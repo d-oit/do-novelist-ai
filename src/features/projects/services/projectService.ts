@@ -189,7 +189,7 @@ class ProjectService {
       const transaction = this.db!.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const index = store.index('status');
-      const request = index.getAll(status.toUpperCase());
+      const request = index.getAll(status);
 
       request.onsuccess = () => resolve(request.result || []);
       request.onerror = () => reject(request.error);
