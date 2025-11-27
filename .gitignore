@@ -1,0 +1,46 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.exe
+*.zip
+
+# Playwright
+test-results/
+
+
+lint_*.txt
+test_*.txt
+*output*.txt
+*.large
+*.dump
+*.cache
+
+# Large file protection (over 50MB)
+**/*.txt
+!**/*.md
+!**/README.md
+!**/CHANGELOG.md
+!**/LICENSE.md
+
+

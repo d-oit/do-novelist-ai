@@ -1,0 +1,71 @@
+/**
+ * Projects Feature Type Definitions
+ *
+ * Feature-local types for project management functionality
+ */
+
+import { z } from 'zod';
+import { WritingStyleSchema } from '../../../types';
+
+/**
+ * Project creation wizard step
+ */
+export type WizardStep = 'idea' | 'outline' | 'style' | 'chapters' | 'review';
+
+/**
+ * Project filter options
+ */
+export interface ProjectFilters {
+  search: string;
+  status: 'all' | 'active' | 'draft' | 'completed' | 'archived';
+  sortBy: 'updatedAt' | 'createdAt' | 'title' | 'progress';
+  sortOrder: 'asc' | 'desc';
+}
+
+/**
+ * Project statistics
+ */
+export interface ProjectStats {
+  totalProjects: number;
+  activeProjects: number;
+  completedProjects: number;
+  totalWords: number;
+  totalChapters: number;
+  averageProgress: number;
+}
+
+/**
+ * Project creation data
+ */
+export const ProjectCreationSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200, 'Title is too long'),
+  idea: z.string().min(10, 'Idea must be at least 10 characters').max(5000),
+  style: WritingStyleSchema,
+  targetWordCount: z.number().min(1000).max(500000).optional(),
+  genre: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+export type ProjectCreationData = z.infer<typeof ProjectCreationSchema>;
+
+/**
+ * Project update data
+ */
+export interface ProjectUpdateData {
+  title?: string;
+  idea?: string;
+  style?: string;
+  status?: string;
+  lastOpenedAt?: number;
+}
+
+/**
+ * Type guards
+ */
+export function isValidWizardStep(step: string): step is WizardStep {
+  return ['idea', 'outline', 'style', 'chapters', 'review'].includes(step);
+}
+
+export function validateProjectCreation(data: unknown): ProjectCreationData {
+  return ProjectCreationSchema.parse(data);
+}

@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode (Derived from Slate/Indigo) */
+    --background: 210 40% 98%;      /* slate-50 */
+    --foreground: 222.2 47.4% 11.2%; /* slate-900 */
+
+    --card: 0 0% 100%;              /* white */
+    --card-foreground: 222.2 47.4% 11.2%; /* slate-900 */
+
+    --popover: 0 0% 100%;           /* white */
+    --popover-foreground: 222.2 47.4% 11.2%; /* slate-900 */
+
+    --primary: 238.7 83.5% 66.7%;   /* indigo-500 */
+    --primary-foreground: 210 40% 98%; /* slate-50 */
+
+    --secondary: 210 40% 96.1%;     /* slate-100 */
+    --secondary-foreground: 222.2 47.4% 11.2%; /* slate-900 */
+
+    --muted: 210 40% 96.1%;         /* slate-100 */
+    --muted-foreground: 215.4 16.3% 46.9%; /* slate-500 */
+
+    --accent: 210 40% 96.1%;        /* slate-100 */
+    --accent-foreground: 222.2 47.4% 11.2%; /* slate-900 */
+
+    --destructive: 0 84.2% 60.2%;   /* red-500 */
+    --destructive-foreground: 210 40% 98%; /* slate-50 */
+
+    --border: 214.3 31.8% 91.4%;    /* slate-200 */
+    --input: 214.3 31.8% 91.4%;     /* slate-200 */
+    --ring: 238.7 83.5% 66.7%;      /* indigo-500 */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark Mode (Specified in Agent Guidelines) */
+    --background: 222.2 47.4% 11.2%; /* slate-950 #0f172a */
+    --foreground: 210 40% 98%;       /* slate-50 #f8fafc */
+
+    --card: 217.2 32.6% 17.5%;       /* slate-900 #1e293b */
+    --card-foreground: 210 40% 98%;  /* slate-50 #f8fafc */
+
+    --popover: 222.2 47.4% 11.2%;    /* slate-950 #0f172a */
+    --popover-foreground: 210 40% 98%; /* slate-50 #f8fafc */
+
+    --primary: 238.7 83.5% 66.7%;    /* indigo-500 #6366f1 */
+    --primary-foreground: 210 40% 98%; /* slate-50 #f8fafc */
+
+    --secondary: 217.2 32.6% 17.5%;  /* slate-900 #1e293b */
+    --secondary-foreground: 210 40% 98%; /* slate-50 #f8fafc */
+
+    --muted: 215 25% 27%;            /* slate-700 #334155 */
+    --muted-foreground: 215 20.2% 65.1%; /* slate-400 #94a3b8 */
+
+    --accent: 238.7 83.5% 66.7%;     /* indigo-500 #6366f1 (using primary as accent base) */
+    --accent-foreground: 210 40% 98%; /* slate-50 #f8fafc */
+
+    --destructive: 0 62.8% 30.6%;    /* red-500 #ef4444 */
+    --destructive-foreground: 210 40% 98%; /* slate-50 #f8fafc */
+
+    --border: 217.2 32.6% 17.5%;     /* slate-800/50 approx */
+    --input: 217.2 32.6% 17.5%;      /* slate-800/50 approx */
+    --ring: 238.7 83.5% 66.7%;       /* indigo-500 #6366f1 */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased selection:bg-primary/20 selection:text-primary;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-medium tracking-tight;
+  }
+}
+
+@layer utilities {
+  /* Text shadows for better readability on dark backgrounds */
+  .text-with-depth {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .text-shadow-sm { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
+  .text-shadow { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); }
+  .text-shadow-lg { text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); }
+
+  /* Scrollbar styling */
+  .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-muted-foreground/20 rounded-full; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { @apply bg-muted-foreground/40; }
+}
+
+/* Animations */
+.animate-in { animation-duration: 200ms; animation-fill-mode: both; }
+.fade-in { animation-name: fadeIn; }
+.zoom-in-95 { animation-name: zoomIn95; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes zoomIn95 { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }

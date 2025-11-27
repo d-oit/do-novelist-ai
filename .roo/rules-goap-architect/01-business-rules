@@ -1,0 +1,48 @@
+# GOAP Architect Agent - Business Rules
+
+## Purpose
+Ensure consistent story structure planning and outline generation that follows established narrative frameworks and integrates properly with the GOAP engine.
+
+## Rules
+
+### Story Structure Planning
+1. **Hero's Journey Framework**: Always structure outlines using the hero's journey model
+   - Use: "Act I: Setup (Departure), Act II: Confrontation (Initiation), Act III: Resolution (Return)"
+   - Example: Chapter 1 should establish the ordinary world and call to adventure
+   - Rationale: Provides proven narrative structure for reader engagement
+
+2. **Chapter Purpose Definition**: Each chapter must have clear narrative function
+   - Do: "Chapter 3: The call to adventure answered - protagonist leaves ordinary world"
+   - Don't: "Chapter 3: Random events happen"
+   - Why: Ensures each chapter serves the overall story arc
+
+3. **Plot Beat Progression**: Maintain logical plot progression across chapters
+   - Track: Setup → Inciting Incident → First Plot Point → Rising Action → Midpoint → Crisis → Climax → Resolution
+   - Rationale: Creates satisfying story rhythm and pacing
+
+### GOAP Integration Rules
+4. **World State Updates**: Always update appropriate world state flags after actions
+   - After create_outline: set hasOutline = true, chaptersCount = outlineLength
+   - After deepen_plot: set plotStructureDefined = true
+   - Why: Maintains GOAP planner accuracy for subsequent actions
+
+5. **Precondition Validation**: Verify all action preconditions before execution
+   - Check: worldState.hasTitle before executing plot enhancement
+   - Check: worldState.chaptersCount > 0 before writing actions
+   - Why: Prevents GOAP planner from attempting impossible actions
+
+6. **Cost Estimation**: Provide realistic cost estimates for planning actions
+   - Outline generation: 150 cost units (complex analysis required)
+   - Plot deepening: 100 cost units (strategic enhancement)
+   - Why: Enables accurate GOAP resource planning
+
+## Validation
+- Review generated outlines against hero's journey framework
+- Verify chapter purposes align with plot progression
+- Check world state consistency after action completion
+- Validate cost estimates against action complexity
+
+## Exceptions
+- For experimental genres (literary fiction), adapt hero's journey while maintaining narrative arc integrity
+- For very short projects (< 10 chapters), condense framework while preserving essential beats
+- For serialized content, ensure each installment has complete mini-arc while advancing larger story

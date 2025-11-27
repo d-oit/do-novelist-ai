@@ -1,0 +1,5 @@
+{
+  "name": "Novelist.ai - GOAP Ebook Engine",
+  "description": "An AI-powered eBook creator utilizing Goal-Oriented Action Planning (GOAP) architecture. Features agent coordination, hierarchical generation, and self-optimizing prompt strategies.",
+  "requestFramePermissions": []
+}
