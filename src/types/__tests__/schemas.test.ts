@@ -8,10 +8,10 @@ import {
   ProjectSchema,
   ChapterSchema,
   CreateProjectSchema,
+  WorldStateSchema,
   validateData,
-  type Chapter
 } from '../schemas';
-import { ProjectSettingsSchema, UpdateChapterSchema, RefineOptionsSchema, isValidData } from '../schemas';
+import { ProjectSettingsSchema, RefineOptionsSchema, isValidData } from '../schemas';
 
 
 describe('Schema Validation Tests', () => {
@@ -81,7 +81,7 @@ describe('Schema Validation Tests', () => {
         title: 'Chapter 1: The Beginning',
         summary: 'Our hero starts their journey.',
         content: 'Once upon a time, in a land far, far away...',
-        status: 'COMPLETE',
+        status: 'complete',
         wordCount: 2500,
         characterCount: 12500,
         estimatedReadingTime: 10,
@@ -107,7 +107,7 @@ describe('Schema Validation Tests', () => {
         title: 'Chapter 1',
         summary: 'A chapter',
         content: 'Some content here',
-        status: 'PENDING'
+        status: 'pending'
       };
 
       const result = validateData(ChapterSchema, minimalChapter);
@@ -129,7 +129,7 @@ describe('Schema Validation Tests', () => {
         title: 'Chapter 1',
         summary: 'A chapter',
         content: 'Some content',
-        status: 'PENDING'
+        status: 'pending'
       };
 
       const result = validateData(ChapterSchema, invalidChapter);
@@ -145,7 +145,7 @@ describe('Schema Validation Tests', () => {
         title: 'Chapter 1',
         summary: 'A chapter',
         content: longContent,
-        status: 'PENDING'
+        status: 'pending'
       };
 
       const result = validateData(ChapterSchema, invalidChapter);
@@ -390,7 +390,7 @@ describe('Schema Validation Tests', () => {
           title: 'Chapter 1',
           summary: 'First chapter',
           content: 'Content here',
-          status: 'COMPLETE',
+          status: 'complete',
           wordCount: 1000,
           characterCount: 5000,
           estimatedReadingTime: 4,
@@ -414,7 +414,7 @@ describe('Schema Validation Tests', () => {
           title: 'Chapter 1',
           summary: 'First chapter',
           content: 'Content here',
-          status: 'COMPLETE',
+          status: 'complete',
           wordCount: 1000,
           characterCount: 5000,
           estimatedReadingTime: 4,
