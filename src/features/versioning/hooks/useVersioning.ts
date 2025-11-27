@@ -35,14 +35,18 @@ export interface UseVersioningReturn {
 export const useVersioning = (chapterId?: string): UseVersioningReturn => {
   const store = useVersioningStore();
 
+  // Extract stable function references to avoid dependency array issues
+  const loadVersionHistory = store.loadVersionHistory;
+  const loadBranches = store.loadBranches;
+
   // Load initial data with cleanup
   useEffect(() => {
     const controller = new AbortController();
 
     if (chapterId) {
       Promise.all([
-        store.loadVersionHistory(chapterId),
-        store.loadBranches(chapterId)
+        loadVersionHistory(chapterId),
+        loadBranches(chapterId)
       ]).catch(err => {
         if (err.name === 'AbortError') return;
         console.error('Failed to load versioning data:', err);
@@ -52,7 +56,7 @@ export const useVersioning = (chapterId?: string): UseVersioningReturn => {
     return () => {
       controller.abort();
     };
-  }, [chapterId, store]);
+  }, [chapterId, loadVersionHistory, loadBranches]);
 
   return {
     versions: store.versions,
