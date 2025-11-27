@@ -4,6 +4,10 @@
  */
 
 import { z } from 'zod';
+import { ChapterStatus, PublishStatus } from '../shared/types';
+
+// Re-export enums for convenience
+export { ChapterStatus, PublishStatus };
 
 // =============================================================================
 // ENUMS & CONSTANTS
@@ -31,17 +35,12 @@ export const LANGUAGES = [
   'en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh'
 ] as const;
 
+// Chapter status enum values - must match the enum in ../shared/types
+export const CHAPTER_STATUSES = ['pending', 'drafting', 'review', 'complete'] as const;
+
 export const AgentModeSchema = z.enum(['SINGLE', 'PARALLEL', 'HYBRID', 'SWARM']);
-export const ChapterStatusValues = ['pending', 'drafting', 'review', 'complete'] as const;
-const ChapterStatusLegacyValues = ['PENDING', 'DRAFTING', 'REVIEW', 'COMPLETE'] as const;
-const ChapterStatusInputSchema = z.union([
-  z.enum(ChapterStatusValues),
-  z.enum(ChapterStatusLegacyValues)
-]);
-export const ChapterStatusSchema = ChapterStatusInputSchema.transform(
-  (status): typeof ChapterStatusValues[number] => status.toLowerCase() as typeof ChapterStatusValues[number]
-);
-export const PublishStatusSchema = z.enum(['Draft', 'Editing', 'Review', 'Published']);
+export const ChapterStatusSchema = z.nativeEnum(ChapterStatus);
+export const PublishStatusSchema = z.nativeEnum(PublishStatus);
 export const LogTypeSchema = z.enum(['info', 'success', 'warning', 'error', 'thought']);
 export const LanguageSchema = z.enum(LANGUAGES);
 
@@ -105,17 +104,7 @@ export const ProjectSettingsSchema = z.object({
   fontSize: z.enum(['small', 'medium', 'large']).default('medium'),
   lineHeight: z.enum(['compact', 'normal', 'relaxed']).default('normal'),
   editorTheme: z.enum(['default', 'minimal', 'typewriter']).default('default')
-}).partial().default({
-  enableDropCaps: true,
-  autoSave: true,
-  autoSaveInterval: 120,
-  showWordCount: true,
-  enableSpellCheck: true,
-  darkMode: false,
-  fontSize: 'medium',
-  lineHeight: 'normal',
-  editorTheme: 'default'
-});
+}).partial();
 
 export const ChapterSchema = z.object({
   id: ChapterIdSchema,
@@ -192,7 +181,7 @@ export const LogEntrySchema = z.object({
   type: LogTypeSchema,
   // Enhanced logging
   level: z.enum(['debug', 'info', 'warn', 'error', 'fatal']).default('info'),
-  context: z.record(z.any()).optional(),
+  context: z.record(z.string(), z.any()).optional(),
   duration: z.number().min(0).optional(), // milliseconds
   actionName: z.string().optional()
 });
@@ -267,7 +256,7 @@ export const ProjectSchema = z.object({
   }
 ).refine(
   (data) => {
-    const completedCount = data.chapters.filter(c => c.status === 'complete').length;
+    const completedCount = data.chapters.filter(c => c.status === 'complete' as ChapterStatus).length;
     return data.worldState.chaptersCompleted === completedCount;
   },
   {
@@ -321,8 +310,6 @@ export const ProjectFilterSchema = z.object({
 // =============================================================================
 
 export type AgentMode = z.infer<typeof AgentModeSchema>;
-export type ChapterStatus = z.infer<typeof ChapterStatusSchema>;
-export type PublishStatus = z.infer<typeof PublishStatusSchema>;
 export type LogType = z.infer<typeof LogTypeSchema>;
 export type Language = z.infer<typeof LanguageSchema>;
 export type WritingStyle = z.infer<typeof WritingStyleSchema>;
