@@ -46,7 +46,7 @@ export const PlatformStatusGrid: React.FC<PlatformStatusGridProps> = ({ insights
         <Card className="p-4">
           <h4 className="font-medium mb-3">Peak Reading Times</h4>
           <div className="space-y-2">
-            {insights.audienceProfile.peakReadingTimes.map((time, index) => (
+            {insights.audienceProfile.peakReadingTimes.map((time, _index) => (
               <div key={time} className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm">{time}</span>

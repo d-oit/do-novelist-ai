@@ -3,7 +3,6 @@
  * Business logic validation and management for character entities
  */
 
-import { z } from 'zod';
 import {
   CharacterSchema,
   CharacterRelationshipSchema,
@@ -15,19 +14,10 @@ import {
   type CharacterRelationship,
   type CharacterGroup,
   type CharacterConflict,
-  type CreateCharacter,
   type UpdateCharacter,
-  type CharacterRole,
-  type PersonalityTrait,
-  type RelationshipType
 } from '../types/character-schemas';
 import {
-  type CharacterId,
   type ProjectId,
-  isCharacter,
-  isCharacterRelationship,
-  isCharacterGroup,
-  isCharacterConflict,
   createCharacterId,
   validateCharacterImportance,
   validateCharacterArc,
@@ -38,7 +28,6 @@ import {
   hasCharacterArc,
   isMainCharacter,
   isProtagonist,
-  isAntagonist
 } from '../types/character-guards';
 import { 
   type ValidationResult,

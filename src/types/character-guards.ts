@@ -36,7 +36,7 @@ export function isCharacterId(value: unknown): value is CharacterId {
   return typeof value === 'string' && /^char_\w+_\d+$/.test(value);
 }
 
-export function createCharacterId(projectId: ProjectId, name?: string, timestamp = Date.now()): CharacterId {
+export function createCharacterId(_projectId: ProjectId, name?: string, timestamp = Date.now()): CharacterId {
   const safeName = name ? name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'char';
   return `char_${safeName}_${timestamp}` as CharacterId;
 }

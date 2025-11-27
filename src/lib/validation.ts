@@ -3,7 +3,7 @@
  * Integrates Zod schemas with application logic
  */
 
-import { z } from 'zod';
+
 import {
   ProjectSchema,
   ChapterSchema,
@@ -12,26 +12,16 @@ import {
   UpdateProjectSchema,
   RefineOptionsSchema,
   validateData,
-  isValidData,
-  transformAndValidate,
+
   type Project,
   type Chapter,
-  type CreateProject,
-  type UpdateChapter,
-  type UpdateProject,
-  type RefineOptions,
   type ValidationResult
 } from '../types/schemas';
 import {
-  isProject,
-  isChapter,
-  isProjectId,
-  isChapterId,
-  createProjectId,
+      isProjectId,
+    createProjectId,
   createChapterId,
-  createLogId,
-  assertType,
-  safeCast
+      safeCast
 } from '../types/guards';
 import { ChapterStatus } from '../types';
 

@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { validationService, validate, assertValid, safeConvert } from '../validation';
-import { createProjectId, createChapterId } from '../../types/guards';
+import { createProjectId } from '../../types/guards';
 
 describe('ValidationService', () => {
   describe('Project Creation Validation', () => {

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ProjectId, ChapterId, LogId, Base64Image, WordCount, Temperature, ValidationResult } from './schemas';
+import { ProjectId, ChapterId, Temperature } from './schemas';
 
 // =============================================================================
 // UTILITY TYPES

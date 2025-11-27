@@ -1,6 +1,6 @@
 
 import { createClient, Client } from "@libsql/client/web";
-import { Project, Chapter, PublishStatus, ProjectSettings } from "@shared/types";
+import { Project, PublishStatus } from "@shared/types";
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';

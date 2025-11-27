@@ -6,10 +6,8 @@ import {
   EngagementMetrics,
   PublishingGoals,
   ReaderInsights,
-  PublishingCampaign,
   PublishingTrends,
   PublishingAlert,
-  PublishingAnalyticsFilter,
   PublishingPlatform
 } from '../types';
 import { Project } from '../../../types';
@@ -190,7 +188,7 @@ class PublishingAnalyticsService {
   }
 
   // Analytics Data Retrieval
-  async getPublicationAnalytics(publicationId: string): Promise<PlatformAnalytics> {
+  async getPublicationAnalytics(_publicationId: string): Promise<PlatformAnalytics> {
     const publication = await this.getPublication(publicationId);
     if (!publication) throw new Error('Publication not found');
 
@@ -288,7 +286,7 @@ class PublishingAnalyticsService {
     });
   }
 
-  async getReaderInsights(publicationId: string): Promise<ReaderInsights> {
+  async getReaderInsights(_publicationId: string): Promise<ReaderInsights> {
     const analytics = await this.getPublicationAnalytics(publicationId);
     const engagement = await this.getEngagementMetrics(publicationId, {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago

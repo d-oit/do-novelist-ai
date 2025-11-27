@@ -7,18 +7,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   ProjectSchema,
   ChapterSchema,
-  WorldStateSchema,
-  ProjectSettingsSchema,
   CreateProjectSchema,
-  UpdateChapterSchema,
-  RefineOptionsSchema,
   validateData,
-  isValidData,
-  type Project,
-  type Chapter,
-  type CreateProject
+  type Chapter
 } from '../schemas';
-import { ChapterStatus } from '../index';
+ from '../index';
+import { ProjectSettingsSchema, UpdateChapterSchema, RefineOptionsSchema, isValidData } from '../schemas';
 
 
 describe('Schema Validation Tests', () => {

@@ -1,11 +1,9 @@
-import { ChapterVersion, ProjectVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
-import { Chapter, Project } from '../../../types';
+import { ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
+import { Chapter } from '../../../types';
 
 class VersioningService {
   private static instance: VersioningService;
-  private versions: Map<string, ChapterVersion[]> = new Map();
-  private branches: Map<string, Branch[]> = new Map();
-  private dbName = 'novelist-versioning';
+      private dbName = 'novelist-versioning';
   private dbVersion = 1;
   private db: IDBDatabase | null = null;
 
@@ -17,7 +15,7 @@ class VersioningService {
   }
 
   async init(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
       
       request.onerror = () => reject(request.error);
@@ -70,7 +68,7 @@ class VersioningService {
       charCount: chapter.content.length,
     };
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['versions'], 'readwrite');
       const store = transaction.objectStore('versions');
       const request = store.add(version);
@@ -83,7 +81,7 @@ class VersioningService {
   async getVersionHistory(chapterId: string): Promise<ChapterVersion[]> {
     if (!this.db) await this.init();
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const index = store.index('chapterId');
@@ -102,7 +100,7 @@ class VersioningService {
   async restoreVersion(versionId: string): Promise<Chapter | null> {
     if (!this.db) await this.init();
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const request = store.get(versionId);
@@ -135,7 +133,7 @@ class VersioningService {
   async deleteVersion(versionId: string): Promise<boolean> {
     if (!this.db) await this.init();
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['versions'], 'readwrite');
       const store = transaction.objectStore('versions');
       const request = store.delete(versionId);
@@ -189,7 +187,7 @@ class VersioningService {
       color: this.generateBranchColor(),
     };
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['branches'], 'readwrite');
       const store = transaction.objectStore('branches');
       const request = store.add(branch);
@@ -202,7 +200,7 @@ class VersioningService {
   async getBranches(chapterId: string): Promise<Branch[]> {
     if (!this.db) await this.init();
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['branches'], 'readonly');
       const store = transaction.objectStore('branches');
       const request = store.getAll();
@@ -215,20 +213,20 @@ class VersioningService {
     });
   }
 
-  async switchBranch(branchId: string): Promise<boolean> {
+  async switchBranch(_branchId: string): Promise<boolean> {
     // Implementation for switching branches
     return true;
   }
 
-  async mergeBranch(sourceBranchId: string, targetBranchId: string): Promise<boolean> {
+  async mergeBranch(_sourceBranchId: string, _targetBranchId: string): Promise<boolean> {
     // Implementation for merging branches
     return true;
   }
 
-  async deleteBranch(branchId: string): Promise<boolean> {
+  async deleteBranch(_branchId: string): Promise<boolean> {
     if (!this.db) await this.init();
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['branches'], 'readwrite');
       const store = transaction.objectStore('branches');
       const request = store.delete(branchId);
@@ -262,7 +260,7 @@ class VersioningService {
   private async getVersion(versionId: string): Promise<ChapterVersion | null> {
     if (!this.db) await this.init();
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const request = store.get(versionId);

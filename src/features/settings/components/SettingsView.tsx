@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Moon, Sun, Laptop, Key, ShieldCheck, User, Database, Save, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Moon, Sun, Laptop, Key, ShieldCheck, Database, Save, CheckCircle, AlertTriangle } from 'lucide-react';
 import { getStoredConfig, saveStoredConfig, DbConfig, db } from '../../../lib/db';
 
 const SettingsView: React.FC = () => {

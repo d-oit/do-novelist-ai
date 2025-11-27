@@ -125,7 +125,7 @@ export function postprocessAction(
  * @param addLog - Logging function
  */
 export function logActionResult(
-  action: AgentAction,
+  _action: AgentAction,
   actionResult: ActionResult,
   addLog: (agentName: string, message: string, type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug') => void
 ): void {
@@ -253,9 +253,9 @@ function handleCreateOutlinePostprocess(
  */
 function handleWriteChaptersPostprocess(
   actionResult: ActionResult,
-  project: Project,
+  _project: Project,
   setProject: React.Dispatch<React.SetStateAction<Project>>,
-  pendingChapters: Chapter[]
+  _pendingChapters: Chapter[]
 ): void {
   const results = actionResult.data;
 
@@ -306,8 +306,6 @@ function handleWriteChaptersPostprocess(
     },
   }));
 
-  // Log summary
-  const totalProcessed = successfulChapters.length + failedChapters.length;
   // Note: The addLog function needs to be called from the main hook context
   // This is a limitation - we'll return the summary for logging
 }
@@ -321,7 +319,7 @@ function handleWriteChaptersPostprocess(
  */
 export function createActionSummary(
   action: AgentAction,
-  pendingChapters: Chapter[],
+  _pendingChapters: Chapter[],
   actionResult: ActionResult
 ): { message: string; type: 'success' | 'warning' } {
   if (action.name === 'write_chapter_parallel' && actionResult.data) {
