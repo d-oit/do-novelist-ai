@@ -243,7 +243,7 @@ export const useGoapEngine = (
         const results = await Promise.all(pendingChapters.map(async (chapter) => {
           addLog('Writer', `Drafting "${chapter.title}"...`, 'info');
           const prevIndex = chapter.orderIndex - 2;
-          const prevSummary = prevIndex >= 0 ? project.chapters[prevIndex].summary : undefined;
+          const prevSummary = prevIndex >= 0 ? project.chapters[prevIndex]?.summary : undefined;
 
           try {
             const content = await writeChapterContent(chapter.title, chapter.summary, project.style, prevSummary);

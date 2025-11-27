@@ -33,9 +33,9 @@ describe('Schema Validation Tests', () => {
 
       const result = validateData(WorldStateSchema, validWorldState);
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.chaptersCount).toBe(5);
-        expect(result.data.hasCharacters).toBe(true);
+      if (result.success && result.data) {
+        expect((result.data as any).chaptersCount).toBe(5);
+        expect((result.data as any).hasCharacters).toBe(true);
       }
     });
 
@@ -51,10 +51,10 @@ describe('Schema Validation Tests', () => {
 
       const result = validateData(WorldStateSchema, minimalWorldState);
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.hasCharacters).toBe(false);
-        expect(result.data.hasWorldBuilding).toBe(false);
-        expect(result.data.hasThemes).toBe(false);
+      if (result.success && result.data) {
+        expect((result.data as any).hasCharacters).toBe(false);
+        expect((result.data as any).hasWorldBuilding).toBe(false);
+        expect((result.data as any).hasThemes).toBe(false);
       }
     });
 

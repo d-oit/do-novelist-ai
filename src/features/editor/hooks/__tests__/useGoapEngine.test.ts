@@ -168,8 +168,8 @@ describe('useGoapEngine Hook', () => {
       });
 
       expect(gemini.writeChapterContent).toHaveBeenCalledTimes(2);
-      expect(project.chapters[0].status).toBe(ChapterStatus.COMPLETE);
-      expect(project.chapters[0].content).toBe('# Content');
+      expect(project.chapters[0]?.status).toBe(ChapterStatus.COMPLETE);
+      expect(project.chapters[0]?.content).toBe('# Content');
       expect(project.worldState.chaptersCompleted).toBe(2);
     });
   });

@@ -109,7 +109,7 @@ export const useGoapEngine = (
         addLog('Writer', `Drafting "${pendingChapter.title}"...`, 'info');
 
         const prevIndex = pendingChapter.orderIndex - 2;
-        const prevSummary = prevIndex >= 0 ? project.chapters[prevIndex].summary : undefined;
+        const prevSummary = prevIndex >= 0 ? project.chapters[prevIndex]?.summary : undefined;
         const content = await writeChapterContent(pendingChapter.title, pendingChapter.summary, project.style, prevSummary);
 
         addLog('Writer', `Chapter ${pendingChapter.orderIndex} completed (${content.length} chars).`, 'success');

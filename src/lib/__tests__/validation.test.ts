@@ -23,16 +23,16 @@ describe('ValidationService', () => {
       const result = validationService.validateCreateProject(createData);
       
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.title).toBe('My Novel');
-        expect(result.data.id).toMatch(/^proj_\d+$/);
-        expect(result.data.worldState.hasTitle).toBe(true);
-        expect(result.data.worldState.styleDefined).toBe(true);
-        expect(result.data.worldState.targetAudienceDefined).toBe(true);
-        expect(result.data.settings.enableDropCaps).toBe(true);
-        expect(result.data.analytics.totalWordCount).toBe(0);
-        expect(result.data.version).toBe('1.0.0');
-        expect(result.data.changeLog).toHaveLength(1);
+      if (result.success && result.data) {
+        expect((result.data as any).title).toBe('My Novel');
+        expect((result.data as any).id).toMatch(/^proj_\d+$/);
+        expect((result.data as any).worldState.hasTitle).toBe(true);
+        expect((result.data as any).worldState.styleDefined).toBe(true);
+        expect((result.data as any).worldState.targetAudienceDefined).toBe(true);
+        expect((result.data as any).settings.enableDropCaps).toBe(true);
+        expect((result.data as any).analytics.totalWordCount).toBe(0);
+        expect((result.data as any).version).toBe('1.0.0');
+        expect((result.data as any).changeLog).toHaveLength(1);
       }
     });
 
@@ -45,14 +45,14 @@ describe('ValidationService', () => {
       };
 
       const result = validationService.validateCreateProject(createData);
-      
+
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.targetWordCount).toBe(50000);
-        expect(result.data.language).toBe('en');
-        expect(result.data.targetAudience).toBe('adult');
-        expect(result.data.settings.autoSave).toBe(true);
-        expect(result.data.settings.autoSaveInterval).toBe(120);
+      if (result.success && result.data) {
+        expect((result.data as any).targetWordCount).toBe(50000);
+        expect((result.data as any).language).toBe('en');
+        expect((result.data as any).targetAudience).toBe('adult');
+        expect((result.data as any).settings.autoSave).toBe(true);
+        expect((result.data as any).settings.autoSaveInterval).toBe(120);
       }
     });
 
@@ -266,12 +266,12 @@ describe('ValidationService', () => {
       );
 
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.title).toBe('Chapter 1: The Adventure Begins');
-        expect(result.data.orderIndex).toBe(1);
-        expect(result.data.status).toBe('pending');
-        expect(result.data.wordCount).toBeGreaterThan(0);
-        expect(result.data.estimatedReadingTime).toBeGreaterThan(0);
+      if (result.success && result.data) {
+        expect((result.data as any).title).toBe('Chapter 1: The Adventure Begins');
+        expect((result.data as any).orderIndex).toBe(1);
+        expect((result.data as any).status).toBe('pending');
+        expect((result.data as any).wordCount).toBeGreaterThan(0);
+        expect((result.data as any).estimatedReadingTime).toBeGreaterThan(0);
       }
     });
 

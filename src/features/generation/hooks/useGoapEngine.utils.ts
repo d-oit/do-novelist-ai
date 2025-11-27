@@ -58,7 +58,7 @@ export function preprocessAction(
     processedAction.pendingChapters = pendingChapters;
 
     // Set the first pending chapter as selected for UI focus
-    if (pendingChapters.length > 0) {
+    if (pendingChapters.length > 0 && pendingChapters[0]) {
       setSelectedChapterId(pendingChapters[0].id);
     }
   }

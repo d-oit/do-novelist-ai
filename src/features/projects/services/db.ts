@@ -168,17 +168,17 @@ export const db = {
         const cRes = await client.execute({ sql: "SELECT * FROM chapters WHERE project_id = ? ORDER BY order_index", args: [projectId] });
         
         const loadedProject: Project = {
-          id: pRow.id as string,
-          title: pRow.title as string,
-          idea: pRow.idea as string,
-          style: pRow.style as string,
-          coverImage: pRow.cover_image as string,
-          worldState: typeof pRow.world_state === 'string' ? JSON.parse(pRow.world_state) : pRow.world_state,
+          id: pRow?.id as string,
+          title: pRow?.title as string,
+          idea: pRow?.idea as string,
+          style: pRow?.style as string,
+          coverImage: pRow?.cover_image as string,
+          worldState: typeof pRow?.world_state === 'string' ? JSON.parse(pRow.world_state as string) : pRow?.world_state,
           isGenerating: false,
-          status: (pRow.status as PublishStatus) || PublishStatus.DRAFT,
-          language: (pRow.language as string) || 'en',
-          targetWordCount: (pRow.target_word_count as number) || 50000,
-          settings: typeof pRow.settings === 'string' ? JSON.parse(pRow.settings) : (pRow.settings || {}),
+          status: (pRow?.status as PublishStatus) || PublishStatus.DRAFT,
+          language: (pRow?.language as string) || 'en',
+          targetWordCount: (pRow?.target_word_count as number) || 50000,
+          settings: typeof pRow?.settings === 'string' ? JSON.parse(pRow.settings as string) : (pRow?.settings || {}),
           chapters: cRes.rows.map(r => ({
             id: r.id as string,
             orderIndex: r.order_index as number,
