@@ -40,6 +40,11 @@ const mockChapter: Chapter = {
   content: 'This is the content of the test chapter.',
   status: ChapterStatus.DRAFTING,
   orderIndex: 1,
+  wordCount: 0,
+  characterCount: 0,
+  estimatedReadingTime: 0,
+  tags: [],
+  notes: ''
 };
 
 const mockVersions = [

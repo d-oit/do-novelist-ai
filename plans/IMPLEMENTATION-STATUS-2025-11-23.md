@@ -88,8 +88,8 @@
 - ✅ Complete type safety verified
 
 #### Core Library Tests
-**File:** `src/lib/__tests__/gemini.test.ts`
-- ✅ All Gemini API mock tests passing
+**File:** `src/lib/__tests__/aiService.test.ts`
+- ✅ All AI SDK Gateway tests passing (database-driven provider/model config)
 
 ### Tests Remaining to Implement (Based on Plans)
 

@@ -117,6 +117,11 @@ class VersioningService {
             content: version.content,
             status: version.status,
             orderIndex: 0, // Will be set by caller
+            wordCount: 0,
+            characterCount: 0,
+            estimatedReadingTime: 0,
+            tags: [],
+            notes: ''
           };
           resolve(chapter);
         } else {

@@ -244,7 +244,7 @@ useEffect(() => {
 
 **Existing Test Infrastructure:**
 - ✅ Vitest configured and running
-- ✅ src/lib/__tests__/gemini.test.ts (passing)
+- ✅ src/lib/__tests__/aiService.test.ts (AI SDK Gateway with database-driven provider/model config)
 - ✅ src/types/__tests__/schemas.test.ts (28/28 passing - 100%)
 - ✅ src/lib/__tests__/validation.test.ts (21/23 passing - 91%)
 

@@ -86,7 +86,6 @@ class ProjectService {
       style: data.style as any,
       status: 'Draft' as const,
       chapters: [],
-      outline: '',
       coverImage: '',
       createdAt: new Date(now),
       updatedAt: new Date(now),
@@ -104,13 +103,26 @@ class ProjectService {
         targetAudienceDefined: false
       },
       isGenerating: false,
+      language: data.language || 'en',
+      targetWordCount: data.targetWordCount || 50000,
+      settings: {
+        enableDropCaps: true
+      },
+      genre: data.genre || [],
+      targetAudience: data.targetAudience || 'adult',
+      contentWarnings: [],
+      keywords: [],
+      synopsis: '',
+      authors: [],
       analytics: {
         totalWordCount: 0,
         averageChapterLength: 0,
         estimatedReadingTime: 0,
         generationCost: 0,
         editingRounds: 0
-      }
+      },
+      version: '1.0.0',
+      changeLog: []
     };
 
     return new Promise((resolve, reject) => {

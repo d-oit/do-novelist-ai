@@ -44,17 +44,23 @@ const mockProject: Project = {
   },
   chapters: [],
   // Additional properties to satisfy Project interface
-  genre: 'Sci-Fi',
-  targetAudience: 'Adult',
+  genre: ['Sci-Fi'],
+  targetAudience: 'adult',
   contentWarnings: [],
   keywords: [],
-  series: '',
-  seriesIndex: 1,
-  isbn: '',
-  publisher: '',
-  rights: '',
-  price: 0,
-  currency: 'USD'
+  synopsis: '',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  authors: [],
+  analytics: {
+    totalWordCount: 0,
+    averageChapterLength: 0,
+    estimatedReadingTime: 0,
+    generationCost: 0,
+    editingRounds: 0
+  },
+  version: '1.0.0',
+  changeLog: []
 };
 
 describe('useGoapEngine Hook', () => {

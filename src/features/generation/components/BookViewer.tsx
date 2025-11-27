@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Project, Chapter, ChapterStatus, RefineOptions } from '@shared/types';
-import { BookOpen, Lock, CheckCircle2, Wand2, Loader2, Menu, X, Maximize2, Minimize2, AlignLeft, Type, UploadCloud, RefreshCw, Clock, Edit3, Plus, Sparkles } from 'lucide-react';
+import { BookOpen, CheckCircle2, Wand2, Loader2, Menu, X, Maximize2, Minimize2, AlignLeft, Type, UploadCloud, RefreshCw, Clock, Edit3, Plus, Sparkles } from 'lucide-react';
 import CoverGenerator from './CoverGenerator';
 import PublishPanel from './PublishPanel';
 

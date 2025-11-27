@@ -17,7 +17,17 @@
       "Bash(npm run lint)",
       "Bash(cat:*)",
       "Bash(npm run test:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(git checkout:*)",
+      "Skill(goap-agent)",
+      "Bash(node --version:*)",
+      "Bash(npm --version:*)",
+      "Bash(pnpm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfix: resolve build infrastructure issues (Tailwind, dependencies)\n\n- Remove package-lock.json to use pnpm-lock.yaml as single source of truth\n- Clean reinstall with pnpm to resolve Tailwind CSS v3->v4 conflict\n- Ensure Tailwind CSS v3.4.18 is correctly installed (not v4)\n- Verify all TypeScript types are installed\n- Build passes successfully with ''pnpm build''\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(tee:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfix: add @shared/* TypeScript path alias\n\nResolves module resolution errors for @shared/types imports by adding\nthe @shared/* path mapping to tsconfig.json.\nEOF\n)\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfix: update Project and Chapter type definitions\n\n- Added missing properties to Project interface (genre, targetAudience, contentWarnings, keywords, synopsis, timestamps, authors, analytics, version, changeLog)\n- Added missing properties to Chapter interface (wordCount, characterCount, estimatedReadingTime, tags, notes, optional plotPoints, characters, locations, scenes)\n- Updated ProjectSettings to make all properties optional with defaults\n- Fixed targetAudience enum casing from \"Adult\" to \"adult\"\n- Removed invalid ''outline'' property from Project creation\n- Fixed analytics property names (totalWords -> totalWordCount)\n- Updated WorldState with optional extended properties\n- Fixed all test files to include required Chapter properties\n\nResolves TS2740, TS2353, and TS2820 type errors\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

@@ -105,6 +105,16 @@ export const ProjectSettingsSchema = z.object({
   fontSize: z.enum(['small', 'medium', 'large']).default('medium'),
   lineHeight: z.enum(['compact', 'normal', 'relaxed']).default('normal'),
   editorTheme: z.enum(['default', 'minimal', 'typewriter']).default('default')
+}).partial().default({
+  enableDropCaps: true,
+  autoSave: true,
+  autoSaveInterval: 120,
+  showWordCount: true,
+  enableSpellCheck: true,
+  darkMode: false,
+  fontSize: 'medium',
+  lineHeight: 'normal',
+  editorTheme: 'default'
 });
 
 export const ChapterSchema = z.object({
@@ -130,7 +140,12 @@ export const ChapterSchema = z.object({
     temperature: TemperatureSchema.optional(),
     maxTokens: z.number().int().min(100).max(8000).optional(),
     topP: z.number().min(0).max(1).optional()
-  }).optional()
+  }).optional(),
+  // Optional extended metadata
+  plotPoints: z.array(z.string()).optional(),
+  characters: z.array(z.string()).optional(),
+  locations: z.array(z.string()).optional(),
+  scenes: z.array(z.string()).optional()
 });
 
 export const RefineOptionsSchema = z.object({

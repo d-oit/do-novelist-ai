@@ -213,13 +213,13 @@ export const db = {
           updatedAt: new Date(),
           authors: [],
           analytics: {
-            totalWords: 0,
-            totalChapters: 0,
-            completedChapters: 0,
+            totalWordCount: 0,
             averageChapterLength: 0,
-            estimatedReadingTime: 0
+            estimatedReadingTime: 0,
+            generationCost: 0,
+            editingRounds: 0
           },
-          version: 1,
+          version: '1.0.0',
           changeLog: []
         };
         console.log(`[DB] Cloud load success: ${loadedProject.title}`);

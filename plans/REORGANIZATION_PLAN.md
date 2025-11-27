@@ -5,7 +5,7 @@
 ### Large Files (Near 500 LOC limit)
 - ProjectWizard.tsx: 387 lines
 - BookViewer.tsx: 378 lines
-- geminiService.ts: 309 lines
+- aiService.ts: 309 lines (AI SDK Gateway with database-driven provider/model config)
 - validation.ts: 365 lines
 
 ### Current Structure

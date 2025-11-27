@@ -120,7 +120,6 @@ describe('Database Library', () => {
                     characterCount: 0,
                     estimatedReadingTime: 0,
                     tags: [],
-                    lastModified: new Date().toISOString(),
                     plotPoints: [],
                     characters: [],
                     locations: [],
