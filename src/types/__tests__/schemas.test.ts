@@ -11,7 +11,6 @@ import {
   validateData,
   type Chapter
 } from '../schemas';
- from '../index';
 import { ProjectSettingsSchema, UpdateChapterSchema, RefineOptionsSchema, isValidData } from '../schemas';
 
 
