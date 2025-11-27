@@ -109,6 +109,23 @@ describe('Database Library', () => {
                 lineHeight: 'relaxed',
                 editorTheme: 'default'
             },
+            genre: [],
+            targetAudience: 'adult',
+            contentWarnings: [],
+            keywords: [],
+            synopsis: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            authors: [],
+            analytics: {
+                totalWordCount: 0,
+                averageChapterLength: 0,
+                estimatedReadingTime: 0,
+                generationCost: 0,
+                editingRounds: 0
+            },
+            version: '1.0.0',
+            changeLog: [],
             chapters: [
                 createChapter({
                     id: 'c1',
