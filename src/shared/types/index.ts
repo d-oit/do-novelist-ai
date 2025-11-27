@@ -5,6 +5,12 @@ export enum AgentMode {
   SWARM = 'SWARM'
 }
 
+/**
+ * Chapter status enum
+ *
+ * CONVENTION: Lowercase values for database compatibility and internal state management.
+ * These values are stored directly in the database and should remain stable.
+ */
 export enum ChapterStatus {
   PENDING = 'pending',
   DRAFTING = 'drafting',
@@ -12,6 +18,13 @@ export enum ChapterStatus {
   COMPLETE = 'complete'
 }
 
+/**
+ * Publishing status enum
+ *
+ * CONVENTION: PascalCase values for UI display compatibility.
+ * These values are user-facing and match the display strings shown in the interface.
+ * Stored in database as-is; do not convert case when querying.
+ */
 export enum PublishStatus {
   DRAFT = 'Draft',
   EDITING = 'Editing',
@@ -32,8 +45,8 @@ export interface Chapter {
   estimatedReadingTime: number;
   tags: string[];
   notes: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
   generationPrompt?: string;
   aiModel?: string;
   generationSettings?: {
