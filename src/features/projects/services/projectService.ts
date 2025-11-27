@@ -4,7 +4,8 @@
  * Handles IndexedDB persistence for projects
  */
 
-import type { Project } from '../../../types';
+import type { Project, Language } from '../../../types';
+import { PublishStatus } from '../../../types';
 import type { ProjectCreationData, ProjectUpdateData } from '../types';
 
 class ProjectService {
@@ -83,8 +84,8 @@ class ProjectService {
       id: crypto.randomUUID(),
       title: data.title,
       idea: data.idea,
-      style: data.style as any,
-      status: 'Draft' as const,
+      style: data.style,
+      status: PublishStatus.DRAFT,
       chapters: [],
       coverImage: '',
       createdAt: new Date(now),
@@ -103,13 +104,13 @@ class ProjectService {
         targetAudienceDefined: false
       },
       isGenerating: false,
-      language: data.language || 'en',
+      language: (data.language || 'en') as Language,
       targetWordCount: data.targetWordCount || 50000,
       settings: {
         enableDropCaps: true
       },
       genre: data.genre || [],
-      targetAudience: data.targetAudience || 'adult',
+      targetAudience: (data.targetAudience || 'adult') as 'children' | 'young_adult' | 'adult' | 'all_ages',
       contentWarnings: [],
       keywords: [],
       synopsis: '',
