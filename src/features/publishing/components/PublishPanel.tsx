@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Project, PublishStatus, Chapter } from '@shared/types';
 import { generateEpub } from '../services/epubService';
-import { translateContent } from '../services/geminiService';
+import { translateContent } from '../../generation/services/geminiService';
 import { Download, Globe, Rocket, Target, Languages, Loader2, FileCheck, Settings } from 'lucide-react';
 
 interface PublishPanelProps {

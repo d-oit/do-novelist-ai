@@ -296,3 +296,32 @@ export interface PublishingExport {
   sections: Array<'overview' | 'engagement' | 'feedback' | 'revenue' | 'insights'>;
   publicationIds: string[];
 }
+/**
+ * Reader Engagement Metrics
+ * Tracks real-time engagement of readers with the published work
+ */
+export interface ReaderEngagement {
+  publicationId: string;
+  totalEngagements: number;
+  uniqueReaders: number;
+  averageSessionDuration: number; // in minutes
+  bounceRate: number; // percentage
+  returnVisitorRate: number; // percentage
+  lastUpdated: Date;
+}
+
+/**
+ * Publishing Insights
+ * Comprehensive insights for the published work's performance
+ */
+export interface PublishingInsights {
+  publicationId: string;
+  overallSentiment: 'positive' | 'neutral' | 'negative';
+  engagementLevel: 'high' | 'medium' | 'low';
+  readabilityScore: number; // 0-100
+  recommendationRate: number; // percentage
+  competitorRanking?: number;
+  trendingTopics: string[];
+  insights: string[];
+  lastAnalyzed: Date;
+}

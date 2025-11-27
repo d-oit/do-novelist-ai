@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { db, getStoredConfig, saveStoredConfig } from '../db';
 import { Project, PublishStatus, ChapterStatus } from '../../types';
+import { createChapter } from '../../shared/utils';
 
 // Mock @libsql/client/web
 const mocks = vi.hoisted(() => ({
@@ -109,23 +110,14 @@ describe('Database Library', () => {
                 editorTheme: 'default'
             },
             chapters: [
-                {
+                createChapter({
                     id: 'c1',
                     orderIndex: 1,
                     title: 'Chapter 1',
                     summary: 'Summary 1',
                     content: 'Content 1',
-                    status: ChapterStatus.PENDING,
-                    wordCount: 0,
-                    characterCount: 0,
-                    estimatedReadingTime: 0,
-                    tags: [],
-                    plotPoints: [],
-                    characters: [],
-                    locations: [],
-                    scenes: [],
-                    notes: ''
-                }
+                    status: ChapterStatus.PENDING
+                })
             ]
         };
 

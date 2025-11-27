@@ -4,6 +4,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useGoapEngine } from '../useGoapEngine';
 import { Project, PublishStatus, ChapterStatus } from '../../../../types';
 import * as gemini from '../../../../lib/gemini';
+import { createChapter } from '../../../../shared/utils';
 
 // Mock Gemini functions
 vi.mock('../../../../lib/gemini');
@@ -146,14 +147,12 @@ describe('useGoapEngine Hook', () => {
       // Setup project with pending chapters
       project.worldState.hasOutline = true;
       project.chapters = [
-        {
-          id: 'c1', orderIndex: 1, title: 'Ch 1', summary: 'Sum 1', content: '', status: ChapterStatus.PENDING,
-          wordCount: 0, characterCount: 0, estimatedReadingTime: 0, tags: [], plotPoints: [], characters: [], locations: [], scenes: [], notes: ''
-        },
-        {
-          id: 'c2', orderIndex: 2, title: 'Ch 2', summary: 'Sum 2', content: '', status: ChapterStatus.PENDING,
-          wordCount: 0, characterCount: 0, estimatedReadingTime: 0, tags: [], plotPoints: [], characters: [], locations: [], scenes: [], notes: ''
-        }
+        createChapter({
+          id: 'c1', orderIndex: 1, title: 'Ch 1', summary: 'Sum 1', content: '', status: ChapterStatus.PENDING
+        }),
+        createChapter({
+          id: 'c2', orderIndex: 2, title: 'Ch 2', summary: 'Sum 2', content: '', status: ChapterStatus.PENDING
+        })
       ];
       project.worldState.chaptersCount = 2;
 

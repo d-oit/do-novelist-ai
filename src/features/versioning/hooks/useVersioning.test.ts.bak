@@ -3,20 +3,24 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useVersioning } from './useVersioning';
 import { versioningService } from '../services/versioningService';
 import { Chapter, ChapterStatus } from '../../../types';
-import { createChapter } from '../../../shared/utils';
 
 // Mock the versioning service
 vi.mock('../services/versioningService');
 const mockVersioningService = vi.mocked(versioningService);
 
-const mockChapter: Chapter = createChapter({
+const mockChapter: Chapter = {
   id: 'test-chapter',
   title: 'Test Chapter',
   summary: 'A test chapter',
   content: 'This is test content.',
   status: ChapterStatus.DRAFTING,
-  orderIndex: 1
-});
+  orderIndex: 1,
+  wordCount: 0,
+  characterCount: 0,
+  estimatedReadingTime: 0,
+  tags: [],
+  notes: ''
+};
 
 const mockVersion = {
   id: 'version-1',

@@ -156,3 +156,18 @@ export interface RefineOptions {
   model: string;
   temperature: number;
 }
+/**
+ * Processed Action Types
+ * Used in the GOAP action execution pipeline
+ */
+export interface ProcessedAction {
+  action: AgentAction;
+  project: Project;
+  pendingChapters?: Chapter[];
+}
+
+export interface ActionResult {
+  success: boolean;
+  data?: any;
+  error?: Error;
+}

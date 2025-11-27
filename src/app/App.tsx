@@ -7,6 +7,7 @@ import { SettingsView } from '../features/settings/components';
 import { useGoapEngine } from '../features/generation/hooks';
 import { Settings, Loader2 } from 'lucide-react';
 import { db } from '../features/projects/services';
+import { createChapter } from '../shared/utils';
 
 // --- Initial Data ---
 
@@ -142,18 +143,18 @@ const App: React.FC = () => {
 
   const handleAddChapter = () => {
     setProject(prev => {
-        const nextIndex = prev.chapters.length > 0 
-            ? Math.max(...prev.chapters.map(c => c.orderIndex)) + 1 
+        const nextIndex = prev.chapters.length > 0
+            ? Math.max(...prev.chapters.map(c => c.orderIndex)) + 1
             : 1;
-        
-        const newChapter: Chapter = {
+
+        const newChapter = createChapter({
             id: `${prev.id}_ch_manual_${Date.now()}`,
             orderIndex: nextIndex,
             title: `Chapter ${nextIndex}`,
             summary: '',
             content: '',
             status: ChapterStatus.PENDING
-        };
+        });
 
         const updatedChapters = [...prev.chapters, newChapter];
         return {

@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import VersionHistory from './VersionHistory';
 import { useVersioning } from '../hooks/useVersioning';
 import { Chapter, ChapterStatus } from '../../../types';
+import { createChapter } from '../../../shared/utils';
 
 // Mock UI components to avoid import issues
 vi.mock('../../../components/ui/Button', () => ({
@@ -33,19 +34,14 @@ vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => children,
 }));
 
-const mockChapter: Chapter = {
+const mockChapter: Chapter = createChapter({
   id: 'test-chapter',
   title: 'Test Chapter',
   summary: 'A test chapter for version history',
   content: 'This is the content of the test chapter.',
   status: ChapterStatus.DRAFTING,
-  orderIndex: 1,
-  wordCount: 0,
-  characterCount: 0,
-  estimatedReadingTime: 0,
-  tags: [],
-  notes: ''
-};
+  orderIndex: 1
+});
 
 const mockVersions = [
   {

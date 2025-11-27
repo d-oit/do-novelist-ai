@@ -1,5 +1,6 @@
 import { ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
 import { Chapter } from '../../../types';
+import { createChapter } from '../../../shared/utils';
 
 class VersioningService {
   private static instance: VersioningService;
@@ -108,19 +109,14 @@ class VersioningService {
       request.onsuccess = () => {
         const version = request.result as ChapterVersion;
         if (version) {
-          const chapter: Chapter = {
+          const chapter = createChapter({
             id: version.chapterId,
             title: version.title,
             summary: version.summary,
             content: version.content,
             status: version.status,
-            orderIndex: 0, // Will be set by caller
-            wordCount: 0,
-            characterCount: 0,
-            estimatedReadingTime: 0,
-            tags: [],
-            notes: ''
-          };
+            orderIndex: 0 // Will be set by caller
+          });
           resolve(chapter);
         } else {
           resolve(null);
