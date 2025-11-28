@@ -4,6 +4,7 @@ import {
   generateOutline,
   writeChapterContent,
 } from '../services/geminiService';
+import { createChapter } from '@shared/utils';
 
 /**
  * Validates if an action can be executed based on project state
@@ -227,12 +228,11 @@ function handleCreateOutlinePostprocess(
   const result = actionResult.data;
 
   // FIX: Unique Chapter IDs based on Project ID to prevent collisions in DB
-  const newChapters: Chapter[] = result.chapters.map((c: any) => ({
+  const newChapters: Chapter[] = result.chapters.map((c: any) => createChapter({
     id: `${project.id}_ch_${c.orderIndex}`,
     orderIndex: c.orderIndex,
     title: c.title,
     summary: c.summary,
-    content: '',
     status: ChapterStatus.PENDING,
   }));
 
@@ -263,19 +263,34 @@ function handleWriteChaptersPostprocess(
   const successfulChapters = results
     .filter(
       (
-        result
+        result: PromiseSettledResult<{
+          chapterId: string;
+          content: string;
+          success: boolean;
+        }>
       ): result is PromiseFulfilledResult<{
         chapterId: string;
         content: string;
         success: true;
       }> => result.status === 'fulfilled' && result.value.success
     )
-    .map(result => result.value);
+    .map(
+      (result: PromiseFulfilledResult<{
+        chapterId: string;
+        content: string;
+        success: true;
+      }>) => result.value
+    );
 
   const failedChapters = results
     .filter(
       (
-        result
+        result: PromiseSettledResult<{
+          chapterId: string;
+          content: string;
+          success: boolean;
+          error?: Error;
+        }>
       ): result is PromiseFulfilledResult<{
         chapterId: string;
         content: string;
@@ -283,18 +298,34 @@ function handleWriteChaptersPostprocess(
         error: Error;
       }> => result.status === 'fulfilled' && !result.value.success
     )
-    .map(result => result.value);
+    .map(
+      (result: PromiseFulfilledResult<{
+        chapterId: string;
+        content: string;
+        success: false;
+        error: Error;
+      }>) => result.value
+    );
 
   // Update project with successful chapters
   setProject(prev => ({
     ...prev,
-    chapters: prev.chapters.map(c => {
-      const successfulResult = successfulChapters.find(r => r.chapterId === c.id);
+    chapters: prev.chapters.map((c: Chapter) => {
+      const successfulResult = successfulChapters.find((r: {
+        chapterId: string;
+        content: string;
+        success: true;
+      }) => r.chapterId === c.id);
       if (successfulResult) {
         return { ...c, content: successfulResult.content, status: ChapterStatus.COMPLETE };
       }
       // Reset failed chapters back to pending
-      const failedResult = failedChapters.find(r => r.chapterId === c.id);
+      const failedResult = failedChapters.find((r: {
+        chapterId: string;
+        content: string;
+        success: false;
+        error: Error;
+      }) => r.chapterId === c.id);
       if (failedResult) {
         return { ...c, status: ChapterStatus.PENDING };
       }
@@ -325,7 +356,11 @@ export function createActionSummary(
   if (action.name === 'write_chapter_parallel' && actionResult.data) {
     const results = actionResult.data;
     const successfulChapters = results.filter(
-      (r: PromiseFulfilledResult<any>) => r.status === 'fulfilled' && r.value.success
+      (r: PromiseFulfilledResult<{
+        chapterId: string;
+        content: string;
+        success: boolean;
+      }>) => r.status === 'fulfilled' && r.value.success
     ).length;
     const totalProcessed = results.length;
 
