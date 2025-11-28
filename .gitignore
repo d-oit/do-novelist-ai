@@ -27,7 +27,7 @@ dist-ssr
 
 # Playwright
 test-results/
-
+playwright-report/
 
 lint_*.txt
 test_*.txt
@@ -45,3 +45,4 @@ test_*.txt
 
 
 .claude/settings.json
+

@@ -8,6 +8,9 @@ test.describe('Feature: Dashboard & Tools', () => {
     await setupGeminiMock(page);
     await page.goto('/');
 
+    // Open the wizard
+    await page.getByTestId('nav-new-project').click();
+
     // Create Project
     await page.getByTestId('wizard-idea-input').fill('Dashboard Test');
     await page.getByTestId('wizard-title-input').fill('Dashboard Book');

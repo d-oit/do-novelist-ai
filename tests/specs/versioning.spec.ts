@@ -5,11 +5,11 @@ test.describe('Version History Feature', () => {
     await page.goto('/');
     
     // Create a test project
-    await page.getByTestId('create-project-btn').click();
-    await page.getByTestId('project-title-input').fill('Version Test Novel');
-    await page.getByTestId('project-idea-input').fill('A novel to test version history functionality');
-    await page.getByTestId('next-btn').click();
-    await page.getByTestId('finish-btn').click();
+    await page.getByTestId('nav-new-project').click();
+    await page.getByTestId('wizard-title-input').fill('Version Test Novel');
+    await page.getByTestId('wizard-idea-input').fill('A novel to test version history functionality');
+    await page.getByTestId('wizard-style-input').click();
+    await page.getByTestId('wizard-submit-btn').click();
     
     // Wait for project creation and navigate to first chapter
     await page.waitForSelector('[data-testid*="chapter-item-order-"]');

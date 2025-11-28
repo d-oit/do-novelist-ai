@@ -8,7 +8,12 @@
       "Bash(git rm:*)",
       "Bash(gh run list:*)",
       "Bash(npm run lint)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm run test)",
+      "Bash(npm run test:e2e)",
+      "Bash(npx playwright test --reporter=line:*)",
+      "Bash(npx playwright test tests/specs/agents.spec.ts --reporter=line)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
