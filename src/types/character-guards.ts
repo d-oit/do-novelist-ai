@@ -24,11 +24,14 @@ import {
   type UpdateCharacter,
   type CharacterSearch
 } from './character-schemas';
-import { type ProjectId, isProjectId } from './guards';
+import { type ProjectId } from './schemas';
 
 // =============================================================================
 // BRANDED TYPE CREATION
 // =============================================================================
+
+// Export ProjectId from schemas for use in character-related functionality
+export type { ProjectId } from './schemas';
 
 export type CharacterId = string & { __brand: 'CharacterId' };
 

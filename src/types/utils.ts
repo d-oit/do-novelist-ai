@@ -209,16 +209,16 @@ export interface ComponentBaseProps {
 /**
  * Props with children
  */
-export interface WithChildren<T = {}> extends T {
+export type WithChildren<T = {}> = T & {
   children: React.ReactNode;
-}
+};
 
 /**
  * Optional children props
  */
-export interface WithOptionalChildren<T = {}> extends T {
+export type WithOptionalChildren<T = {}> = T & {
   children?: React.ReactNode;
-}
+};
 
 /**
  * Props with ref forwarding
@@ -230,9 +230,9 @@ export type WithRef<T, TElement = HTMLElement> = T & {
 /**
  * Polymorphic component props
  */
-export type PolymorphicProps<TElement extends keyof JSX.IntrinsicElements = 'div'> = {
+export type PolymorphicProps<TElement extends keyof React.JSX.IntrinsicElements = 'div'> = {
   as?: TElement;
-} & Omit<JSX.IntrinsicElements[TElement], 'as'>;
+} & Omit<React.JSX.IntrinsicElements[TElement], 'as'>;
 
 // =============================================================================
 // VALIDATION TYPES

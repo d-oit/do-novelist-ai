@@ -65,7 +65,7 @@ export const CharacterIdSchema = z.string().regex(
   'Invalid character ID format'
 );
 
-export const CharacterPhysicalTraitsSchema = z.object({
+const CharacterPhysicalTraitsBaseSchema = z.object({
   age: z.number().int().min(0).max(200).optional(),
   height: z.string().max(50).optional(), // e.g., "5'8\"", "172cm"
   weight: z.string().max(50).optional(),
@@ -77,7 +77,12 @@ export const CharacterPhysicalTraitsSchema = z.object({
   disabilities: z.array(z.string().max(100)).default([])
 });
 
-export const CharacterBackgroundSchema = z.object({
+export const CharacterPhysicalTraitsSchema = CharacterPhysicalTraitsBaseSchema.default(() => ({
+  distinctiveFeatures: [],
+  disabilities: []
+}));
+
+const CharacterBackgroundBaseSchema = z.object({
   birthplace: z.string().max(100).optional(),
   education: z.string().max(200).optional(),
   occupation: z.string().max(100).optional(),
@@ -91,7 +96,12 @@ export const CharacterBackgroundSchema = z.object({
   secrets: z.array(z.string().max(200)).default([])
 });
 
-export const CharacterPsychologySchema = z.object({
+export const CharacterBackgroundSchema = CharacterBackgroundBaseSchema.default(() => ({
+  significantEvents: [],
+  secrets: []
+}));
+
+const CharacterPsychologyBaseSchema = z.object({
   coreBeliefs: z.array(z.string().max(200)).default([]),
   values: z.array(z.string().max(100)).default([]),
   fears: z.array(z.string().max(100)).default([]),
@@ -103,6 +113,16 @@ export const CharacterPsychologySchema = z.object({
   cognitiveStyle: z.enum(['analytical', 'intuitive', 'practical', 'creative']).optional(),
   communicationStyle: z.enum(['direct', 'diplomatic', 'passive', 'aggressive']).optional()
 });
+
+export const CharacterPsychologySchema = CharacterPsychologyBaseSchema.default(() => ({
+  coreBeliefs: [],
+  values: [],
+  fears: [],
+  desires: [],
+  flaws: [],
+  strengths: [],
+  personalityTraits: []
+}));
 
 export const CharacterArcSchema = z.object({
   type: CharacterArcTypeSchema,
@@ -119,14 +139,21 @@ export const CharacterArcSchema = z.object({
   lessonLearned: z.string().max(300).optional()
 });
 
-export const CharacterVoiceSchema = z.object({
+const CharacterVoiceBaseSchema = z.object({
   vocabulary: z.enum(['simple', 'average', 'sophisticated', 'technical', 'archaic']).default('average'),
   tone: z.enum(['formal', 'casual', 'humorous', 'serious', 'sarcastic', 'warm', 'cold']).default('casual'),
   speechPatterns: z.array(z.string().max(100)).default([]),
   catchphrases: z.array(z.string().max(100)).default([]),
   accentDialect: z.string().max(100).optional(),
-  languageProficiency: z.record(z.enum(['native', 'fluent', 'conversational', 'basic']), z.string()).optional().default({})
+  languageProficiency: z.record(z.enum(['native', 'fluent', 'conversational', 'basic']), z.string()).optional()
 });
+
+export const CharacterVoiceSchema = CharacterVoiceBaseSchema.default(() => ({
+  vocabulary: 'average' as const,
+  tone: 'casual' as const,
+  speechPatterns: [] as string[],
+  catchphrases: [] as string[]
+}));
 
 export const CharacterRelationshipSchema = z.object({
   id: z.string(),
@@ -166,10 +193,10 @@ export const CharacterSchema = z.object({
   
   // Core character information
   summary: z.string().max(500).default(''),
-  physicalTraits: CharacterPhysicalTraitsSchema.optional().default({ distinctiveFeatures: [], disabilities: [] }),
-  background: CharacterBackgroundSchema.optional().default({ significantEvents: [], secrets: [] }),
-  psychology: CharacterPsychologySchema.optional().default({ coreBeliefs: [], values: [], fears: [], desires: [], flaws: [], strengths: [], personalityTraits: [] }),
-  voice: CharacterVoiceSchema.optional().default({ vocabulary: 'average', tone: 'casual', speechPatterns: [], catchphrases: [] }),
+  physicalTraits: CharacterPhysicalTraitsSchema.optional(),
+  background: CharacterBackgroundSchema.optional(),
+  psychology: CharacterPsychologySchema.optional(),
+  voice: CharacterVoiceSchema.optional(),
   arc: CharacterArcSchema.optional(),
   
   // Visual representation
@@ -252,8 +279,8 @@ export const CreateCharacterSchema = z.object({
   role: CharacterRoleSchema,
   importance: z.number().min(0).max(10).default(5),
   summary: z.string().max(500).default(''),
-  physicalTraits: CharacterPhysicalTraitsSchema.partial().default({}),
-  psychology: CharacterPsychologySchema.partial().default({}),
+  physicalTraits: CharacterPhysicalTraitsBaseSchema.partial(),
+  psychology: CharacterPsychologyBaseSchema.partial(),
   tags: z.array(z.string().max(50)).default([])
 });
 
