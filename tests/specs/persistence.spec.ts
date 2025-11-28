@@ -19,8 +19,11 @@ test.describe('Feature: Persistence', () => {
 
   test('Local Storage: Retains project data after reload', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
     // 1. Create Project
+    await page.getByTestId('nav-new-project').click();
+    await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
     await page.getByTestId('wizard-idea-input').fill('Persistence Test');
     await page.getByTestId('wizard-title-input').fill('Saved Book');
     await page.getByTestId('wizard-style-input').fill('Memoir');
@@ -31,6 +34,7 @@ test.describe('Feature: Persistence', () => {
 
     // 2. Reload Page
     await page.reload();
+    await page.waitForLoadState('networkidle');
 
     // Close wizard if it reappears after reload
     if (await page.getByTestId('project-wizard-overlay').isVisible()) {
@@ -66,6 +70,7 @@ test.describe('Feature: Persistence', () => {
 
     // Reload
     await page.reload();
+    await page.waitForLoadState('networkidle');
 
     // Close wizard again if it reappears
     if (await page.getByTestId('project-wizard-overlay').isVisible()) {

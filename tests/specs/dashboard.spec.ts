@@ -7,9 +7,11 @@ test.describe('Feature: Dashboard & Tools', () => {
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
     // Open the wizard
     await page.getByTestId('nav-new-project').click();
+    await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
 
     // Create Project
     await page.getByTestId('wizard-idea-input').fill('Dashboard Test');

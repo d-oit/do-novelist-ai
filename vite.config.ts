@@ -17,6 +17,29 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'vendor-react': ['react', 'react-dom'],
+              'vendor-ui': [
+                'framer-motion',
+                'lucide-react',
+                'class-variance-authority',
+                'clsx',
+                'tailwind-merge'
+              ],
+              'vendor-charts': ['recharts'],
+              'vendor-ai': ['@google/genai'],
+              'vendor-db': ['@libsql/client'],
+              'vendor-utils': ['zod', 'zustand', 'jszip']
+            }
+          }
+        },
+        chunkSizeWarningLimit: 600,
+        cssCodeSplit: true,
+        minify: true
       }
     };
 });

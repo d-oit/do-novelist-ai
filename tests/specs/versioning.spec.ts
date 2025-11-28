@@ -3,9 +3,11 @@ import { test, expect } from '@playwright/test';
 test.describe('Version History Feature', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
     // Create a test project - open wizard first
     await page.getByTestId('nav-new-project').click();
+    await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
     await page.getByTestId('wizard-idea-input').fill('Version Test Novel');
     await page.getByTestId('wizard-title-input').fill('Version Test Title');
     await page.getByTestId('wizard-style-input').fill('Mystery');

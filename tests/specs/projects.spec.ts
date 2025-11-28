@@ -7,6 +7,7 @@ test.describe('Feature: Project Management', () => {
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
     // Attempt to dismiss wizard if it appears
     try {
@@ -26,6 +27,9 @@ test.describe('Feature: Project Management', () => {
     if (!await wizard.isVisible()) {
       await page.getByTestId('nav-new-project').click();
     }
+
+    // Wait for wizard to be fully loaded
+    await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
 
     // Fill Idea
     await page.getByTestId('wizard-idea-input').fill('Time Travel Mystery');

@@ -31,7 +31,10 @@
       "Bash(node:*)",
       "Bash(timeout:*)",
       "Bash(tee:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(npm test)",
+      "Skill(playwright-skill)"
     ],
     "deny": [],
     "ask": []

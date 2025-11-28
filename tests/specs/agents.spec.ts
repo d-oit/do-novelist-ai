@@ -7,9 +7,11 @@ test.describe('Feature: Creative Agents', () => {
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
     // Open the wizard by clicking the "New" button
     await page.getByTestId('nav-new-project').click();
+    await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
     await expect(page.getByTestId('project-wizard-overlay')).toBeVisible();
 
     // Setup: Create a fresh project

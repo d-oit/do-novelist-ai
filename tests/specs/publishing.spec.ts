@@ -7,8 +7,11 @@ test.describe('Feature: Publishing Panel', () => {
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
-    
+    await page.waitForLoadState('networkidle');
+
     // Create Project
+    await page.getByTestId('nav-new-project').click();
+    await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
     await page.getByTestId('wizard-idea-input').fill('Publishing Test');
     await page.getByTestId('wizard-title-input').fill('Book to Export');
     await page.getByTestId('wizard-style-input').fill('Simple');
