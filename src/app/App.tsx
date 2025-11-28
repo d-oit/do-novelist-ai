@@ -80,6 +80,7 @@ const App: React.FC = () => {
        }, 2000); // Debounced save
        return () => clearTimeout(saveTimer);
     }
+    return undefined;
   }, [project, isLoading]);
 
   const handleCreateProject = (title: string, style: string, idea: string, targetWordCount: number) => {
