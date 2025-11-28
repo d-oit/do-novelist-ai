@@ -2,9 +2,9 @@ name: CI/CD Pipeline (Optimized)
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
