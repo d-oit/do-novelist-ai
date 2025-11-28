@@ -19,7 +19,7 @@ class VersioningService {
     return new Promise((resolve, _reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
       
-      request.onerror = () => reject(request.error);
+      request.onerror = () => _reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
         resolve();
@@ -75,7 +75,7 @@ class VersioningService {
       const request = store.add(version);
       
       request.onsuccess = () => resolve(version);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => _reject(request.error);
     });
   }
 
@@ -94,7 +94,7 @@ class VersioningService {
         );
         resolve(versions);
       };
-      request.onerror = () => reject(request.error);
+      request.onerror = () => _reject(request.error);
     });
   }
 
@@ -122,7 +122,7 @@ class VersioningService {
           resolve(null);
         }
       };
-      request.onerror = () => reject(request.error);
+      request.onerror = () => _reject(request.error);
     });
   }
 
@@ -189,7 +189,7 @@ class VersioningService {
       const request = store.add(branch);
       
       request.onsuccess = () => resolve(branch);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => _reject(request.error);
     });
   }
 
@@ -205,7 +205,7 @@ class VersioningService {
         const branches = request.result.filter(b => b.chapterId === chapterId);
         resolve(branches);
       };
-      request.onerror = () => reject(request.error);
+      request.onerror = () => _reject(request.error);
     });
   }
 
@@ -219,9 +219,9 @@ class VersioningService {
     return true;
   }
 
-  async deleteBranch(_branchId: string): Promise<boolean> {
+  async deleteBranch(branchId: string): Promise<boolean> {
     if (!this.db) await this.init();
-    
+
     return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['branches'], 'readwrite');
       const store = transaction.objectStore('branches');
@@ -262,7 +262,7 @@ class VersioningService {
       const request = store.get(versionId);
       
       request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => _reject(request.error);
     });
   }
 
@@ -293,10 +293,10 @@ class VersioningService {
 
   private generateBranchColor(): string {
     const colors = [
-      '#3B82F6', '#8B5CF6', '#EC4899', '#10B981', 
+      '#3B82F6', '#8B5CF6', '#EC4899', '#10B981',
       '#F59E0B', '#EF4444', '#06B6D4', '#84CC16'
     ];
-    return colors[Math.floor(Math.random() * colors.length)];
+    return colors[Math.floor(Math.random() * colors.length)] as string;
   }
 
   private computeDiffs(content1: string, content2: string): VersionDiff[] {
