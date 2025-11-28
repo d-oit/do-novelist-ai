@@ -15,6 +15,8 @@ import {
   type CharacterGroup,
   type CharacterConflict,
   type UpdateCharacter,
+  type CharacterRole,
+  type PersonalityTrait,
 } from '../types/character-schemas';
 import {
   type ProjectId,
@@ -29,9 +31,10 @@ import {
   isMainCharacter,
   isProtagonist,
 } from '../types/character-guards';
-import { 
+import { z } from 'zod';
+import {
   type ValidationResult,
-  validateData 
+  validateData
 } from '../types/schemas';
 
 // =============================================================================
@@ -54,17 +57,17 @@ export class CharacterValidationService {
    * Validates a character and returns a simple validation result
    * Used by UI components for display
    */
-  public validate(character: Character): { isValid: boolean; score: number; issues: Array<{ path: (string | number)[]; message: string; code: string }>; strengths: string[] } {
+  public validate(character: Character): { isValid: boolean; score: number; issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }>; strengths: string[] } {
     const result = this.validateCharacterIntegrity(character);
 
     if (!result.success) {
       return {
         isValid: false,
         score: 0,
-        issues: result.errors.map(err => ({
-          path: err.path,
+        issues: result.issues.map((err: z.ZodIssue) => ({
+          path: err.path as (string | number)[],
           message: err.message,
-          code: err.code
+          code: 'custom' as const
         })),
         strengths: []
       };
@@ -72,14 +75,15 @@ export class CharacterValidationService {
 
     // Calculate a simple score based on character completeness
     let score = 50; // Base score
-    if (character.backstory && character.backstory.length > 100) score += 15;
-    if (character.motivations && character.motivations.length > 0) score += 15;
+    const backgroundData = character.background as { backstory?: string } | undefined;
+    if (backgroundData?.backstory && backgroundData.backstory.length > 100) score += 15;
+    if (character.psychology?.desires && character.psychology.desires.length > 0) score += 15;
     if (character.arc) score += 20;
 
     const strengths: string[] = [];
-    if (character.backstory && character.backstory.length > 100) strengths.push('Well-developed backstory');
-    if (character.motivations && character.motivations.length > 2) strengths.push('Clear motivations');
-    if (character.relationships && character.relationships.length > 2) strengths.push('Rich relationships');
+    if (backgroundData?.backstory && backgroundData.backstory.length > 100) strengths.push('Well-developed backstory');
+    if (character.psychology?.desires && character.psychology.desires.length > 2) strengths.push('Clear motivations');
+    if (character.appearances && character.appearances.length > 2) strengths.push('Rich relationships');
 
     return {
       isValid: true,
@@ -121,7 +125,7 @@ export class CharacterValidationService {
           issues: [{
             path: ['name'],
             message: 'A character with this name already exists',
-            code: 'duplicate_name'
+            code: 'custom' as const
           }]
         };
       }
@@ -134,7 +138,7 @@ export class CharacterValidationService {
           issues: [{
             path: ['importance'],
             message: this.getImportanceRequirementMessage(createData.role),
-            code: 'invalid_importance'
+            code: 'custom' as const
           }]
         };
       }
@@ -160,7 +164,7 @@ export class CharacterValidationService {
         background: {
           significantEvents: [],
           secrets: [],
-          ...createData.background || {}
+          ...(createData as any).background || {}
         },
         psychology: {
           coreBeliefs: [],
@@ -177,9 +181,15 @@ export class CharacterValidationService {
           tone: 'casual',
           speechPatterns: [],
           catchphrases: [],
-          languageProficiency: {}
+          languageProficiency: {
+            native: '',
+            fluent: '',
+            conversational: '',
+            basic: ''
+          }
         },
         appearances: [],
+        mood_board: [],
         tags: createData.tags,
         notes: '',
         inspirations: [],
@@ -228,7 +238,7 @@ export class CharacterValidationService {
             issues: [{
               path: ['name'],
               message: 'Another character already has this name',
-              code: 'duplicate_name'
+              code: 'custom' as const
             }]
           };
         }
@@ -243,7 +253,7 @@ export class CharacterValidationService {
             issues: [{
               path: ['importance'],
               message: this.getImportanceRequirementMessage(updateData.role),
-              code: 'invalid_importance'
+              code: 'custom' as const
             }]
           };
         }
@@ -271,14 +281,14 @@ export class CharacterValidationService {
       }
 
       const validatedCharacter = schemaValidation.data;
-      const issues: Array<{ path: (string | number)[]; message: string; code: string }> = [];
+      const issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }> = [];
 
       // Business logic validation
       if (!validateCharacterImportance(validatedCharacter.role, validatedCharacter.importance)) {
         issues.push({
           path: ['importance'],
           message: this.getImportanceRequirementMessage(validatedCharacter.role),
-          code: 'invalid_importance'
+          code: 'custom' as const
         });
       }
 
@@ -287,7 +297,7 @@ export class CharacterValidationService {
         issues.push({
           path: ['arc'],
           message: 'Characters with importance 7+ must have a character arc',
-          code: 'missing_arc'
+          code: 'custom' as const
         });
       }
 
@@ -297,27 +307,27 @@ export class CharacterValidationService {
         issues.push({
           path: ['appearances'],
           message: 'Character cannot appear multiple times in the same chapter',
-          code: 'duplicate_appearances'
+          code: 'custom' as const
         });
       }
 
       // Validate physical trait consistency
-      if (validatedCharacter.physicalTraits.age !== undefined && validatedCharacter.physicalTraits.age < 0) {
+      if (validatedCharacter.physicalTraits?.age !== undefined && validatedCharacter.physicalTraits.age < 0) {
         issues.push({
           path: ['physicalTraits', 'age'],
           message: 'Age cannot be negative',
-          code: 'invalid_age'
+          code: 'custom' as const
         });
       }
 
       // Validate personality trait conflicts
-      const traits = validatedCharacter.psychology.personalityTraits;
+      const traits = validatedCharacter.psychology?.personalityTraits || [];
       const conflicts = this.findPersonalityConflicts(traits);
       if (conflicts.length > 0) {
         issues.push({
           path: ['psychology', 'personalityTraits'],
           message: `Conflicting personality traits: ${conflicts.join(', ')}`,
-          code: 'personality_conflicts'
+          code: 'custom' as const
         });
       }
 
@@ -357,14 +367,14 @@ export class CharacterValidationService {
       }
 
       const relationship = validation.data;
-      const issues: Array<{ path: (string | number)[]; message: string; code: string }> = [];
+      const issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }> = [];
 
       // Validate relationship logic
       if (!validateRelationship(relationship)) {
         issues.push({
           path: ['characterAId', 'characterBId'],
           message: 'Invalid relationship configuration',
-          code: 'invalid_relationship'
+          code: 'custom'
         });
       }
 
@@ -374,14 +384,14 @@ export class CharacterValidationService {
         issues.push({
           path: ['characterAId'],
           message: 'Character A does not exist',
-          code: 'character_not_found'
+          code: 'custom'
         });
       }
       if (!characterIds.includes(relationship.characterBId)) {
         issues.push({
           path: ['characterBId'],
           message: 'Character B does not exist',
-          code: 'character_not_found'
+          code: 'custom'
         });
       }
 
@@ -392,7 +402,10 @@ export class CharacterValidationService {
       if (charA && charB) {
         const appropriatenessIssue = this.validateRelationshipAppropriateness(charA, charB, relationship);
         if (appropriatenessIssue) {
-          issues.push(appropriatenessIssue);
+          issues.push({
+            ...appropriatenessIssue,
+            code: 'custom' as const
+          });
         }
       }
 
@@ -440,7 +453,7 @@ export class CharacterValidationService {
           issues: [{
             path: ['characterIds'],
             message: 'Group must contain at least 2 existing characters',
-            code: 'invalid_group'
+            code: 'custom' as const
           }]
         };
       }
@@ -477,7 +490,7 @@ export class CharacterValidationService {
           issues: [{
             path: ['participants'],
             message: 'Conflict must involve at least 2 existing characters',
-            code: 'invalid_conflict'
+            code: 'custom' as const
           }]
         };
       }
@@ -511,14 +524,14 @@ export class CharacterValidationService {
     conflicts: CharacterConflict[];
   }> {
     try {
-      const issues: Array<{ path: (string | number)[]; message: string; code: string }> = [];
+      const issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }> = [];
 
       // Validate unique character names
       if (!validateUniqueCharacterNames(characters)) {
         issues.push({
           path: ['characters'],
           message: 'Character names must be unique within the project',
-          code: 'duplicate_names'
+          code: 'custom'
         });
       }
 
@@ -528,13 +541,13 @@ export class CharacterValidationService {
         issues.push({
           path: ['characters'],
           message: 'Project must have at least one protagonist',
-          code: 'missing_protagonist'
+          code: 'custom'
         });
       } else if (protagonists.length > 3) {
         issues.push({
           path: ['characters'],
           message: 'Project should not have more than 3 protagonists',
-          code: 'too_many_protagonists'
+          code: 'custom'
         });
       }
 
@@ -545,7 +558,7 @@ export class CharacterValidationService {
         issues.push({
           path: ['characters'],
           message: `Main characters missing character arcs: ${mainWithoutArcs.map(c => c.name).join(', ')}`,
-          code: 'missing_main_character_arcs'
+          code: 'custom'
         });
       }
 
@@ -556,7 +569,7 @@ export class CharacterValidationService {
           issues.push({
             path: ['relationships', index],
             message: `Relationship references non-existent character(s)`,
-            code: 'invalid_relationship_reference'
+            code: 'custom'
           });
         }
       });
@@ -568,7 +581,7 @@ export class CharacterValidationService {
           issues.push({
             path: ['groups', index],
             message: `Group references non-existent character(s): ${invalidRefs.join(', ')}`,
-            code: 'invalid_group_reference'
+            code: 'custom'
           });
         }
       });
@@ -580,7 +593,7 @@ export class CharacterValidationService {
           issues.push({
             path: ['conflicts', index],
             message: `Conflict references non-existent character(s): ${invalidRefs.join(', ')}`,
-            code: 'invalid_conflict_reference'
+            code: 'custom'
           });
         }
       });
@@ -684,15 +697,15 @@ export class CharacterValidationService {
   ): { path: (string | number)[]; message: string; code: string } | null {
     // Age-appropriate relationships
     if (relationship.type === 'romantic') {
-      const ageA = charA.physicalTraits.age;
-      const ageB = charB.physicalTraits.age;
-      
+      const ageA = charA.physicalTraits?.age;
+      const ageB = charB.physicalTraits?.age;
+
       if (ageA !== undefined && ageB !== undefined) {
         if (Math.abs(ageA - ageB) > 15 && (ageA < 25 || ageB < 25)) {
           return {
             path: ['type'],
             message: 'Large age gap in romantic relationship with young character',
-            code: 'inappropriate_age_gap'
+            code: 'custom'
           };
         }
       }
@@ -703,7 +716,7 @@ export class CharacterValidationService {
       return {
         path: ['intensity'],
         message: 'Family relationships should have higher intensity (3+)',
-        code: 'low_family_intensity'
+        code: 'custom'
       };
     }
 
@@ -712,7 +725,7 @@ export class CharacterValidationService {
       return {
         path: ['description'],
         message: 'Enemy relationships must have a description',
-        code: 'missing_enemy_description'
+        code: 'custom'
       };
     }
 

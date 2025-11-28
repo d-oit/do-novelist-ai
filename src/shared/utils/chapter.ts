@@ -45,8 +45,8 @@ export function createChapter(partial: Partial<Chapter> & Pick<Chapter, 'id' | '
     notes: partial.notes ?? '',
 
     // Timestamps
-    createdAt: partial.createdAt ?? now,
-    updatedAt: partial.updatedAt ?? now,
+    createdAt: (partial.createdAt ?? now) as Date,
+    updatedAt: (partial.updatedAt ?? now) as Date,
 
     // AI generation metadata (optional)
     generationPrompt: partial.generationPrompt,

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 
 const Loading = () => (
   <div className='flex items-center justify-center h-64'>
@@ -7,7 +7,7 @@ const Loading = () => (
 );
 
 // Placeholder lazy-loaded component for recharts
-const LazyRecharts = (props: any) => (
+const LazyRecharts = (_props: any) => (
   <Suspense fallback={<Loading />}>
     <div className='flex items-center justify-center h-64'>
       <div className='text-muted-foreground'>Recharts components not loaded</div>

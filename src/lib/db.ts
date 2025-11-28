@@ -1,6 +1,6 @@
 
 import { createClient } from "@libsql/client/web";
-import { type Project, PublishStatus } from "../types";
+import { type Project, PublishStatus, ChapterStatus } from "../types";
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';
@@ -194,7 +194,7 @@ export const db = {
             title: r.title as string,
             summary: r.summary as string,
             content: r.content as string,
-            status: (isValidChapterStatus(r.status as string) ? r.status : 'pending') as 'pending' | 'drafting' | 'review' | 'complete',
+            status: (isValidChapterStatus(r.status as string) ? r.status : 'pending') as ChapterStatus,
             wordCount: 0,
             characterCount: 0,
             estimatedReadingTime: 0,
