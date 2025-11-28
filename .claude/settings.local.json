@@ -18,7 +18,20 @@
       "Bash(git branch:*)",
       "Bash(git checkout:*)",
       "Bash(npm install:*)",
-      "Bash(timeout 60 bash -c \"npm run test:e2e 2>&1\":*)"
+      "Bash(timeout 60 bash -c \"npm run test:e2e 2>&1\":*)",
+      "Skill(gemini-websearch)",
+      "Bash(python scripts/search.py:*)",
+      "Bash(gemini:*)",
+      "Bash(gemini --help:*)",
+      "Bash(gemini.cmd:*)",
+      "Bash(gemini.bat:*)",
+      "Bash(PATH=\"/c/Users/doswa/AppData/Roaming/npm:$PATH\" python:*)",
+      "Bash(python:*)",
+      "Bash(bash -c:*)",
+      "Bash(node:*)",
+      "Bash(timeout:*)",
+      "Bash(tee:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
