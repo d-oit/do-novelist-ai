@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Project } from '../../../types';
+import { Project } from '@shared/types';
 import { Folder, Clock, MoreVertical, FileText, Star, Trash2, Loader2, Plus } from 'lucide-react';
 import { iconButtonTarget } from '../../../lib/utils';
 import { db } from '../../../lib/db';
