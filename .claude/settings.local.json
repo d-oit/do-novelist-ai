@@ -15,7 +15,9 @@
       "Bash(npx playwright test tests/specs/agents.spec.ts --reporter=line)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
