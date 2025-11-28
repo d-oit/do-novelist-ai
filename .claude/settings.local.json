@@ -14,11 +14,7 @@
       "Bash(npx playwright test --reporter=line:*)",
       "Bash(npx playwright test tests/specs/agents.spec.ts --reporter=line)",
       "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(gh pr checks:*)",
-      "Bash(npx playwright test:*)",
-      "Bash(gh pr merge 16 --squash --delete-branch --message \"$(cat << ''EOF''\nfix: resolve Playwright strict mode violations in E2E tests\n\n## Summary\nSuccessfully resolved Playwright strict mode violations affecting 30 E2E tests by replacing ambiguous role/name selectors with specific data-testid attributes.\n\n## Changes Made\n- Updated test files to use unique data-testid selectors instead of ambiguous getByRole calls\n- Fixed wizard initialization in test setup to use correct test IDs\n- Ensured all tests can properly identify UI elements without strict mode violations\n\n## CI Status\n✅ Build & Test: PASS\n✅ CodeQL Security Analysis: PASS  \n✅ YAML Syntax Validation: PASS\n✅ Dependency Review: PASS\n✅ Vercel Deployment: PASS\n\nNote: E2E tests may still have unrelated timeout issues in CI environment, but core Playwright strict mode violations are resolved.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\nEOF\n)\")",
-      "Bash(gh pr merge:*)"
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
