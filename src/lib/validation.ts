@@ -3,7 +3,7 @@
  * Integrates Zod schemas with application logic
  */
 
-import { z } from 'zod';
+
 import {
   ProjectSchema,
   ChapterSchema,
@@ -12,28 +12,17 @@ import {
   UpdateProjectSchema,
   RefineOptionsSchema,
   validateData,
-  isValidData,
-  transformAndValidate,
+
   type Project,
   type Chapter,
-  type CreateProject,
-  type UpdateChapter,
-  type UpdateProject,
-  type RefineOptions,
   type ValidationResult
 } from '../types/schemas';
 import {
-  isProject,
-  isChapter,
-  isProjectId,
-  isChapterId,
-  createProjectId,
+      isProjectId,
+    createProjectId,
   createChapterId,
-  createLogId,
-  assertType,
-  safeCast
 } from '../types/guards';
-import { ChapterStatus } from '../types';
+import { ChapterStatus, PublishStatus } from '../shared/types';
 
 // =============================================================================
 // VALIDATION SERVICE CLASS
@@ -91,7 +80,7 @@ export class ValidationService {
           targetAudienceDefined: true
         },
         isGenerating: false,
-        status: 'Draft',
+        status: PublishStatus.DRAFT,
         language: createValidation.data.language,
         targetWordCount: createValidation.data.targetWordCount,
         settings: {
@@ -159,7 +148,7 @@ export class ValidationService {
             issues: [{
               path: ['worldState', 'chaptersCompleted'],
               message: 'Cannot exceed total chapters',
-              code: 'invalid_range'
+              code: 'custom' as const
             }]
           };
         }
@@ -183,7 +172,7 @@ export class ValidationService {
       const validatedProject = schemaValidation.data;
 
       // Cross-field validation
-      const issues: Array<{ path: (string | number)[]; message: string; code: string }> = [];
+      const issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }> = [];
 
       // Check chapters consistency
       const actualChapterCount = validatedProject.chapters.length;
@@ -192,7 +181,7 @@ export class ValidationService {
         issues.push({
           path: ['worldState', 'chaptersCount'],
           message: `World state shows ${worldStateChapterCount} chapters but project has ${actualChapterCount}`,
-          code: 'inconsistent_chapter_count'
+          code: 'custom' as const
         });
       }
 
@@ -204,7 +193,7 @@ export class ValidationService {
         issues.push({
           path: ['worldState', 'chaptersCompleted'],
           message: `World state shows ${worldStateCompletedCount} completed chapters but ${actualCompletedCount} are actually complete`,
-          code: 'inconsistent_completed_count'
+          code: 'custom' as const
         });
       }
 
@@ -215,7 +204,7 @@ export class ValidationService {
           issues.push({
             path: ['chapters', i, 'orderIndex'],
             message: `Chapter order index should be ${i + 1} but is ${orderIndices[i]}`,
-            code: 'invalid_order_index'
+            code: 'custom' as const
           });
           break;
         }
@@ -228,7 +217,7 @@ export class ValidationService {
           issues.push({
             path: ['chapters', index, 'id'],
             message: `Duplicate chapter ID: ${chapter.id}`,
-            code: 'duplicate_chapter_id'
+            code: 'custom' as const
           });
         }
         chapterIds.add(chapter.id);
@@ -276,7 +265,7 @@ export class ValidationService {
           issues: [{
             path: ['id'],
             message: `Chapter ID must start with project ID: ${projectId}`,
-            code: 'invalid_chapter_id'
+            code: 'custom' as const
           }]
         };
       }
@@ -290,7 +279,7 @@ export class ValidationService {
           issues: [{
             path: ['wordCount'],
             message: `Word count is ${chapter.wordCount} but content has ${actualWordCount} words`,
-            code: 'inconsistent_word_count'
+            code: 'custom' as const
           }]
         };
       }
@@ -324,7 +313,7 @@ export class ValidationService {
           issues: [{
             path: ['wordCount'],
             message: `Provided word count ${validation.data.wordCount} does not match actual word count ${wordCount}`,
-            code: 'inconsistent_word_count'
+            code: 'custom' as const
           }]
         };
       }
@@ -483,7 +472,7 @@ export class ValidationService {
           issues: [{
             path: ['content'],
             message: 'Content too long',
-            code: 'max_length_exceeded'
+            code: 'custom' as const
           }]
         };
       }
@@ -547,10 +536,10 @@ export const assertValid = {
 export const safeConvert = {
   toProject: (data: unknown): Project | null => {
     const result = validate.project(data);
-    return result.success ? result.data : null;
+    return result.success ? result.data as Project : null;
   },
   toChapter: (data: unknown): Chapter | null => {
     const result = validate.chapter(data);
-    return result.success ? result.data : null;
+    return result.success ? result.data as Chapter : null;
   }
 };

@@ -27,7 +27,7 @@ Increase test coverage from **22% to 80%+** by implementing comprehensive unit t
 | `editor/hooks/__tests__/useGoapEngine.test.ts` | Hook | useGoapEngine | ✅ Good |
 | `versioning/components/VersionHistory.test.tsx` | Component | VersionHistory | ✅ Basic |
 | `versioning/hooks/useVersioning.test.ts` | Hook | useVersioning | ❌ **FAILING** (Infinite loop) |
-| `lib/__tests__/gemini.test.ts` | Service | Gemini API | ✅ Passing |
+| `lib/__tests__/aiService.test.ts` | Service | AI SDK Gateway (configurable providers) | ✅ Passing |
 | `types/__tests__/schemas.test.ts` | Types | Schema validation | ⚠️ **1 FAILED** (Chapter consistency) |
 | `lib/__tests__/validation.test.ts` | Utils | Data validation | ⚠️ **7 FAILED** (Chapter integrity) |
 
@@ -193,7 +193,7 @@ Existing test files in `tests/specs/`:
 
 #### E2E Infrastructure Status
 - 🔄 Playwright tests running but timing out after 60s
-- ⚠️ Mock interceptors working for Gemini API
+- ⚠️ Mock interceptors working for AI SDK Gateway
 - ⚠️ Multiple test failures (selector conflicts, async issues)
 - ✅ Test isolation and cleanup functioning
 

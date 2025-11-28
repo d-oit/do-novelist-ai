@@ -8,6 +8,9 @@ test.describe('Feature: Book Editor', () => {
     await setupGeminiMock(page);
     await page.goto('/');
 
+    // Open the wizard
+    await page.getByTestId('nav-new-project').click();
+
     // Setup: Create a project quickly
     await page.getByTestId('wizard-idea-input').fill('Test Book');
     await page.getByTestId('wizard-title-input').fill('Test Title');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   GitCompare,
@@ -159,9 +159,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
   const renderSideBySide = () => {
     const lines1 = version1.content.split('\n');
     const lines2 = version2.content.split('\n');
-    const maxLines = Math.max(lines1.length, lines2.length);
-
-    return (
+      return (
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h4 className="font-medium text-sm mb-2 text-muted-foreground">

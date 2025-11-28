@@ -7,6 +7,7 @@ import { SettingsView } from '../features/settings/components';
 import { useGoapEngine } from '../features/generation/hooks';
 import { Settings, Loader2 } from 'lucide-react';
 import { db } from '../features/projects/services';
+import { createChapter } from '../shared/utils';
 
 // --- Initial Data ---
 
@@ -30,7 +31,24 @@ const INITIAL_PROJECT: Project = {
   targetWordCount: 50000,
   settings: {
     enableDropCaps: true
-  }
+  },
+  genre: [],
+  targetAudience: 'adult',
+  contentWarnings: [],
+  keywords: [],
+  synopsis: '',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  authors: [],
+  analytics: {
+    totalWordCount: 0,
+    averageChapterLength: 0,
+    estimatedReadingTime: 0,
+    generationCost: 0,
+    editingRounds: 0
+  },
+  version: '1.0.0',
+  changeLog: []
 };
 
 type ViewMode = 'dashboard' | 'projects' | 'settings';
@@ -62,6 +80,7 @@ const App: React.FC = () => {
        }, 2000); // Debounced save
        return () => clearTimeout(saveTimer);
     }
+    return undefined;
   }, [project, isLoading]);
 
   const handleCreateProject = (title: string, style: string, idea: string, targetWordCount: number) => {
@@ -125,18 +144,18 @@ const App: React.FC = () => {
 
   const handleAddChapter = () => {
     setProject(prev => {
-        const nextIndex = prev.chapters.length > 0 
-            ? Math.max(...prev.chapters.map(c => c.orderIndex)) + 1 
+        const nextIndex = prev.chapters.length > 0
+            ? Math.max(...prev.chapters.map(c => c.orderIndex)) + 1
             : 1;
-        
-        const newChapter: Chapter = {
+
+        const newChapter = createChapter({
             id: `${prev.id}_ch_manual_${Date.now()}`,
             orderIndex: nextIndex,
             title: `Chapter ${nextIndex}`,
             summary: '',
             content: '',
             status: ChapterStatus.PENDING
-        };
+        });
 
         const updatedChapters = [...prev.chapters, newChapter];
         return {

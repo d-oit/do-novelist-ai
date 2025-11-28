@@ -49,7 +49,7 @@ const ProjectStats: React.FC<ProjectStatsProps> = ({ project }) => {
                 contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f1f5f9', fontSize: '12px' }}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                {data.map((entry, index) => (
+                {data.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Bar>

@@ -42,8 +42,10 @@ export const ProjectCreationSchema = z.object({
   idea: z.string().min(10, 'Idea must be at least 10 characters').max(5000),
   style: WritingStyleSchema,
   targetWordCount: z.number().min(1000).max(500000).optional(),
-  genre: z.string().optional(),
+  genre: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
+  language: z.string().optional(),
+  targetAudience: z.string().optional()
 });
 
 export type ProjectCreationData = z.infer<typeof ProjectCreationSchema>;
@@ -51,11 +53,13 @@ export type ProjectCreationData = z.infer<typeof ProjectCreationSchema>;
 /**
  * Project update data
  */
+import type { WritingStyle, PublishStatus } from '../../../types';
+
 export interface ProjectUpdateData {
   title?: string;
   idea?: string;
-  style?: string;
-  status?: string;
+  style?: WritingStyle;
+  status?: PublishStatus;
   lastOpenedAt?: number;
 }
 

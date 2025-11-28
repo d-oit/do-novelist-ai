@@ -16,18 +16,32 @@ import {
     polishDialogue
 } from '../gemini';
 
-// Mock @google/genai
-const mockGenerateContent = vi.fn();
-const mockGenerateImages = vi.fn();
+// Mock @google/genai - use vi.hoisted() to ensure mocks are available during module hoisting
+const { mockGenerateContent, mockGenerateImages, MockGoogleGenAI } = vi.hoisted(() => {
+    const mockGenerateContent = vi.fn();
+    const mockGenerateImages = vi.fn();
+
+    class MockGoogleGenAI {
+        models = {
+            generateContent: mockGenerateContent,
+            generateImages: mockGenerateImages
+        };
+
+        constructor(_config?: any) {
+            // Mock constructor
+        }
+    }
+
+    return {
+        mockGenerateContent,
+        mockGenerateImages,
+        MockGoogleGenAI
+    };
+});
 
 vi.mock('@google/genai', () => {
     return {
-        GoogleGenAI: vi.fn().mockImplementation(() => ({
-            models: {
-                generateContent: mockGenerateContent,
-                generateImages: mockGenerateImages
-            }
-        })),
+        GoogleGenAI: MockGoogleGenAI,
         Type: {
             OBJECT: 'OBJECT',
             STRING: 'STRING',

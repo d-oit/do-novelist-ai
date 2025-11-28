@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { generateCoverImage } from '../services/geminiService';
+import { generateCoverImage } from '../../generation/services/geminiService';
 import { Project } from '@shared/types';
 import { Image, Wand2, Loader2, RefreshCcw, Download } from 'lucide-react';
 

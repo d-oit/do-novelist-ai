@@ -18,6 +18,8 @@ export type {
   EngagementMetrics,
   PublishingGoals,
   ReaderInsights,
+  ReaderEngagement,
+  PublishingInsights,
   PublishingCampaign,
   PublishingTrends,
   PublishingAlert,
@@ -27,29 +29,10 @@ export type {
 
 // Type aliases for backward compatibility
 export type { EngagementMetrics as PublishingAnalytics } from '../features/publishing/types';
-export type { ReaderInsights as PublishingInsights } from '../features/publishing/types';
-export type { EngagementMetrics as ReaderEngagement } from '../features/publishing/types';
 
-// Legacy enum exports for backward compatibility
-export enum AgentMode {
-  SINGLE = 'SINGLE',
-  PARALLEL = 'PARALLEL',
-  HYBRID = 'HYBRID',
-  SWARM = 'SWARM'
-}
-
-export const ChapterStatus = {
-  PENDING: 'pending',
-  DRAFTING: 'drafting',
-  REVIEW: 'review',
-  COMPLETE: 'complete'
-} as const;
-
-export type ChapterStatusType = typeof ChapterStatus[keyof typeof ChapterStatus];
-
-export enum PublishStatus {
-  DRAFT = 'Draft',
-  EDITING = 'Editing',
-  REVIEW = 'Review',
-  PUBLISHED = 'Published'
-}
+// Legacy enum exports - import from root types.ts
+export {
+  AgentMode,
+  ChapterStatus,
+  PublishStatus
+} from '../../types';

@@ -296,3 +296,68 @@ export interface PublishingExport {
   sections: Array<'overview' | 'engagement' | 'feedback' | 'revenue' | 'insights'>;
   publicationIds: string[];
 }
+
+/**
+ * Publishing Analytics
+ * Aggregated analytics data for overall publishing performance
+ */
+export interface PublishingAnalytics {
+  views: number;
+  uniqueVisitors: number;
+  downloads: number;
+  bookmarks: number;
+  shares: number;
+  rating: {
+    average: number;
+    count: number;
+  };
+  revenue?: {
+    total: number;
+    currency: string;
+    salesCount: number;
+  };
+  lastUpdated: Date;
+}
+/**
+ * Reader Engagement Metrics
+ * Tracks real-time engagement of readers with the published work
+ */
+export interface ReaderEngagement {
+  publicationId: string;
+  totalEngagements: number;
+  uniqueReaders: number;
+  averageSessionDuration: number; // in minutes
+  averageReadingTime: number; // in minutes
+  completionRate: number; // percentage
+  bounceRate: number; // percentage
+  returnVisitorRate: number; // percentage
+  socialEngagement: {
+    shares: number;
+    discussions: number;
+    fanArt: number;
+    communityPosts: number;
+  };
+  lastUpdated: Date;
+}
+
+/**
+ * Publishing Insights
+ * Comprehensive insights for the published work's performance
+ */
+export interface PublishingInsights {
+  publicationId: string;
+  overallSentiment: 'positive' | 'neutral' | 'negative';
+  engagementLevel: 'high' | 'medium' | 'low';
+  readabilityScore: number; // 0-100
+  recommendationRate: number; // percentage
+  competitorRanking?: number;
+  trendingTopics: string[];
+  insights: string[];
+  audienceProfile: {
+    primaryDemographic: string;
+    topCountries: string[];
+    peakReadingTimes: string[];
+    averageSessionDuration: number;
+  };
+  lastAnalyzed: Date;
+}

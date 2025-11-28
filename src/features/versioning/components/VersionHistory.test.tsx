@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import VersionHistory from './VersionHistory';
 import { useVersioning } from '../hooks/useVersioning';
 import { Chapter, ChapterStatus } from '../../../types';
+import { createChapter } from '../../../shared/utils';
 
 // Mock UI components to avoid import issues
 vi.mock('../../../components/ui/Button', () => ({
@@ -33,14 +34,14 @@ vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => children,
 }));
 
-const mockChapter: Chapter = {
+const mockChapter: Chapter = createChapter({
   id: 'test-chapter',
   title: 'Test Chapter',
   summary: 'A test chapter for version history',
   content: 'This is the content of the test chapter.',
   status: ChapterStatus.DRAFTING,
-  orderIndex: 1,
-};
+  orderIndex: 1
+});
 
 const mockVersions = [
   {
@@ -102,6 +103,10 @@ describe('VersionHistory', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseVersioning.mockReturnValue(mockVersioningHook);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('renders version history with versions list', () => {
@@ -203,12 +208,21 @@ describe('VersionHistory', () => {
     mockVersioningHook.exportVersionHistory.mockResolvedValue(mockExportData);
 
     // Mock URL.createObjectURL
+    const originalCreateObjectURL = global.URL.createObjectURL;
+    const originalRevokeObjectURL = global.URL.revokeObjectURL;
     global.URL.createObjectURL = vi.fn(() => 'mocked-url');
     global.URL.revokeObjectURL = vi.fn();
-    
-    // Mock createElement and click
-    const mockAnchor = { click: vi.fn(), href: '', download: '' };
-    vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor as any);
+
+    // Mock createElement to return a proper anchor element
+    const originalCreateElement = document.createElement.bind(document);
+    const mockAnchor = originalCreateElement('a');
+    mockAnchor.click = vi.fn();
+    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+      if (tagName === 'a') {
+        return mockAnchor;
+      }
+      return originalCreateElement(tagName);
+    });
 
     render(
       <VersionHistory
@@ -227,6 +241,10 @@ describe('VersionHistory', () => {
         'json'
       );
     });
+
+    // Restore original functions
+    global.URL.createObjectURL = originalCreateObjectURL;
+    global.URL.revokeObjectURL = originalRevokeObjectURL;
   });
 
   it('calls onClose when close button is clicked', () => {

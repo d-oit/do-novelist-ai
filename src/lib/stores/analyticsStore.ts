@@ -151,7 +151,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
                 },
 
                 // Track Progress
-                trackProgress: async (projectId: string, wordsWritten: number, chapterIds: string[]) => {
+                trackProgress: async (_projectId: string, wordsWritten: number, chapterIds: string[]) => {
                     const { currentSession } = get();
                     if (!currentSession) return;
 
@@ -159,7 +159,11 @@ export const useAnalyticsStore = create<AnalyticsState>()(
                         await analyticsService.trackProgress(currentSession.id, {
                             wordsWritten,
                             chapterIds,
-                            timeSpent: Date.now() - currentSession.startTime
+                            timeSpent: typeof currentSession.startTime === 'number'
+                                ? Date.now() - currentSession.startTime
+                                : currentSession.startTime instanceof Date
+                                    ? Date.now() - currentSession.startTime.getTime()
+                                    : 0
                         });
 
                         // Update current session locally
@@ -259,9 +263,9 @@ export const useAnalyticsStore = create<AnalyticsState>()(
                         d.setDate(d.getDate() + i);
                         const dateStr = d.toISOString().split('T')[0];
                         data.push({
-                            date: dateStr,
+                            date: dateStr || '',
                             value: Math.floor(Math.random() * 50) + 10,
-                            label: d.toLocaleDateString('en-US', { weekday: 'short' })
+                            label: d.toLocaleDateString('en-US', { weekday: 'short' }) || ''
                         });
                     }
                     set({ productivityChart: data });

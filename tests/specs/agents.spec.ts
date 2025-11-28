@@ -9,7 +9,7 @@ test.describe('Feature: Creative Agents', () => {
     await page.goto('/');
 
     // Open the wizard by clicking the "New" button
-    await page.getByRole('button', { name: 'New' }).click();
+    await page.getByTestId('nav-new-project').click();
     await expect(page.getByTestId('project-wizard-overlay')).toBeVisible();
 
     // Setup: Create a fresh project
@@ -21,11 +21,11 @@ test.describe('Feature: Creative Agents', () => {
     await page.getByTestId('wizard-idea-input').fill('A thrilling sci-fi adventure in deep space');
 
     // Submit the wizard
-    await page.getByRole('button', { name: 'Initialize Project' }).click();
+    await page.getByTestId('wizard-submit-btn').click();
     await expect(page.getByTestId('project-wizard-overlay')).toBeHidden({ timeout: 10000 });
 
     // Navigate to Dashboard view
-    await page.getByRole('menuitem', { name: 'Navigate to Dashboard' }).click();
+    await page.getByTestId('nav-dashboard').click();
     await page.waitForTimeout(1000); // Give the dashboard time to render
 
     // Wait for dashboard to load - look for action cards instead

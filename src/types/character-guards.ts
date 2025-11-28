@@ -24,11 +24,14 @@ import {
   type UpdateCharacter,
   type CharacterSearch
 } from './character-schemas';
-import { type ProjectId, isProjectId } from './guards';
+import { type ProjectId } from './schemas';
 
 // =============================================================================
 // BRANDED TYPE CREATION
 // =============================================================================
+
+// Export ProjectId from schemas for use in character-related functionality
+export type { ProjectId } from './schemas';
 
 export type CharacterId = string & { __brand: 'CharacterId' };
 
@@ -36,7 +39,7 @@ export function isCharacterId(value: unknown): value is CharacterId {
   return typeof value === 'string' && /^char_\w+_\d+$/.test(value);
 }
 
-export function createCharacterId(projectId: ProjectId, name?: string, timestamp = Date.now()): CharacterId {
+export function createCharacterId(_projectId: ProjectId, name?: string, timestamp = Date.now()): CharacterId {
   const safeName = name ? name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'char';
   return `char_${safeName}_${timestamp}` as CharacterId;
 }

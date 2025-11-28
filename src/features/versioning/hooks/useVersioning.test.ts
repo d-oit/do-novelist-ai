@@ -3,19 +3,20 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useVersioning } from './useVersioning';
 import { versioningService } from '../services/versioningService';
 import { Chapter, ChapterStatus } from '../../../types';
+import { createChapter } from '../../../shared/utils';
 
 // Mock the versioning service
 vi.mock('../services/versioningService');
 const mockVersioningService = vi.mocked(versioningService);
 
-const mockChapter: Chapter = {
+const mockChapter: Chapter = createChapter({
   id: 'test-chapter',
   title: 'Test Chapter',
   summary: 'A test chapter',
   content: 'This is test content.',
   status: ChapterStatus.DRAFTING,
-  orderIndex: 1,
-};
+  orderIndex: 1
+});
 
 const mockVersion = {
   id: 'version-1',
@@ -146,13 +147,13 @@ describe('useVersioning', () => {
     // Filter by manual versions
     const manualVersions = result.current.getFilteredVersions('manual', 'newest');
     expect(manualVersions).toHaveLength(2);
-    expect(manualVersions[0].id).toBe('v3'); // newest first
-    expect(manualVersions[1].id).toBe('v1');
+    expect(manualVersions[0]?.id).toBe('v3'); // newest first
+    expect(manualVersions[1]?.id).toBe('v1');
 
     // Filter by auto versions
     const autoVersions = result.current.getFilteredVersions('auto', 'newest');
     expect(autoVersions).toHaveLength(1);
-    expect(autoVersions[0].id).toBe('v2');
+    expect(autoVersions[0]?.id).toBe('v2');
   });
 
   it('searches versions by query', async () => {
@@ -172,7 +173,7 @@ describe('useVersioning', () => {
 
     const searchResults = result.current.searchVersions('setup');
     expect(searchResults).toHaveLength(1);
-    expect(searchResults[0].id).toBe('v1');
+    expect(searchResults[0]?.id).toBe('v1');
   });
 
   it('handles errors gracefully', async () => {

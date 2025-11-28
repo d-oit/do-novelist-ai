@@ -8,7 +8,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { projectService } from '../services/projectService';
 import type { Project } from '../../../types';
-import { ChapterStatus } from '../../../types';
+import { ChapterStatus, PublishStatus } from '../../../types';
 import type { ProjectFilters, ProjectStats, ProjectCreationData, ProjectUpdateData } from '../types';
 
 interface ProjectsState {
@@ -81,8 +81,8 @@ export const useProjects = create<ProjectsState>()(
           const { projects } = get();
           const stats: ProjectStats = {
             totalProjects: projects.length,
-            activeProjects: projects.filter(p => p.status === 'Editing' || p.status === 'Draft').length,
-            completedProjects: projects.filter(p => p.status === 'Published').length,
+            activeProjects: projects.filter(p => p.status === PublishStatus.EDITING || p.status === PublishStatus.DRAFT).length,
+            completedProjects: projects.filter(p => p.status === PublishStatus.PUBLISHED).length,
             totalWords: projects.reduce((sum, p) =>
               sum + p.chapters.reduce((chSum, ch) => chSum + ch.content.split(' ').length, 0), 0
             ),
@@ -128,10 +128,10 @@ export const useProjects = create<ProjectsState>()(
           await projectService.update(id, data);
           set(state => ({
             projects: state.projects.map(p =>
-              p.id === id ? { ...p, ...data, updatedAt: Date.now() } : p
+              p.id === id ? { ...p, ...data, updatedAt: Date.now() } as unknown as Project : p
             ),
             selectedProject: state.selectedProject?.id === id
-              ? { ...state.selectedProject, ...data, updatedAt: Date.now() }
+              ? { ...state.selectedProject, ...data, updatedAt: Date.now() } as unknown as Project
               : state.selectedProject,
             isLoading: false
           }));
@@ -204,7 +204,15 @@ export const selectFilteredProjects = (state: ProjectsState): Project[] => {
 
   // Apply status filter
   if (state.filters.status !== 'all') {
-    filtered = filtered.filter(p => p.status === state.filters.status.toUpperCase());
+    const statusMap: Record<string, PublishStatus> = {
+      'active': PublishStatus.EDITING,
+      'draft': PublishStatus.DRAFT,
+      'completed': PublishStatus.PUBLISHED,
+    };
+    const targetStatus = statusMap[state.filters.status];
+    if (targetStatus) {
+      filtered = filtered.filter(p => p.status === targetStatus);
+    }
   }
 
   // Apply sorting

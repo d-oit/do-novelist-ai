@@ -4,7 +4,8 @@
  * Handles IndexedDB persistence for projects
  */
 
-import type { Project } from '../../../types';
+import type { Project, Language } from '../../../types';
+import { PublishStatus } from '../../../types';
 import type { ProjectCreationData, ProjectUpdateData } from '../types';
 
 class ProjectService {
@@ -83,10 +84,9 @@ class ProjectService {
       id: crypto.randomUUID(),
       title: data.title,
       idea: data.idea,
-      style: data.style as any,
-      status: 'Draft' as const,
+      style: data.style,
+      status: PublishStatus.DRAFT,
       chapters: [],
-      outline: '',
       coverImage: '',
       createdAt: new Date(now),
       updatedAt: new Date(now),
@@ -104,13 +104,26 @@ class ProjectService {
         targetAudienceDefined: false
       },
       isGenerating: false,
+      language: (data.language || 'en') as Language,
+      targetWordCount: data.targetWordCount || 50000,
+      settings: {
+        enableDropCaps: true
+      },
+      genre: data.genre || [],
+      targetAudience: (data.targetAudience || 'adult') as 'children' | 'young_adult' | 'adult' | 'all_ages',
+      contentWarnings: [],
+      keywords: [],
+      synopsis: '',
+      authors: [],
       analytics: {
         totalWordCount: 0,
         averageChapterLength: 0,
         estimatedReadingTime: 0,
         generationCost: 0,
         editingRounds: 0
-      }
+      },
+      version: '1.0.0',
+      changeLog: []
     };
 
     return new Promise((resolve, reject) => {
@@ -176,7 +189,7 @@ class ProjectService {
       const transaction = this.db!.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const index = store.index('status');
-      const request = index.getAll(status.toUpperCase());
+      const request = index.getAll(status);
 
       request.onsuccess = () => resolve(request.result || []);
       request.onerror = () => reject(request.error);

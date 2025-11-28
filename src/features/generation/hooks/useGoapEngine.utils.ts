@@ -4,6 +4,7 @@ import {
   generateOutline,
   writeChapterContent,
 } from '../services/geminiService';
+import { createChapter } from '@shared/utils';
 
 /**
  * Validates if an action can be executed based on project state
@@ -58,7 +59,7 @@ export function preprocessAction(
     processedAction.pendingChapters = pendingChapters;
 
     // Set the first pending chapter as selected for UI focus
-    if (pendingChapters.length > 0) {
+    if (pendingChapters.length > 0 && pendingChapters[0]) {
       setSelectedChapterId(pendingChapters[0].id);
     }
   }
@@ -125,7 +126,7 @@ export function postprocessAction(
  * @param addLog - Logging function
  */
 export function logActionResult(
-  action: AgentAction,
+  _action: AgentAction,
   actionResult: ActionResult,
   addLog: (agentName: string, message: string, type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug') => void
 ): void {
@@ -227,12 +228,11 @@ function handleCreateOutlinePostprocess(
   const result = actionResult.data;
 
   // FIX: Unique Chapter IDs based on Project ID to prevent collisions in DB
-  const newChapters: Chapter[] = result.chapters.map((c: any) => ({
+  const newChapters: Chapter[] = result.chapters.map((c: any) => createChapter({
     id: `${project.id}_ch_${c.orderIndex}`,
     orderIndex: c.orderIndex,
     title: c.title,
     summary: c.summary,
-    content: '',
     status: ChapterStatus.PENDING,
   }));
 
@@ -253,9 +253,9 @@ function handleCreateOutlinePostprocess(
  */
 function handleWriteChaptersPostprocess(
   actionResult: ActionResult,
-  project: Project,
+  _project: Project,
   setProject: React.Dispatch<React.SetStateAction<Project>>,
-  pendingChapters: Chapter[]
+  _pendingChapters: Chapter[]
 ): void {
   const results = actionResult.data;
 
@@ -263,19 +263,34 @@ function handleWriteChaptersPostprocess(
   const successfulChapters = results
     .filter(
       (
-        result
+        result: PromiseSettledResult<{
+          chapterId: string;
+          content: string;
+          success: boolean;
+        }>
       ): result is PromiseFulfilledResult<{
         chapterId: string;
         content: string;
         success: true;
       }> => result.status === 'fulfilled' && result.value.success
     )
-    .map(result => result.value);
+    .map(
+      (result: PromiseFulfilledResult<{
+        chapterId: string;
+        content: string;
+        success: true;
+      }>) => result.value
+    );
 
   const failedChapters = results
     .filter(
       (
-        result
+        result: PromiseSettledResult<{
+          chapterId: string;
+          content: string;
+          success: boolean;
+          error?: Error;
+        }>
       ): result is PromiseFulfilledResult<{
         chapterId: string;
         content: string;
@@ -283,18 +298,34 @@ function handleWriteChaptersPostprocess(
         error: Error;
       }> => result.status === 'fulfilled' && !result.value.success
     )
-    .map(result => result.value);
+    .map(
+      (result: PromiseFulfilledResult<{
+        chapterId: string;
+        content: string;
+        success: false;
+        error: Error;
+      }>) => result.value
+    );
 
   // Update project with successful chapters
   setProject(prev => ({
     ...prev,
-    chapters: prev.chapters.map(c => {
-      const successfulResult = successfulChapters.find(r => r.chapterId === c.id);
+    chapters: prev.chapters.map((c: Chapter) => {
+      const successfulResult = successfulChapters.find((r: {
+        chapterId: string;
+        content: string;
+        success: true;
+      }) => r.chapterId === c.id);
       if (successfulResult) {
         return { ...c, content: successfulResult.content, status: ChapterStatus.COMPLETE };
       }
       // Reset failed chapters back to pending
-      const failedResult = failedChapters.find(r => r.chapterId === c.id);
+      const failedResult = failedChapters.find((r: {
+        chapterId: string;
+        content: string;
+        success: false;
+        error: Error;
+      }) => r.chapterId === c.id);
       if (failedResult) {
         return { ...c, status: ChapterStatus.PENDING };
       }
@@ -306,8 +337,6 @@ function handleWriteChaptersPostprocess(
     },
   }));
 
-  // Log summary
-  const totalProcessed = successfulChapters.length + failedChapters.length;
   // Note: The addLog function needs to be called from the main hook context
   // This is a limitation - we'll return the summary for logging
 }
@@ -321,13 +350,17 @@ function handleWriteChaptersPostprocess(
  */
 export function createActionSummary(
   action: AgentAction,
-  pendingChapters: Chapter[],
+  _pendingChapters: Chapter[],
   actionResult: ActionResult
 ): { message: string; type: 'success' | 'warning' } {
   if (action.name === 'write_chapter_parallel' && actionResult.data) {
     const results = actionResult.data;
     const successfulChapters = results.filter(
-      (r: PromiseFulfilledResult<any>) => r.status === 'fulfilled' && r.value.success
+      (r: PromiseFulfilledResult<{
+        chapterId: string;
+        content: string;
+        success: boolean;
+      }>) => r.status === 'fulfilled' && r.value.success
     ).length;
     const totalProcessed = results.length;
 

@@ -164,7 +164,7 @@ Current State:
 **Output:**
 ```markdown
 ## Gap Analysis Report
-- **Untested Core Libraries:** db.ts, gemini.ts, epub.ts, cache.ts
+- **Untested Core Libraries:** db.ts, aiService.ts (AI SDK Gateway), epub.ts, cache.ts
 - **Untested Features:** useGoapEngine hook, versioningService
 - **Component Coverage:** 30% (missing: ProjectDashboard, GoapVisualizer, AgentConsole)
 - **E2E Coverage:** Navigation tests (flaky), Agent tests (failing)
@@ -227,7 +227,7 @@ Current State:
 
 ### tests/specs/agents.spec.ts
 - **Issue:** Dialogue polishing test timeout
-- **Root Cause:** Insufficient wait time for Gemini mock response
+- **Root Cause:** Insufficient wait time for AI service mock response (AI SDK Gateway)
 - **Fix Plan:** Add explicit wait for log entry before content check
 
 ### tests/specs/navigation.spec.ts
@@ -266,7 +266,7 @@ Current State:
 src/
 ├── lib/__tests__/
 │   ├── db.test.ts (NEW)
-│   ├── gemini.test.ts (NEW)
+│   ├── aiService.test.ts (NEW - AI SDK Gateway with database-driven provider config)
 │   ├── epub.test.ts (NEW)
 │   ├── cache.test.ts (NEW)
 │   └── validation.test.ts (EXISTS)
@@ -286,8 +286,8 @@ src/
 #### Pattern 1: GOAP Engine Testing
 ```typescript
 describe('useGoapEngine', () => {
-  // Mock all Gemini API calls
-  vi.mock('../../../lib/gemini');
+  // Mock all AI service calls (AI SDK Gateway)
+  vi.mock('../../../lib/aiService');
   
   describe('Action Availability', () => {
     // Test precondition checking
@@ -306,18 +306,19 @@ describe('useGoapEngine', () => {
 
 #### Pattern 2: API Mocking
 ```typescript
-// Centralized mock setup
-vi.mock('../../lib/gemini', () => ({
+// Centralized mock setup for AI SDK Gateway
+vi.mock('../../lib/aiService', () => ({
   generateOutline: vi.fn().mockResolvedValue({ chapters: [...] }),
   writeChapterContent: vi.fn().mockResolvedValue('# Content'),
   // ... all other methods
+  // Provider/model config comes from database
 }));
 ```
 
 #### Pattern 3: E2E Test Isolation
 ```typescript
 test.beforeEach(async ({ page }) => {
-  await setupGeminiMock(page);
+  await setupAIServiceMock(page);
   await page.goto('/');
   // Fresh state for each test
 });
@@ -367,27 +368,37 @@ Test Cases:
    - Should retry on transaction conflicts
    - Should validate data before saving
 
-### lib/gemini.test.ts (Priority: CRITICAL)
-**Estimated Tests:** 20
+### lib/aiService.test.ts (Priority: CRITICAL)
+**Purpose:** Test AI SDK Gateway integration with database-driven provider/model configuration
+**Estimated Tests:** 25
 **Coverage Target:** 90%
 
 Test Cases:
-1. API mocking
-   - Should mock all 9 agent functions
-   - Should handle API errors
-   - Should respect rate limits
+1. Provider Configuration (Database-driven)
+   - Should load provider settings from database (OpenAI, Anthropic, Google, etc.)
+   - Should load model settings from database
+   - Should switch providers based on database config
+   - Should handle missing/invalid provider config
 
-2. generateOutline
+2. AI Gateway Routing
+   - Should route to correct provider via AI Gateway
+   - Should handle provider fallback
+   - Should respect rate limits per provider
+   - Should handle API errors gracefully
+
+3. generateOutline
    - Should return chapters with correct structure
    - Should handle style variations
    - Should validate response format
+   - Should work with any configured provider
 
-3. writeChapterContent
+4. writeChapterContent
    - Should generate content for given chapter
    - Should consider previous chapter summary
    - Should apply style guidelines
+   - Should respect provider-specific parameters
 
-4. All other agent functions (7 tests each)
+5. All other agent functions (7 tests each with provider flexibility)
 
 ### features/editor/hooks/useGoapEngine.test.ts (Priority: CRITICAL)
 **Estimated Tests:** 35

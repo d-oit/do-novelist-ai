@@ -1,6 +1,6 @@
 
 import { createClient, Client } from "@libsql/client/web";
-import { Project, Chapter, PublishStatus, ProjectSettings } from "@shared/types";
+import { Project, PublishStatus } from "@shared/types";
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';
@@ -168,24 +168,49 @@ export const db = {
         const cRes = await client.execute({ sql: "SELECT * FROM chapters WHERE project_id = ? ORDER BY order_index", args: [projectId] });
         
         const loadedProject: Project = {
-          id: pRow.id as string,
-          title: pRow.title as string,
-          idea: pRow.idea as string,
-          style: pRow.style as string,
-          coverImage: pRow.cover_image as string,
-          worldState: typeof pRow.world_state === 'string' ? JSON.parse(pRow.world_state) : pRow.world_state,
+          id: pRow?.id as string,
+          title: pRow?.title as string,
+          idea: pRow?.idea as string,
+          style: pRow?.style as any,
+          coverImage: pRow?.cover_image as string,
+          worldState: typeof pRow?.world_state === 'string' ? JSON.parse(pRow.world_state as string) : pRow?.world_state,
           isGenerating: false,
-          status: (pRow.status as PublishStatus) || PublishStatus.DRAFT,
-          language: (pRow.language as string) || 'en',
-          targetWordCount: (pRow.target_word_count as number) || 50000,
-          settings: typeof pRow.settings === 'string' ? JSON.parse(pRow.settings) : (pRow.settings || {}),
+          status: (pRow?.status as PublishStatus) || PublishStatus.DRAFT,
+          language: (pRow?.language as string) || 'en',
+          targetWordCount: (pRow?.target_word_count as number) || 50000,
+          settings: typeof pRow?.settings === 'string' ? JSON.parse(pRow.settings as string) : (pRow?.settings || {}),
+          genre: [],
+          targetAudience: 'adult',
+          contentWarnings: [],
+          keywords: [],
+          synopsis: '',
+          authors: [],
+          analytics: {
+            totalWordCount: 0,
+            averageChapterLength: 0,
+            estimatedReadingTime: 0,
+            generationCost: 0,
+            editingRounds: 0
+          },
+          version: '1.0.0',
+          changeLog: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
           chapters: cRes.rows.map(r => ({
             id: r.id as string,
             orderIndex: r.order_index as number,
             title: r.title as string,
             summary: r.summary as string,
             content: r.content as string,
-            status: r.status as any
+            status: r.status as any,
+            wordCount: 0,
+            characterCount: 0,
+            estimatedReadingTime: 0,
+            tags: [],
+            notes: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            illustration: undefined
           }))
         };
         console.log(`[DB] Cloud load success: ${loadedProject.title}`);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Project, AgentAction, AgentMode, LogEntry, Chapter, ChapterStatus, RefineOptions } from '@shared/types';
 import { generateOutline, writeChapterContent, refineChapterContent, analyzeConsistency, continueWriting } from '../services/geminiService';
+import { createChapter } from '@shared/utils';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {
@@ -71,12 +72,11 @@ export const useGoapEngine = (
         addLog('Architect', `Outline generated with ${result.chapters.length} chapters.`, 'success');
 
         // FIX: Unique Chapter IDs based on Project ID to prevent collisions in DB
-        const newChapters: Chapter[] = result.chapters.map((c: any) => ({
+        const newChapters: Chapter[] = result.chapters.map((c: any) => createChapter({
           id: `${project.id}_ch_${c.orderIndex}`,
           orderIndex: c.orderIndex,
           title: c.title,
           summary: c.summary,
-          content: '',
           status: ChapterStatus.PENDING
         }));
 
@@ -109,7 +109,7 @@ export const useGoapEngine = (
         addLog('Writer', `Drafting "${pendingChapter.title}"...`, 'info');
 
         const prevIndex = pendingChapter.orderIndex - 2;
-        const prevSummary = prevIndex >= 0 ? project.chapters[prevIndex].summary : undefined;
+        const prevSummary = prevIndex >= 0 ? project.chapters[prevIndex]?.summary : undefined;
         const content = await writeChapterContent(pendingChapter.title, pendingChapter.summary, project.style, prevSummary);
 
         addLog('Writer', `Chapter ${pendingChapter.orderIndex} completed (${content.length} chars).`, 'success');

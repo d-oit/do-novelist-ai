@@ -211,7 +211,7 @@ function getCategoryDefaults(category: SettingsCategory): Partial<Settings> {
  * Selector: Get settings for a specific category
  */
 export const selectCategorySettings = (
-  state: SettingsState,
+  _state: SettingsState,
   category: SettingsCategory
 ): Partial<Settings> => {
   return getCategoryDefaults(category);

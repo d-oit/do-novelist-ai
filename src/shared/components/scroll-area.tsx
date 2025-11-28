@@ -13,4 +13,5 @@ const ScrollArea: React.FC<ScrollAreaProps> = ({ className, children }) => {
   );
 };
 
+export default ScrollArea;
 export { ScrollArea };
