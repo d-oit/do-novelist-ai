@@ -6,7 +6,8 @@
       "Bash(gh pr view:*)",
       "Bash(gh run view:*)",
       "Bash(git rm:*)",
-      "Bash(gh run list:*)"
+      "Bash(gh run list:*)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []
