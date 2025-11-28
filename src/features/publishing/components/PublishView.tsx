@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Project, PublishStatus, Chapter } from '@shared/types';
 import { generateEpub } from '../services/epubService';
 import { translateContent } from '../../generation/services/geminiService';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Download, Globe, Rocket, Target, Languages, Loader2, FileCheck } from 'lucide-react';
 
 interface PublishViewProps {

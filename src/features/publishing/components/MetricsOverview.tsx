@@ -12,11 +12,11 @@ import {
   Activity
 } from 'lucide-react';
 import MetricCard from '../../../components/ui/MetricCard';
-import type { PublishingAnalytics, ReaderEngagement } from '../types';
+import type { PublishingAnalytics, EngagementMetrics } from '../types';
 
 interface MetricsOverviewProps {
   analytics: PublishingAnalytics;
-  engagement: ReaderEngagement | null;
+  engagement: EngagementMetrics | null;
   averageRating: number;
 }
 
@@ -98,7 +98,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
             <MetricCard
               icon={<Target className="w-6 h-6" />}
               title="Completion Rate"
-              value={engagement.completionRate}
+              value={Math.round(engagement.completionRate)}
               format="percentage"
               change={-2.1}
               color="text-emerald-500"

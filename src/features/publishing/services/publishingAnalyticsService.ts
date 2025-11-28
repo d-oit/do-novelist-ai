@@ -188,7 +188,7 @@ class PublishingAnalyticsService {
   }
 
   // Analytics Data Retrieval
-  async getPublicationAnalytics(_publicationId: string): Promise<PlatformAnalytics> {
+  async getPublicationAnalytics(publicationId: string): Promise<PlatformAnalytics> {
     const publication = await this.getPublication(publicationId);
     if (!publication) throw new Error('Publication not found');
 
@@ -286,7 +286,7 @@ class PublishingAnalyticsService {
     });
   }
 
-  async getReaderInsights(_publicationId: string): Promise<ReaderInsights> {
+  async getReaderInsights(publicationId: string): Promise<ReaderInsights> {
     const analytics = await this.getPublicationAnalytics(publicationId);
     const engagement = await this.getEngagementMetrics(publicationId, {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
@@ -362,7 +362,7 @@ class PublishingAnalyticsService {
   }
 
   // Trends and Predictions
-  async getPublishingTrends(publicationId: string, days: number = 30): Promise<PublishingTrends> {
+  async getPublishingTrends(_publicationId: string, days: number = 30): Promise<PublishingTrends> {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - days);
@@ -417,7 +417,12 @@ class PublishingAnalyticsService {
 
   // Data Export
   async exportPublishingAnalytics(publicationIds: string[], format: 'json' | 'csv' | 'xlsx'): Promise<string> {
-    const exportData = {
+    const exportData: {
+      publications: Publication[];
+      analytics: PlatformAnalytics[];
+      feedback: ReaderFeedback[];
+      exportedAt: string;
+    } = {
       publications: [],
       analytics: [],
       feedback: [],
@@ -630,8 +635,8 @@ class PublishingAnalyticsService {
   }
 
   private generateRecommendations(analytics: PlatformAnalytics, engagement: EngagementMetrics): Array<{ type: 'content' | 'marketing' | 'pricing' | 'timing'; priority: 'high' | 'medium' | 'low'; suggestion: string; expectedImpact: string }> {
-    const recommendations = [];
-    
+    const recommendations: Array<{ type: 'content' | 'marketing' | 'pricing' | 'timing'; priority: 'high' | 'medium' | 'low'; suggestion: string; expectedImpact: string }> = [];
+
     if (engagement.completionRate < 0.5) {
       recommendations.push({
         type: 'content',
@@ -640,7 +645,7 @@ class PublishingAnalyticsService {
         expectedImpact: 'Could increase completion rate by 15-25%',
       });
     }
-    
+
     if (analytics.rating.average < 4.0) {
       recommendations.push({
         type: 'content',
@@ -649,18 +654,18 @@ class PublishingAnalyticsService {
         expectedImpact: 'Could improve rating by 0.3-0.5 stars',
       });
     }
-    
+
     return recommendations;
   }
 
   private generateTrendMetrics(days: number): Array<{ date: string; views: number; engagement: number; rating: number }> {
-    const metrics = [];
+    const metrics: Array<{ date: string; views: number; engagement: number; rating: number }> = [];
     for (let i = 0; i < days; i++) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      
+
       metrics.push({
-        date: date.toISOString().split('T')[0],
+        date: date.toISOString().split('T')[0]!,
         views: Math.floor(Math.random() * 200) + 50,
         engagement: Math.random() * 100,
         rating: 3.5 + Math.random() * 1.5,
@@ -697,7 +702,7 @@ class PublishingAnalyticsService {
   /**
    * Generate publishing insights
    */
-  public async generateInsights(publicationId: string): Promise<any[]> {
+  public async generateInsights(_publicationId: string): Promise<any[]> {
     try {
       return [
         {
@@ -718,8 +723,17 @@ class PublishingAnalyticsService {
    */
   public async getPublications(projectId: string): Promise<Publication[]> {
     try {
-      const publications = this.getStoredData('publications', []) as Publication[];
-      return publications.filter(pub => pub.projectId === projectId);
+      if (!this.db) await this.init();
+
+      return new Promise((resolve, reject) => {
+        const transaction = this.db!.transaction(['publications'], 'readonly');
+        const store = transaction.objectStore('publications');
+        const index = store.index('projectId');
+        const request = index.getAll(projectId);
+
+        request.onsuccess = () => resolve(request.result as Publication[]);
+        request.onerror = () => reject(request.error);
+      });
     } catch (error) {
       console.error('Failed to get publications:', error);
       return [];

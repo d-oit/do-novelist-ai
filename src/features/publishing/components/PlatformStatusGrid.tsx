@@ -2,10 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { PieChart, MapPin, Calendar } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
-import type { PublishingInsights } from '../types';
+import type { ReaderInsights } from '../types';
 
 interface PlatformStatusGridProps {
-  insights: PublishingInsights | null;
+  insights: ReaderInsights | null;
 }
 
 export const PlatformStatusGrid: React.FC<PlatformStatusGridProps> = ({ insights }) => {
@@ -26,7 +26,7 @@ export const PlatformStatusGrid: React.FC<PlatformStatusGridProps> = ({ insights
         <Card className="p-4">
           <h4 className="font-medium mb-3">Top Countries</h4>
           <div className="space-y-2">
-            {insights.audienceProfile.topCountries.slice(0, 5).map((country, index) => (
+            {insights.audienceProfile.topCountries.slice(0, 5).map((country: string, index: number) => (
               <div key={country} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-muted-foreground" />
@@ -46,7 +46,7 @@ export const PlatformStatusGrid: React.FC<PlatformStatusGridProps> = ({ insights
         <Card className="p-4">
           <h4 className="font-medium mb-3">Peak Reading Times</h4>
           <div className="space-y-2">
-            {insights.audienceProfile.peakReadingTimes.map((time, _index) => (
+            {insights.audienceProfile.peakReadingTimes.map((time: string, _index: number) => (
               <div key={time} className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm">{time}</span>
