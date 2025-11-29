@@ -62,7 +62,6 @@ export default tseslint.config(
       },
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'no-console': 'off', // Allow console for development
       // Client-side security rules - less strict for development
       'security/detect-object-injection': 'off', // Too many false positives
@@ -81,7 +80,7 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       // Allow empty catch blocks for development
       'no-empty': 'off',
-      // Allow unused error variables
+      // Unused vars rule with comprehensive ignore patterns
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -100,8 +99,6 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-function-type': 'off',
       // Allow empty object types
       '@typescript-eslint/no-empty-object-type': 'off',
-      // Allow unused vars for development
-      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
   // Configuration for test files - more lenient for better performance
