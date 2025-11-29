@@ -14,7 +14,6 @@ const mockGetAll = vi.fn();
 const mockPut = vi.fn();
 const mockDelete = vi.fn();
 const mockCreateObjectStore = vi.fn();
-const mockCreateIndex = vi.fn();
 
 const mockDB = {
   close: mockClose,
@@ -30,7 +29,7 @@ const mockRequest = {
 };
 
 global.indexedDB = {
-  open: mockOpenDB.mockImplementation((name, version) => {
+  open: mockOpenDB.mockImplementation((_name, _version) => {
     setTimeout(() => {
       if (mockRequest.onsuccess) {
         mockRequest.onsuccess({ target: mockRequest });
@@ -91,8 +90,8 @@ describe('VersioningService', () => {
 
     // Setup get operation
     mockGet.mockImplementation((id) => {
-      const version = storage.versions.find((v) => v.id === id);
-      const request = createRequest(version || null);
+      const _version = storage.versions.find((v) => v.id === id);
+      const request = createRequest(_version || null);
       setTimeout(() => request.onsuccess?.({ target: request }), 0);
       return request;
     });
@@ -176,44 +175,45 @@ describe('VersioningService', () => {
   });
 
   describe('Version Creation', () => {
-    it('should save a manual version with message', async () => {
+    it('should save a manual _version with message', async () => {
       const message = 'First draft complete';
-      const version = await versioningService.saveVersion(testChapter, message, 'manual');
+      const _version = await versioningService.saveVersion(testChapter, message, 'manual');
 
-      expect(version).toBeDefined();
-      expect(version.id).toMatch(/^version_/);
-      expect(version.chapterId).toBe(testChapter.id);
-      expect(version.title).toBe(testChapter.title);
-      expect(version.content).toBe(testChapter.content);
-      expect(version.message).toBe(message);
-      expect(version.type).toBe('manual');
-      expect(version.timestamp).toBeInstanceOf(Date);
+      expect(_version).toBeDefined();
+      expect(_version.id).toMatch(/^version_/);
+      expect(_version.chapterId).toBe(testChapter.id);
+      expect(_version.title).toBe(testChapter.title);
+      expect(_version.content).toBe(testChapter.content);
+      expect(_version.message).toBe(message);
+      expect(_version.type).toBe('manual');
+      expect(_version.timestamp).toBeInstanceOf(Date);
     });
 
-    it('should save an auto version', async () => {
-      const version = await versioningService.saveVersion(testChapter, undefined, 'auto');
+    it('should save an auto _version', async () => {
+      const _version = await versioningService.saveVersion(testChapter, undefined, 'auto');
 
-      expect(version.type).toBe('auto');
-      expect(version.message).toContain('Auto-saved');
-      expect(version.message).toContain(testChapter.title);
+      expect(_version.type).toBe('auto');
+      expect(_version.message).toContain('Auto-saved');
+      expect(_version.message).toContain(testChapter.title);
     });
 
-    it('should save an AI-generated version', async () => {
-      const version = await versioningService.saveVersion(testChapter, undefined, 'ai-generated');
+    it('should save an AI-generated _version', async () => {
+      const _version = await versioningService.saveVersion(testChapter, undefined, 'ai-generated');
 
-      expect(version.type).toBe('ai-generated');
-      expect(version.message).toContain('AI generated');
-      expect(version.message).toContain(testChapter.title);
+      expect(_version.type).toBe('ai-generated');
+      expect(_version.message).toContain('AI generated');
+      expect(_version.message).toContain(testChapter.title);
     });
 
-    it('should save a restore version', async () => {
-      const version = await versioningService.saveVersion(testChapter, undefined, 'restore');
+    it('should save a restore _version', async () => {
+      const _version = await versioningService.saveVersion(testChapter, undefined, 'restore');
 
-      expect(version.type).toBe('restore');
-      expect(version.message).toContain('Restored version');
+      expect(_version.type).toBe('restore');
+      expect(_version.message).toContain('Restored version of:');
+      expect(_version.message).toContain(testChapter.title);
     });
 
-    it('should generate unique version IDs', async () => {
+    it('should generate unique _version IDs', async () => {
       const version1 = await versioningService.saveVersion(testChapter);
       const version2 = await versioningService.saveVersion(testChapter);
 
@@ -221,35 +221,35 @@ describe('VersioningService', () => {
     });
 
     it('should calculate word count correctly', async () => {
-      const version = await versioningService.saveVersion(testChapter);
+      const _version = await versioningService.saveVersion(testChapter);
 
-      expect(version.wordCount).toBeGreaterThan(0);
-      expect(version.wordCount).toBe(9); // "This is the initial content of the test chapter."
+      expect(_version.wordCount).toBeGreaterThan(0);
+      expect(_version.wordCount).toBe(9); // "This is the initial content of the test chapter."
     });
 
     it('should calculate character count correctly', async () => {
-      const version = await versioningService.saveVersion(testChapter);
+      const _version = await versioningService.saveVersion(testChapter);
 
-      expect(version.charCount).toBe(testChapter.content.length);
+      expect(_version.charCount).toBe(testChapter.content.length);
     });
 
     it('should generate content hash', async () => {
-      const version = await versioningService.saveVersion(testChapter);
+      const _version = await versioningService.saveVersion(testChapter);
 
-      expect(version.contentHash).toBeDefined();
-      expect(version.contentHash.length).toBeGreaterThan(0);
+      expect(_version.contentHash).toBeDefined();
+      expect(_version.contentHash.length).toBeGreaterThan(0);
     });
 
-    it('should preserve chapter status in version', async () => {
-      testChapter.status = ChapterStatus.IN_PROGRESS;
-      const version = await versioningService.saveVersion(testChapter);
+    it('should preserve chapter status in _version', async () => {
+      testChapter.status = ChapterStatus.DRAFTING;
+      const _version = await versioningService.saveVersion(testChapter);
 
-      expect(version.status).toBe(ChapterStatus.IN_PROGRESS);
+      expect(_version.status).toBe(ChapterStatus.DRAFTING);
     });
   });
 
   describe('Version History', () => {
-    it('should retrieve version history for a chapter', async () => {
+    it('should retrieve _version history for a chapter', async () => {
       await versioningService.saveVersion(testChapter, 'First save');
       await versioningService.saveVersion(testChapter, 'Second save');
 
@@ -266,8 +266,8 @@ describe('VersioningService', () => {
 
       const history = await versioningService.getVersionHistory(testChapter.id);
 
-      expect(history[0].id).toBe(version2.id);
-      expect(history[1].id).toBe(version1.id);
+      expect(history[0]?.id).toBe(version2.id);
+      expect(history[1]?.id).toBe(version1.id);
     });
 
     it('should return empty array for chapter with no versions', async () => {
@@ -278,26 +278,26 @@ describe('VersioningService', () => {
   });
 
   describe('Version Restoration', () => {
-    it('should restore a version to a chapter', async () => {
+    it('should restore a _version to a chapter', async () => {
       const originalContent = testChapter.content;
-      const version = await versioningService.saveVersion(testChapter);
+      const _version = await versioningService.saveVersion(testChapter);
 
-      const restored = await versioningService.restoreVersion(version.id);
+      const restored = await versioningService.restoreVersion(_version.id);
 
       expect(restored).toBeDefined();
       expect(restored?.content).toBe(originalContent);
       expect(restored?.title).toBe(testChapter.title);
     });
 
-    it('should return null for non-existent version', async () => {
-      const restored = await versioningService.restoreVersion('non-existent-version');
+    it('should return null for non-existent _version', async () => {
+      const restored = await versioningService.restoreVersion('non-existent-_version');
 
       expect(restored).toBeNull();
     });
 
     it('should preserve all chapter properties on restore', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const restored = await versioningService.restoreVersion(version.id);
+      const _version = await versioningService.saveVersion(testChapter);
+      const restored = await versioningService.restoreVersion(_version.id);
 
       expect(restored?.id).toBe(testChapter.id);
       expect(restored?.summary).toBe(testChapter.summary);
@@ -306,20 +306,20 @@ describe('VersioningService', () => {
   });
 
   describe('Version Deletion', () => {
-    it('should delete a version successfully', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const result = await versioningService.deleteVersion(version.id);
+    it('should delete a _version successfully', async () => {
+      const _version = await versioningService.saveVersion(testChapter);
+      const result = await versioningService.deleteVersion(_version.id);
 
       expect(result).toBe(true);
     });
 
-    it('should return false when deleting non-existent version', async () => {
-      const result = await versioningService.deleteVersion('non-existent-version');
+    it('should return false when deleting non-existent _version', async () => {
+      const result = await versioningService.deleteVersion('non-existent-_version');
 
       expect(result).toBe(false);
     });
 
-    it('should remove deleted version from history', async () => {
+    it('should remove deleted _version from history', async () => {
       const version1 = await versioningService.saveVersion(testChapter, 'First');
       const version2 = await versioningService.saveVersion(testChapter, 'Second');
 
@@ -391,40 +391,40 @@ describe('VersioningService', () => {
 
   describe('Branch Operations', () => {
     it('should create a new branch', async () => {
-      const version = await versioningService.saveVersion(testChapter);
+      const _version = await versioningService.saveVersion(testChapter);
       const branch = await versioningService.createBranch(
         'Alternative Ending',
         'Exploring a different story direction',
-        version.id
+        _version.id
       );
 
       expect(branch).toBeDefined();
       expect(branch.id).toMatch(/^branch_/);
       expect(branch.name).toBe('Alternative Ending');
       expect(branch.description).toBe('Exploring a different story direction');
-      expect(branch.parentVersionId).toBe(version.id);
+      expect(branch.parentVersionId).toBe(_version.id);
       expect(branch.isActive).toBe(false);
     });
 
     it('should assign a color to new branch', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch('Branch', 'Description', version.id);
+      const _version = await versioningService.saveVersion(testChapter);
+      const branch = await versioningService.createBranch('Branch', 'Description', _version.id);
 
       expect(branch.color).toBeDefined();
       expect(branch.color).toMatch(/^#[0-9A-F]{6}$/i);
     });
 
     it('should set createdAt timestamp for new branch', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch('Branch', 'Description', version.id);
+      const _version = await versioningService.saveVersion(testChapter);
+      const branch = await versioningService.createBranch('Branch', 'Description', _version.id);
 
       expect(branch.createdAt).toBeInstanceOf(Date);
     });
 
     it('should retrieve branches for a chapter', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      await versioningService.createBranch('Branch 1', 'Description 1', version.id);
-      await versioningService.createBranch('Branch 2', 'Description 2', version.id);
+      const _version = await versioningService.saveVersion(testChapter);
+      await versioningService.createBranch('Branch 1', 'Description 1', _version.id);
+      await versioningService.createBranch('Branch 2', 'Description 2', _version.id);
 
       const branches = await versioningService.getBranches(testChapter.id);
 
@@ -432,8 +432,8 @@ describe('VersioningService', () => {
     });
 
     it('should delete a branch', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch('Branch', 'Description', version.id);
+      const _version = await versioningService.saveVersion(testChapter);
+      const branch = await versioningService.createBranch('Branch', 'Description', _version.id);
 
       const result = await versioningService.deleteBranch(branch.id);
 
@@ -441,8 +441,8 @@ describe('VersioningService', () => {
     });
 
     it('should switch to a branch', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch('Branch', 'Description', version.id);
+      const _version = await versioningService.saveVersion(testChapter);
+      const branch = await versioningService.createBranch('Branch', 'Description', _version.id);
 
       const result = await versioningService.switchBranch(branch.id);
 
@@ -450,9 +450,9 @@ describe('VersioningService', () => {
     });
 
     it('should merge branches', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const branch1 = await versioningService.createBranch('Branch 1', 'Description', version.id);
-      const branch2 = await versioningService.createBranch('Branch 2', 'Description', version.id);
+      const _version = await versioningService.saveVersion(testChapter);
+      const branch1 = await versioningService.createBranch('Branch 1', 'Description', _version.id);
+      const branch2 = await versioningService.createBranch('Branch 2', 'Description', _version.id);
 
       const result = await versioningService.mergeBranch(branch1.id, branch2.id);
 
@@ -461,7 +461,7 @@ describe('VersioningService', () => {
   });
 
   describe('Version Export', () => {
-    it('should export version history as JSON', async () => {
+    it('should export _version history as JSON', async () => {
       await versioningService.saveVersion(testChapter, 'Version 1');
       await versioningService.saveVersion(testChapter, 'Version 2');
 
@@ -473,7 +473,7 @@ describe('VersioningService', () => {
       expect(parsed.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('should export version history as CSV', async () => {
+    it('should export _version history as CSV', async () => {
       await versioningService.saveVersion(testChapter, 'Version 1');
       await versioningService.saveVersion(testChapter, 'Version 2');
 
@@ -484,15 +484,15 @@ describe('VersioningService', () => {
       expect(exported.split('\n').length).toBeGreaterThanOrEqual(3); // Header + 2 rows
     });
 
-    it('should include all version data in JSON export', async () => {
-      const version = await versioningService.saveVersion(testChapter, 'Test Version');
+    it('should include all _version data in JSON export', async () => {
+      const _version = await versioningService.saveVersion(testChapter, 'Test Version');
       const exported = await versioningService.exportVersionHistory(testChapter.id, 'json');
       const parsed = JSON.parse(exported);
 
-      const exportedVersion = parsed.find((v: any) => v.id === version.id);
+      const exportedVersion = parsed.find((v: any) => v.id === _version.id);
       expect(exportedVersion).toBeDefined();
       expect(exportedVersion.message).toBe('Test Version');
-      expect(exportedVersion.wordCount).toBe(version.wordCount);
+      expect(exportedVersion.wordCount).toBe(_version.wordCount);
     });
   });
 

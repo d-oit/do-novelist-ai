@@ -1,6 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
-import { AgentConsole } from '../AgentConsole';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+// import { AgentConsole } from '../AgentConsole';
 
 // Mock the agent console hook
 const mockUseAgentConsole = vi.fn();

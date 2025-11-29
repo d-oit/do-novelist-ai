@@ -43,7 +43,15 @@
       "Bash(gh pr list:*)",
       "SlashCommand(/implement-plans check with gh first all pr and use existing branch if it fits)",
       "Bash(jobs:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(gh run rerun:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(git stash:*)",
+      "Skill(parallel-execution)",
+      "WebFetch(domain:geminicli.com)",
+      "Skill(task-decomposition)",
+      "Bash(npx:*)"
     ],
     "deny": [],
     "ask": []
