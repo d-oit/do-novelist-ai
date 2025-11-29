@@ -4,10 +4,10 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : '50%',
+  retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 4 : '50%',
   reporter: 'html',
-  timeout: 120000, // 2 minutes
+  timeout: 60000, // 1 minute per test
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
