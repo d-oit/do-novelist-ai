@@ -91,7 +91,7 @@ export default tseslint.config(
       ],
       // Allow case declarations
       'no-case-declarations': 'off',
-      // Allow useless escapes in regex for now
+      // Allow useless escapes in regex
       'no-useless-escape': 'off',
       // Allow control characters in regex for validation
       'no-control-regex': 'off',
