@@ -14,7 +14,7 @@ const mockGetAll = vi.fn();
 const mockPut = vi.fn();
 const mockDelete = vi.fn();
 const mockCreateObjectStore = vi.fn();
-const mockCreateIndex = vi.fn();
+const _mockCreateIndex = vi.fn();
 
 const mockDB = {
   close: mockClose,
@@ -158,7 +158,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'My First Novel',
         idea: 'A story about a young wizard discovering their powers in a modern city',
-        style: 'fantasy-epic',
+        style: "Fantasy",
         targetWordCount: 80000,
       };
 
@@ -176,7 +176,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Test Project',
         idea: 'Test idea',
-        style: 'modern-literary',
+        style: "Literary Fiction",
       };
 
       const project1 = await projectService.create(data);
@@ -185,23 +185,23 @@ describe('ProjectService', () => {
       expect(project1.id).not.toBe(project2.id);
     });
 
-    it('should set default status to DRAFT', async () => {
+    it('should set default status to PublishStatus.DRAFT', async () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'thriller-psychological',
+        style: "Mystery & Thriller",
       };
 
       const project = await projectService.create(data);
 
-      expect(project.status).toBe(PublishStatus.DRAFT);
+      expect(project.status).toBe(PublishStatus.PublishStatus.DRAFT);
     });
 
     it('should initialize empty chapters array', async () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'romance-contemporary',
+        style: "Romance",
       };
 
       const project = await projectService.create(data);
@@ -213,7 +213,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'scifi-space-opera',
+        style: "Science Fiction",
       };
 
       const project = await projectService.create(data);
@@ -226,7 +226,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'mystery-cozy',
+        style: "Mystery & Thriller",
       };
 
       const project = await projectService.create(data);
@@ -243,7 +243,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'horror-psychological',
+        style: "Horror",
       };
 
       const project = await projectService.create(data);
@@ -255,7 +255,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'fantasy-urban',
+        style: "Fantasy",
         language: 'es',
       };
 
@@ -268,7 +268,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'literary-fiction',
+        style: "Literary Fiction",
       };
 
       const project = await projectService.create(data);
@@ -280,7 +280,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'dystopian',
+        style: "Science Fiction",
       };
 
       const project = await projectService.create(data);
@@ -297,7 +297,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'historical-fiction',
+        style: "Historical Fiction",
       };
 
       const project = await projectService.create(data);
@@ -309,7 +309,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'adventure',
+        style: "General Fiction",
       };
 
       const project = await projectService.create(data);
@@ -321,20 +321,20 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'New Project',
         idea: 'An idea',
-        style: 'fantasy-epic',
-        genre: ['fantasy', 'adventure', 'coming-of-age'],
+        style: "Fantasy",
+        genre: ['fantasy', "General Fiction", 'coming-of-age'],
       };
 
       const project = await projectService.create(data);
 
-      expect(project.genre).toEqual(['fantasy', 'adventure', 'coming-of-age']);
+      expect(project.genre).toEqual(['fantasy', "General Fiction", 'coming-of-age']);
     });
 
     it('should handle target audience', async () => {
       const data: ProjectCreationData = {
         title: 'Young Adult Novel',
         idea: 'Teen discovers superpowers',
-        style: 'fantasy-urban',
+        style: "Fantasy",
         targetAudience: 'young_adult',
       };
 
@@ -349,12 +349,12 @@ describe('ProjectService', () => {
       const data1: ProjectCreationData = {
         title: 'Project 1',
         idea: 'Idea 1',
-        style: 'scifi-space-opera',
+        style: "Science Fiction",
       };
       const data2: ProjectCreationData = {
         title: 'Project 2',
         idea: 'Idea 2',
-        style: 'fantasy-epic',
+        style: "Fantasy",
       };
 
       await projectService.create(data1);
@@ -370,7 +370,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Test Project',
         idea: 'Test idea',
-        style: 'thriller-psychological',
+        style: "Mystery & Thriller",
       };
 
       const created = await projectService.create(data);
@@ -391,22 +391,22 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Draft Project',
         idea: 'Draft idea',
-        style: 'mystery-cozy',
+        style: "Mystery & Thriller",
       };
 
       await projectService.create(data);
 
-      const projects = await projectService.getByStatus(PublishStatus.DRAFT);
+      const projects = await projectService.getByStatus(PublishStatus.PublishStatus.DRAFT);
 
       expect(Array.isArray(projects)).toBe(true);
       expect(projects.length).toBeGreaterThan(0);
       projects.forEach(project => {
-        expect(project.status).toBe(PublishStatus.DRAFT);
+        expect(project.status).toBe(PublishStatus.PublishStatus.DRAFT);
       });
     });
 
     it('should return empty array when no projects match status', async () => {
-      const projects = await projectService.getByStatus(PublishStatus.PUBLISHED);
+      const projects = await projectService.getByStatus(PublishStatus.PublishStatus.PUBLISHED);
 
       expect(Array.isArray(projects)).toBe(true);
     });
@@ -417,7 +417,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Original Title',
         idea: 'Original idea',
-        style: 'romance-contemporary',
+        style: "Romance",
       };
 
       const project = await projectService.create(data);
@@ -436,26 +436,26 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Test Project',
         idea: 'Test idea',
-        style: 'scifi-cyberpunk',
+        style: "Science Fiction",
       };
 
       const project = await projectService.create(data);
 
       const updates: ProjectUpdateData = {
-        status: PublishStatus.IN_PROGRESS,
+        status: PublishStatus.DRAFT,
       };
 
       await projectService.update(project.id, updates);
 
       const updated = await projectService.getById(project.id);
-      expect(updated?.status).toBe(PublishStatus.IN_PROGRESS);
+      expect(updated?.status).toBe(PublishStatus.DRAFT);
     });
 
     it('should update updatedAt timestamp', async () => {
       const data: ProjectCreationData = {
         title: 'Test Project',
         idea: 'Test idea',
-        style: 'horror-psychological',
+        style: "Horror",
       };
 
       const project = await projectService.create(data);
@@ -488,7 +488,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Original',
         idea: 'Original idea',
-        style: 'fantasy-epic',
+        style: "Fantasy",
       };
 
       const project = await projectService.create(data);
@@ -496,7 +496,7 @@ describe('ProjectService', () => {
       const updates: ProjectUpdateData = {
         title: 'New Title',
         idea: 'New idea',
-        style: 'scifi-space-opera',
+        style: "Science Fiction",
       };
 
       await projectService.update(project.id, updates);
@@ -504,7 +504,7 @@ describe('ProjectService', () => {
       const updated = await projectService.getById(project.id);
       expect(updated?.title).toBe('New Title');
       expect(updated?.idea).toBe('New idea');
-      expect(updated?.style).toBe('scifi-space-opera');
+      expect(updated?.style).toBe("Science Fiction");
     });
   });
 
@@ -513,25 +513,25 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Test Project',
         idea: 'Test idea',
-        style: 'thriller-psychological',
+        style: "Mystery & Thriller",
       };
 
       const project = await projectService.create(data);
       project.title = 'Modified Title';
-      project.status = PublishStatus.COMPLETED;
+      project.status = PublishStatus.PUBLISHED;
 
       await projectService.save(project);
 
       const saved = await projectService.getById(project.id);
       expect(saved?.title).toBe('Modified Title');
-      expect(saved?.status).toBe(PublishStatus.COMPLETED);
+      expect(saved?.status).toBe(PublishStatus.PUBLISHED);
     });
 
     it('should update timestamp on save', async () => {
       const data: ProjectCreationData = {
         title: 'Test Project',
         idea: 'Test idea',
-        style: 'mystery-cozy',
+        style: "Mystery & Thriller",
       };
 
       const project = await projectService.create(data);
@@ -551,7 +551,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Project to Delete',
         idea: 'This will be deleted',
-        style: 'romance-contemporary',
+        style: "Romance",
       };
 
       const project = await projectService.create(data);
@@ -572,7 +572,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Project to Delete',
         idea: 'This will be deleted',
-        style: 'scifi-space-opera',
+        style: "Science Fiction",
       };
 
       const project = await projectService.create(data);
@@ -592,7 +592,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Test Project',
         idea: 'Test idea',
-        style: 'fantasy-epic',
+        style: "Fantasy",
       };
 
       // Normal creation should work
@@ -603,12 +603,12 @@ describe('ProjectService', () => {
       const data1: ProjectCreationData = {
         title: 'Project 1',
         idea: 'Idea 1',
-        style: 'scifi-space-opera',
+        style: "Science Fiction",
       };
       const data2: ProjectCreationData = {
         title: 'Project 2',
         idea: 'Idea 2',
-        style: 'fantasy-epic',
+        style: "Fantasy",
       };
 
       const [project1, project2] = await Promise.all([
@@ -627,7 +627,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Persistent Project',
         idea: 'This should persist',
-        style: 'thriller-psychological',
+        style: "Mystery & Thriller",
       };
 
       const project = await projectService.create(data);
@@ -646,7 +646,7 @@ describe('ProjectService', () => {
       const data: ProjectCreationData = {
         title: 'Large Project',
         idea: largeIdea,
-        style: 'literary-fiction',
+        style: "Literary Fiction",
       };
 
       const project = await projectService.create(data);

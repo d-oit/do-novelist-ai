@@ -61,76 +61,80 @@ class SearchCache:
 
 class ResultValidator:
     """Validates and scores search results."""
-    
+
     @staticmethod
     def extract_citations(result: Dict) -> List[Dict]:
-        """Extract citations from grounding metadata."""
-        citations = []
-        
-        if "grounding_metadata" in result:
-            for chunk in result["grounding_metadata"].get("grounding_chunks", []):
-                if "web" in chunk:
-                    citations.append({
-                        "url": chunk["web"].get("uri"),
-                        "title": chunk["web"].get("title"),
-                        "snippet": chunk.get("snippet")
-                    })
-        
-        return citations
+        """Extract citations from grounding metadata.
+
+        Note: Gemini CLI doesn't currently provide grounding metadata,
+        so this returns an empty list.
+        """
+        # Gemini CLI doesn't provide citations in JSON output
+        return []
     
     @staticmethod
     def calculate_relevance(query: str, result: Dict) -> float:
         """Calculate relevance score based on query match."""
-        text = result.get("text", "").lower()
+        text = result.get("response", "").lower()
         query_terms = query.lower().split()
-        
-        # Count query term matches
+
+        # Count query term matches (ignore "search" prefix if present)
+        query_terms = [term for term in query_terms if term != "search"]
+
         matches = sum(1 for term in query_terms if term in text)
         relevance = matches / len(query_terms) if query_terms else 0
-        
+
         return min(relevance, 1.0)
     
     @staticmethod
     def score_quality(result: Dict, citations: List[Dict], query: str) -> float:
         """Multi-factor quality score (0-1)."""
         score = 0.0
-        
-        # Citation count (max 0.3)
-        citation_score = min(len(citations) * 0.1, 0.3)
-        score += citation_score
-        
-        # Content length (max 0.2)
-        text = result.get("text", "")
-        length_score = min(len(text) / 1000, 0.2)
+
+        # Response length (max 0.3) - longer responses indicate comprehensive results
+        text = result.get("response", "")
+        length_score = min(len(text) / 2000, 0.3)
         score += length_score
-        
-        # Grounding metadata (0.2)
-        if result.get("grounding_metadata"):
-            score += 0.2
-        
-        # Relevance to query (0.3)
+
+        # Search tool success (0.2) - verify google_web_search was called
+        stats = result.get("stats", {})
+        tools = stats.get("tools", {}).get("byName", {})
+        if "google_web_search" in tools:
+            web_search_stats = tools["google_web_search"]
+            if web_search_stats.get("success", 0) > 0:
+                score += 0.2
+                # Bonus for shorter latency (0.1)
+                latency = web_search_stats.get("durationMs", 0)
+                if latency < 20000:  # Good if under 20 seconds
+                    score += 0.1
+
+        # Relevance to query (0.4) - check if response contains query terms
         relevance = ResultValidator.calculate_relevance(query, result)
-        score += relevance * 0.3
-        
+        score += relevance * 0.4
+
         return min(score, 1.0)
     
     @staticmethod
     def validate(result: Dict, query: str, min_quality: float = 0.6,
-                 min_citations: int = 2, min_relevance: float = 0.5) -> Tuple[bool, float, str]:
-        """Validate search result with false positive detection."""
+                 min_citations: int = 0, min_relevance: float = 0.5) -> Tuple[bool, float, str]:
+        """Validate search result with false positive detection.
+
+        Note: min_citations defaults to 0 since Gemini CLI doesn't provide citations.
+        """
         citations = ResultValidator.extract_citations(result)
         quality = ResultValidator.score_quality(result, citations, query)
         relevance = ResultValidator.calculate_relevance(query, result)
-        
+
         if quality < min_quality:
             return False, quality, f"Quality {quality:.2f} below threshold {min_quality}"
-        
-        if len(citations) < min_citations:
+
+        # Skip citation check if min_citations is 0 (default for Gemini CLI)
+        if min_citations > 0 and len(citations) < min_citations:
             return False, quality, f"Only {len(citations)} citations (need {min_citations})"
-        
+
         if relevance < min_relevance:
             return False, quality, f"Low relevance {relevance:.2f} (threshold {min_relevance})"
-        
+
         return True, quality, "Valid"
 
 
@@ -379,7 +383,7 @@ if __name__ == "__main__":
     parser.add_argument("--no-cache", action="store_true", help="Disable cache")
     parser.add_argument("--validate", action="store_true")
     parser.add_argument("--min-quality", type=float, default=0.6)
-    parser.add_argument("--min-citations", type=int, default=2)
+    parser.add_argument("--min-citations", type=int, default=0, help="Min citations (not available in Gemini CLI output, default: 0)")
     parser.add_argument("--min-relevance", type=float, default=0.5)
     parser.add_argument("--retry-on-fail", action="store_true")
     parser.add_argument("--max-retries", type=int, default=2)

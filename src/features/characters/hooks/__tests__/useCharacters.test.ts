@@ -158,7 +158,8 @@ describe('useCharacters', () => {
       motivation: 'Seeking power at any cost',
       goal: 'Control the kingdom',
       conflict: 'Moral boundaries limit his ambition',
-      traits: []
+      traits: [],
+      relationships: []
     };
 
     await act(async () => {
@@ -182,7 +183,8 @@ describe('useCharacters', () => {
       motivation: 'Test motivation',
       goal: 'Test goal',
       conflict: 'Test conflict',
-      traits: []
+      traits: [],
+      relationships: []
     };
 
     await act(async () => {
@@ -206,7 +208,8 @@ describe('useCharacters', () => {
         motivation: 'Test motivation',
         goal: 'Test goal',
         conflict: 'Test conflict',
-        traits: []
+        traits: [],
+        relationships: []
       });
     });
 
@@ -236,7 +239,8 @@ describe('useCharacters', () => {
         motivation: 'Test motivation',
         goal: 'Test goal',
         conflict: 'Test conflict',
-        traits: []
+        traits: [],
+        relationships: []
       });
     });
 
@@ -497,7 +501,8 @@ describe('useCharacters', () => {
         motivation: 'Test motivation',
         goal: 'Test goal',
         conflict: 'Test conflict',
-        traits: []
+        traits: [],
+        relationships: []
       });
     });
 

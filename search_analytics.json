@@ -1,12 +1,15 @@
 {
-  "total_searches": 2,
-  "cache_hits": 0,
-  "cache_misses": 2,
-  "avg_latency_ms": 48358.35158824921,
+  "total_searches": 7,
+  "cache_hits": 1,
+  "cache_misses": 6,
+  "avg_latency_ms": 40359.08644539969,
   "quality_scores": [
-    0.0
+    0.0,
+    0.0,
+    0.0,
+    0.9
   ],
-  "failed_validations": 1,
+  "failed_validations": 3,
   "queries": [
     {
       "query": "React 19 features",
@@ -23,6 +26,46 @@
       "latency_ms": 41745.99552154541,
       "quality": 0.0,
       "valid": false
+    },
+    {
+      "query": "React 19 new features",
+      "timestamp": "2025-11-29T12:42:53.554562",
+      "cached": false,
+      "latency_ms": 58639.259576797485,
+      "quality": null,
+      "valid": true
+    },
+    {
+      "query": "Python 3.13 new features",
+      "timestamp": "2025-11-29T12:43:39.917849",
+      "cached": false,
+      "latency_ms": 34287.18876838684,
+      "quality": 0.0,
+      "valid": false
+    },
+    {
+      "query": "search for the react 19 best practice",
+      "timestamp": "2025-11-29T12:52:49.180939",
+      "cached": false,
+      "latency_ms": 27416.84579849243,
+      "quality": 0.0,
+      "valid": false
+    },
+    {
+      "query": "search for the react 19 best practice",
+      "timestamp": "2025-11-29T13:03:15.325691",
+      "cached": true,
+      "latency_ms": 0.24509429931640625,
+      "quality": null,
+      "valid": true
+    },
+    {
+      "query": "search for the python 3.13 new features",
+      "timestamp": "2025-11-29T13:07:00.471366",
+      "cached": false,
+      "latency_ms": 65453.362703323364,
+      "quality": 0.9,
+      "valid": true
     }
   ]
 }

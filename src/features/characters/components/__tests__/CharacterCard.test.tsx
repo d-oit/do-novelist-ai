@@ -432,7 +432,7 @@ describe('CharacterCard', () => {
           />
         );
 
-        expect(screen.getByTestId(expectedIcons[index])).toBeInTheDocument();
+        expect(screen.getByTestId(expectedIcons[index] as string)).toBeInTheDocument();
         unmount();
       });
     });
