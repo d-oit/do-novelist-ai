@@ -4,8 +4,8 @@
  * Handles localStorage persistence for application settings
  */
 
-import type { Settings } from '../types';
 import { DEFAULT_SETTINGS, validateSettings } from '../types';
+import { type Settings } from '../types';
 
 const STORAGE_KEY = 'novelist-settings';
 

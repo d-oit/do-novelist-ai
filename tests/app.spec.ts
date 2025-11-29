@@ -1,9 +1,8 @@
-
 import { test, expect } from '@playwright/test';
+
 import { setupGeminiMock } from './utils/mock-gemini';
 
 test.describe('Smoke Test: Critical User Journey', () => {
-  
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
@@ -40,5 +39,4 @@ test.describe('Smoke Test: Critical User Journey', () => {
     await page.getByTestId('chapter-item-publish').click();
     await expect(page.getByTestId('export-epub-btn')).toBeVisible();
   });
-
 });

@@ -7,8 +7,47 @@ import {
   logUsageAnalytic,
   getUserUsageStats,
   type AIUsageAnalytic,
-  type UsageStats
-} from '@/lib/db';
+  type UsageStats,
+} from '@/lib/db/index';
+import { type AIProvider } from '@/lib/ai-config';
+
+/**
+ * Enhanced usage stats with computed properties
+ */
+export interface EnhancedUsageStats extends UsageStats {
+  providerBreakdown: Array<{
+    provider: AIProvider;
+    tokens: number;
+    cost: number;
+    requests: number;
+    successRate: number;
+  }>;
+  requestTypeBreakdown: Array<{
+    requestType: string;
+    tokens: number;
+    cost: number;
+    requests: number;
+  }>;
+  costByProvider: Array<{
+    provider: AIProvider;
+    cost: number;
+    percentage: number;
+  }>;
+  costByRequestType: Array<{
+    requestType: string;
+    cost: number;
+    percentage: number;
+  }>;
+  timeSeriesData: Array<{
+    date: string;
+    tokens: number;
+    cost: number;
+    requests: number;
+  }>;
+  totalBudget: number;
+  usedBudget: number;
+  budgetRemaining: number;
+}
 
 export interface CostBreakdown {
   inputTokens: number;
@@ -42,12 +81,12 @@ export interface OptimizationRecommendation {
 }
 
 const PRICING_PER_1M_TOKENS: Record<string, { input: number; output: number }> = {
-  'openai:gpt-4o': { input: 2.50, output: 10.00 },
-  'openai:gpt-4o-mini': { input: 0.15, output: 0.60 },
-  'anthropic:claude-3.5-sonnet-20241022': { input: 3.00, output: 15.00 },
+  'openai:gpt-4o': { input: 2.5, output: 10.0 },
+  'openai:gpt-4o-mini': { input: 0.15, output: 0.6 },
+  'anthropic:claude-3.5-sonnet-20241022': { input: 3.0, output: 15.0 },
   'anthropic:claude-3-5-haiku-20241022': { input: 0.25, output: 1.25 },
-  'google:gemini-2.0-flash-exp': { input: 0.075, output: 0.30 },
-  'google:gemini-exp-1206': { input: 1.25, output: 5.00 }
+  'google:gemini-2.0-flash-exp': { input: 0.075, output: 0.3 },
+  'google:gemini-exp-1206': { input: 1.25, output: 5.0 },
 };
 
 /**
@@ -60,7 +99,7 @@ export function calculateCost(
   completionTokens: number
 ): CostBreakdown {
   const pricingKey = `${provider}:${model}`;
-  const pricing = PRICING_PER_1M_TOKENS[pricingKey] || { input: 0.10, output: 0.40 };
+  const pricing = PRICING_PER_1M_TOKENS[pricingKey] || { input: 0.1, output: 0.4 };
 
   const inputCost = (promptTokens / 1_000_000) * pricing.input;
   const outputCost = (completionTokens / 1_000_000) * pricing.output;
@@ -71,7 +110,7 @@ export function calculateCost(
     totalTokens: promptTokens + completionTokens,
     inputCost,
     outputCost,
-    totalCost: inputCost + outputCost
+    totalCost: inputCost + outputCost,
   };
 }
 
@@ -95,7 +134,7 @@ export async function logAIUsage(
     const analytic: AIUsageAnalytic = {
       id: crypto.randomUUID(),
       userId,
-      provider,
+      provider: provider as AIProvider,
       modelName: model,
       promptTokens,
       completionTokens,
@@ -105,7 +144,7 @@ export async function logAIUsage(
       success,
       errorMessage,
       requestType,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     await logUsageAnalytic(analytic);
@@ -121,10 +160,24 @@ export async function getUsageStats(
   userId: string,
   startDate?: Date,
   endDate?: Date
-): Promise<UsageStats> {
+): Promise<EnhancedUsageStats> {
   try {
-    const stats = await getUserUsageStats(userId, startDate, endDate);
-    return stats;
+    const startDateStr = startDate?.toISOString();
+    const endDateStr = endDate?.toISOString();
+    const stats = await getUserUsageStats(userId, startDateStr, endDateStr);
+
+    // Return with computed properties
+    return {
+      ...stats,
+      providerBreakdown: [],
+      requestTypeBreakdown: [],
+      costByProvider: [],
+      costByRequestType: [],
+      timeSeriesData: [],
+      totalBudget: 0,
+      usedBudget: 0,
+      budgetRemaining: 0,
+    };
   } catch (error) {
     console.error('Failed to get usage stats:', error);
     return {
@@ -140,7 +193,7 @@ export async function getUsageStats(
       timeSeriesData: [],
       totalBudget: 0,
       usedBudget: 0,
-      budgetRemaining: 0
+      budgetRemaining: 0,
     };
   }
 }
@@ -156,7 +209,11 @@ export async function getBudgetInfo(userId: string): Promise<BudgetInfo> {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
 
-    const stats = await getUserUsageStats(userId, startDate, new Date());
+    const stats = await getUserUsageStats(
+      userId,
+      startDate.toISOString(),
+      new Date().toISOString()
+    );
 
     const totalBudget = prefs.monthlyBudget;
     const usedBudget = stats.totalCost;
@@ -176,7 +233,7 @@ export async function getBudgetInfo(userId: string): Promise<BudgetInfo> {
       projectedCost,
       daysRemaining: Math.max(0, daysRemaining),
       isNearLimit: usagePercentage >= 80,
-      isOverLimit: usagePercentage >= 100
+      isOverLimit: usagePercentage >= 100,
     };
   } catch (error) {
     console.error('Failed to get budget info:', error);
@@ -188,7 +245,7 @@ export async function getBudgetInfo(userId: string): Promise<BudgetInfo> {
       projectedCost: 0,
       daysRemaining: 30,
       isNearLimit: false,
-      isOverLimit: false
+      isOverLimit: false,
     };
   }
 }
@@ -197,7 +254,7 @@ export async function getBudgetInfo(userId: string): Promise<BudgetInfo> {
  * Get cost optimization recommendations
  */
 export function getOptimizationRecommendations(
-  userStats: UsageStats,
+  userStats: EnhancedUsageStats,
   budgetInfo: BudgetInfo
 ): OptimizationRecommendation[] {
   const recommendations: OptimizationRecommendation[] = [];
@@ -207,20 +264,20 @@ export function getOptimizationRecommendations(
       type: 'cheaper_provider',
       description: 'Switch to a more cost-effective provider',
       estimatedSavings: 0,
-      action: { provider: 'google' }
+      action: { provider: 'google' },
     });
   }
 
   if (userStats.costByProvider.length > 0) {
     const topCostProvider = userStats.costByProvider[0];
-    const isExpensive = topCostProvider.provider === 'openai';
+    const isExpensive = topCostProvider?.provider === 'openai';
 
     if (isExpensive && budgetInfo.usagePercentage > 60) {
       recommendations.push({
         type: 'cheaper_model',
         description: 'Consider switching from GPT-4o to GPT-4o Mini (up to 90% cost reduction)',
-        estimatedSavings: topCostProvider.cost * 0.5,
-        action: { model: 'gpt-4o-mini' }
+        estimatedSavings: (topCostProvider?.cost || 0) * 0.5,
+        action: { model: 'gpt-4o-mini' },
       });
     }
   }
@@ -230,7 +287,7 @@ export function getOptimizationRecommendations(
       type: 'reduce_tokens',
       description: 'Reduce max tokens per request to lower costs',
       estimatedSavings: userStats.totalCost * 0.2,
-      action: { maxTokens: 2000 }
+      action: { maxTokens: 2000 },
     });
   }
 
@@ -239,7 +296,7 @@ export function getOptimizationRecommendations(
       type: 'none',
       description: 'Your usage is well optimized',
       estimatedSavings: 0,
-      action: {}
+      action: {},
     });
   }
 
@@ -249,7 +306,7 @@ export function getOptimizationRecommendations(
 /**
  * Get provider cost comparison
  */
-export function compareProviderCosts(userStats: UsageStats): Array<{
+export function compareProviderCosts(userStats: EnhancedUsageStats): Array<{
   provider: string;
   cost: number;
   percentage: number;
@@ -258,16 +315,19 @@ export function compareProviderCosts(userStats: UsageStats): Array<{
   const costByProvider = userStats.costByProvider;
   const totalCost = userStats.totalCost;
 
-  return costByProvider.map((item) => {
-    const tokens = userStats.providerBreakdown.find(
-      (p) => p.provider === item.provider
-    )?.tokens || 0;
+  return costByProvider
+    .map((item: { provider: AIProvider; cost: number }) => {
+      const tokens =
+        userStats.providerBreakdown.find(
+          (p: { provider: AIProvider; tokens: number }) => p.provider === item.provider
+        )?.tokens || 0;
 
-    return {
-      provider: item.provider,
-      cost: item.cost,
-      percentage: totalCost > 0 ? (item.cost / totalCost) * 100 : 0,
-      efficiency: tokens > 0 ? item.cost / tokens : 0
-    };
-  }).sort((a, b) => b.cost - a.cost);
+      return {
+        provider: item.provider,
+        cost: item.cost,
+        percentage: totalCost > 0 ? (item.cost / totalCost) * 100 : 0,
+        efficiency: tokens > 0 ? item.cost / tokens : 0,
+      };
+    })
+    .sort((a: { cost: number }, b: { cost: number }) => b.cost - a.cost);
 }

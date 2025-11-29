@@ -46,24 +46,24 @@ export interface ContentAnalysis {
   chapterId: string;
   content: string;
   timestamp: Date;
-  
+
   // Core Metrics
   readabilityScore: number; // 0-100 (Flesch Reading Ease)
   sentimentScore: number; // -1 to 1
   paceScore: number; // 0-100 (slow to fast)
   engagementScore: number; // 0-100
-  
+
   // Detailed Analysis
   suggestions: WritingSuggestion[];
   plotHoles: PlotHoleDetection[];
   characterIssues: CharacterConsistencyIssue[];
   dialogueAnalysis: DialogueAnalysis;
-  
+
   // Style Analysis
   styleProfile: StyleProfile;
   toneAnalysis: ToneAnalysis;
   wordUsage: WordUsageAnalysis;
-  
+
   // Structure Analysis
   paragraphAnalysis: ParagraphAnalysis;
   sentenceVariety: SentenceVarietyAnalysis;
@@ -93,14 +93,20 @@ export interface CharacterConsistencyIssue {
   id: string;
   characterId: string;
   characterName: string;
-  issueType: 'personality' | 'speech_pattern' | 'knowledge' | 'ability' | 'appearance' | 'motivation';
+  issueType:
+    | 'personality'
+    | 'speech_pattern'
+    | 'knowledge'
+    | 'ability'
+    | 'appearance'
+    | 'motivation';
   description: string;
   currentInstance: string;
-  conflictingInstances: Array<{
+  conflictingInstances: {
     text: string;
     chapterId: string;
     context: string;
-  }>;
+  }[];
   severity: 'minor' | 'moderate' | 'major';
   suggestedResolution: string;
 }
@@ -114,14 +120,19 @@ export interface DialogueAnalysis {
   dialoguePercentage: number; // % of chapter that's dialogue
   speakerVariety: number; // how many different speakers
   averageDialogueLength: number;
-  
+
   issues: DialogueIssue[];
   voiceConsistency: VoiceConsistencyAnalysis[];
   tagAnalysis: DialogueTagAnalysis;
 }
 
 export interface DialogueIssue {
-  type: 'excessive_tags' | 'unclear_speaker' | 'unnatural_speech' | 'repetitive_tags' | 'missing_action';
+  type:
+    | 'excessive_tags'
+    | 'unclear_speaker'
+    | 'unnatural_speech'
+    | 'repetitive_tags'
+    | 'missing_action';
   description: string;
   examples: string[];
   suggestions: string[];
@@ -131,19 +142,19 @@ export interface VoiceConsistencyAnalysis {
   characterName: string;
   consistency: number; // 0-100
   patterns: string[];
-  deviations: Array<{
+  deviations: {
     text: string;
     reason: string;
-  }>;
+  }[];
 }
 
 export interface DialogueTagAnalysis {
   totalTags: number;
   varietyScore: number;
-  overusedTags: Array<{
+  overusedTags: {
     tag: string;
     count: number;
-  }>;
+  }[];
   suggestions: string[];
 }
 
@@ -157,7 +168,7 @@ export interface StyleProfile {
   voice: 'active' | 'passive' | 'mixed';
   perspective: 'first_person' | 'second_person' | 'third_limited' | 'third_omniscient' | 'mixed';
   tense: 'present' | 'past' | 'future' | 'mixed';
-  
+
   strengths: string[];
   improvements: string[];
   consistency: number; // 0-100
@@ -192,28 +203,28 @@ export interface WordUsageAnalysis {
   vocabularyLevel: 'elementary' | 'middle_school' | 'high_school' | 'college' | 'graduate';
   averageWordLength: number;
   averageSentenceLength: number;
-  
-  overusedWords: Array<{
+
+  overusedWords: {
     word: string;
     count: number;
     suggestions: string[];
-  }>;
-  
-  weakWords: Array<{
+  }[];
+
+  weakWords: {
     word: string;
     context: string;
     suggestion: string;
-  }>;
-  
-  cliches: Array<{
+  }[];
+
+  cliches: {
     phrase: string;
     alternatives: string[];
-  }>;
-  
-  redundancies: Array<{
+  }[];
+
+  redundancies: {
     phrase: string;
     simplified: string;
-  }>;
+  }[];
 }
 
 // ============================================================================
@@ -245,14 +256,14 @@ export interface SentenceVarietyAnalysis {
 
 export interface TransitionAnalysis {
   quality: number; // 0-100
-  missingTransitions: Array<{
+  missingTransitions: {
     position: number;
     suggestion: string;
-  }>;
-  weakTransitions: Array<{
+  }[];
+  weakTransitions: {
     text: string;
     improvement: string;
-  }>;
+  }[];
 }
 
 // ============================================================================
@@ -263,30 +274,25 @@ export const WritingAssistantConfigSchema = z.object({
   // Analysis Settings
   enableRealTimeAnalysis: z.boolean().default(true),
   analysisDelay: z.number().min(500).max(5000).default(1500), // ms
-  
+
   // Suggestion Filters
-  enabledCategories: z.array(z.string()).default([
-    'readability',
-    'engagement',
-    'consistency',
-    'flow',
-    'dialogue',
-    'character_voice'
-  ]),
-  
+  enabledCategories: z
+    .array(z.string())
+    .default(['readability', 'engagement', 'consistency', 'flow', 'dialogue', 'character_voice']),
+
   minimumConfidence: z.number().min(0).max(1).default(0.6),
   maxSuggestionsPerType: z.number().min(1).max(20).default(5),
-  
+
   // Content Analysis
   enablePlotHoleDetection: z.boolean().default(true),
   enableCharacterTracking: z.boolean().default(true),
   enableDialogueAnalysis: z.boolean().default(true),
   enableStyleAnalysis: z.boolean().default(true),
-  
+
   // AI Settings
   aiModel: z.enum(['gemini-pro', 'gemini-flash']).default('gemini-pro'),
   analysisDepth: z.enum(['basic', 'standard', 'comprehensive']).default('standard'),
-  
+
   // User Preferences
   preferredStyle: z.enum(['concise', 'descriptive', 'balanced']).default('balanced'),
   targetAudience: z.enum(['children', 'young_adult', 'adult', 'literary']).default('adult'),
@@ -305,7 +311,7 @@ export interface WritingAssistantState {
   currentAnalysis?: ContentAnalysis;
   suggestions: WritingSuggestion[];
   config: WritingAssistantConfig;
-  
+
   // UI State
   selectedSuggestion?: string;
   showSuggestions: boolean;
@@ -319,7 +325,7 @@ export interface WritingAssistantActions {
   applySuggestion: (suggestionId: string) => void;
   dismissSuggestion: (suggestionId: string) => void;
   updateConfig: (config: Partial<WritingAssistantConfig>) => void;
-  
+
   // UI Actions
   selectSuggestion: (suggestionId: string) => void;
   toggleSuggestions: () => void;
@@ -358,7 +364,14 @@ export function isContentAnalysis(value: unknown): value is ContentAnalysis {
 export const DEFAULT_WRITING_ASSISTANT_CONFIG: WritingAssistantConfig = {
   enableRealTimeAnalysis: true,
   analysisDelay: 1500,
-  enabledCategories: ['readability', 'engagement', 'consistency', 'flow', 'dialogue', 'character_voice'],
+  enabledCategories: [
+    'readability',
+    'engagement',
+    'consistency',
+    'flow',
+    'dialogue',
+    'character_voice',
+  ],
   minimumConfidence: 0.6,
   maxSuggestionsPerType: 5,
   enablePlotHoleDetection: true,

@@ -1,6 +1,6 @@
+import { createClient } from '@libsql/client/web';
 
-import { createClient } from "@libsql/client/web";
-import { type Project, PublishStatus, ChapterStatus } from "../types";
+import { type Project, PublishStatus, ChapterStatus } from '../types';
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';
@@ -12,7 +12,7 @@ export interface DbConfig {
 }
 
 const CHAPTER_STATUS_VALUES = ['pending', 'drafting', 'review', 'complete'] as const;
-type ChapterStatusValue = typeof CHAPTER_STATUS_VALUES[number];
+type ChapterStatusValue = (typeof CHAPTER_STATUS_VALUES)[number];
 const isValidChapterStatus = (status: string): status is ChapterStatusValue => {
   return CHAPTER_STATUS_VALUES.includes(status as any);
 };
@@ -36,7 +36,7 @@ export const getStoredConfig = (): DbConfig => {
   return {
     url: envUrl || '',
     authToken: envToken || '',
-    useCloud: !!(envUrl && envToken) // Default to cloud if env vars exist
+    useCloud: !!(envUrl && envToken), // Default to cloud if env vars exist
   };
 };
 
@@ -61,7 +61,7 @@ const getClient = (): Client | null => {
     });
     return dbClient;
   } catch (e) {
-    console.error("Failed to create Turso client", e);
+    console.error('Failed to create Turso client', e);
     return null;
   }
 };
@@ -89,10 +89,20 @@ export const db = {
         `);
 
         // Attempt to add columns for existing tables (ignoring errors if they exist)
-        try { await client.execute("ALTER TABLE projects ADD COLUMN status TEXT DEFAULT 'Draft'"); } catch (e) { }
-        try { await client.execute("ALTER TABLE projects ADD COLUMN language TEXT DEFAULT 'en'"); } catch (e) { }
-        try { await client.execute("ALTER TABLE projects ADD COLUMN target_word_count INTEGER DEFAULT 50000"); } catch (e) { }
-        try { await client.execute("ALTER TABLE projects ADD COLUMN settings TEXT"); } catch (e) { }
+        try {
+          await client.execute("ALTER TABLE projects ADD COLUMN status TEXT DEFAULT 'Draft'");
+        } catch (e) {}
+        try {
+          await client.execute("ALTER TABLE projects ADD COLUMN language TEXT DEFAULT 'en'");
+        } catch (e) {}
+        try {
+          await client.execute(
+            'ALTER TABLE projects ADD COLUMN target_word_count INTEGER DEFAULT 50000'
+          );
+        } catch (e) {}
+        try {
+          await client.execute('ALTER TABLE projects ADD COLUMN settings TEXT');
+        } catch (e) {}
 
         // Chapters Table
         await client.execute(`
@@ -106,12 +116,12 @@ export const db = {
             status TEXT
           )
         `);
-        console.log("Turso DB Connection Established");
+        console.log('Turso DB Connection Established');
       } catch (e) {
-        console.error("Turso Init Error (Falling back to local):", e);
+        console.error('Turso Init Error (Falling back to local):', e);
       }
     } else {
-      console.log("Using LocalStorage Persistence");
+      console.log('Using LocalStorage Persistence');
     }
   },
 
@@ -137,8 +147,8 @@ export const db = {
             project.status,
             project.language,
             project.targetWordCount,
-            JSON.stringify(project.settings || {})
-          ]
+            JSON.stringify(project.settings || {}),
+          ],
         });
 
         // Upsert Chapters
@@ -148,13 +158,13 @@ export const db = {
                   VALUES (?, ?, ?, ?, ?, ?, ?)
                   ON CONFLICT(id) DO UPDATE SET
                   title=excluded.title, summary=excluded.summary, content=excluded.content, status=excluded.status`,
-            args: [c.id, project.id, c.orderIndex, c.title, c.summary, c.content, c.status]
+            args: [c.id, project.id, c.orderIndex, c.title, c.summary, c.content, c.status],
           }));
-          await client.batch(stmts, "write");
+          await client.batch(stmts, 'write');
         }
         console.log(`[DB] Cloud save complete.`);
       } catch (e) {
-        console.error("Failed to save to Cloud", e);
+        console.error('Failed to save to Cloud', e);
       }
     } else {
       // Local Save
@@ -170,11 +180,17 @@ export const db = {
     const client = getClient();
     if (client) {
       try {
-        const pRes = await client.execute({ sql: "SELECT * FROM projects WHERE id = ?", args: [projectId] });
+        const pRes = await client.execute({
+          sql: 'SELECT * FROM projects WHERE id = ?',
+          args: [projectId],
+        });
         if (pRes.rows.length === 0) return null;
         const pRow = pRes.rows[0]!;
 
-        const cRes = await client.execute({ sql: "SELECT * FROM chapters WHERE project_id = ? ORDER BY order_index", args: [projectId] });
+        const cRes = await client.execute({
+          sql: 'SELECT * FROM chapters WHERE project_id = ? ORDER BY order_index',
+          args: [projectId],
+        });
 
         const loadedProject: Project = {
           id: pRow.id as string,
@@ -182,19 +198,25 @@ export const db = {
           idea: pRow.idea as string,
           style: pRow.style as any,
           coverImage: pRow.cover_image as string,
-          worldState: typeof pRow.world_state === 'string' ? JSON.parse(pRow.world_state) : pRow.world_state,
+          worldState:
+            typeof pRow.world_state === 'string' ? JSON.parse(pRow.world_state) : pRow.world_state,
           isGenerating: false,
           status: (pRow.status as PublishStatus) || PublishStatus.DRAFT,
           language: (pRow.language as any) || 'en',
           targetWordCount: (pRow.target_word_count as number) || 50000,
-          settings: typeof pRow.settings === 'string' ? JSON.parse(pRow.settings) : (pRow.settings || { enableDropCaps: true }),
+          settings:
+            typeof pRow.settings === 'string'
+              ? JSON.parse(pRow.settings)
+              : pRow.settings || { enableDropCaps: true },
           chapters: cRes.rows.map(r => ({
             id: r.id as string,
             orderIndex: r.order_index as number,
             title: r.title as string,
             summary: r.summary as string,
             content: r.content as string,
-            status: (isValidChapterStatus(r.status as string) ? r.status : 'pending') as ChapterStatus,
+            status: (isValidChapterStatus(r.status as string)
+              ? r.status
+              : 'pending') as ChapterStatus,
             wordCount: 0,
             characterCount: 0,
             estimatedReadingTime: 0,
@@ -202,7 +224,7 @@ export const db = {
             lastEdited: new Date().toISOString(),
             notes: '',
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
           })),
           genre: [],
           targetAudience: 'adult',
@@ -217,15 +239,15 @@ export const db = {
             averageChapterLength: 0,
             estimatedReadingTime: 0,
             generationCost: 0,
-            editingRounds: 0
+            editingRounds: 0,
           },
           version: '1.0.0',
-          changeLog: []
+          changeLog: [],
         };
         console.log(`[DB] Cloud load success: ${loadedProject.title}`);
         return loadedProject;
       } catch (e) {
-        console.error("Failed to load from Cloud", e);
+        console.error('Failed to load from Cloud', e);
         return null;
       }
     } else {
@@ -240,36 +262,42 @@ export const db = {
         targetWordCount: 50000,
         settings: { enableDropCaps: true },
         ...p,
-        isGenerating: false
+        isGenerating: false,
       };
     }
   },
 
-  getAllProjects: async (): Promise<{ id: string, title: string, style: string, updatedAt: string, coverImage?: string }[]> => {
+  getAllProjects: async (): Promise<
+    { id: string; title: string; style: string; updatedAt: string; coverImage?: string }[]
+  > => {
     const client = getClient();
     if (client) {
       try {
-        const res = await client.execute("SELECT id, title, style, cover_image, updated_at FROM projects ORDER BY updated_at DESC");
+        const res = await client.execute(
+          'SELECT id, title, style, cover_image, updated_at FROM projects ORDER BY updated_at DESC'
+        );
         return res.rows.map(r => ({
           id: r.id as string,
           title: r.title as string,
           style: r.style as string,
           updatedAt: r.updated_at as string,
-          coverImage: r.cover_image as string
+          coverImage: r.cover_image as string,
         }));
       } catch (e) {
-        console.error("Failed to list projects from Cloud", e);
+        console.error('Failed to list projects from Cloud', e);
         return [];
       }
     } else {
       const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) || '{}');
-      return Object.values(projects).map((p: any) => ({
-        id: p.id,
-        title: p.title,
-        style: p.style,
-        updatedAt: p.updatedAt || new Date().toISOString(),
-        coverImage: p.coverImage
-      })).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      return Object.values(projects)
+        .map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          style: p.style,
+          updatedAt: p.updatedAt || new Date().toISOString(),
+          coverImage: p.coverImage,
+        }))
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
     }
   },
 
@@ -278,17 +306,20 @@ export const db = {
     const client = getClient();
     if (client) {
       try {
-        await client.batch([
-          { sql: "DELETE FROM chapters WHERE project_id = ?", args: [projectId] },
-          { sql: "DELETE FROM projects WHERE id = ?", args: [projectId] }
-        ], "write");
+        await client.batch(
+          [
+            { sql: 'DELETE FROM chapters WHERE project_id = ?', args: [projectId] },
+            { sql: 'DELETE FROM projects WHERE id = ?', args: [projectId] },
+          ],
+          'write'
+        );
       } catch (e) {
-        console.error("Failed to delete from Cloud", e);
+        console.error('Failed to delete from Cloud', e);
       }
     } else {
       const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) || '{}');
       delete projects[projectId];
       localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
     }
-  }
+  },
 };

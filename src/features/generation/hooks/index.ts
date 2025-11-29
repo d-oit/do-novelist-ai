@@ -8,5 +8,5 @@ export {
   executeActionLogic,
   postprocessAction,
   logActionResult,
-  createActionSummary
+  createActionSummary,
 } from './useGoapEngine.utils';

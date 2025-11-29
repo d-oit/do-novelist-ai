@@ -1,10 +1,14 @@
-import { Project, AgentAction, Chapter, ChapterStatus, ProcessedAction, ActionResult } from '@shared/types';
 import {
-  analyzeConsistency,
-  generateOutline,
-  writeChapterContent,
-} from '../services/geminiService';
+  Project,
+  AgentAction,
+  Chapter,
+  ChapterStatus,
+  ProcessedAction,
+  ActionResult,
+} from '@shared/types';
 import { createChapter } from '@shared/utils';
+
+import { analyzeConsistency, generateOutline, writeChapterContent } from '../../../lib/ai';
 
 /**
  * Validates if an action can be executed based on project state
@@ -16,7 +20,11 @@ import { createChapter } from '@shared/utils';
 export function validateAction(
   action: AgentAction,
   project: Project,
-  addLog?: (agentName: string, message: string, type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug') => void
+  addLog?: (
+    agentName: string,
+    message: string,
+    type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug'
+  ) => void
 ): boolean {
   // Check if project is already generating - prevent concurrent actions
   if (project.isGenerating) {
@@ -75,7 +83,11 @@ export function preprocessAction(
  */
 export async function executeActionLogic(
   processedAction: ProcessedAction,
-  addLog: (agentName: string, message: string, type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug') => void
+  addLog: (
+    agentName: string,
+    message: string,
+    type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug'
+  ) => void
 ): Promise<ActionResult> {
   const { action, project, pendingChapters } = processedAction;
 
@@ -128,7 +140,11 @@ export function postprocessAction(
 export function logActionResult(
   _action: AgentAction,
   actionResult: ActionResult,
-  addLog: (agentName: string, message: string, type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug') => void
+  addLog: (
+    agentName: string,
+    message: string,
+    type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug'
+  ) => void
 ): void {
   if (!actionResult.success && actionResult.error) {
     addLog('System', `Action Failed: ${actionResult.error.message}`, 'error');
@@ -140,7 +156,11 @@ export function logActionResult(
  */
 async function executeCreateOutline(
   project: Project,
-  addLog: (agentName: string, message: string, type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug') => void
+  addLog: (
+    agentName: string,
+    message: string,
+    type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug'
+  ) => void
 ): Promise<ActionResult> {
   addLog('Planner', 'Selected Strategy: Architect (Single Agent Mode)', 'thought');
   addLog('Architect', `Analyzing Idea: "${project.idea.substring(0, 100)}..."`, 'info');
@@ -158,7 +178,11 @@ async function executeCreateOutline(
 async function executeWriteChaptersParallel(
   pendingChapters: Chapter[],
   project: Project,
-  addLog: (agentName: string, message: string, type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug') => void
+  addLog: (
+    agentName: string,
+    message: string,
+    type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug'
+  ) => void
 ): Promise<ActionResult> {
   addLog(
     'Planner',
@@ -178,7 +202,12 @@ async function executeWriteChaptersParallel(
           : undefined;
       const prevSummary = prevChapter?.summary;
 
-      const content = await writeChapterContent(chapter.title, chapter.summary, project.style, prevSummary);
+      const content = await writeChapterContent(
+        chapter.title,
+        chapter.summary,
+        project.style,
+        prevSummary
+      );
 
       addLog(
         `Writer ${index + 1}`,
@@ -208,7 +237,11 @@ async function executeWriteChaptersParallel(
  */
 async function executeEditorReview(
   project: Project,
-  addLog: (agentName: string, message: string, type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug') => void
+  addLog: (
+    agentName: string,
+    message: string,
+    type?: 'info' | 'success' | 'warning' | 'error' | 'thought' | 'debug'
+  ) => void
 ): Promise<ActionResult> {
   addLog('Planner', 'Selected Strategy: Editor (Consistency Check)', 'thought');
   const analysis = await analyzeConsistency(project.chapters, project.style);
@@ -228,13 +261,15 @@ function handleCreateOutlinePostprocess(
   const result = actionResult.data;
 
   // FIX: Unique Chapter IDs based on Project ID to prevent collisions in DB
-  const newChapters: Chapter[] = result.chapters.map((c: any) => createChapter({
-    id: `${project.id}_ch_${c.orderIndex}`,
-    orderIndex: c.orderIndex,
-    title: c.title,
-    summary: c.summary,
-    status: ChapterStatus.PENDING,
-  }));
+  const newChapters: Chapter[] = result.chapters.map((c: any) =>
+    createChapter({
+      id: `${project.id}_ch_${c.orderIndex}`,
+      orderIndex: c.orderIndex,
+      title: c.title,
+      summary: c.summary,
+      status: ChapterStatus.PENDING,
+    })
+  );
 
   setProject(prev => ({
     ...prev,
@@ -275,11 +310,13 @@ function handleWriteChaptersPostprocess(
       }> => result.status === 'fulfilled' && result.value.success
     )
     .map(
-      (result: PromiseFulfilledResult<{
-        chapterId: string;
-        content: string;
-        success: true;
-      }>) => result.value
+      (
+        result: PromiseFulfilledResult<{
+          chapterId: string;
+          content: string;
+          success: true;
+        }>
+      ) => result.value
     );
 
   const failedChapters = results
@@ -299,33 +336,31 @@ function handleWriteChaptersPostprocess(
       }> => result.status === 'fulfilled' && !result.value.success
     )
     .map(
-      (result: PromiseFulfilledResult<{
-        chapterId: string;
-        content: string;
-        success: false;
-        error: Error;
-      }>) => result.value
+      (
+        result: PromiseFulfilledResult<{
+          chapterId: string;
+          content: string;
+          success: false;
+          error: Error;
+        }>
+      ) => result.value
     );
 
   // Update project with successful chapters
   setProject(prev => ({
     ...prev,
     chapters: prev.chapters.map((c: Chapter) => {
-      const successfulResult = successfulChapters.find((r: {
-        chapterId: string;
-        content: string;
-        success: true;
-      }) => r.chapterId === c.id);
+      const successfulResult = successfulChapters.find(
+        (r: { chapterId: string; content: string; success: true }) => r.chapterId === c.id
+      );
       if (successfulResult) {
         return { ...c, content: successfulResult.content, status: ChapterStatus.COMPLETE };
       }
       // Reset failed chapters back to pending
-      const failedResult = failedChapters.find((r: {
-        chapterId: string;
-        content: string;
-        success: false;
-        error: Error;
-      }) => r.chapterId === c.id);
+      const failedResult = failedChapters.find(
+        (r: { chapterId: string; content: string; success: false; error: Error }) =>
+          r.chapterId === c.id
+      );
       if (failedResult) {
         return { ...c, status: ChapterStatus.PENDING };
       }
@@ -356,11 +391,13 @@ export function createActionSummary(
   if (action.name === 'write_chapter_parallel' && actionResult.data) {
     const results = actionResult.data;
     const successfulChapters = results.filter(
-      (r: PromiseFulfilledResult<{
-        chapterId: string;
-        content: string;
-        success: boolean;
-      }>) => r.status === 'fulfilled' && r.value.success
+      (
+        r: PromiseFulfilledResult<{
+          chapterId: string;
+          content: string;
+          success: boolean;
+        }>
+      ) => r.status === 'fulfilled' && r.value.success
     ).length;
     const totalProcessed = results.length;
 

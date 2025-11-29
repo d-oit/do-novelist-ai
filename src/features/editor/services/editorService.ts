@@ -5,11 +5,11 @@
  * Uses IndexedDB for local storage with versioning support.
  */
 
-import type { SavedDraft, DraftMetadata } from '../types';
+import { type SavedDraft, type DraftMetadata } from '../types';
 
 class EditorService {
-  private dbName = 'novelist-drafts';
-  private version = 1;
+  private readonly dbName = 'novelist-drafts';
+  private readonly version = 1;
   private db: IDBDatabase | null = null;
 
   /**
@@ -25,7 +25,7 @@ class EditorService {
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Drafts store
@@ -60,7 +60,7 @@ class EditorService {
       summary,
       savedAt: Date.now(),
       wordCount,
-      version
+      version,
     };
 
     return new Promise((resolve, reject) => {

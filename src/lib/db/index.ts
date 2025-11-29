@@ -14,7 +14,7 @@ export {
   getUserUsageStats,
   getProviderHealth,
   updateProviderHealth,
-  type UsageStats
+  type UsageStats,
 } from './ai-preferences';
 
 // AI Preferences Schema Types
@@ -22,5 +22,5 @@ export type {
   UserAIPreference,
   AIProviderCapability,
   AIUsageAnalytic,
-  AIProviderHealth
+  AIProviderHealth,
 } from './schemas/ai-preferences-schema';

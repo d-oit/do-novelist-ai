@@ -1,4 +1,3 @@
-import type { Project } from '@/types';
 import {
   type WritingSession,
   type DailyStats,
@@ -9,6 +8,8 @@ import {
   type AnalyticsFilter,
   type ChartDataPoint,
 } from '../types';
+
+import { type Project } from '@/types';
 
 interface SessionProgress {
   wordsWritten: number;
@@ -21,10 +22,10 @@ const buildDailyKey = (projectId: string, date: string) => `${projectId}|${date}
 const START_OF_WEEK = 1; // Monday
 
 class AnalyticsService {
-  private sessions = new Map<string, WritingSession>();
-  private sessionProjects = new Map<string, string>();
-  private goals = new Map<string, WritingGoals>();
-  private dailyStats = new Map<string, DailyStats>();
+  private readonly sessions = new Map<string, WritingSession>();
+  private readonly sessionProjects = new Map<string, string>();
+  private readonly goals = new Map<string, WritingGoals>();
+  private readonly dailyStats = new Map<string, DailyStats>();
 
   async init(): Promise<void> {
     return Promise.resolve();
@@ -63,7 +64,7 @@ class AnalyticsService {
       charactersTyped: number;
       backspacesPressed: number;
       aiWordsGenerated?: number;
-    },
+    }
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) {
@@ -108,9 +109,14 @@ class AnalyticsService {
   }
 
   async getProjectAnalytics(project: Project): Promise<ProjectAnalytics> {
-    const totalWords = project.chapters.reduce((sum, chapter) => sum + this.countWords(chapter.content), 0);
+    const totalWords = project.chapters.reduce(
+      (sum, chapter) => sum + this.countWords(chapter.content),
+      0
+    );
     const totalChapters = project.chapters.length;
-    const completedChapters = project.chapters.filter((chapter) => chapter.status.toLowerCase() === 'complete').length;
+    const completedChapters = project.chapters.filter(
+      chapter => chapter.status.toLowerCase() === 'complete'
+    ).length;
     const averageChapterLength = totalChapters > 0 ? totalWords / totalChapters : 0;
     const writingProgress = totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
     const projectStats = this.collectDailyStatsForProject(project.id);
@@ -126,14 +132,17 @@ class AnalyticsService {
       averageChapterLength,
       writingProgress,
       timeSpent: projectStats.reduce((sum, stat) => sum + stat.totalWritingTime, 0),
-      lastActivity: projectStats.length > 0
-        ? new Date(`${projectStats[projectStats.length - 1]?.date ?? new Date().toISOString().substring(0, 10)}T00:00:00Z`)
-        : new Date(),
-      wordCountHistory: projectStats.map((stat) => ({
+      lastActivity:
+        projectStats.length > 0
+          ? new Date(
+              `${projectStats[projectStats.length - 1]?.date ?? new Date().toISOString().substring(0, 10)}T00:00:00Z`
+            )
+          : new Date(),
+      wordCountHistory: projectStats.map(stat => ({
         date: stat.date,
         wordCount: stat.wordsWritten,
       })),
-      chapterProgress: project.chapters.map((chapter) => {
+      chapterProgress: project.chapters.map(chapter => {
         const base = {
           chapterId: chapter.id,
           title: chapter.title,
@@ -149,7 +158,9 @@ class AnalyticsService {
   }
 
   async getGoals(projectId: string): Promise<WritingGoals[]> {
-    return Array.from(this.goals.values()).filter((goal) => goal.projectId === projectId || goal.projectId === undefined);
+    return Array.from(this.goals.values()).filter(
+      goal => goal.projectId === projectId || goal.projectId === undefined
+    );
   }
 
   async createGoal(goal: Omit<WritingGoals, 'id' | 'current'>): Promise<WritingGoals> {
@@ -199,12 +210,16 @@ class AnalyticsService {
     const totalSessions = statsInRange.reduce((sum, stat) => sum + stat.sessionsCount, 0);
 
     const averageWordsPerHour = totalTime > 0 ? totalWords / (totalTime / 60) : 0;
-    const averageSessionLength = totalSessions > 0
-      ? statsInRange.reduce((sum, stat) => sum + stat.averageSessionLength * stat.sessionsCount, 0) / totalSessions
-      : 0;
+    const averageSessionLength =
+      totalSessions > 0
+        ? statsInRange.reduce(
+            (sum, stat) => sum + stat.averageSessionLength * stat.sessionsCount,
+            0
+          ) / totalSessions
+        : 0;
 
     const peakHours = statsInRange
-      .map((stat) => stat.peakWritingHour)
+      .map(stat => stat.peakWritingHour)
       .filter((hour, index, arr) => arr.indexOf(hour) === index && hour !== undefined);
 
     const preferredDays = this.collectPreferredDays(statsInRange);
@@ -224,10 +239,15 @@ class AnalyticsService {
         revisionRatio: totalWords > 0 ? Math.min(1, statsInRange.length / 10) : 0,
       },
       aiUsage: {
-        totalWordsGenerated: statsInRange.reduce((sum, stat) => sum + (stat.aiAssistancePercentage / 100) * stat.wordsWritten, 0),
-        assistancePercentage: statsInRange.length > 0
-          ? statsInRange.reduce((sum, stat) => sum + stat.aiAssistancePercentage, 0) / statsInRange.length
-          : 0,
+        totalWordsGenerated: statsInRange.reduce(
+          (sum, stat) => sum + (stat.aiAssistancePercentage / 100) * stat.wordsWritten,
+          0
+        ),
+        assistancePercentage:
+          statsInRange.length > 0
+            ? statsInRange.reduce((sum, stat) => sum + stat.aiAssistancePercentage, 0) /
+              statsInRange.length
+            : 0,
         mostAssistedChapters: [],
         aiDependencyTrend: 0,
       },
@@ -289,7 +309,8 @@ class AnalyticsService {
     const projectId = this.sessionProjects.get(session.id);
     if (!projectId) return;
 
-    const dateKey = session.endTime.toISOString().split('T')[0] ?? session.endTime.toISOString().substring(0, 10);
+    const dateKey =
+      session.endTime.toISOString().split('T')[0] ?? session.endTime.toISOString().substring(0, 10);
     const key = buildDailyKey(projectId, dateKey);
 
     const existing = this.dailyStats.get(key);
@@ -305,7 +326,8 @@ class AnalyticsService {
         averageSessionLength: currentMinutes,
         peakWritingHour: session.endTime.getHours(),
         productivity: currentMinutes > 0 ? currentWords / (currentMinutes / 60) : 0,
-        aiAssistancePercentage: currentWords > 0 ? (session.aiWordsGenerated / currentWords) * 100 : 0,
+        aiAssistancePercentage:
+          currentWords > 0 ? (session.aiWordsGenerated / currentWords) * 100 : 0,
       };
 
       this.dailyStats.set(key, stats);
@@ -342,15 +364,13 @@ class AnalyticsService {
     const endKey = end.toISOString().slice(0, 10);
 
     return Array.from(this.dailyStats.values())
-      .filter((stat) => stat.date >= startKey && stat.date <= endKey)
+      .filter(stat => stat.date >= startKey && stat.date <= endKey)
       .sort((a, b) => a.date.localeCompare(b.date));
   }
 
   private computeStreaks(stats: DailyStats[]): WritingInsights['streaks'] {
     const streakLength = this.computeStreakLength(stats);
-    const dates = stats
-      .filter((stat) => stat.wordsWritten > 0)
-      .map((stat) => stat.date);
+    const dates = stats.filter(stat => stat.wordsWritten > 0).map(stat => stat.date);
 
     return {
       currentStreak: streakLength,
@@ -391,7 +411,7 @@ class AnalyticsService {
   private collectPreferredDays(stats: DailyStats[]): string[] {
     const dayCounts = new Map<string, number>();
 
-    stats.forEach((stat) => {
+    stats.forEach(stat => {
       const date = new Date(`${stat.date}T00:00:00Z`);
       const day = date.toLocaleDateString('en-US', { weekday: 'long' });
       dayCounts.set(day, (dayCounts.get(day) ?? 0) + stat.wordsWritten);

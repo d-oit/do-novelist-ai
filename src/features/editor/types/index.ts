@@ -16,18 +16,22 @@ export const RefineOptionsSchema = z.object({
   temperature: z.number().min(0).max(2).default(0.7),
   maxTokens: z.number().int().min(100).max(8000).default(2000),
   topP: z.number().min(0).max(1).default(0.95),
-  focusAreas: z.array(z.enum([
-    'grammar',
-    'style',
-    'pacing',
-    'character_development',
-    'dialogue',
-    'description',
-    'plot_consistency',
-    'tone'
-  ])).default(['grammar', 'style']),
+  focusAreas: z
+    .array(
+      z.enum([
+        'grammar',
+        'style',
+        'pacing',
+        'character_development',
+        'dialogue',
+        'description',
+        'plot_consistency',
+        'tone',
+      ])
+    )
+    .default(['grammar', 'style']),
   preserveLength: z.boolean().default(false),
-  targetTone: z.enum(['formal', 'casual', 'dramatic', 'humorous', 'mysterious']).optional()
+  targetTone: z.enum(['formal', 'casual', 'dramatic', 'humorous', 'mysterious']).optional(),
 });
 
 export type RefineOptions = z.infer<typeof RefineOptionsSchema>;
@@ -73,7 +77,14 @@ export interface EditorState extends EditorContent, EditorUIState {
 // Image Generation
 // ============================================================================
 
-export const ImageStyleSchema = z.enum(['realistic', 'illustration', 'anime', 'sketch', 'watercolor', 'oil-painting']);
+export const ImageStyleSchema = z.enum([
+  'realistic',
+  'illustration',
+  'anime',
+  'sketch',
+  'watercolor',
+  'oil-painting',
+]);
 export const AspectRatioSchema = z.enum(['16:9', '4:3', '1:1', '9:16', '3:4']);
 
 export const ImageGenerationOptionsSchema = z.object({
@@ -81,7 +92,7 @@ export const ImageGenerationOptionsSchema = z.object({
   style: ImageStyleSchema.default('illustration'),
   aspectRatio: AspectRatioSchema.default('16:9'),
   negativePrompt: z.string().max(500).optional(),
-  seed: z.number().int().optional()
+  seed: z.number().int().optional(),
 });
 
 export type ImageGenerationOptions = z.infer<typeof ImageGenerationOptionsSchema>;

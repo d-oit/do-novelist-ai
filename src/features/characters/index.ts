@@ -7,13 +7,13 @@
 
 // Types
 export type {
-    Character,
-    CharacterRole,
-    CharacterArc,
-    CharacterTrait,
-    CharacterRelationship,
-    CharacterValidationResult,
-    CharacterFilters as CharacterFilterOptions
+  Character,
+  CharacterRole,
+  CharacterArc,
+  CharacterTrait,
+  CharacterRelationship,
+  CharacterValidationResult,
+  CharacterFilters as CharacterFilterOptions,
 } from './types';
 
 // Hooks

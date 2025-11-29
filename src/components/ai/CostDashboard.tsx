@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Activity, CheckCircle } from 'lucide-react';
-import { getUsageStats, getBudgetInfo, getOptimizationRecommendations } from '@/services/ai-analytics-service';
-import type { UsageStats, BudgetInfo } from '@/services/ai-analytics-service';
+import {
+  getUsageStats,
+  getBudgetInfo,
+  getOptimizationRecommendations,
+  type EnhancedUsageStats,
+} from '@/services/ai-analytics-service';
+import type { BudgetInfo } from '@/services/ai-analytics-service';
+import { type AIProvider } from '@/lib/ai-config';
 
 interface CostDashboardProps {
   userId: string;
 }
 
 export function CostDashboard({ userId }: CostDashboardProps) {
-  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+  const [usageStats, setUsageStats] = useState<EnhancedUsageStats | null>(null);
   const [budgetInfo, setBudgetInfo] = useState<BudgetInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,10 +24,7 @@ export function CostDashboard({ userId }: CostDashboardProps) {
 
   const loadData = async () => {
     try {
-      const [stats, budget] = await Promise.all([
-        getUsageStats(userId),
-        getBudgetInfo(userId)
-      ]);
+      const [stats, budget] = await Promise.all([getUsageStats(userId), getBudgetInfo(userId)]);
 
       setUsageStats(stats);
       setBudgetInfo(budget);
@@ -34,12 +37,12 @@ export function CostDashboard({ userId }: CostDashboardProps) {
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-lg border">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className='rounded-lg border bg-white p-6'>
+        <div className='animate-pulse space-y-4'>
+          <div className='h-4 w-1/4 rounded bg-gray-200'></div>
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 bg-gray-200 rounded"></div>
+              <div key={i} className='h-24 rounded bg-gray-200'></div>
             ))}
           </div>
         </div>
@@ -49,8 +52,8 @@ export function CostDashboard({ userId }: CostDashboardProps) {
 
   if (!usageStats || !budgetInfo) {
     return (
-      <div className="bg-white p-6 rounded-lg border">
-        <p className="text-gray-500">No usage data available</p>
+      <div className='rounded-lg border bg-white p-6'>
+        <p className='text-gray-500'>No usage data available</p>
       </div>
     );
   }
@@ -58,112 +61,116 @@ export function CostDashboard({ userId }: CostDashboardProps) {
   const recommendations = getOptimizationRecommendations(usageStats, budgetInfo);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-lg border">
-          <div className="flex items-center justify-between">
+    <div className='space-y-6'>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+        <div className='rounded-lg border bg-white p-6'>
+          <div className='flex items-center justify-between'>
             <div>
-              <p className="text-sm text-gray-600">Total Cost</p>
-              <p className="text-2xl font-bold">${usageStats.totalCost.toFixed(4)}</p>
+              <p className='text-sm text-gray-600'>Total Cost</p>
+              <p className='text-2xl font-bold'>${usageStats.totalCost.toFixed(4)}</p>
             </div>
-            <DollarSign className="w-8 h-8 text-green-500" />
+            <DollarSign className='h-8 w-8 text-green-500' />
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            of ${budgetInfo.totalBudget} budget
-          </p>
+          <p className='mt-2 text-xs text-gray-500'>of ${budgetInfo.totalBudget} budget</p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border">
-          <div className="flex items-center justify-between">
+        <div className='rounded-lg border bg-white p-6'>
+          <div className='flex items-center justify-between'>
             <div>
-              <p className="text-sm text-gray-600">Tokens Used</p>
-              <p className="text-2xl font-bold">{usageStats.totalTokens.toLocaleString()}</p>
+              <p className='text-sm text-gray-600'>Tokens Used</p>
+              <p className='text-2xl font-bold'>{usageStats.totalTokens.toLocaleString()}</p>
             </div>
-            <Activity className="w-8 h-8 text-blue-500" />
+            <Activity className='h-8 w-8 text-blue-500' />
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            {usageStats.totalRequests} requests
-          </p>
+          <p className='mt-2 text-xs text-gray-500'>{usageStats.totalRequests} requests</p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border">
-          <div className="flex items-center justify-between">
+        <div className='rounded-lg border bg-white p-6'>
+          <div className='flex items-center justify-between'>
             <div>
-              <p className="text-sm text-gray-600">Avg Latency</p>
-              <p className="text-2xl font-bold">{usageStats.avgLatencyMs.toFixed(0)}ms</p>
+              <p className='text-sm text-gray-600'>Avg Latency</p>
+              <p className='text-2xl font-bold'>{usageStats.avgLatencyMs.toFixed(0)}ms</p>
             </div>
-            <TrendingUp className="w-8 h-8 text-purple-500" />
+            <TrendingUp className='h-8 w-8 text-purple-500' />
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className='mt-2 text-xs text-gray-500'>
             {usageStats.successRate.toFixed(1)}% success rate
           </p>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border">
-        <h3 className="font-semibold mb-4">Budget Status</h3>
-        <div className="space-y-3">
+      <div className='rounded-lg border bg-white p-6'>
+        <h3 className='mb-4 font-semibold'>Budget Status</h3>
+        <div className='space-y-3'>
           <div>
-            <div className="flex justify-between text-sm mb-1">
+            <div className='mb-1 flex justify-between text-sm'>
               <span>Usage</span>
               <span>{budgetInfo.usagePercentage.toFixed(1)}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className='h-2 w-full rounded-full bg-gray-200'>
               <div
                 className={`h-2 rounded-full ${
-                  budgetInfo.isOverLimit ? 'bg-red-500' :
-                  budgetInfo.isNearLimit ? 'bg-yellow-500' : 'bg-green-500'
+                  budgetInfo.isOverLimit
+                    ? 'bg-red-500'
+                    : budgetInfo.isNearLimit
+                      ? 'bg-yellow-500'
+                      : 'bg-green-500'
                 }`}
                 style={{ width: `${Math.min(budgetInfo.usagePercentage, 100)}%` }}
               ></div>
             </div>
           </div>
-          <div className="flex justify-between text-sm text-gray-600">
+          <div className='flex justify-between text-sm text-gray-600'>
             <span>Used: ${budgetInfo.usedBudget.toFixed(4)}</span>
             <span>Remaining: ${budgetInfo.remainingBudget.toFixed(4)}</span>
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border">
-        <h3 className="font-semibold mb-4">Provider Breakdown</h3>
-        <div className="space-y-3">
+      <div className='rounded-lg border bg-white p-6'>
+        <h3 className='mb-4 font-semibold'>Provider Breakdown</h3>
+        <div className='space-y-3'>
           {usageStats.costByProvider.length > 0 ? (
-            usageStats.costByProvider.map(item => (
-              <div key={item.provider} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="font-medium capitalize">{item.provider}</span>
+            usageStats.costByProvider.map(
+              (item: { provider: AIProvider; cost: number; percentage: number }) => (
+                <div
+                  key={item.provider}
+                  className='flex items-center justify-between rounded bg-gray-50 p-3'
+                >
+                  <div className='flex items-center gap-3'>
+                    <div className='h-3 w-3 rounded-full bg-blue-500'></div>
+                    <span className='font-medium capitalize'>{item.provider}</span>
+                  </div>
+                  <div className='text-right'>
+                    <div className='font-bold'>${item.cost.toFixed(4)}</div>
+                    <div className='text-xs text-gray-500'>{item.percentage.toFixed(1)}%</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-bold">${item.cost.toFixed(4)}</div>
-                  <div className="text-xs text-gray-500">{item.percentage.toFixed(1)}%</div>
-                </div>
-              </div>
-            ))
+              )
+            )
           ) : (
-            <p className="text-gray-500 text-sm">No usage data</p>
+            <p className='text-sm text-gray-500'>No usage data</p>
           )}
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border">
-        <h3 className="font-semibold mb-4">Optimization Suggestions</h3>
-        <div className="space-y-3">
+      <div className='rounded-lg border bg-white p-6'>
+        <h3 className='mb-4 font-semibold'>Optimization Suggestions</h3>
+        <div className='space-y-3'>
           {recommendations.map((rec, idx) => (
-            <div key={idx} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-start gap-3">
+            <div key={idx} className='rounded-lg border border-blue-200 bg-blue-50 p-4'>
+              <div className='flex items-start gap-3'>
                 {rec.type === 'cheaper_provider' || rec.type === 'cheaper_model' ? (
-                  <TrendingDown className="w-5 h-5 text-green-500 mt-0.5" />
+                  <TrendingDown className='mt-0.5 h-5 w-5 text-green-500' />
                 ) : rec.type === 'reduce_tokens' ? (
-                  <TrendingUp className="w-5 h-5 text-orange-500 mt-0.5" />
+                  <TrendingUp className='mt-0.5 h-5 w-5 text-orange-500' />
                 ) : (
-                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5" />
+                  <CheckCircle className='mt-0.5 h-5 w-5 text-green-500' />
                 )}
-                <div className="flex-1">
-                  <p className="font-medium">{rec.description}</p>
+                <div className='flex-1'>
+                  <p className='font-medium'>{rec.description}</p>
                   {rec.estimatedSavings > 0 && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className='mt-1 text-sm text-gray-600'>
                       Estimated savings: ${rec.estimatedSavings.toFixed(4)}
                     </p>
                   )}

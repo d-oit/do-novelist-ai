@@ -1,8 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
-import { setupGeminiMock } from '../utils/mock-gemini';
+
+import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
 test.describe('Feature: Navigation & UX', () => {
-
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
@@ -47,7 +47,6 @@ test.describe('Feature: Navigation & UX', () => {
     // On desktop, sidebar remains hidden after exiting focus mode
     await expect(sidebar).toBeHidden();
   });
-
 });
 
 /**
@@ -66,7 +65,7 @@ async function setupTestProject(page: Page) {
   // Check for wizard overlay
   const wizard = page.getByTestId('project-wizard-overlay');
 
-  if (!await wizard.isVisible()) {
+  if (!(await wizard.isVisible())) {
     // If neither sidebar nor wizard is visible, try clicking "New Project" if available
     const newProjectBtn = page.getByTestId('nav-new-project');
     if (await newProjectBtn.isVisible()) {

@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { versioningService } from '../versioningService';
-import { Chapter, ChapterStatus } from '../../../../types';
+
 import { createChapter } from '../../../../shared/utils';
+import { Chapter, ChapterStatus } from '../../../../types';
+import { versioningService } from '../versioningService';
 
 // Mock indexedDB
 const mockOpenDB = vi.fn();
@@ -79,8 +80,8 @@ describe('VersioningService', () => {
     });
 
     // Setup add operation
-    mockAdd.mockImplementation((data) => {
-      if (data && data.id && data.chapterId) {
+    mockAdd.mockImplementation(data => {
+      if (data?.id && data.chapterId) {
         storage.versions.push(data);
       }
       const request = createRequest(data);
@@ -89,18 +90,18 @@ describe('VersioningService', () => {
     });
 
     // Setup get operation
-    mockGet.mockImplementation((id) => {
-      const _version = storage.versions.find((v) => v.id === id);
+    mockGet.mockImplementation(id => {
+      const _version = storage.versions.find(v => v.id === id);
       const request = createRequest(_version || null);
       setTimeout(() => request.onsuccess?.({ target: request }), 0);
       return request;
     });
 
     // Setup getAll operation
-    mockGetAll.mockImplementation((chapterId) => {
+    mockGetAll.mockImplementation(chapterId => {
       let results = storage.versions;
       if (chapterId) {
-        results = storage.versions.filter((v) => v.chapterId === chapterId);
+        results = storage.versions.filter(v => v.chapterId === chapterId);
       }
       const request = createRequest(results);
       setTimeout(() => request.onsuccess?.({ target: request }), 0);
@@ -108,9 +109,9 @@ describe('VersioningService', () => {
     });
 
     // Setup put operation
-    mockPut.mockImplementation((data) => {
-      if (data && data.id && data.chapterId) {
-        const index = storage.versions.findIndex((v) => v.id === data.id);
+    mockPut.mockImplementation(data => {
+      if (data?.id && data.chapterId) {
+        const index = storage.versions.findIndex(v => v.id === data.id);
         if (index >= 0) {
           storage.versions[index] = data;
         } else {
@@ -123,8 +124,8 @@ describe('VersioningService', () => {
     });
 
     // Setup delete operation
-    mockDelete.mockImplementation((id) => {
-      const index = storage.versions.findIndex((v) => v.id === id);
+    mockDelete.mockImplementation(id => {
+      const index = storage.versions.findIndex(v => v.id === id);
       if (index >= 0) {
         storage.versions.splice(index, 1);
       }
@@ -370,15 +371,16 @@ describe('VersioningService', () => {
     });
 
     it('should throw error when comparing non-existent versions', async () => {
-      await expect(
-        versioningService.compareVersions('invalid1', 'invalid2')
-      ).rejects.toThrow('One or both versions not found');
+      await expect(versioningService.compareVersions('invalid1', 'invalid2')).rejects.toThrow(
+        'One or both versions not found'
+      );
     });
 
     it('should detect additions, deletions, and modifications', async () => {
       const version1 = await versioningService.saveVersion(testChapter);
 
-      testChapter.content = 'This is completely different content.\nWith multiple lines.\nAnd more changes.';
+      testChapter.content =
+        'This is completely different content.\nWith multiple lines.\nAnd more changes.';
       const version2 = await versioningService.saveVersion(testChapter);
 
       const comparison = await versioningService.compareVersions(version1.id, version2.id);

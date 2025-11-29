@@ -287,7 +287,11 @@ function checkPattern(value: string, pattern: RegExp | undefined, errorMessage: 
   }
 }
 
-function checkCustomValidator(value: string, customValidator: ((value: string) => boolean) | undefined, errorMessage: string): void {
+function checkCustomValidator(
+  value: string,
+  customValidator: ((value: string) => boolean) | undefined,
+  errorMessage: string
+): void {
   if (customValidator && !customValidator(value)) {
     throw new ValidationError(errorMessage, undefined, 'CUSTOM_VALIDATION_FAILED');
   }

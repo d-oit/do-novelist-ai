@@ -17,7 +17,7 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -74,7 +74,7 @@ export const storage = {
     } catch (error) {
       console.warn('Failed to remove from localStorage:', error);
     }
-  }
+  },
 };
 
 /**
@@ -82,20 +82,18 @@ export const storage = {
  * Ensures 44x44px minimum per WCAG 2.1 guidelines
  * Automatically resets to normal size on desktop (md: breakpoint)
  */
-export const touchTarget = (className?: string) => cn(
-  "min-h-[44px] min-w-[44px]",
-  "md:min-h-auto md:min-w-auto",
-  className
-);
+export const touchTarget = (className?: string) =>
+  cn('min-h-[44px] min-w-[44px]', 'md:min-h-auto md:min-w-auto', className);
 
 /**
  * Icon button touch target (maintains square aspect ratio)
  * Perfect for icon-only buttons that need to meet WCAG 44x44px minimum
  * Centers content within the touch target
  */
-export const iconButtonTarget = (className?: string) => cn(
-  "min-h-[44px] min-w-[44px]",
-  "flex items-center justify-center",
-  "md:min-h-auto md:min-w-auto",
-  className
-);
+export const iconButtonTarget = (className?: string) =>
+  cn(
+    'min-h-[44px] min-w-[44px]',
+    'flex items-center justify-center',
+    'md:min-h-auto md:min-w-auto',
+    className
+  );

@@ -24,15 +24,11 @@ export type {
   PublishingTrends,
   PublishingAlert,
   PublishingAnalyticsFilter,
-  PublishingExport
+  PublishingExport,
 } from '../features/publishing/types';
 
 // Type aliases for backward compatibility
 export type { EngagementMetrics as PublishingAnalytics } from '../features/publishing/types';
 
 // Legacy enum exports - import from root types.ts
-export {
-  AgentMode,
-  ChapterStatus,
-  PublishStatus
-} from '../../types';
+export { AgentMode, ChapterStatus, PublishStatus } from '../../types';

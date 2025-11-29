@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+
 import { useAnalyticsStore } from '../../../lib/stores/analyticsStore';
 import { Project } from '../../../types';
 import {
@@ -8,7 +9,7 @@ import {
   WritingGoals,
   WritingInsights,
   AnalyticsFilter,
-  ChartDataPoint
+  ChartDataPoint,
 } from '../types';
 
 export interface UseAnalyticsReturn {
@@ -80,20 +81,23 @@ export const useAnalytics = (): UseAnalyticsReturn => {
   }, [store]);
 
   // Session Management Wrappers
-  const startSession = useCallback(async (projectId: string, chapterId?: string) => {
-    const session = await store.startSession(projectId, chapterId);
+  const startSession = useCallback(
+    async (projectId: string, chapterId?: string) => {
+      const session = await store.startSession(projectId, chapterId);
 
-    // Reset local metrics
-    sessionMetrics.current = {
-      initialWordCount: 0,
-      currentWordCount: 0,
-      charactersTyped: 0,
-      backspacesPressed: 0,
-      aiWordsGenerated: 0,
-    };
+      // Reset local metrics
+      sessionMetrics.current = {
+        initialWordCount: 0,
+        currentWordCount: 0,
+        charactersTyped: 0,
+        backspacesPressed: 0,
+        aiWordsGenerated: 0,
+      };
 
-    return session;
-  }, [store]);
+      return session;
+    },
+    [store]
+  );
 
   const endSession = useCallback(async () => {
     const metrics = sessionMetrics.current;
@@ -107,56 +111,68 @@ export const useAnalytics = (): UseAnalyticsReturn => {
   }, [store]);
 
   // Tracking Functions
-  const trackWordCountChange = useCallback((oldCount: number, newCount: number) => {
-    if (!store.isTracking) return;
+  const trackWordCountChange = useCallback(
+    (oldCount: number, newCount: number) => {
+      if (!store.isTracking) return;
 
-    sessionMetrics.current.currentWordCount = newCount;
-    if (sessionMetrics.current.initialWordCount === 0) {
-      sessionMetrics.current.initialWordCount = oldCount;
-    }
-  }, [store.isTracking]);
+      sessionMetrics.current.currentWordCount = newCount;
+      if (sessionMetrics.current.initialWordCount === 0) {
+        sessionMetrics.current.initialWordCount = oldCount;
+      }
+    },
+    [store.isTracking]
+  );
 
-  const trackKeystroke = useCallback((isBackspace: boolean = false) => {
-    if (!store.isTracking) return;
+  const trackKeystroke = useCallback(
+    (isBackspace = false) => {
+      if (!store.isTracking) return;
 
-    if (isBackspace) {
-      sessionMetrics.current.backspacesPressed++;
-    } else {
-      sessionMetrics.current.charactersTyped++;
-    }
-  }, [store.isTracking]);
+      if (isBackspace) {
+        sessionMetrics.current.backspacesPressed++;
+      } else {
+        sessionMetrics.current.charactersTyped++;
+      }
+    },
+    [store.isTracking]
+  );
 
-  const trackAIGeneration = useCallback((wordsGenerated: number) => {
-    if (!store.isTracking) return;
-    sessionMetrics.current.aiWordsGenerated += wordsGenerated;
-  }, [store.isTracking]);
+  const trackAIGeneration = useCallback(
+    (wordsGenerated: number) => {
+      if (!store.isTracking) return;
+      sessionMetrics.current.aiWordsGenerated += wordsGenerated;
+    },
+    [store.isTracking]
+  );
 
   // Export Logic (kept here as it's a utility)
-  const exportAnalytics = useCallback(async (format: 'json' | 'csv' | 'pdf'): Promise<string> => {
-    const exportData = {
-      projectAnalytics: store.projectAnalytics,
-      weeklyStats: store.weeklyStats,
-      insights: store.insights,
-      goals: store.goals,
-      charts: {
-        wordCount: store.wordCountChart,
-        productivity: store.productivityChart,
-        streak: store.streakChart,
-      },
-      exportedAt: new Date().toISOString(),
-    };
+  const exportAnalytics = useCallback(
+    async (format: 'json' | 'csv' | 'pdf'): Promise<string> => {
+      const exportData = {
+        projectAnalytics: store.projectAnalytics,
+        weeklyStats: store.weeklyStats,
+        insights: store.insights,
+        goals: store.goals,
+        charts: {
+          wordCount: store.wordCountChart,
+          productivity: store.productivityChart,
+          streak: store.streakChart,
+        },
+        exportedAt: new Date().toISOString(),
+      };
 
-    if (format === 'json') {
-      return JSON.stringify(exportData, null, 2);
-    } else if (format === 'csv') {
-      // Simple CSV conversion
-      return Object.entries(exportData)
-        .map(([key, value]) => `${key},${JSON.stringify(value)}`)
-        .join('\n');
-    } else {
-      throw new Error('PDF export not yet implemented');
-    }
-  }, [store]);
+      if (format === 'json') {
+        return JSON.stringify(exportData, null, 2);
+      } else if (format === 'csv') {
+        // Simple CSV conversion
+        return Object.entries(exportData)
+          .map(([key, value]) => `${key},${JSON.stringify(value)}`)
+          .join('\n');
+      } else {
+        throw new Error('PDF export not yet implemented');
+      }
+    },
+    [store]
+  );
 
   // Auto-end session on page unload
   useEffect(() => {
@@ -187,12 +203,12 @@ export const useAnalytics = (): UseAnalyticsReturn => {
     // Actions from Store
     startSession,
     endSession,
-    loadProjectAnalytics: (project) => store.loadProjectAnalytics(project),
+    loadProjectAnalytics: project => store.loadProjectAnalytics(project),
 
     loadWeeklyStats: store.loadWeeklyStats,
     loadInsights: store.loadInsights,
     createGoal: store.createGoal,
-    updateGoal: (id) => store.updateGoal(id, {}), // Simplified for now
+    updateGoal: id => store.updateGoal(id, {}), // Simplified for now
     loadWordCountChart: store.loadWordCountChart,
     loadProductivityChart: store.loadProductivityChart,
 

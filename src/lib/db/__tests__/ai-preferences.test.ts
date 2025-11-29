@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import {
   getUserAIPreference,
   saveUserAIPreference,
@@ -13,13 +14,13 @@ import {
   getUserUsageStats,
   getProviderHealth,
   updateProviderHealth,
-  initAIPreferencesDB
+  initAIPreferencesDB,
 } from '../ai-preferences';
-import type {
-  UserAIPreference,
-  AIProviderCapability,
-  AIUsageAnalytic,
-  AIProviderHealth
+import {
+  type UserAIPreference,
+  type AIProviderCapability,
+  type AIUsageAnalytic,
+  type AIProviderHealth,
 } from '../schemas/ai-preferences-schema';
 
 // Mock localStorage
@@ -38,12 +39,12 @@ const localStorageMock = (() => {
     },
     clear: (): void => {
       store = {};
-    }
+    },
   };
 })();
 
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
+  value: localStorageMock,
 });
 
 describe('AI Preferences Database Service', () => {
@@ -74,7 +75,7 @@ describe('AI Preferences Database Service', () => {
       frequencyPenalty: 0.0,
       presencePenalty: 0.0,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     it('should save user AI preference to localStorage', async () => {
@@ -112,7 +113,7 @@ describe('AI Preferences Database Service', () => {
       const updated: UserAIPreference = {
         ...mockPreference,
         selectedModel: 'gpt-4o-mini',
-        temperature: 0.5
+        temperature: 0.5,
       };
 
       await saveUserAIPreference(updated);
@@ -127,7 +128,7 @@ describe('AI Preferences Database Service', () => {
       const prefWithNoBudget: UserAIPreference = {
         ...mockPreference,
         budgetLimit: null,
-        budgetPeriod: null
+        budgetPeriod: null,
       };
 
       await saveUserAIPreference(prefWithNoBudget);
@@ -154,7 +155,7 @@ describe('AI Preferences Database Service', () => {
       contextWindow: 128000,
       capabilities: JSON.stringify(['text', 'vision', 'function-calling']),
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     it('should save provider capability to localStorage', async () => {
@@ -175,7 +176,7 @@ describe('AI Preferences Database Service', () => {
         ...mockCapability,
         id: 'cap-456',
         provider: 'anthropic',
-        modelName: 'claude-3-5-sonnet-20241022'
+        modelName: 'claude-3-5-sonnet-20241022',
       };
 
       await saveProviderCapability(mockCapability2);
@@ -192,7 +193,7 @@ describe('AI Preferences Database Service', () => {
         ...mockCapability,
         id: 'cap-456',
         provider: 'anthropic',
-        modelName: 'claude-3-5-sonnet-20241022'
+        modelName: 'claude-3-5-sonnet-20241022',
       };
 
       await saveProviderCapability(mockCapability2);
@@ -208,7 +209,7 @@ describe('AI Preferences Database Service', () => {
 
       const updated: AIProviderCapability = {
         ...mockCapability,
-        inputCostPer1kTokens: 0.003
+        inputCostPer1kTokens: 0.003,
       };
 
       await saveProviderCapability(updated);
@@ -234,7 +235,7 @@ describe('AI Preferences Database Service', () => {
       success: true,
       errorMessage: null,
       requestType: 'chapter-generation',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     it('should log usage analytic to localStorage', async () => {
@@ -255,7 +256,7 @@ describe('AI Preferences Database Service', () => {
         id: 'anal-124',
         totalTokens: 400,
         estimatedCost: 0.006,
-        latencyMs: 2000
+        latencyMs: 2000,
       });
 
       const stats = await getUserUsageStats('user-456');
@@ -273,7 +274,7 @@ describe('AI Preferences Database Service', () => {
         ...mockAnalytic,
         id: 'anal-125',
         success: false,
-        errorMessage: 'Rate limit exceeded'
+        errorMessage: 'Rate limit exceeded',
       });
 
       const stats = await getUserUsageStats('user-456');
@@ -288,10 +289,7 @@ describe('AI Preferences Database Service', () => {
       await logUsageAnalytic({ ...mockAnalytic, id: 'anal-old', createdAt: oldDate });
       await logUsageAnalytic({ ...mockAnalytic, id: 'anal-new', createdAt: newDate });
 
-      const stats = await getUserUsageStats(
-        'user-456',
-        new Date('2024-06-01').toISOString()
-      );
+      const stats = await getUserUsageStats('user-456', new Date('2024-06-01').toISOString());
 
       expect(stats.totalRequests).toBe(1);
     });
@@ -319,7 +317,7 @@ describe('AI Preferences Database Service', () => {
       lastIncidentAt: null,
       incidentDescription: null,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     it('should save provider health to localStorage', async () => {
@@ -339,7 +337,7 @@ describe('AI Preferences Database Service', () => {
         ...mockHealth,
         id: 'health-456',
         provider: 'anthropic',
-        uptime: 99.5
+        uptime: 99.5,
       });
 
       const health = await getProviderHealth();
@@ -352,7 +350,7 @@ describe('AI Preferences Database Service', () => {
       await updateProviderHealth({
         ...mockHealth,
         id: 'health-456',
-        provider: 'anthropic'
+        provider: 'anthropic',
       });
 
       const health = await getProviderHealth('openai');
@@ -369,7 +367,7 @@ describe('AI Preferences Database Service', () => {
         status: 'degraded',
         errorRate: 5.0,
         lastIncidentAt: new Date().toISOString(),
-        incidentDescription: 'Increased latency detected'
+        incidentDescription: 'Increased latency detected',
       };
 
       await updateProviderHealth(updated);
@@ -389,7 +387,7 @@ describe('AI Preferences Database Service', () => {
         uptime: 0,
         errorRate: 100,
         lastIncidentAt: new Date().toISOString(),
-        incidentDescription: 'Complete service outage'
+        incidentDescription: 'Complete service outage',
       };
 
       await updateProviderHealth(outageHealth);
@@ -437,7 +435,7 @@ describe('AI Preferences Database Service', () => {
         frequencyPenalty: 0.0,
         presencePenalty: 0.0,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       await saveUserAIPreference(preference);
@@ -461,7 +459,7 @@ describe('AI Preferences Database Service', () => {
         contextWindow: 128000,
         capabilities: JSON.stringify(['text']),
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       await saveProviderCapability(capability);

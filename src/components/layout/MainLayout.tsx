@@ -1,6 +1,8 @@
-import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import React, { ReactNode } from 'react';
+
 import { cn } from '../../lib/utils';
+
 import { AppBackground } from './AppBackground';
 
 interface MainLayoutProps {
@@ -12,7 +14,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
   return (
     <motion.div
       className={cn(
-        "min-h-screen text-foreground font-sans selection:bg-primary/20 flex flex-col relative overflow-hidden",
+        'relative flex min-h-screen flex-col overflow-hidden font-sans text-foreground selection:bg-primary/20',
         className
       )}
       initial={{ opacity: 0 }}
@@ -23,7 +25,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
 
       {/* Main content with proper z-index and stagger animation */}
       <motion.div
-        className="relative z-10 flex flex-col min-h-screen"
+        className='relative z-10 flex min-h-screen flex-col'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.6 }}

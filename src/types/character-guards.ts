@@ -22,7 +22,7 @@ import {
   type CharacterConflict,
   type CreateCharacter,
   type UpdateCharacter,
-  type CharacterSearch
+  type CharacterSearch,
 } from './character-schemas';
 import { type ProjectId } from './schemas';
 
@@ -39,7 +39,11 @@ export function isCharacterId(value: unknown): value is CharacterId {
   return typeof value === 'string' && /^char_\w+_\d+$/.test(value);
 }
 
-export function createCharacterId(_projectId: ProjectId, name?: string, timestamp = Date.now()): CharacterId {
+export function createCharacterId(
+  _projectId: ProjectId,
+  name?: string,
+  timestamp = Date.now()
+): CharacterId {
   const safeName = name ? name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'char';
   return `char_${safeName}_${timestamp}` as CharacterId;
 }
@@ -81,44 +85,125 @@ export function isCharacterSearch(value: unknown): value is CharacterSearch {
 // =============================================================================
 
 export function isCharacterRole(value: unknown): value is CharacterRole {
-  return typeof value === 'string' && [
-    'protagonist', 'antagonist', 'deuteragonist', 'tritagonist',
-    'love_interest', 'mentor', 'sidekick', 'foil', 'supporting',
-    'minor', 'background'
-  ].includes(value);
+  return (
+    typeof value === 'string' &&
+    [
+      'protagonist',
+      'antagonist',
+      'deuteragonist',
+      'tritagonist',
+      'love_interest',
+      'mentor',
+      'sidekick',
+      'foil',
+      'supporting',
+      'minor',
+      'background',
+    ].includes(value)
+  );
 }
 
 export function isCharacterArcType(value: unknown): value is CharacterArcType {
-  return typeof value === 'string' && [
-    'positive_change', 'negative_change', 'flat', 'corruption',
-    'redemption', 'growth', 'fall', 'disillusion', 'testing'
-  ].includes(value);
+  return (
+    typeof value === 'string' &&
+    [
+      'positive_change',
+      'negative_change',
+      'flat',
+      'corruption',
+      'redemption',
+      'growth',
+      'fall',
+      'disillusion',
+      'testing',
+    ].includes(value)
+  );
 }
 
 export function isPersonalityTrait(value: unknown): value is PersonalityTrait {
-  return typeof value === 'string' && [
-    'brave', 'cowardly', 'intelligent', 'foolish', 'kind', 'cruel',
-    'honest', 'deceptive', 'loyal', 'treacherous', 'optimistic', 'pessimistic',
-    'confident', 'insecure', 'patient', 'impatient', 'humble', 'arrogant',
-    'generous', 'selfish', 'creative', 'conventional', 'ambitious', 'content',
-    'curious', 'indifferent', 'disciplined', 'impulsive', 'empathetic', 'callous'
-  ].includes(value);
+  return (
+    typeof value === 'string' &&
+    [
+      'brave',
+      'cowardly',
+      'intelligent',
+      'foolish',
+      'kind',
+      'cruel',
+      'honest',
+      'deceptive',
+      'loyal',
+      'treacherous',
+      'optimistic',
+      'pessimistic',
+      'confident',
+      'insecure',
+      'patient',
+      'impatient',
+      'humble',
+      'arrogant',
+      'generous',
+      'selfish',
+      'creative',
+      'conventional',
+      'ambitious',
+      'content',
+      'curious',
+      'indifferent',
+      'disciplined',
+      'impulsive',
+      'empathetic',
+      'callous',
+    ].includes(value)
+  );
 }
 
 export function isRelationshipType(value: unknown): value is RelationshipType {
-  return typeof value === 'string' && [
-    'family', 'romantic', 'friendship', 'mentor_student', 'rivalry',
-    'enemy', 'ally', 'professional', 'acquaintance', 'stranger'
-  ].includes(value);
+  return (
+    typeof value === 'string' &&
+    [
+      'family',
+      'romantic',
+      'friendship',
+      'mentor_student',
+      'rivalry',
+      'enemy',
+      'ally',
+      'professional',
+      'acquaintance',
+      'stranger',
+    ].includes(value)
+  );
 }
 
 export function isEmotionalState(value: unknown): value is EmotionalState {
-  return typeof value === 'string' && [
-    'happy', 'sad', 'angry', 'fearful', 'disgusted', 'surprised',
-    'contempt', 'pride', 'shame', 'guilt', 'envy', 'gratitude',
-    'hope', 'despair', 'love', 'hate', 'confusion', 'clarity',
-    'anxiety', 'calm', 'excitement', 'boredom'
-  ].includes(value);
+  return (
+    typeof value === 'string' &&
+    [
+      'happy',
+      'sad',
+      'angry',
+      'fearful',
+      'disgusted',
+      'surprised',
+      'contempt',
+      'pride',
+      'shame',
+      'guilt',
+      'envy',
+      'gratitude',
+      'hope',
+      'despair',
+      'love',
+      'hate',
+      'confusion',
+      'clarity',
+      'anxiety',
+      'calm',
+      'excitement',
+      'boredom',
+    ].includes(value)
+  );
 }
 
 // =============================================================================
@@ -191,15 +276,16 @@ export function hasPortrait(character: Character): boolean {
  * Check if two characters are in a specific relationship
  */
 export function hasRelationship(
-  character1: Character, 
-  character2: Character, 
+  character1: Character,
+  character2: Character,
   relationships: CharacterRelationship[],
   type?: RelationshipType
 ): boolean {
-  return relationships.some(rel => 
-    ((rel.characterAId === character1.id && rel.characterBId === character2.id) ||
-     (rel.characterAId === character2.id && rel.characterBId === character1.id)) &&
-    (type ? rel.type === type : true)
+  return relationships.some(
+    rel =>
+      ((rel.characterAId === character1.id && rel.characterBId === character2.id) ||
+        (rel.characterAId === character2.id && rel.characterBId === character1.id)) &&
+      (type ? rel.type === type : true)
   );
 }
 
@@ -213,7 +299,10 @@ export function appearsInChapter(character: Character, chapterId: string): boole
 /**
  * Check if a character is involved in a conflict
  */
-export function isInvolvedInConflict(character: Character, conflicts: CharacterConflict[]): boolean {
+export function isInvolvedInConflict(
+  character: Character,
+  conflicts: CharacterConflict[]
+): boolean {
   return conflicts.some(conflict => conflict.participants.includes(character.id as CharacterId));
 }
 
@@ -272,17 +361,17 @@ export function validateRelationship(relationship: CharacterRelationship): boole
   if (relationship.characterAId === relationship.characterBId) {
     return false;
   }
-  
+
   // Romantic relationships should have higher intensity
   if (relationship.type === 'romantic' && relationship.intensity < 6) {
     return false;
   }
-  
+
   // Enemy relationships should be documented
   if (relationship.type === 'enemy' && !relationship.description) {
     return false;
   }
-  
+
   return true;
 }
 
@@ -302,7 +391,7 @@ export function validateCharacterGroup(group: CharacterGroup, characters: Charac
   if (group.characterIds.length < 2) {
     return false;
   }
-  
+
   // All character IDs must exist
   const characterIds = characters.map(c => c.id);
   return group.characterIds.every(id => characterIds.includes(id));
@@ -311,12 +400,15 @@ export function validateCharacterGroup(group: CharacterGroup, characters: Charac
 /**
  * Validate character conflict
  */
-export function validateCharacterConflict(conflict: CharacterConflict, characters: Character[]): boolean {
+export function validateCharacterConflict(
+  conflict: CharacterConflict,
+  characters: Character[]
+): boolean {
   // Conflict must have at least 2 participants
   if (conflict.participants.length < 2) {
     return false;
   }
-  
+
   // All participant IDs must exist
   const characterIds = characters.map(c => c.id);
   return conflict.participants.every(id => characterIds.includes(id));
@@ -329,7 +421,9 @@ export function validateCharacterConflict(conflict: CharacterConflict, character
 /**
  * Get character importance tier
  */
-export function getCharacterTier(importance: number): 'main' | 'supporting' | 'minor' | 'background' {
+export function getCharacterTier(
+  importance: number
+): 'main' | 'supporting' | 'minor' | 'background' {
   if (importance >= 7) return 'main';
   if (importance >= 4) return 'supporting';
   if (importance >= 2) return 'minor';
@@ -358,7 +452,7 @@ export function analyzeCharacterDevelopment(character: Character): {
 } {
   const hasArc = !!character.arc;
   const appearanceCount = character.appearances.length;
-  
+
   let developmentPotential: 'high' | 'medium' | 'low';
   if (character.importance >= 7 && hasArc && appearanceCount >= 3) {
     developmentPotential = 'high';
@@ -367,11 +461,11 @@ export function analyzeCharacterDevelopment(character: Character): {
   } else {
     developmentPotential = 'low';
   }
-  
+
   return {
     hasArc,
     appearanceCount,
-    developmentPotential
+    developmentPotential,
   };
 }
 
@@ -379,18 +473,19 @@ export function analyzeCharacterDevelopment(character: Character): {
  * Find characters with potential relationship opportunities
  */
 export function findPotentialRelationships(
-  character: Character, 
+  character: Character,
   allCharacters: Character[],
   existingRelationships: CharacterRelationship[]
 ): Character[] {
   const existingRelatedIds = existingRelationships
     .filter(rel => rel.characterAId === character.id || rel.characterBId === character.id)
-    .map(rel => rel.characterAId === character.id ? rel.characterBId : rel.characterAId);
-  
-  return allCharacters.filter(otherChar => 
-    otherChar.id !== character.id && 
-    !existingRelatedIds.includes(otherChar.id as CharacterId) &&
-    otherChar.importance >= 3 // Only suggest relationships with somewhat important characters
+    .map(rel => (rel.characterAId === character.id ? rel.characterBId : rel.characterAId));
+
+  return allCharacters.filter(
+    otherChar =>
+      otherChar.id !== character.id &&
+      !existingRelatedIds.includes(otherChar.id as CharacterId) &&
+      otherChar.importance >= 3 // Only suggest relationships with somewhat important characters
   );
 }
 
@@ -406,10 +501,6 @@ export function safeCastToCharacter(data: unknown): Character | null {
  */
 export function assertCharacter(data: unknown, context?: string): asserts data is Character {
   if (!isCharacter(data)) {
-    throw new Error(
-      context 
-        ? `Invalid character data in ${context}`
-        : 'Invalid character data'
-    );
+    throw new Error(context ? `Invalid character data in ${context}` : 'Invalid character data');
   }
 }

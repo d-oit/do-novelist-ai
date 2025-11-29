@@ -4,14 +4,14 @@
  * Handles IndexedDB persistence for projects
  */
 
-import type { Project, Language } from '../../../types';
 import { PublishStatus } from '../../../types';
-import type { ProjectCreationData, ProjectUpdateData } from '../types';
+import { type Project, type Language } from '../../../types';
+import { type ProjectCreationData, type ProjectUpdateData } from '../types';
 
 class ProjectService {
-  private dbName = 'novelist-projects';
-  private version = 1;
-  private storeName = 'projects';
+  private readonly dbName = 'novelist-projects';
+  private readonly version = 1;
+  private readonly storeName = 'projects';
   private db: IDBDatabase | null = null;
 
   /**
@@ -27,7 +27,7 @@ class ProjectService {
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Create projects store
@@ -101,16 +101,20 @@ class ProjectService {
         hasWorldBuilding: false,
         hasThemes: false,
         plotStructureDefined: false,
-        targetAudienceDefined: false
+        targetAudienceDefined: false,
       },
       isGenerating: false,
       language: (data.language || 'en') as Language,
       targetWordCount: data.targetWordCount || 50000,
       settings: {
-        enableDropCaps: true
+        enableDropCaps: true,
       },
       genre: data.genre || [],
-      targetAudience: (data.targetAudience || 'adult') as 'children' | 'young_adult' | 'adult' | 'all_ages',
+      targetAudience: (data.targetAudience || 'adult') as
+        | 'children'
+        | 'young_adult'
+        | 'adult'
+        | 'all_ages',
       contentWarnings: [],
       keywords: [],
       synopsis: '',
@@ -120,10 +124,10 @@ class ProjectService {
         averageChapterLength: 0,
         estimatedReadingTime: 0,
         generationCost: 0,
-        editingRounds: 0
+        editingRounds: 0,
       },
       version: '1.0.0',
-      changeLog: []
+      changeLog: [],
     };
 
     return new Promise((resolve, reject) => {

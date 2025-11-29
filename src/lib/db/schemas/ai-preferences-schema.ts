@@ -174,7 +174,7 @@ export const AI_PREFERENCES_INDEXES = [
   'CREATE INDEX IF NOT EXISTS idx_ai_usage_analytics_provider ON ai_usage_analytics(provider)',
   'CREATE INDEX IF NOT EXISTS idx_ai_usage_analytics_created_at ON ai_usage_analytics(created_at)',
   'CREATE INDEX IF NOT EXISTS idx_ai_provider_capabilities_provider ON ai_provider_capabilities(provider)',
-  'CREATE INDEX IF NOT EXISTS idx_ai_provider_health_provider ON ai_provider_health(provider)'
+  'CREATE INDEX IF NOT EXISTS idx_ai_provider_health_provider ON ai_provider_health(provider)',
 ];
 
 /**
@@ -185,5 +185,5 @@ export const ALL_AI_SCHEMAS = [
   AI_PROVIDER_CAPABILITIES_SCHEMA,
   AI_USAGE_ANALYTICS_SCHEMA,
   AI_PROVIDER_HEALTH_SCHEMA,
-  ...AI_PREFERENCES_INDEXES
+  ...AI_PREFERENCES_INDEXES,
 ];

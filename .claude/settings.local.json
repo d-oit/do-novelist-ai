@@ -53,7 +53,14 @@
       "Skill(task-decomposition)",
       "Bash(npx:*)",
       "Bash(npm run test:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(pkill:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill -9:*)",
+      "Bash(curl:*)",
+      "Bash(git log:*)",
+      "Bash(xargs rm:*)"
     ],
     "deny": [],
     "ask": []

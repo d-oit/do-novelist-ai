@@ -1,6 +1,7 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Award } from 'lucide-react';
+import React from 'react';
+
 import { Card } from '../../../components/ui/Card';
 
 interface GoalsProgressProps {
@@ -27,26 +28,26 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
   size = 120,
   strokeWidth = 8,
   color = '#3B82F6',
-  label
+  label,
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const progress = Math.min(value / max, 1);
   const strokeDasharray = circumference;
-  const strokeDashoffset = circumference - (progress * circumference);
+  const strokeDashoffset = circumference - progress * circumference;
 
   return (
-    <div className="relative flex items-center justify-center">
-      <svg width={size} height={size} className="transform -rotate-90">
+    <div className='relative flex items-center justify-center'>
+      <svg width={size} height={size} className='-rotate-90 transform'>
         {/* Background circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="currentColor"
+          stroke='currentColor'
           strokeWidth={strokeWidth}
-          fill="transparent"
-          className="text-secondary/30"
+          fill='transparent'
+          className='text-secondary/30'
         />
         {/* Progress circle */}
         <motion.circle
@@ -55,24 +56,20 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
           r={radius}
           stroke={color}
           strokeWidth={strokeWidth}
-          fill="transparent"
+          fill='transparent'
           strokeDasharray={strokeDasharray}
           strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
+          strokeLinecap='round'
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ duration: 1, ease: 'easeOut' }}
         />
       </svg>
 
       {/* Center content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="text-2xl font-bold font-serif">
-          {Math.round(progress * 100)}%
-        </span>
-        {label && (
-          <span className="text-xs text-muted-foreground mt-1">{label}</span>
-        )}
+      <div className='absolute inset-0 flex flex-col items-center justify-center text-center'>
+        <span className='font-serif text-2xl font-bold'>{Math.round(progress * 100)}%</span>
+        {label && <span className='mt-1 text-xs text-muted-foreground'>{label}</span>}
       </div>
     </div>
   );
@@ -84,7 +81,7 @@ export const GoalsProgress: React.FC<GoalsProgressProps> = ({
   weeklyWords,
   weeklyGoal = 10000,
   consistency,
-  className
+  className,
 }) => {
   return (
     <motion.div
@@ -93,46 +90,34 @@ export const GoalsProgress: React.FC<GoalsProgressProps> = ({
       transition={{ delay: 0.4 }}
       className={className}
     >
-      <h3 className="font-serif font-semibold text-lg mb-4 flex items-center gap-2">
-        <Award className="w-5 h-5 text-primary" />
+      <h3 className='mb-4 flex items-center gap-2 font-serif text-lg font-semibold'>
+        <Award className='h-5 w-5 text-primary' />
         Progress & Goals
       </h3>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="p-6 text-center">
+      <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
+        <Card className='p-6 text-center'>
           <ProgressRing
             value={chaptersCompleted}
             max={totalChapters}
-            color="#3B82F6"
-            label="Chapters"
+            color='#3B82F6'
+            label='Chapters'
           />
-          <p className="text-sm text-muted-foreground mt-4">
+          <p className='mt-4 text-sm text-muted-foreground'>
             {chaptersCompleted} of {totalChapters} chapters completed
           </p>
         </Card>
 
-        <Card className="p-6 text-center">
-          <ProgressRing
-            value={weeklyWords}
-            max={weeklyGoal}
-            color="#10B981"
-            label="Weekly Goal"
-          />
-          <p className="text-sm text-muted-foreground mt-4">
+        <Card className='p-6 text-center'>
+          <ProgressRing value={weeklyWords} max={weeklyGoal} color='#10B981' label='Weekly Goal' />
+          <p className='mt-4 text-sm text-muted-foreground'>
             {weeklyWords.toLocaleString()} of {weeklyGoal.toLocaleString()} weekly words
           </p>
         </Card>
 
-        <Card className="p-6 text-center">
-          <ProgressRing
-            value={consistency}
-            max={100}
-            color="#F59E0B"
-            label="Consistency"
-          />
-          <p className="text-sm text-muted-foreground mt-4">
-            Writing consistency score
-          </p>
+        <Card className='p-6 text-center'>
+          <ProgressRing value={consistency} max={100} color='#F59E0B' label='Consistency' />
+          <p className='mt-4 text-sm text-muted-foreground'>Writing consistency score</p>
         </Card>
       </div>
     </motion.div>

@@ -7,15 +7,18 @@ import { startHealthMonitoring } from '@/services/ai-health-service';
 
 let healthMonitorStopper: (() => void) | null = null;
 
-export function initializeAIMonitoring(): void {
+export function initializeAIMonitoring(userId: string = 'system'): void {
   if (healthMonitorStopper) {
     return;
   }
 
   console.log('[AI Integration] Initializing AI monitoring services...');
-  
-  healthMonitorStopper = startHealthMonitoring(300000);
-  
+
+  startHealthMonitoring(userId);
+  healthMonitorStopper = () => {
+    // No-op: health monitoring runs automatically
+  };
+
   console.log('[AI Integration] AI monitoring initialized');
 }
 

@@ -1,21 +1,18 @@
 /**
  * AI Service - Universal Multi-Provider Interface
  * Replaces gemini.ts with support for OpenAI, Anthropic, and Google
- * Uses Vercel AI SDK for unified API across providers
+ * Uses Vercel AI SDK with Vercel AI Gateway for unified API across providers
  */
 
-import { generateText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
+import { generateText } from 'ai';
+
 import { Chapter, RefineOptions } from '../types/index';
+
+import { getAIConfig, getEnabledProviders, getModelForTask, type AIProvider } from './ai-config';
 import { withCache } from './cache';
-import {
-  getAIConfig,
-  getEnabledProviders,
-  getModelForTask,
-  type AIProvider
-} from './ai-config';
 
 // Get configuration
 const config = getAIConfig();
@@ -23,29 +20,48 @@ const enabledProviders = getEnabledProviders(config);
 
 /**
  * Get the appropriate model instance based on provider
+ * Uses Vercel AI Gateway for routing
  */
 function getModel(provider: AIProvider, complexity: 'fast' | 'standard' | 'advanced' = 'standard') {
   const modelName = getModelForTask(provider, complexity, config);
   const providerConfig = config.providers[provider];
 
   if (!providerConfig.enabled) {
-    throw new Error(`Provider ${provider} is not configured. Please set the API key.`);
+    throw new Error(`Provider ${provider} is not configured. Please set the AI Gateway API key.`);
   }
+
+  // Vercel AI Gateway base URL
+  const gatewayUrl = `https://gateway.vercel.ai/v1/${providerConfig.gatewayPath}`;
 
   switch (provider) {
     case 'openai': {
-      const openaiClient = createOpenAI({ apiKey: providerConfig.apiKey });
+      const openaiClient = createOpenAI({
+        apiKey: config.gatewayApiKey,
+        baseURL: gatewayUrl,
+      });
       return openaiClient(modelName);
     }
 
     case 'anthropic': {
-      const anthropicClient = createAnthropic({ apiKey: providerConfig.apiKey });
+      const anthropicClient = createAnthropic({
+        apiKey: config.gatewayApiKey,
+        baseURL: gatewayUrl,
+      });
       return anthropicClient(modelName);
     }
 
     case 'google': {
-      const googleClient = createGoogleGenerativeAI({ apiKey: providerConfig.apiKey });
+      const googleClient = createGoogleGenerativeAI({
+        apiKey: config.gatewayApiKey,
+        baseURL: gatewayUrl,
+      });
       return googleClient(modelName);
+    }
+
+    case 'mistral': {
+      throw new Error(
+        'Mistral SDK not installed. To enable Mistral, install @ai-sdk/mistral and uncomment the import.'
+      );
     }
 
     default:
@@ -57,9 +73,8 @@ function getModel(provider: AIProvider, complexity: 'fast' | 'standard' | 'advan
  * Execute AI generation with automatic fallback and analytics
  */
 async function executeWithFallback<T>(
-  operation: (provider: AIProvider) => Promise<{ result: T; promptTokens: number; completionTokens: number }>,
-  operationName: string,
-  userId?: string
+  operation: (provider: AIProvider) => Promise<T>,
+  operationName: string
 ): Promise<T> {
   const providers = enabledProviders;
 
@@ -70,62 +85,18 @@ async function executeWithFallback<T>(
   let lastError: Error | null = null;
 
   for (const provider of providers) {
-    const startTime = Date.now();
-
     try {
       console.log(`[AI] Attempting ${operationName} with provider: ${provider}`);
-      const { result, promptTokens, completionTokens } = await operation(provider);
-      const latencyMs = Date.now() - startTime;
+      const result = await operation(provider);
 
       console.log(`[AI] Success with provider: ${provider}`);
 
-      // Log usage analytics if userId provided
-      if (userId) {
-        try {
-          const { logAIUsage } = await import('../services/ai-analytics-service');
-          await logAIUsage(
-            userId,
-            provider,
-            getModelForTask(provider, 'standard', config),
-            promptTokens,
-            completionTokens,
-            latencyMs,
-            true,
-            null,
-            operationName
-          );
-        } catch (analyticsError) {
-          console.warn('Failed to log analytics:', analyticsError);
-        }
-      }
-
       return result;
     } catch (error) {
-      const latencyMs = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : String(error);
 
       console.warn(`[AI] Provider ${provider} failed for ${operationName}:`, errorMessage);
       lastError = error instanceof Error ? error : new Error(errorMessage);
-
-      // Log failed usage analytics
-      if (userId) {
-        try {
-          const { logAIUsage } = await import('../services/ai-analytics-service');
-          await logAIUsage(
-            userId,
-            provider,
-            getModelForTask(provider, 'standard', config),
-            0,
-            0,
-            latencyMs,
-            false,
-            errorMessage,
-            operationName
-          );
-        } catch (analyticsError) {
-          console.warn('Failed to log analytics:', analyticsError);
-        }
-      }
 
       // If fallback is disabled or this is the last provider, throw immediately
       if (!config.enableFallback || provider === providers[providers.length - 1]) {
@@ -147,7 +118,7 @@ const _generateOutline = async (
   idea: string,
   style: string
 ): Promise<{ title: string; chapters: Partial<Chapter>[] }> => {
-  return executeWithFallback(async (provider) => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'standard');
 
     const systemInstruction = `You are an expert Novel Architect.
@@ -155,7 +126,7 @@ Your goal is to take a vague book idea and structurize it into a compelling chap
 The style of the book is: ${style}.
 Adhere to the "Hero's Journey" or "Save the Cat" beat sheets if applicable to the genre.`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       system: systemInstruction,
       prompt: `Create a title and a chapter outline for this idea: "${idea}"
@@ -175,12 +146,14 @@ Return a JSON object with this structure:
     });
 
     try {
-      return JSON.parse(text);
+      const parsed = JSON.parse(response.text);
+      return parsed;
     } catch (parseError) {
       // If JSON parsing fails, try to extract JSON from the response
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      const jsonMatch = /\{[\s\S]*\}/.exec(response.text);
       if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+        const parsed = JSON.parse(jsonMatch[0]);
+        return parsed;
       }
       throw new Error('Failed to parse outline response as JSON');
     }
@@ -198,7 +171,7 @@ export const writeChapterContent = async (
   style: string,
   previousChapterSummary?: string
 ): Promise<string> => {
-  return executeWithFallback(async (provider) => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'standard');
 
     const prompt = `
@@ -209,13 +182,13 @@ Style: ${style}.
 Write in Markdown. Focus on "Show, Don't Tell". Use sensory details.
 Output only the chapter content.`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: 0.7,
     });
 
-    return text || '';
+    return response.text || '';
   }, 'writeChapterContent');
 };
 
@@ -227,7 +200,7 @@ export const continueWriting = async (
   chapterSummary: string,
   style: string
 ): Promise<string> => {
-  return executeWithFallback(async (provider) => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'standard');
     const context = currentContent.slice(-3000);
 
@@ -238,13 +211,13 @@ Goal: ${chapterSummary}
 Rules: Seamlessly continue narrative. Maintain tone. Write 300-500 words. Output ONLY new content.
 Context: ...${context}`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: 0.75,
     });
 
-    return text || '';
+    return response.text || '';
   }, 'continueWriting');
 };
 
@@ -257,10 +230,11 @@ export const refineChapterContent = async (
   style: string,
   options: RefineOptions
 ): Promise<string> => {
-  return executeWithFallback(async (provider) => {
-    const complexity = options.model?.includes('pro') || options.model?.includes('advanced')
-      ? 'advanced'
-      : 'standard';
+  return executeWithFallback(async provider => {
+    const complexity =
+      options.model?.includes('pro') || options.model?.includes('advanced')
+        ? 'advanced'
+        : 'standard';
     const model = getModel(provider, complexity);
 
     const prompt = `
@@ -270,26 +244,25 @@ Goal: ${chapterSummary}
 Instructions: Improve flow, prose, and dialogue. Fix grammar. Maintain tone. Do NOT change plot.
 Content: ${content}`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: options.temperature,
     });
 
-    return text || content;
+    return response.text || content;
   }, 'refineChapterContent');
 };
 
 /**
  * Analyze consistency across chapters
  */
-export const analyzeConsistency = async (
-  chapters: Chapter[],
-  style: string
-): Promise<string> => {
-  return executeWithFallback(async (provider) => {
+export const analyzeConsistency = async (chapters: Chapter[], style: string): Promise<string> => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'fast');
-    const bookContext = chapters.map(c => `Ch ${c.orderIndex} (${c.title}): ${c.summary}`).join('\n');
+    const bookContext = chapters
+      .map(c => `Ch ${c.orderIndex} (${c.title}): ${c.summary}`)
+      .join('\n');
 
     const prompt = `
 Analyze this outline for inconsistencies, plot holes, or tonal shifts.
@@ -297,13 +270,13 @@ Style: ${style}
 Outline: ${bookContext}
 INSTRUCTIONS: Identify up to 3 issues. For EACH, provide a "SUGGESTED FIX".`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: 0.3,
     });
 
-    return text || 'No issues found.';
+    return response.text || 'No issues found.';
   }, 'analyzeConsistency');
 };
 
@@ -314,22 +287,25 @@ export const brainstormProject = async (
   context: string,
   field: 'title' | 'style' | 'idea'
 ): Promise<string> => {
-  return executeWithFallback(async (provider) => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'fast');
     const safeContext = context.substring(0, 50000);
 
     let prompt = '';
-    if (field === 'title') prompt = `Generate a catchy book title for: "${safeContext}". Output ONLY title.`;
-    else if (field === 'style') prompt = `Suggest a genre/style for: "${safeContext}". Output ONLY style.`;
-    else if (field === 'idea') prompt = `Enhance this concept into a detailed paragraph: "${safeContext}"`;
+    if (field === 'title')
+      prompt = `Generate a catchy book title for: "${safeContext}". Output ONLY title.`;
+    else if (field === 'style')
+      prompt = `Suggest a genre/style for: "${safeContext}". Output ONLY style.`;
+    else if (field === 'idea')
+      prompt = `Enhance this concept into a detailed paragraph: "${safeContext}"`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: 0.8,
     });
 
-    return text?.trim().replace(/^"|"$/g, '') || '';
+    return response.text?.trim().replace(/^"|"$/g, '') || '';
   }, 'brainstormProject');
 };
 
@@ -344,7 +320,9 @@ export const generateCoverImage = async (
   try {
     // This requires Google's Imagen API which is separate from the AI SDK
     // For now, return null and keep the original implementation
-    console.warn('Cover image generation requires Google Imagen API - keeping original implementation');
+    console.warn(
+      'Cover image generation requires Google Imagen API - keeping original implementation'
+    );
     return null;
   } catch (error) {
     console.error('Cover image generation failed:', error);
@@ -363,7 +341,9 @@ export const generateChapterIllustration = async (
   try {
     // This requires Google's Imagen API which is separate from the AI SDK
     // For now, return null and keep the original implementation
-    console.warn('Chapter illustration requires Google Imagen API - keeping original implementation');
+    console.warn(
+      'Chapter illustration requires Google Imagen API - keeping original implementation'
+    );
     return null;
   } catch (error) {
     console.error('Chapter illustration failed:', error);
@@ -378,105 +358,93 @@ export const translateContent = async (
   content: string,
   targetLanguage: string
 ): Promise<string> => {
-  return executeWithFallback(async (provider) => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'fast');
 
     const prompt = `Translate markdown content to ${targetLanguage}. Maintain formatting and tone.\n\nContent:\n${content}`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: 0.3,
     });
 
-    return text || '';
+    return response.text || '';
   }, 'translateContent');
 };
 
 /**
  * Develop characters
  */
-export const developCharacters = async (
-  idea: string,
-  style: string
-): Promise<string> => {
-  return executeWithFallback(async (provider) => {
+export const developCharacters = async (idea: string, style: string): Promise<string> => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'standard');
 
     const prompt = `Create a character cast list for: ${idea}\nStyle: ${style}\nOutput Name, Role, Motivation, Conflict.`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: 0.8,
     });
 
-    return text || '';
+    return response.text || '';
   }, 'developCharacters');
 };
 
 /**
  * Build world
  */
-export const buildWorld = async (
-  idea: string,
-  style: string
-): Promise<string> => {
-  return executeWithFallback(async (provider) => {
+export const buildWorld = async (idea: string, style: string): Promise<string> => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'standard');
 
     const prompt = `Expand setting/lore for: ${idea}\nStyle: ${style}\nFocus on rules, atmosphere, locations.`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: 0.85,
     });
 
-    return text || '';
+    return response.text || '';
   }, 'buildWorld');
 };
 
 /**
  * Enhance plot
  */
-export const enhancePlot = async (
-  idea: string,
-  style: string
-): Promise<string> => {
-  return executeWithFallback(async (provider) => {
+export const enhancePlot = async (idea: string, style: string): Promise<string> => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'advanced');
 
     const prompt = `Inject conflict and structure into: ${idea}\nStyle: ${style}\nProvide Inciting Incident, Twist, Climax setup.`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: 0.7,
     });
 
-    return text || '';
+    return response.text || '';
   }, 'enhancePlot');
 };
 
 /**
  * Polish dialogue
  */
-export const polishDialogue = async (
-  content: string,
-  style: string
-): Promise<string> => {
-  return executeWithFallback(async (provider) => {
+export const polishDialogue = async (content: string, style: string): Promise<string> => {
+  return executeWithFallback(async provider => {
     const model = getModel(provider, 'standard');
 
     const prompt = `Rewrite ONLY dialogue to be subtext-rich and distinct.\nStyle: ${style}\nText:\n${content}`;
 
-    const { text } = await generateText({
+    const response = await generateText({
       model,
       prompt,
       temperature: 0.6,
     });
 
-    return text || '';
+    return response.text || '';
   }, 'polishDialogue');
 };

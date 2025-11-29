@@ -40,7 +40,9 @@ test.describe('Version History Feature', () => {
     await page.getByTestId('save-version-btn').click();
 
     // Add more content
-    await contentEditor.fill('This is the initial content of the chapter. Now with additional content added.');
+    await contentEditor.fill(
+      'This is the initial content of the chapter. Now with additional content added.'
+    );
 
     // Wait for auto-save
     await page.waitForTimeout(3500);
@@ -179,7 +181,9 @@ test.describe('Version History Feature', () => {
     await page.getByTestId('save-version-btn').click();
     await page.waitForTimeout(1000);
 
-    await contentEditor.fill('This is a much longer version with significantly more words to test word count tracking.');
+    await contentEditor.fill(
+      'This is a much longer version with significantly more words to test word count tracking.'
+    );
     await page.getByTestId('save-version-btn').click();
     await page.waitForTimeout(1000);
 

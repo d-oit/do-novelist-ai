@@ -3,11 +3,7 @@
  * Manages user preferences for AI provider selection
  */
 
-import {
-  getUserAIPreference,
-  saveUserAIPreference,
-  type UserAIPreference
-} from '@/lib/db';
+import { getUserAIPreference, saveUserAIPreference, type UserAIPreference } from '@/lib/db/index';
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 
 export interface ProviderConfig {
@@ -30,6 +26,47 @@ export interface ProviderPreferenceData {
 }
 
 /**
+ * Map database UserAIPreference to service ProviderPreferenceData
+ */
+function mapUserAIToProviderData(pref: UserAIPreference): ProviderPreferenceData {
+  return {
+    selectedProvider: pref.selectedProvider,
+    selectedModel: pref.selectedModel,
+    fallbackProviders: pref.fallbackProviders,
+    temperature: pref.temperature,
+    maxTokens: pref.maxTokensPerRequest || 4000,
+    monthlyBudget: pref.budgetLimit || 50,
+    autoFallback: pref.enableFallback,
+    costOptimization: false, // Default value as it's not in database schema
+  };
+}
+
+/**
+ * Map service ProviderPreferenceData to database UserAIPreference
+ */
+function mapProviderDataToUserAI(
+  data: ProviderPreferenceData,
+  userId: string,
+  existingId?: string
+): Omit<UserAIPreference, 'createdAt' | 'updatedAt'> {
+  return {
+    id: existingId || crypto.randomUUID(),
+    userId,
+    selectedProvider: data.selectedProvider,
+    selectedModel: data.selectedModel,
+    enableFallback: data.autoFallback,
+    fallbackProviders: data.fallbackProviders,
+    budgetLimit: data.monthlyBudget,
+    budgetPeriod: 'monthly',
+    maxTokensPerRequest: data.maxTokens,
+    temperature: data.temperature,
+    topP: 1.0, // Default
+    frequencyPenalty: 0.0, // Default
+    presencePenalty: 0.0, // Default
+  };
+}
+
+/**
  * Default preferences for new users
  */
 const DEFAULT_PREFERENCES: ProviderPreferenceData = {
@@ -40,7 +77,7 @@ const DEFAULT_PREFERENCES: ProviderPreferenceData = {
   maxTokens: 4000,
   monthlyBudget: 50,
   autoFallback: true,
-  costOptimization: false
+  costOptimization: false,
 };
 
 /**
@@ -54,7 +91,7 @@ export async function loadUserPreferences(userId: string): Promise<ProviderPrefe
       return getDefaultConfig();
     }
 
-    return validateAndNormalizePreferences(userPrefs);
+    return mapUserAIToProviderData(userPrefs);
   } catch (error) {
     console.error('Failed to load user preferences:', error);
     return getDefaultConfig();
@@ -73,19 +110,9 @@ export async function saveUserPreferences(
     const currentPrefs = await loadUserPreferences(userId);
     const mergedPrefs = { ...currentPrefs, ...validatedPrefs };
 
-    await saveUserAIPreference({
-      id: crypto.randomUUID(),
-      userId,
-      selectedProvider: mergedPrefs.selectedProvider,
-      selectedModel: mergedPrefs.selectedModel,
-      fallbackProviders: mergedPrefs.fallbackProviders,
-      temperature: mergedPrefs.temperature,
-      maxTokens: mergedPrefs.maxTokens,
-      monthlyBudget: mergedPrefs.monthlyBudget,
-      autoFallback: mergedPrefs.autoFallback,
-      costOptimization: mergedPrefs.costOptimization,
-      updatedAt: new Date().toISOString()
-    });
+    const userAIPref = mapProviderDataToUserAI(mergedPrefs, userId);
+
+    await saveUserAIPreference(userAIPref as UserAIPreference);
 
     console.log(`[AI Config] Saved preferences for user ${userId}`);
   } catch (error) {
@@ -135,7 +162,7 @@ export function validateProviderModel(
   const allModels = [
     providerConfig.models.fast,
     providerConfig.models.standard,
-    providerConfig.models.advanced
+    providerConfig.models.advanced,
   ];
 
   if (!allModels.includes(model)) {
@@ -151,7 +178,7 @@ export function validateProviderModel(
 export function getOptimalModel(
   provider: AIProvider,
   taskType: 'fast' | 'standard' | 'advanced',
-  prefs: ProviderPreferenceData
+  _prefs: ProviderPreferenceData
 ): string {
   const aiConfig = getAIConfig();
   return aiConfig.providers[provider].models[taskType];
@@ -167,7 +194,7 @@ function getDefaultConfig(): ProviderPreferenceData {
   return {
     ...DEFAULT_PREFERENCES,
     selectedProvider: defaultProvider,
-    selectedModel: getOptimalModel(defaultProvider, 'standard', DEFAULT_PREFERENCES)
+    selectedModel: getOptimalModel(defaultProvider, 'standard', DEFAULT_PREFERENCES),
   };
 }
 
@@ -216,37 +243,4 @@ function validatePreferences(
   }
 
   return validated as Omit<ProviderPreferenceData, 'selectedProvider'>;
-}
-
-/**
- * Private: Validate and normalize user preferences
- */
-function validateAndNormalizePreferences(
-  userPrefs: UserAIPreference
-): ProviderPreferenceData {
-  try {
-    const providerValidation = validateProviderModel(
-      userPrefs.selectedProvider,
-      userPrefs.selectedModel
-    );
-
-    if (!providerValidation.valid) {
-      console.warn(`Invalid provider/model, using defaults: ${providerValidation.error}`);
-      return getDefaultConfig();
-    }
-
-    return {
-      selectedProvider: userPrefs.selectedProvider,
-      selectedModel: userPrefs.selectedModel,
-      fallbackProviders: userPrefs.fallbackProviders || [],
-      temperature: userPrefs.temperature || 0.7,
-      maxTokens: userPrefs.maxTokens || 4000,
-      monthlyBudget: userPrefs.monthlyBudget || 50,
-      autoFallback: userPrefs.autoFallback ?? true,
-      costOptimization: userPrefs.costOptimization ?? false
-    };
-  } catch (error) {
-    console.error('Error validating preferences:', error);
-    return getDefaultConfig();
-  }
 }

@@ -3,14 +3,16 @@
  * Provides CRUD operations for AI provider preferences, usage analytics, and health monitoring
  */
 
-import { createClient } from "@libsql/client/web";
+import { createClient } from '@libsql/client/web';
+
 import { type AIProvider } from '../ai-config';
+
 import {
   type UserAIPreference,
   type AIProviderCapability,
   type AIUsageAnalytic,
   type AIProviderHealth,
-  ALL_AI_SCHEMAS
+  ALL_AI_SCHEMAS,
 } from './schemas/ai-preferences-schema';
 
 type Client = ReturnType<typeof createClient>;
@@ -23,7 +25,7 @@ const STORAGE_KEY = 'novelist_ai_preferences';
 function getClient(): Client | null {
   const config = {
     url: import.meta.env.VITE_TURSO_DATABASE_URL || '',
-    authToken: import.meta.env.VITE_TURSO_AUTH_TOKEN || ''
+    authToken: import.meta.env.VITE_TURSO_AUTH_TOKEN || '',
   };
 
   if (!config.url) return null;
@@ -34,7 +36,7 @@ function getClient(): Client | null {
       authToken: config.authToken,
     });
   } catch (e) {
-    console.error("Failed to create Turso client for AI preferences", e);
+    console.error('Failed to create Turso client for AI preferences', e);
     return null;
   }
 }
@@ -49,12 +51,12 @@ export async function initAIPreferencesDB(): Promise<void> {
       for (const schema of ALL_AI_SCHEMAS) {
         await client.execute(schema);
       }
-      console.log("AI Preferences DB tables initialized");
+      console.log('AI Preferences DB tables initialized');
     } catch (e) {
-      console.error("Failed to initialize AI Preferences DB:", e);
+      console.error('Failed to initialize AI Preferences DB:', e);
     }
   } else {
-    console.log("Using LocalStorage for AI Preferences");
+    console.log('Using LocalStorage for AI Preferences');
   }
 }
 
@@ -69,7 +71,7 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
     try {
       const result = await client.execute({
         sql: 'SELECT * FROM user_ai_preferences WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1',
-        args: [userId]
+        args: [userId],
       });
 
       if (result.rows.length === 0) return null;
@@ -90,7 +92,7 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
         frequencyPenalty: row.frequency_penalty as number,
         presencePenalty: row.presence_penalty as number,
         createdAt: row.created_at as string,
-        updatedAt: row.updated_at as string
+        updatedAt: row.updated_at as string,
       };
     } catch (e) {
       console.error('Failed to get user AI preference:', e);
@@ -146,8 +148,8 @@ export async function saveUserAIPreference(preference: UserAIPreference): Promis
           preference.frequencyPenalty,
           preference.presencePenalty,
           preference.createdAt,
-          preference.updatedAt
-        ]
+          preference.updatedAt,
+        ],
       });
     } catch (e) {
       console.error('Failed to save user AI preference:', e);
@@ -162,7 +164,9 @@ export async function saveUserAIPreference(preference: UserAIPreference): Promis
  * AI Provider Capabilities CRUD Operations
  */
 
-export async function getProviderCapabilities(provider?: AIProvider): Promise<AIProviderCapability[]> {
+export async function getProviderCapabilities(
+  provider?: AIProvider
+): Promise<AIProviderCapability[]> {
   const client = getClient();
 
   if (client) {
@@ -188,7 +192,7 @@ export async function getProviderCapabilities(provider?: AIProvider): Promise<AI
         contextWindow: row.context_window as number,
         capabilities: row.capabilities as string,
         createdAt: row.created_at as string,
-        updatedAt: row.updated_at as string
+        updatedAt: row.updated_at as string,
       }));
     } catch (e) {
       console.error('Failed to get provider capabilities:', e);
@@ -238,8 +242,8 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
           capability.contextWindow,
           capability.capabilities,
           capability.createdAt,
-          capability.updatedAt
-        ]
+          capability.updatedAt,
+        ],
       });
     } catch (e) {
       console.error('Failed to save provider capability:', e);
@@ -248,8 +252,9 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
   } else {
     const stored = localStorage.getItem(`${STORAGE_KEY}_capabilities`);
     const all = stored ? JSON.parse(stored) : [];
-    const index = all.findIndex((c: AIProviderCapability) =>
-      c.provider === capability.provider && c.modelName === capability.modelName
+    const index = all.findIndex(
+      (c: AIProviderCapability) =>
+        c.provider === capability.provider && c.modelName === capability.modelName
     );
 
     if (index >= 0) {
@@ -290,8 +295,8 @@ export async function logUsageAnalytic(analytic: AIUsageAnalytic): Promise<void>
           analytic.success ? 1 : 0,
           analytic.errorMessage,
           analytic.requestType,
-          analytic.createdAt
-        ]
+          analytic.createdAt,
+        ],
       });
     } catch (e) {
       console.error('Failed to log usage analytic:', e);
@@ -351,7 +356,7 @@ export async function getUserUsageStats(
           totalCost: 0,
           totalRequests: 0,
           successRate: 0,
-          avgLatencyMs: 0
+          avgLatencyMs: 0,
         };
       }
 
@@ -360,7 +365,7 @@ export async function getUserUsageStats(
         totalCost: (row.total_cost as number) || 0,
         totalRequests: (row.total_requests as number) || 0,
         successRate: ((row.success_rate as number) || 0) * 100,
-        avgLatencyMs: (row.avg_latency_ms as number) || 0
+        avgLatencyMs: (row.avg_latency_ms as number) || 0,
       };
     } catch (e) {
       console.error('Failed to get user usage stats:', e);
@@ -369,7 +374,7 @@ export async function getUserUsageStats(
         totalCost: 0,
         totalRequests: 0,
         successRate: 0,
-        avgLatencyMs: 0
+        avgLatencyMs: 0,
       };
     }
   } else {
@@ -386,16 +391,15 @@ export async function getUserUsageStats(
     const totalCost = filtered.reduce((sum, a) => sum + a.estimatedCost, 0);
     const totalRequests = filtered.length;
     const successCount = filtered.filter(a => a.success).length;
-    const avgLatencyMs = filtered.length > 0
-      ? filtered.reduce((sum, a) => sum + a.latencyMs, 0) / filtered.length
-      : 0;
+    const avgLatencyMs =
+      filtered.length > 0 ? filtered.reduce((sum, a) => sum + a.latencyMs, 0) / filtered.length : 0;
 
     return {
       totalTokens,
       totalCost,
       totalRequests,
       successRate: totalRequests > 0 ? (successCount / totalRequests) * 100 : 0,
-      avgLatencyMs
+      avgLatencyMs,
     };
   }
 }
@@ -427,7 +431,7 @@ export async function getProviderHealth(provider?: AIProvider): Promise<AIProvid
         lastIncidentAt: row.last_incident_at as string | null,
         incidentDescription: row.incident_description as string | null,
         createdAt: row.created_at as string,
-        updatedAt: row.updated_at as string
+        updatedAt: row.updated_at as string,
       }));
     } catch (e) {
       console.error('Failed to get provider health:', e);
@@ -471,8 +475,8 @@ export async function updateProviderHealth(health: AIProviderHealth): Promise<vo
           health.lastIncidentAt,
           health.incidentDescription,
           health.createdAt,
-          health.updatedAt
-        ]
+          health.updatedAt,
+        ],
       });
     } catch (e) {
       console.error('Failed to update provider health:', e);

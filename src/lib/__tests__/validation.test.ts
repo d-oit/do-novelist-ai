@@ -5,8 +5,9 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from 'zod';
-import { validationService, validate, assertValid, safeConvert } from '../validation';
+
 import { createProjectId } from '../../types/guards';
+import { validationService, validate, assertValid, safeConvert } from '../validation';
 
 describe('ValidationService', () => {
   describe('Project Creation Validation', () => {
@@ -18,11 +19,11 @@ describe('ValidationService', () => {
         genre: ['science_fiction', 'adventure'],
         targetAudience: 'adult',
         language: 'en',
-        targetWordCount: 75000
+        targetWordCount: 75000,
       };
 
       const result = validationService.validateCreateProject(createData);
-      
+
       expect(result.success).toBe(true);
       if (result.success && result.data) {
         expect((result.data as any).title).toBe('My Novel');
@@ -42,7 +43,7 @@ describe('ValidationService', () => {
         title: 'Simple Novel',
         style: 'General Fiction',
         idea: 'A simple story.',
-        genre: ['fiction']
+        genre: ['fiction'],
       };
 
       const result = validationService.validateCreateProject(createData);
@@ -62,7 +63,7 @@ describe('ValidationService', () => {
         title: '', // Empty title
         style: 'Invalid Style',
         idea: 'Too short',
-        genre: [] // Empty genre array
+        genre: [], // Empty genre array
       };
 
       const result = validationService.validateCreateProject(invalidData);
@@ -81,9 +82,9 @@ describe('ValidationService', () => {
         title: 'Test Novel',
         style: 'General Fiction',
         idea: 'A test story for validation.',
-        genre: ['fiction']
+        genre: ['fiction'],
       });
-      
+
       if (createResult.success) {
         validProject = createResult.data;
       }
@@ -96,21 +97,23 @@ describe('ValidationService', () => {
 
     it('should detect chapter count inconsistencies', () => {
       const testProject = structuredClone(validProject);
-      testProject.chapters = [{
-        id: `${testProject.id}_ch_manual_123`,
-        orderIndex: 1,
-        title: 'Chapter 1',
-        summary: 'First chapter',
-        content: 'Content here',
-        status: 'complete',
-        wordCount: 500,
-        characterCount: 2500,
-        estimatedReadingTime: 2,
-        tags: [],
-        notes: '',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }];
+      testProject.chapters = [
+        {
+          id: `${testProject.id}_ch_manual_123`,
+          orderIndex: 1,
+          title: 'Chapter 1',
+          summary: 'First chapter',
+          content: 'Content here',
+          status: 'complete',
+          wordCount: 500,
+          characterCount: 2500,
+          estimatedReadingTime: 2,
+          tags: [],
+          notes: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
       testProject.worldState.chaptersCount = 2; // Should be 1
 
       const result = validationService.validateProjectIntegrity(testProject);
@@ -122,9 +125,10 @@ describe('ValidationService', () => {
         // The validation should detect the chapter count inconsistency
         // (1 chapter in array but worldState says 2)
         const hasChapterCountIssue = result.issues?.some(
-          (issue: z.ZodIssue) => issue.code === 'custom' ||
-                   issue.message?.includes('chapter') ||
-                   issue.message?.includes('count')
+          (issue: z.ZodIssue) =>
+            issue.code === 'custom' ||
+            issue.message?.includes('chapter') ||
+            issue.message?.includes('count')
         );
         expect(hasChapterCountIssue).toBe(true);
       }
@@ -132,21 +136,23 @@ describe('ValidationService', () => {
 
     it('should detect completed chapters inconsistencies', () => {
       const testProject = structuredClone(validProject);
-      testProject.chapters = [{
-        id: `${testProject.id}_ch_manual_123`,
-        orderIndex: 1,
-        title: 'Chapter 1',
-        summary: 'First chapter',
-        content: 'Content here',
-        status: 'complete',
-        wordCount: 500,
-        characterCount: 2500,
-        estimatedReadingTime: 2,
-        tags: [],
-        notes: '',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }];
+      testProject.chapters = [
+        {
+          id: `${testProject.id}_ch_manual_123`,
+          orderIndex: 1,
+          title: 'Chapter 1',
+          summary: 'First chapter',
+          content: 'Content here',
+          status: 'complete',
+          wordCount: 500,
+          characterCount: 2500,
+          estimatedReadingTime: 2,
+          tags: [],
+          notes: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
       testProject.worldState.chaptersCount = 1;
       testProject.worldState.chaptersCompleted = 0; // Should be 1
 
@@ -156,9 +162,10 @@ describe('ValidationService', () => {
         // The validation should detect the completed count inconsistency
         // (1 complete chapter but worldState says 0 completed)
         const hasCompletedIssue = result.issues?.some(
-          (issue: z.ZodIssue) => issue.code === 'custom' ||
-                   issue.message?.includes('completed') ||
-                   issue.message?.includes('complete')
+          (issue: z.ZodIssue) =>
+            issue.code === 'custom' ||
+            issue.message?.includes('completed') ||
+            issue.message?.includes('complete')
         );
         expect(hasCompletedIssue).toBe(true);
       }
@@ -181,7 +188,7 @@ describe('ValidationService', () => {
           tags: [],
           notes: '',
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         },
         {
           id: chapterId, // Duplicate ID
@@ -196,8 +203,8 @@ describe('ValidationService', () => {
           tags: [],
           notes: '',
           createdAt: new Date(),
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       ];
       testProject.worldState.chaptersCount = 2;
 
@@ -222,7 +229,7 @@ describe('ValidationService', () => {
         characterCount: 45,
         estimatedReadingTime: 1,
         tags: ['beginning'],
-        notes: 'Important chapter'
+        notes: 'Important chapter',
       };
 
       const result = validationService.validateChapter(chapterData, 'proj_123');
@@ -237,7 +244,7 @@ describe('ValidationService', () => {
         summary: 'Summary',
         content: 'This is a test chapter with some content that should be counted.',
         status: 'pending',
-        wordCount: 5 // Should be much higher
+        wordCount: 5, // Should be much higher
       };
 
       const result = validationService.validateChapter(chapterData);
@@ -255,7 +262,7 @@ describe('ValidationService', () => {
         summary: 'Summary',
         content: 'Content',
         status: 'pending',
-        wordCount: 1
+        wordCount: 1,
       };
 
       const result = validationService.validateChapter(chapterData, 'proj_123');
@@ -288,12 +295,7 @@ describe('ValidationService', () => {
     });
 
     it('should reject invalid project ID', () => {
-      const result = validationService.createChapter(
-        'invalid_id',
-        'Chapter 1',
-        1,
-        'Content'
-      );
+      const result = validationService.createChapter('invalid_id', 'Chapter 1', 1, 'Content');
 
       expect(result.success).toBe(false);
       if (!result.success && 'error' in result) {
@@ -323,7 +325,7 @@ describe('ValidationService', () => {
             tags: [],
             notes: '',
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
           },
           {
             id: 'proj_123_ch_manual_2',
@@ -338,8 +340,8 @@ describe('ValidationService', () => {
             tags: [],
             notes: '',
             createdAt: new Date(),
-            updatedAt: new Date()
-          }
+            updatedAt: new Date(),
+          },
         ],
         worldState: {
           hasTitle: true,
@@ -347,7 +349,7 @@ describe('ValidationService', () => {
           chaptersCount: 2,
           chaptersCompleted: 1,
           styleDefined: true,
-          isPublished: false
+          isPublished: false,
         },
         isGenerating: false,
         status: 'Draft',
@@ -367,10 +369,10 @@ describe('ValidationService', () => {
           averageChapterLength: 0,
           estimatedReadingTime: 0,
           generationCost: 0,
-          editingRounds: 0
+          editingRounds: 0,
         },
         version: '1.0.0',
-        changeLog: []
+        changeLog: [],
       } as any;
 
       const updated = validationService.updateProjectAnalytics(project);
@@ -393,7 +395,7 @@ describe('ValidationService', () => {
       `;
 
       const result = validationService.validateAndFormatContent(maliciousContent);
-      
+
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).not.toContain('<script>');
@@ -441,7 +443,7 @@ describe('Convenience Functions', () => {
         title: 'Test Novel',
         style: 'General Fiction',
         idea: 'A test story',
-        genre: ['fiction']
+        genre: ['fiction'],
       };
 
       const result = validate.createProject(createData);
@@ -451,7 +453,7 @@ describe('Convenience Functions', () => {
     it('should validate content', () => {
       const result = validate.content('This is valid content.');
       expect(result.success).toBe(true);
-      
+
       const longResult = validate.content('a'.repeat(50001));
       expect(longResult.success).toBe(false);
     });
@@ -471,7 +473,7 @@ describe('Convenience Functions', () => {
           chaptersCount: 0,
           chaptersCompleted: 0,
           styleDefined: true,
-          isPublished: false
+          isPublished: false,
         },
         isGenerating: false,
         status: 'Draft',
@@ -491,10 +493,10 @@ describe('Convenience Functions', () => {
           averageChapterLength: 0,
           estimatedReadingTime: 0,
           generationCost: 0,
-          editingRounds: 0
+          editingRounds: 0,
         },
         version: '1.0.0',
-        changeLog: []
+        changeLog: [],
       };
 
       expect(() => assertValid.project(validProject as any)).not.toThrow();
@@ -521,7 +523,7 @@ describe('Convenience Functions', () => {
           chaptersCount: 0,
           chaptersCompleted: 0,
           styleDefined: true,
-          isPublished: false
+          isPublished: false,
         },
         isGenerating: false,
         status: 'Draft',
@@ -541,10 +543,10 @@ describe('Convenience Functions', () => {
           averageChapterLength: 0,
           estimatedReadingTime: 0,
           generationCost: 0,
-          editingRounds: 0
+          editingRounds: 0,
         },
         version: '1.0.0',
-        changeLog: []
+        changeLog: [],
       };
 
       const result = safeConvert.toProject(validProject);

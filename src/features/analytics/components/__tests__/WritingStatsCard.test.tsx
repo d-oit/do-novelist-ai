@@ -1,12 +1,22 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+
 import { WritingStatsCard } from '../WritingStatsCard';
 
 // Mock framer-motion with complete prop handling
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, className, whileHover, whileTap, transition, animate, initial, ...props }: any) => (
-      <div className={className} {...props} data-testid="motion-div">
+    div: ({
+      children,
+      className,
+      whileHover,
+      whileTap,
+      transition,
+      animate,
+      initial,
+      ...props
+    }: any) => (
+      <div className={className} {...props} data-testid='motion-div'>
         {children}
       </div>
     ),
@@ -15,15 +25,15 @@ vi.mock('framer-motion', () => ({
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
-  BookOpen: ({ className }: any) => <div className={className} data-testid="bookopen-icon" />,
-  Target: ({ className }: any) => <div className={className} data-testid="target-icon" />,
-  Clock: ({ className }: any) => <div className={className} data-testid="clock-icon" />,
-  Zap: ({ className }: any) => <div className={className} data-testid="zap-icon" />,
-  PieChart: ({ className }: any) => <div className={className} data-testid="piechart-icon" />,
-  Flame: ({ className }: any) => <div className={className} data-testid="flame-icon" />,
-  Brain: ({ className }: any) => <div className={className} data-testid="brain-icon" />,
-  Activity: ({ className }: any) => <div className={className} data-testid="activity-icon" />,
-  TrendingUp: ({ className }: any) => <div className={className} data-testid="trendingup-icon" />,
+  BookOpen: ({ className }: any) => <div className={className} data-testid='bookopen-icon' />,
+  Target: ({ className }: any) => <div className={className} data-testid='target-icon' />,
+  Clock: ({ className }: any) => <div className={className} data-testid='clock-icon' />,
+  Zap: ({ className }: any) => <div className={className} data-testid='zap-icon' />,
+  PieChart: ({ className }: any) => <div className={className} data-testid='piechart-icon' />,
+  Flame: ({ className }: any) => <div className={className} data-testid='flame-icon' />,
+  Brain: ({ className }: any) => <div className={className} data-testid='brain-icon' />,
+  Activity: ({ className }: any) => <div className={className} data-testid='activity-icon' />,
+  TrendingUp: ({ className }: any) => <div className={className} data-testid='trendingup-icon' />,
 }));
 
 describe('WritingStatsCard', () => {
@@ -49,7 +59,7 @@ describe('WritingStatsCard', () => {
     it('renders weekly performance section', () => {
       render(<WritingStatsCard {...defaultProps} />);
 
-      expect(screen.getByText('This Week\'s Performance')).toBeInTheDocument();
+      expect(screen.getByText("This Week's Performance")).toBeInTheDocument();
       expect(screen.getAllByTestId('piechart-icon')).toHaveLength(2);
     });
 
@@ -104,7 +114,7 @@ describe('WritingStatsCard', () => {
     });
 
     it('applies custom className when provided', () => {
-      const { container } = render(<WritingStatsCard {...defaultProps} className="custom-class" />);
+      const { container } = render(<WritingStatsCard {...defaultProps} className='custom-class' />);
 
       const element = container.querySelector('.custom-class');
       expect(element).toBeInTheDocument();
@@ -202,7 +212,7 @@ describe('WritingStatsCard', () => {
       render(<WritingStatsCard {...defaultProps} />);
 
       expect(screen.getByText('Writing Overview')).toBeInTheDocument();
-      expect(screen.getByText('This Week\'s Performance')).toBeInTheDocument();
+      expect(screen.getByText("This Week's Performance")).toBeInTheDocument();
     });
 
     it('displays all metric titles', () => {
@@ -218,13 +228,7 @@ describe('WritingStatsCard', () => {
     });
 
     it('renders with partial data', () => {
-      render(
-        <WritingStatsCard
-          {...defaultProps}
-          chaptersCompleted={0}
-          weeklyWords={0}
-        />
-      );
+      render(<WritingStatsCard {...defaultProps} chaptersCompleted={0} weeklyWords={0} />);
 
       expect(screen.getByText('Writing Overview')).toBeInTheDocument();
     });

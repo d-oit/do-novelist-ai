@@ -4,10 +4,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
+
 import {
   isProject,
   isChapter,
-
   isProjectId,
   isChapterId,
   isLogId,
@@ -21,7 +21,6 @@ import {
   createTemperature,
   isProjectArray,
   isChapterArray,
-
   isNotNull,
   isNotUndefined,
   isNotNullish,
@@ -44,7 +43,7 @@ import {
   allMatch,
   someMatch,
   createEnumGuard,
-  isEnumValue
+  isEnumValue,
 } from '../guards';
 import { ProjectSchema, ChapterSchema } from '../schemas';
 
@@ -63,14 +62,14 @@ describe('Type Guards Tests', () => {
           chaptersCount: 0,
           chaptersCompleted: 0,
           styleDefined: true,
-          isPublished: false
+          isPublished: false,
         },
         isGenerating: false,
         status: 'Draft',
         language: 'en',
         targetWordCount: 50000,
         settings: {
-          enableDropCaps: true
+          enableDropCaps: true,
         },
         genre: ['fiction'],
         targetAudience: 'adult',
@@ -85,10 +84,10 @@ describe('Type Guards Tests', () => {
           averageChapterLength: 0,
           estimatedReadingTime: 0,
           generationCost: 0,
-          editingRounds: 0
+          editingRounds: 0,
         },
         version: '1.0.0',
-        changeLog: []
+        changeLog: [],
       };
 
       expect(isProject(validProject)).toBe(true);
@@ -118,7 +117,7 @@ describe('Type Guards Tests', () => {
         tags: [],
         notes: '',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       expect(isChapter(validChapter)).toBe(true);
@@ -127,7 +126,7 @@ describe('Type Guards Tests', () => {
     it('should reject invalid chapters', () => {
       const invalidChapter = {
         id: 'invalid_format',
-        title: 'Chapter'
+        title: 'Chapter',
         // Missing required fields
       };
 
@@ -276,7 +275,7 @@ describe('Type Guards Tests', () => {
             chaptersCount: 0,
             chaptersCompleted: 0,
             styleDefined: true,
-            isPublished: false
+            isPublished: false,
           },
           isGenerating: false,
           status: 'Draft',
@@ -296,11 +295,11 @@ describe('Type Guards Tests', () => {
             averageChapterLength: 0,
             estimatedReadingTime: 0,
             generationCost: 0,
-            editingRounds: 0
+            editingRounds: 0,
           },
           version: '1.0.0',
-          changeLog: []
-        })
+          changeLog: [],
+        }),
       ];
 
       expect(isProjectArray(validProjects)).toBe(true);
@@ -317,8 +316,8 @@ describe('Type Guards Tests', () => {
           title: 'Chapter 1',
           summary: 'Summary',
           content: 'Content',
-          status: 'pending'
-        })
+          status: 'pending',
+        }),
       ];
 
       expect(isChapterArray(validChapters)).toBe(true);
@@ -435,7 +434,7 @@ describe('Type Guards Tests', () => {
 
     it('should check for functions', () => {
       expect(isFunction(() => {})).toBe(true);
-      expect(isFunction(function() {})).toBe(true);
+      expect(isFunction(function () {})).toBe(true);
       expect(isFunction(Date)).toBe(true); // Constructor function
       expect(isFunction('not a function')).toBe(false);
     });
@@ -444,7 +443,7 @@ describe('Type Guards Tests', () => {
   describe('Validation Helpers', () => {
     it('should assert types correctly', () => {
       const value: unknown = 'hello';
-      
+
       expect(() => {
         assertType(value, isString);
         // At this point, TypeScript knows value is a string
@@ -464,7 +463,7 @@ describe('Type Guards Tests', () => {
 
     it('should check for required keys', () => {
       const obj = { name: 'John', age: 30 };
-      
+
       expect(hasKeys(obj, ['name'])).toBe(true);
       expect(hasKeys(obj, ['name', 'age'])).toBe(true);
       expect(hasKeys(obj, ['name', 'email'])).toBe(false);
@@ -473,7 +472,7 @@ describe('Type Guards Tests', () => {
 
     it('should check for any required key', () => {
       const obj = { name: 'John' };
-      
+
       expect(hasAnyKey(obj, ['name', 'email'])).toBe(true);
       expect(hasAnyKey(obj, ['email', 'phone'])).toBe(false);
       expect(hasAnyKey('not an object', ['key'])).toBe(false);
@@ -482,7 +481,7 @@ describe('Type Guards Tests', () => {
     it('should check if all items match', () => {
       const numbers = [1, 2, 3, 4, 5];
       const mixed = [1, '2', 3];
-      
+
       expect(allMatch(numbers, isNumber)).toBe(true);
       expect(allMatch(mixed, isNumber)).toBe(false);
       expect(allMatch([], isNumber)).toBe(true); // Empty array matches
@@ -492,7 +491,7 @@ describe('Type Guards Tests', () => {
       const mixed = [1, '2', true];
       const strings = ['a', 'b', 'c'];
       const numbers = [1, 2, 3];
-      
+
       expect(someMatch(mixed, isString)).toBe(true);
       expect(someMatch(strings, isNumber)).toBe(false);
       expect(someMatch(numbers, isNumber)).toBe(true);
@@ -503,12 +502,12 @@ describe('Type Guards Tests', () => {
     enum TestEnum {
       VALUE1 = 'value1',
       VALUE2 = 'value2',
-      VALUE3 = 'value3'
+      VALUE3 = 'value3',
     }
 
     it('should create enum guards', () => {
       const isTestEnum = createEnumGuard(TestEnum);
-      
+
       expect(isTestEnum('value1')).toBe(true);
       expect(isTestEnum('value2')).toBe(true);
       expect(isTestEnum('invalid')).toBe(false);

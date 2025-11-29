@@ -1,10 +1,10 @@
-
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useGoapEngine } from '../useGoapEngine';
-import { Project, PublishStatus, ChapterStatus } from '../../../../types';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import * as ai from '../../../../lib/ai';
 import { createChapter } from '../../../../shared/utils';
+import { Project, PublishStatus, ChapterStatus } from '../../../../types';
+import { useGoapEngine } from '../useGoapEngine';
 
 // Mock AI functions
 vi.mock('../../../../lib/ai');
@@ -26,7 +26,7 @@ const mockProject: Project = {
     hasWorldBuilding: false,
     hasThemes: false,
     plotStructureDefined: false,
-    targetAudienceDefined: false
+    targetAudienceDefined: false,
   },
   isGenerating: false,
   status: PublishStatus.DRAFT,
@@ -41,7 +41,7 @@ const mockProject: Project = {
     darkMode: true,
     fontSize: 'medium',
     lineHeight: 'relaxed',
-    editorTheme: 'default'
+    editorTheme: 'default',
   },
   chapters: [],
   // Additional properties to satisfy Project interface
@@ -58,10 +58,10 @@ const mockProject: Project = {
     averageChapterLength: 0,
     estimatedReadingTime: 0,
     generationCost: 0,
-    editingRounds: 0
+    editingRounds: 0,
   },
   version: '1.0.0',
-  changeLog: []
+  changeLog: [],
 };
 
 describe('useGoapEngine Hook', () => {
@@ -72,7 +72,7 @@ describe('useGoapEngine Hook', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     project = { ...mockProject };
-    setProject = vi.fn((update) => {
+    setProject = vi.fn(update => {
       if (typeof update === 'function') {
         project = update(project);
       } else {
@@ -100,7 +100,9 @@ describe('useGoapEngine Hook', () => {
       expect(result.current.isActionAvailable(createOutline!)).toBe(true);
 
       // write_chapter_parallel requires hasOutline: true
-      const writeChapter = result.current.availableActions.find(a => a.name === 'write_chapter_parallel');
+      const writeChapter = result.current.availableActions.find(
+        a => a.name === 'write_chapter_parallel'
+      );
       expect(result.current.isActionAvailable(writeChapter!)).toBe(false);
     });
 
@@ -110,7 +112,9 @@ describe('useGoapEngine Hook', () => {
       project.worldState.chaptersCount = 0;
 
       const { result } = renderHook(() => useGoapEngine(project, setProject, setSelectedChapterId));
-      const writeChapter = result.current.availableActions.find(a => a.name === 'write_chapter_parallel');
+      const writeChapter = result.current.availableActions.find(
+        a => a.name === 'write_chapter_parallel'
+      );
 
       // Should be false because chaptersCount is 0
       expect(result.current.isActionAvailable(writeChapter!)).toBe(false);
@@ -123,7 +127,7 @@ describe('useGoapEngine Hook', () => {
 
       const mockOutline = {
         title: 'Generated Title',
-        chapters: [{ orderIndex: 1, title: 'Ch 1', summary: 'Sum 1' }]
+        chapters: [{ orderIndex: 1, title: 'Ch 1', summary: 'Sum 1' }],
       };
       vi.mocked(ai.generateOutline).mockResolvedValue(mockOutline);
 
@@ -138,9 +142,11 @@ describe('useGoapEngine Hook', () => {
       expect(project.title).toBe('Generated Title');
       expect(project.chapters).toHaveLength(1);
       expect(project.worldState.hasOutline).toBe(true);
-      expect(result.current.logs).toEqual(expect.arrayContaining([
-        expect.objectContaining({ agentName: 'Architect', type: 'success' })
-      ]));
+      expect(result.current.logs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ agentName: 'Architect', type: 'success' }),
+        ])
+      );
     });
 
     it('should execute write_chapter_parallel action', async () => {
@@ -152,15 +158,15 @@ describe('useGoapEngine Hook', () => {
           orderIndex: 1,
           title: 'Ch 1',
           summary: 'Sum 1',
-          status: ChapterStatus.PENDING as ChapterStatus
+          status: ChapterStatus.PENDING as ChapterStatus,
         }),
         createChapter({
           id: 'c2',
           orderIndex: 2,
           title: 'Ch 2',
           summary: 'Sum 2',
-          status: ChapterStatus.PENDING as ChapterStatus
-        })
+          status: ChapterStatus.PENDING as ChapterStatus,
+        }),
       ];
       project.worldState.chaptersCount = 2;
 
@@ -168,7 +174,9 @@ describe('useGoapEngine Hook', () => {
 
       vi.mocked(ai.writeChapterContent).mockResolvedValue('# Content');
 
-      const action = result.current.availableActions.find(a => a.name === 'write_chapter_parallel')!;
+      const action = result.current.availableActions.find(
+        a => a.name === 'write_chapter_parallel'
+      )!;
 
       await act(async () => {
         await result.current.executeAction(action);

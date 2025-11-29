@@ -1,8 +1,8 @@
-
+import { Image, Wand2, Loader2, RefreshCcw, Download } from 'lucide-react';
 import React, { useState } from 'react';
+
 import { generateCoverImage } from '../../../lib/ai';
 import { Project } from '../../../types';
-import { Image, Wand2, Loader2, RefreshCcw, Download } from 'lucide-react';
 
 interface CoverGeneratorProps {
   project: Project;
@@ -31,91 +31,91 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[500px] p-8 space-y-8 animate-in fade-in duration-500">
-      
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-serif font-bold flex items-center justify-center gap-2">
-          <Image className="w-6 h-6 text-primary" />
+    <div className='animate-in fade-in flex min-h-[500px] flex-col items-center justify-center space-y-8 p-8 duration-500'>
+      <div className='space-y-2 text-center'>
+        <h2 className='flex items-center justify-center gap-2 font-serif text-2xl font-bold'>
+          <Image className='h-6 w-6 text-primary' />
           Cover Art Studio
         </h2>
-        <p className="text-muted-foreground max-w-md mx-auto text-sm">
-          Generate a professional, cinematic cover for <strong>{project.title}</strong> using the Imagen 4.0 model.
+        <p className='mx-auto max-w-md text-sm text-muted-foreground'>
+          Generate a professional, cinematic cover for <strong>{project.title}</strong> using the
+          Imagen 4.0 model.
         </p>
       </div>
 
       {/* Cover Preview Area */}
-      <div className="relative group">
-        <div className={`
-          w-[300px] h-[400px] bg-card border-2 border-dashed border-border rounded-lg 
-          flex flex-col items-center justify-center shadow-2xl overflow-hidden relative transition-all
-          ${!project.coverImage ? 'hover:border-primary/50' : 'border-transparent'}
-        `}>
-          
+      <div className='group relative'>
+        <div
+          className={`relative flex h-[400px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-card shadow-2xl transition-all ${!project.coverImage ? 'hover:border-primary/50' : 'border-transparent'} `}
+        >
           {project.coverImage ? (
-            <img 
-              src={project.coverImage} 
-              alt="Generated Book Cover" 
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+            <img
+              src={project.coverImage}
+              alt='Generated Book Cover'
+              className='h-full w-full object-cover transition-transform duration-700 hover:scale-105'
             />
           ) : (
-            <div className="text-center p-6 opacity-50">
-              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-                 <Image className="w-8 h-8 text-muted-foreground" />
+            <div className='p-6 text-center opacity-50'>
+              <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary'>
+                <Image className='h-8 w-8 text-muted-foreground' />
               </div>
-              <p className="text-xs uppercase tracking-widest">No Cover Generated</p>
+              <p className='text-xs uppercase tracking-widest'>No Cover Generated</p>
             </div>
           )}
 
           {/* Loading Overlay */}
           {isGenerating && (
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
-              <Loader2 className="w-10 h-10 text-primary animate-spin mb-2" />
-              <p className="text-xs font-mono animate-pulse">Dreaming up visuals...</p>
+            <div className='absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm'>
+              <Loader2 className='mb-2 h-10 w-10 animate-spin text-primary' />
+              <p className='animate-pulse font-mono text-xs'>Dreaming up visuals...</p>
             </div>
           )}
         </div>
 
         {/* Download Action (Only if image exists) */}
         {project.coverImage && !isGenerating && (
-          <a 
-            href={project.coverImage} 
+          <a
+            href={project.coverImage}
             download={`cover-${project.title.replace(/\s+/g, '-').toLowerCase()}.png`}
-            className="absolute top-2 right-2 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-            title="Download Cover"
+            className='absolute right-2 top-2 rounded-full bg-black/50 p-2 text-white opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100'
+            title='Download Cover'
           >
-            <Download className="w-4 h-4" />
+            <Download className='h-4 w-4' />
           </a>
         )}
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col gap-4 w-full max-w-xs">
+      <div className='flex w-full max-w-xs flex-col gap-4'>
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-bold rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
-          data-testid="generate-cover-btn"
+          className='flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:shadow-primary/40 disabled:scale-100 disabled:cursor-not-allowed disabled:opacity-50'
+          data-testid='generate-cover-btn'
         >
           {isGenerating ? (
             <>Generating...</>
           ) : project.coverImage ? (
-            <><RefreshCcw className="w-4 h-4" /> Regenerate Cover</>
+            <>
+              <RefreshCcw className='h-4 w-4' /> Regenerate Cover
+            </>
           ) : (
-            <><Wand2 className="w-4 h-4" /> Generate Artwork</>
+            <>
+              <Wand2 className='h-4 w-4' /> Generate Artwork
+            </>
           )}
         </button>
-        
+
         {error && (
-          <p className="text-xs text-red-500 text-center font-mono bg-red-500/10 py-2 rounded">
+          <p className='rounded bg-red-500/10 py-2 text-center font-mono text-xs text-red-500'>
             {error}
           </p>
         )}
 
-        <p className="text-[10px] text-center text-muted-foreground opacity-60">
+        <p className='text-center text-[10px] text-muted-foreground opacity-60'>
           Uses your project Idea, Style, and Title as input context.
         </p>
       </div>
-
     </div>
   );
 };

@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+
 import { ChapterStatus, PublishStatus } from '../shared/types';
 
 // Re-export enums for convenience
@@ -23,17 +24,15 @@ export const WRITING_STYLES = [
   'Horror',
   'Historical Fiction',
   'Young Adult',
-  'Children\'s Literature',
+  "Children's Literature",
   'Non-Fiction',
   'Biography & Memoir',
   'Self-Help',
   'Business & Economics',
-  'Technical Writing'
+  'Technical Writing',
 ] as const;
 
-export const LANGUAGES = [
-  'en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh'
-] as const;
+export const LANGUAGES = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh'] as const;
 
 // Chapter status enum values - must match the enum in ../shared/types
 export const CHAPTER_STATUSES = ['pending', 'drafting', 'review', 'complete'] as const;
@@ -47,7 +46,6 @@ export const LanguageSchema = z.enum(LANGUAGES);
 // Writing styles with proper validation
 export const WritingStyleSchema = z.enum(WRITING_STYLES);
 
-
 // =============================================================================
 // BASE SCHEMAS
 // =============================================================================
@@ -58,10 +56,10 @@ export const ChapterIdSchema = z.string().regex(/^.+_ch_.+_\d+$/, 'Invalid chapt
 export const LogIdSchema = z.string().uuid('Invalid log ID format');
 
 // Base64 image validation
-export const Base64ImageSchema = z.string().regex(
-  /^data:image\/(png|jpg|jpeg|gif|webp);base64,/,
-  'Invalid base64 image format'
-).optional();
+export const Base64ImageSchema = z
+  .string()
+  .regex(/^data:image\/(png|jpg|jpeg|gif|webp);base64,/, 'Invalid base64 image format')
+  .optional();
 
 // Word count validation
 export const WordCountSchema = z.number().int().min(1000).max(500000);
@@ -73,38 +71,39 @@ export const TemperatureSchema = z.number().min(0).max(2);
 // CORE DOMAIN SCHEMAS
 // =============================================================================
 
-export const WorldStateSchema = z.object({
-  hasTitle: z.boolean(),
-  hasOutline: z.boolean(),
-  chaptersCount: z.number().int().min(0).max(100),
-  chaptersCompleted: z.number().int().min(0),
-  styleDefined: z.boolean(),
-  isPublished: z.boolean(),
-  // Enhanced world state
-  hasCharacters: z.boolean().default(false),
-  hasWorldBuilding: z.boolean().default(false),
-  hasThemes: z.boolean().default(false),
-  plotStructureDefined: z.boolean().default(false),
-  targetAudienceDefined: z.boolean().default(false)
-}).refine(
-  (data) => data.chaptersCompleted <= data.chaptersCount,
-  {
-    message: "Completed chapters cannot exceed total chapters",
-    path: ["chaptersCompleted"]
-  }
-);
+export const WorldStateSchema = z
+  .object({
+    hasTitle: z.boolean(),
+    hasOutline: z.boolean(),
+    chaptersCount: z.number().int().min(0).max(100),
+    chaptersCompleted: z.number().int().min(0),
+    styleDefined: z.boolean(),
+    isPublished: z.boolean(),
+    // Enhanced world state
+    hasCharacters: z.boolean().default(false),
+    hasWorldBuilding: z.boolean().default(false),
+    hasThemes: z.boolean().default(false),
+    plotStructureDefined: z.boolean().default(false),
+    targetAudienceDefined: z.boolean().default(false),
+  })
+  .refine(data => data.chaptersCompleted <= data.chaptersCount, {
+    message: 'Completed chapters cannot exceed total chapters',
+    path: ['chaptersCompleted'],
+  });
 
-export const ProjectSettingsSchema = z.object({
-  enableDropCaps: z.boolean().default(true),
-  autoSave: z.boolean().default(true),
-  autoSaveInterval: z.number().int().min(30).max(3600).default(120), // seconds
-  showWordCount: z.boolean().default(true),
-  enableSpellCheck: z.boolean().default(true),
-  darkMode: z.boolean().default(false),
-  fontSize: z.enum(['small', 'medium', 'large']).default('medium'),
-  lineHeight: z.enum(['compact', 'normal', 'relaxed']).default('normal'),
-  editorTheme: z.enum(['default', 'minimal', 'typewriter']).default('default')
-}).partial();
+export const ProjectSettingsSchema = z
+  .object({
+    enableDropCaps: z.boolean().default(true),
+    autoSave: z.boolean().default(true),
+    autoSaveInterval: z.number().int().min(30).max(3600).default(120), // seconds
+    showWordCount: z.boolean().default(true),
+    enableSpellCheck: z.boolean().default(true),
+    darkMode: z.boolean().default(false),
+    fontSize: z.enum(['small', 'medium', 'large']).default('medium'),
+    lineHeight: z.enum(['compact', 'normal', 'relaxed']).default('normal'),
+    editorTheme: z.enum(['default', 'minimal', 'typewriter']).default('default'),
+  })
+  .partial();
 
 export const ChapterSchema = z.object({
   id: ChapterIdSchema,
@@ -125,16 +124,18 @@ export const ChapterSchema = z.object({
   // AI generation metadata
   generationPrompt: z.string().optional(),
   aiModel: z.string().optional(),
-  generationSettings: z.object({
-    temperature: TemperatureSchema.optional(),
-    maxTokens: z.number().int().min(100).max(8000).optional(),
-    topP: z.number().min(0).max(1).optional()
-  }).optional(),
+  generationSettings: z
+    .object({
+      temperature: TemperatureSchema.optional(),
+      maxTokens: z.number().int().min(100).max(8000).optional(),
+      topP: z.number().min(0).max(1).optional(),
+    })
+    .optional(),
   // Optional extended metadata
   plotPoints: z.array(z.string()).optional(),
   characters: z.array(z.string()).optional(),
   locations: z.array(z.string()).optional(),
-  scenes: z.array(z.string()).optional()
+  scenes: z.array(z.string()).optional(),
 });
 
 export const RefineOptionsSchema = z.object({
@@ -143,18 +144,22 @@ export const RefineOptionsSchema = z.object({
   maxTokens: z.number().int().min(100).max(8000).default(2000),
   topP: z.number().min(0).max(1).default(0.95),
   // Enhanced refine options
-  focusAreas: z.array(z.enum([
-    'grammar',
-    'style',
-    'pacing',
-    'character_development',
-    'dialogue',
-    'description',
-    'plot_consistency',
-    'tone'
-  ])).default(['grammar', 'style']),
+  focusAreas: z
+    .array(
+      z.enum([
+        'grammar',
+        'style',
+        'pacing',
+        'character_development',
+        'dialogue',
+        'description',
+        'plot_consistency',
+        'tone',
+      ])
+    )
+    .default(['grammar', 'style']),
   preserveLength: z.boolean().default(false),
-  targetTone: z.enum(['formal', 'casual', 'dramatic', 'humorous', 'mysterious']).optional()
+  targetTone: z.enum(['formal', 'casual', 'dramatic', 'humorous', 'mysterious']).optional(),
 });
 
 export const AgentActionSchema = z.object({
@@ -170,7 +175,7 @@ export const AgentActionSchema = z.object({
   category: z.enum(['generation', 'editing', 'analysis', 'publishing']).default('generation'),
   estimatedDuration: z.number().int().min(1).max(3600).default(60), // seconds
   requiredPermissions: z.array(z.string()).default([]),
-  tags: z.array(z.string()).default([])
+  tags: z.array(z.string()).default([]),
 });
 
 export const LogEntrySchema = z.object({
@@ -183,87 +188,102 @@ export const LogEntrySchema = z.object({
   level: z.enum(['debug', 'info', 'warn', 'error', 'fatal']).default('info'),
   context: z.record(z.string(), z.any()).optional(),
   duration: z.number().min(0).optional(), // milliseconds
-  actionName: z.string().optional()
+  actionName: z.string().optional(),
 });
 
 // =============================================================================
 // PROJECT SCHEMA (Main Entity)
 // =============================================================================
 
-export const ProjectSchema = z.object({
-  id: ProjectIdSchema,
-  title: z.string().min(1).max(200),
-  idea: z.string().max(5000),
-  style: WritingStyleSchema,
-  coverImage: Base64ImageSchema,
-  chapters: z.array(ChapterSchema).default([]),
-  worldState: WorldStateSchema,
-  isGenerating: z.boolean().default(false),
+export const ProjectSchema = z
+  .object({
+    id: ProjectIdSchema,
+    title: z.string().min(1).max(200),
+    idea: z.string().max(5000),
+    style: WritingStyleSchema,
+    coverImage: Base64ImageSchema,
+    chapters: z.array(ChapterSchema).default([]),
+    worldState: WorldStateSchema,
+    isGenerating: z.boolean().default(false),
 
-  // Publishing Metadata
-  status: PublishStatusSchema,
-  language: LanguageSchema,
-  targetWordCount: WordCountSchema,
-  settings: ProjectSettingsSchema,
+    // Publishing Metadata
+    status: PublishStatusSchema,
+    language: LanguageSchema,
+    targetWordCount: WordCountSchema,
+    settings: ProjectSettingsSchema,
 
-  // Enhanced project metadata
-  genre: z.array(z.string()).default([]),
-  targetAudience: z.enum(['children', 'young_adult', 'adult', 'all_ages']).default('adult'),
-  contentWarnings: z.array(z.string()).default([]),
-  keywords: z.array(z.string()).default([]),
-  synopsis: z.string().max(2000).default(''),
+    // Enhanced project metadata
+    genre: z.array(z.string()).default([]),
+    targetAudience: z.enum(['children', 'young_adult', 'adult', 'all_ages']).default('adult'),
+    contentWarnings: z.array(z.string()).default([]),
+    keywords: z.array(z.string()).default([]),
+    synopsis: z.string().max(2000).default(''),
 
-  // Timestamps
-  createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date()),
-  publishedAt: z.date().optional(),
+    // Timestamps
+    createdAt: z.date().default(() => new Date()),
+    updatedAt: z.date().default(() => new Date()),
+    publishedAt: z.date().optional(),
 
-  // Collaboration
-  authors: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().email(),
-    role: z.enum(['owner', 'collaborator', 'editor', 'viewer']).default('collaborator')
-  })).default([]),
+    // Collaboration
+    authors: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          email: z.string().email(),
+          role: z.enum(['owner', 'collaborator', 'editor', 'viewer']).default('collaborator'),
+        })
+      )
+      .default([]),
 
-  // Analytics
-  analytics: z.object({
-    totalWordCount: z.number().int().min(0).default(0),
-    averageChapterLength: z.number().min(0).default(0),
-    estimatedReadingTime: z.number().int().min(0).default(0), // minutes
-    generationCost: z.number().min(0).default(0), // abstract cost units
-    editingRounds: z.number().int().min(0).default(0)
-  }).default({
-    totalWordCount: 0,
-    averageChapterLength: 0,
-    estimatedReadingTime: 0,
-    generationCost: 0,
-    editingRounds: 0
-  }),
+    // Analytics
+    analytics: z
+      .object({
+        totalWordCount: z.number().int().min(0).default(0),
+        averageChapterLength: z.number().min(0).default(0),
+        estimatedReadingTime: z.number().int().min(0).default(0), // minutes
+        generationCost: z.number().min(0).default(0), // abstract cost units
+        editingRounds: z.number().int().min(0).default(0),
+      })
+      .default({
+        totalWordCount: 0,
+        averageChapterLength: 0,
+        estimatedReadingTime: 0,
+        generationCost: 0,
+        editingRounds: 0,
+      }),
 
-  // Version control
-  version: z.string().regex(/^\d+\.\d+\.\d+$/).default('1.0.0'),
-  changeLog: z.array(z.object({
-    version: z.string(),
-    changes: z.array(z.string()),
-    timestamp: z.date()
-  })).default([])
-}).refine(
-  (data) => data.worldState.chaptersCount === data.chapters.length,
-  {
-    message: "World state chapters count must match actual chapters length",
-    path: ["worldState", "chaptersCount"]
-  }
-).refine(
-  (data) => {
-    const completedCount = data.chapters.filter(c => c.status === 'complete' as ChapterStatus).length;
-    return data.worldState.chaptersCompleted === completedCount;
-  },
-  {
-    message: "World state completed count must match actual completed chapters",
-    path: ["worldState", "chaptersCompleted"]
-  }
-);
+    // Version control
+    version: z
+      .string()
+      .regex(/^\d+\.\d+\.\d+$/)
+      .default('1.0.0'),
+    changeLog: z
+      .array(
+        z.object({
+          version: z.string(),
+          changes: z.array(z.string()),
+          timestamp: z.date(),
+        })
+      )
+      .default([]),
+  })
+  .refine(data => data.worldState.chaptersCount === data.chapters.length, {
+    message: 'World state chapters count must match actual chapters length',
+    path: ['worldState', 'chaptersCount'],
+  })
+  .refine(
+    data => {
+      const completedCount = data.chapters.filter(
+        c => c.status === ('complete' as ChapterStatus)
+      ).length;
+      return data.worldState.chaptersCompleted === completedCount;
+    },
+    {
+      message: 'World state completed count must match actual completed chapters',
+      path: ['worldState', 'chaptersCompleted'],
+    }
+  );
 
 // =============================================================================
 // API & FORM SCHEMAS
@@ -277,17 +297,17 @@ export const CreateProjectSchema = z.object({
   targetWordCount: WordCountSchema.default(50000),
   language: LanguageSchema.default('en'),
   genre: z.array(z.string()).min(1, 'At least one genre is required'),
-  targetAudience: z.enum(['children', 'young_adult', 'adult', 'all_ages']).default('adult')
+  targetAudience: z.enum(['children', 'young_adult', 'adult', 'all_ages']).default('adult'),
 });
 
 // Chapter update form
 export const UpdateChapterSchema = ChapterSchema.partial().extend({
-  id: ChapterIdSchema
+  id: ChapterIdSchema,
 });
 
 // Project update form
 export const UpdateProjectSchema = ProjectSchema.partial().extend({
-  id: ProjectIdSchema
+  id: ProjectIdSchema,
 });
 
 // Settings update form
@@ -302,7 +322,7 @@ export const ProjectFilterSchema = z.object({
   createdBefore: z.date().optional(),
   wordCountMin: z.number().int().min(0).optional(),
   wordCountMax: z.number().int().min(0).optional(),
-  searchTerm: z.string().optional()
+  searchTerm: z.string().optional(),
 });
 
 // =============================================================================
@@ -366,13 +386,13 @@ export function validateData<T>(
     return {
       success: false,
       error: errorMessage,
-      issues: result.error.issues
+      issues: result.error.issues,
     };
   } catch (error) {
     return {
       success: false,
       error: `Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      issues: []
+      issues: [],
     };
   }
 }
@@ -405,7 +425,7 @@ export function transformAndValidate<TInput, TOutput>(
     return {
       success: false,
       error: `Transformation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      issues: []
+      issues: [],
     };
   }
 }

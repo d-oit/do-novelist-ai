@@ -1,9 +1,8 @@
-
 import { test, expect } from '@playwright/test';
-import { setupGeminiMock } from '../utils/mock-gemini';
+
+import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
 test.describe('Feature: Book Editor', () => {
-
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
@@ -77,5 +76,4 @@ test.describe('Feature: Book Editor', () => {
     const newCount = await page.getByTestId(/^chapter-item-order-/).count();
     expect(newCount).toBeGreaterThan(initialCount);
   });
-
 });

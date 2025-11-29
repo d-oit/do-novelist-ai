@@ -1,19 +1,21 @@
-
 import { test, expect } from '@playwright/test';
-import { setupGeminiMock } from '../utils/mock-gemini';
+
+import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
 test.describe('Feature: Persistence', () => {
-
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
 
     // Force Local Storage mode (override env vars in playwright.config.ts)
     await page.addInitScript(() => {
-      window.localStorage.setItem('novelist_db_config', JSON.stringify({
-        url: '',
-        authToken: '',
-        useCloud: false
-      }));
+      window.localStorage.setItem(
+        'novelist_db_config',
+        JSON.stringify({
+          url: '',
+          authToken: '',
+          useCloud: false,
+        })
+      );
     });
   });
 
@@ -86,5 +88,4 @@ test.describe('Feature: Persistence', () => {
     // Verify still Light
     await expect(page.locator('html')).not.toHaveClass(/dark/);
   });
-
 });

@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, Save, DollarSign, Shield, Zap, Activity } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, DollarSign, Shield, Zap, Activity } from 'lucide-react';
 import { ProviderSelector } from '@/components/ai/ProviderSelector';
 import { CostDashboard } from '@/components/ai/CostDashboard';
-import { loadUserPreferences, saveUserPreferences, type ProviderPreferenceData } from '@/services/ai-config-service';
+import {
+  loadUserPreferences,
+  saveUserPreferences,
+  type ProviderPreferenceData,
+} from '@/services/ai-config-service';
 import { startHealthMonitoring } from '@/services/ai-health-service';
 
 interface AISettingsPanelProps {
@@ -39,35 +43,35 @@ export function AISettingsPanel({ userId }: AISettingsPanelProps) {
 
   if (loading || !preferences) {
     return (
-      <div className="bg-white p-6 rounded-lg border">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
+      <div className='rounded-lg border bg-white p-6'>
+        <div className='animate-pulse space-y-4'>
+          <div className='h-4 w-1/4 rounded bg-gray-200'></div>
+          <div className='h-32 rounded bg-gray-200'></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg border">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <Settings className="w-5 h-5" />
+    <div className='space-y-6'>
+      <div className='rounded-lg border bg-white p-6'>
+        <div className='mb-6 flex items-center justify-between'>
+          <h2 className='flex items-center gap-2 text-xl font-semibold'>
+            <Settings className='h-5 w-5' />
             AI Provider Settings
           </h2>
           <button
             onClick={() => startHealthMonitoring()}
-            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+            className='rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600'
           >
             Refresh Health
           </button>
         </div>
 
-        <div className="flex gap-2 mb-6 border-b">
+        <div className='mb-6 flex gap-2 border-b'>
           <button
             onClick={() => setActiveTab('provider')}
-            className={`px-4 py-2 border-b-2 transition-colors ${
+            className={`border-b-2 px-4 py-2 transition-colors ${
               activeTab === 'provider'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -77,7 +81,7 @@ export function AISettingsPanel({ userId }: AISettingsPanelProps) {
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2 border-b-2 transition-colors ${
+            className={`border-b-2 px-4 py-2 transition-colors ${
               activeTab === 'analytics'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -87,7 +91,7 @@ export function AISettingsPanel({ userId }: AISettingsPanelProps) {
           </button>
           <button
             onClick={() => setActiveTab('health')}
-            className={`px-4 py-2 border-b-2 transition-colors ${
+            className={`border-b-2 px-4 py-2 transition-colors ${
               activeTab === 'health'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -98,10 +102,10 @@ export function AISettingsPanel({ userId }: AISettingsPanelProps) {
         </div>
 
         {activeTab === 'provider' && (
-          <div className="space-y-6">
+          <div className='space-y-6'>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Zap className="w-4 h-4 inline mr-1" />
+              <label className='mb-2 block text-sm font-medium text-gray-700'>
+                <Zap className='mr-1 inline h-4 w-4' />
                 Current Provider
               </label>
               <ProviderSelector
@@ -109,133 +113,127 @@ export function AISettingsPanel({ userId }: AISettingsPanelProps) {
                 onProviderChange={(provider, model) => {
                   handleSave({
                     selectedProvider: provider,
-                    selectedModel: model
+                    selectedModel: model,
                   });
                 }}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Temperature
-                </label>
+                <label className='mb-2 block text-sm font-medium text-gray-700'>Temperature</label>
                 <input
-                  type="number"
-                  min="0"
-                  max="2"
-                  step="0.1"
+                  type='number'
+                  min='0'
+                  max='2'
+                  step='0.1'
                   value={preferences.temperature}
-                  onChange={(e) => handleSave({ temperature: parseFloat(e.target.value) })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  onChange={e => handleSave({ temperature: parseFloat(e.target.value) })}
+                  className='w-full rounded-md border px-3 py-2'
                 />
-                <p className="text-xs text-gray-500 mt-1">0.0-2.0 (lower = more focused)</p>
+                <p className='mt-1 text-xs text-gray-500'>0.0-2.0 (lower = more focused)</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Max Tokens
-                </label>
+                <label className='mb-2 block text-sm font-medium text-gray-700'>Max Tokens</label>
                 <input
-                  type="number"
-                  min="1"
-                  max="128000"
+                  type='number'
+                  min='1'
+                  max='128000'
                   value={preferences.maxTokens}
-                  onChange={(e) => handleSave({ maxTokens: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  onChange={e => handleSave({ maxTokens: parseInt(e.target.value) })}
+                  className='w-full rounded-md border px-3 py-2'
                 />
-                <p className="text-xs text-gray-500 mt-1">Maximum response length</p>
+                <p className='mt-1 text-xs text-gray-500'>Maximum response length</p>
               </div>
             </div>
 
             <div>
-              <label className="flex items-center">
+              <label className='flex items-center'>
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={preferences.autoFallback}
-                  onChange={(e) => handleSave({ autoFallback: e.target.checked })}
-                  className="mr-2"
+                  onChange={e => handleSave({ autoFallback: e.target.checked })}
+                  className='mr-2'
                 />
-                <span className="text-sm text-gray-700">
-                  <Shield className="w-4 h-4 inline mr-1" />
+                <span className='text-sm text-gray-700'>
+                  <Shield className='mr-1 inline h-4 w-4' />
                   Enable automatic fallback to other providers
                 </span>
               </label>
             </div>
 
             <div>
-              <label className="flex items-center">
+              <label className='flex items-center'>
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={preferences.costOptimization}
-                  onChange={(e) => handleSave({ costOptimization: e.target.checked })}
-                  className="mr-2"
+                  onChange={e => handleSave({ costOptimization: e.target.checked })}
+                  className='mr-2'
                 />
-                <span className="text-sm text-gray-700">
-                  <Zap className="w-4 h-4 inline mr-1" />
+                <span className='text-sm text-gray-700'>
+                  <Zap className='mr-1 inline h-4 w-4' />
                   Enable cost optimization (route to cheapest provider)
                 </span>
               </label>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <DollarSign className="w-4 h-4 inline mr-1" />
+              <label className='mb-2 block text-sm font-medium text-gray-700'>
+                <DollarSign className='mr-1 inline h-4 w-4' />
                 Monthly Budget ($)
               </label>
               <input
-                type="number"
-                min="0"
-                step="5"
+                type='number'
+                min='0'
+                step='5'
                 value={preferences.monthlyBudget}
-                onChange={(e) => handleSave({ monthlyBudget: parseFloat(e.target.value) })}
-                className="w-full px-3 py-2 border rounded-md"
+                onChange={e => handleSave({ monthlyBudget: parseFloat(e.target.value) })}
+                className='w-full rounded-md border px-3 py-2'
               />
-              <p className="text-xs text-gray-500 mt-1">Set a monthly spending limit</p>
+              <p className='mt-1 text-xs text-gray-500'>Set a monthly spending limit</p>
             </div>
 
             {saving && (
-              <div className="flex items-center gap-2 text-sm text-blue-600">
-                <Activity className="w-4 h-4 animate-spin" />
+              <div className='flex items-center gap-2 text-sm text-blue-600'>
+                <Activity className='h-4 w-4 animate-spin' />
                 <span>Saving...</span>
               </div>
             )}
           </div>
         )}
 
-        {activeTab === 'analytics' && (
-          <CostDashboard userId={userId} />
-        )}
+        {activeTab === 'analytics' && <CostDashboard userId={userId} />}
 
         {activeTab === 'health' && (
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h3 className="font-semibold mb-2">Provider Health Monitoring</h3>
-              <p className="text-sm text-gray-600">
-                All providers are automatically monitored for uptime and performance.
-                Unhealthy providers will be automatically skipped during fallback.
+          <div className='space-y-4'>
+            <div className='rounded-lg border border-blue-200 bg-blue-50 p-4'>
+              <h3 className='mb-2 font-semibold'>Provider Health Monitoring</h3>
+              <p className='text-sm text-gray-600'>
+                All providers are automatically monitored for uptime and performance. Unhealthy
+                providers will be automatically skipped during fallback.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">OpenAI</h4>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Operational</span>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+              <div className='rounded-lg border p-4'>
+                <h4 className='mb-2 font-medium'>OpenAI</h4>
+                <div className='flex items-center gap-2'>
+                  <div className='h-2 w-2 rounded-full bg-green-500'></div>
+                  <span className='text-sm text-gray-600'>Operational</span>
                 </div>
               </div>
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">Anthropic</h4>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Operational</span>
+              <div className='rounded-lg border p-4'>
+                <h4 className='mb-2 font-medium'>Anthropic</h4>
+                <div className='flex items-center gap-2'>
+                  <div className='h-2 w-2 rounded-full bg-green-500'></div>
+                  <span className='text-sm text-gray-600'>Operational</span>
                 </div>
               </div>
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">Google</h4>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Operational</span>
+              <div className='rounded-lg border p-4'>
+                <h4 className='mb-2 font-medium'>Google</h4>
+                <div className='flex items-center gap-2'>
+                  <div className='h-2 w-2 rounded-full bg-green-500'></div>
+                  <span className='text-sm text-gray-600'>Operational</span>
                 </div>
               </div>
             </div>

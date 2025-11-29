@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+
 import { cn } from '../../lib/utils';
 
 interface SidebarProps {
@@ -18,44 +19,42 @@ const Sidebar: React.FC<SidebarProps> = ({
   width = '240px',
   isCollapsible = false,
   isCollapsed = false,
-  onToggle
+  onToggle,
 }) => {
   return (
     <aside
       className={cn(
-        "flex flex-col bg-card/50 backdrop-blur-sm border-r border-border/40",
-        "transition-all duration-300 ease-in-out",
-        "hidden md:flex", // Hidden on mobile by default
+        'flex flex-col border-r border-border/40 bg-card/50 backdrop-blur-sm',
+        'transition-all duration-300 ease-in-out',
+        'hidden md:flex', // Hidden on mobile by default
         isCollapsed ? 'w-16' : width,
-        position === 'right' && 'border-r-0 border-l border-border/40',
+        position === 'right' && 'border-l border-r-0 border-border/40',
         className
       )}
-      style={{ 
+      style={{
         width: isCollapsed ? '4rem' : width,
-        minWidth: isCollapsed ? '4rem' : width 
+        minWidth: isCollapsed ? '4rem' : width,
       }}
     >
       {/* Sidebar Header */}
       {isCollapsible && (
-        <div className="p-4 border-b border-border/40">
+        <div className='border-b border-border/40 p-4'>
           <button
             onClick={onToggle}
             className={cn(
-              "w-full flex items-center justify-center p-2",
-              "rounded-lg hover:bg-secondary/50 transition-colors",
-              "text-muted-foreground hover:text-foreground"
+              'flex w-full items-center justify-center p-2',
+              'rounded-lg transition-colors hover:bg-secondary/50',
+              'text-muted-foreground hover:text-foreground'
             )}
-            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {/* Toggle icon would go here */}
           </button>
         </div>
       )}
-      
+
       {/* Sidebar Content */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        {children}
-      </div>
+      <div className='flex-1 overflow-y-auto overflow-x-hidden'>{children}</div>
     </aside>
   );
 };

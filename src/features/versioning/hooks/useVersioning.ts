@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
+
 import { useVersioningStore } from '../../../lib/stores/versioningStore';
-import { ChapterVersion, Branch, VersionCompareResult, VersionFilter, SortOrder } from '../types';
 import { Chapter } from '../../../types';
+import { ChapterVersion, Branch, VersionCompareResult, VersionFilter, SortOrder } from '../types';
 
 export interface UseVersioningReturn {
   // State
@@ -12,7 +13,11 @@ export interface UseVersioningReturn {
   error: string | null;
 
   // Actions
-  saveVersion: (chapter: Chapter, message?: string, type?: ChapterVersion['type']) => Promise<ChapterVersion>;
+  saveVersion: (
+    chapter: Chapter,
+    message?: string,
+    type?: ChapterVersion['type']
+  ) => Promise<ChapterVersion>;
   restoreVersion: (versionId: string) => Promise<Chapter | null>;
   deleteVersion: (versionId: string) => Promise<boolean>;
   compareVersions: (versionId1: string, versionId2: string) => Promise<VersionCompareResult | null>;
@@ -44,10 +49,7 @@ export const useVersioning = (chapterId?: string): UseVersioningReturn => {
     const controller = new AbortController();
 
     if (chapterId) {
-      Promise.all([
-        loadVersionHistory(chapterId),
-        loadBranches(chapterId)
-      ]).catch(err => {
+      Promise.all([loadVersionHistory(chapterId), loadBranches(chapterId)]).catch(err => {
         if (err.name === 'AbortError') return;
         console.error('Failed to load versioning data:', err);
       });

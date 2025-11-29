@@ -6,9 +6,10 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+
 import { settingsService } from '../services/settingsService';
-import type { Settings, SettingsCategory } from '../types';
 import { DEFAULT_SETTINGS, validateSettings } from '../types';
+import { type Settings, type SettingsCategory } from '../types';
 
 interface SettingsState {
   // Data
@@ -128,7 +129,7 @@ export const useSettings = create<SettingsState>()(
       }),
       {
         name: 'settings-storage',
-        partialize: (state) => ({
+        partialize: state => ({
           settings: state.settings,
         }),
       }

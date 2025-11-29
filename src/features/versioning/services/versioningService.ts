@@ -1,11 +1,11 @@
-import { ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
-import { Chapter } from '../../../types';
 import { createChapter } from '../../../shared/utils';
+import { Chapter } from '../../../types';
+import { ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
 
 class VersioningService {
   private static instance: VersioningService;
-      private dbName = 'novelist-versioning';
-  private dbVersion = 1;
+  private readonly dbName = 'novelist-versioning';
+  private readonly dbVersion = 1;
   private db: IDBDatabase | null = null;
 
   static getInstance(): VersioningService {
@@ -31,16 +31,16 @@ class VersioningService {
   async init(): Promise<void> {
     return new Promise((resolve, _reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
-      
+
       request.onerror = () => _reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
         resolve();
       };
-      
-      request.onupgradeneeded = (event) => {
+
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
-        
+
         // Create versions store
         if (!db.objectStoreNames.contains('versions')) {
           const versionStore = db.createObjectStore('versions', { keyPath: 'id' });
@@ -48,7 +48,7 @@ class VersioningService {
           versionStore.createIndex('timestamp', 'timestamp');
           versionStore.createIndex('type', 'type');
         }
-        
+
         // Create branches store
         if (!db.objectStoreNames.contains('branches')) {
           const branchStore = db.createObjectStore('branches', { keyPath: 'id' });
@@ -60,12 +60,12 @@ class VersioningService {
   }
 
   async saveVersion(
-    chapter: Chapter, 
-    message?: string, 
+    chapter: Chapter,
+    message?: string,
     type: ChapterVersion['type'] = 'manual'
   ): Promise<ChapterVersion> {
     if (!this.db) await this.init();
-    
+
     const version: ChapterVersion = {
       id: `version_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       chapterId: chapter.id,
@@ -86,7 +86,7 @@ class VersioningService {
       const transaction = this.db!.transaction(['versions'], 'readwrite');
       const store = transaction.objectStore('versions');
       const request = store.add(version);
-      
+
       request.onsuccess = () => resolve(version);
       request.onerror = () => _reject(request.error);
     });
@@ -94,16 +94,16 @@ class VersioningService {
 
   async getVersionHistory(chapterId: string): Promise<ChapterVersion[]> {
     if (!this.db) await this.init();
-    
+
     return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const index = store.index('chapterId');
       const request = index.getAll(chapterId);
-      
+
       request.onsuccess = () => {
-        const versions = request.result.sort((a, b) => 
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        const versions = request.result.sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         resolve(versions);
       };
@@ -113,12 +113,12 @@ class VersioningService {
 
   async restoreVersion(versionId: string): Promise<Chapter | null> {
     if (!this.db) await this.init();
-    
+
     return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const request = store.get(versionId);
-      
+
       request.onsuccess = () => {
         const version = request.result as ChapterVersion;
         if (version) {
@@ -128,7 +128,7 @@ class VersioningService {
             summary: version.summary,
             content: version.content,
             status: version.status,
-            orderIndex: 0 // Will be set by caller
+            orderIndex: 0, // Will be set by caller
           });
           resolve(chapter);
         } else {
@@ -164,7 +164,7 @@ class VersioningService {
   async compareVersions(versionId1: string, versionId2: string): Promise<VersionCompareResult> {
     const [version1, version2] = await Promise.all([
       this.getVersion(versionId1),
-      this.getVersion(versionId2)
+      this.getVersion(versionId2),
     ]);
 
     if (!version1 || !version2) {
@@ -191,7 +191,7 @@ class VersioningService {
 
   async createBranch(name: string, description: string, parentVersionId: string): Promise<Branch> {
     if (!this.db) await this.init();
-    
+
     const branch: Branch = {
       id: `branch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name,
@@ -206,7 +206,7 @@ class VersioningService {
       const transaction = this.db!.transaction(['branches'], 'readwrite');
       const store = transaction.objectStore('branches');
       const request = store.add(branch);
-      
+
       request.onsuccess = () => resolve(branch);
       request.onerror = () => _reject(request.error);
     });
@@ -214,12 +214,12 @@ class VersioningService {
 
   async getBranches(chapterId: string): Promise<Branch[]> {
     if (!this.db) await this.init();
-    
+
     return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['branches'], 'readonly');
       const store = transaction.objectStore('branches');
       const request = store.getAll();
-      
+
       request.onsuccess = () => {
         const branches = request.result.filter(b => b.chapterId === chapterId);
         resolve(branches);
@@ -245,7 +245,7 @@ class VersioningService {
       const transaction = this.db!.transaction(['branches'], 'readwrite');
       const store = transaction.objectStore('branches');
       const request = store.delete(branchId);
-      
+
       request.onsuccess = () => resolve(true);
       request.onerror = () => resolve(false);
     });
@@ -253,7 +253,7 @@ class VersioningService {
 
   async exportVersionHistory(chapterId: string, format: 'json' | 'csv'): Promise<string> {
     const versions = await this.getVersionHistory(chapterId);
-    
+
     if (format === 'json') {
       return JSON.stringify(versions, null, 2);
     } else {
@@ -265,21 +265,21 @@ class VersioningService {
         v.message,
         v.type,
         v.wordCount.toString(),
-        v.charCount.toString()
+        v.charCount.toString(),
       ]);
-      
+
       return [headers, ...rows].map(row => row.join(',')).join('\n');
     }
   }
 
   private async getVersion(versionId: string): Promise<ChapterVersion | null> {
     if (!this.db) await this.init();
-    
+
     return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const request = store.get(versionId);
-      
+
       request.onsuccess = () => resolve(request.result || null);
       request.onerror = () => _reject(request.error);
     });
@@ -294,7 +294,10 @@ class VersioningService {
   }
 
   private countWords(content: string): number {
-    return content.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return content
+      .trim()
+      .split(/\s+/)
+      .filter(word => word.length > 0).length;
   }
 
   private generateAutoMessage(type: ChapterVersion['type'], chapter: Chapter): string {
@@ -312,10 +315,16 @@ class VersioningService {
 
   private generateBranchColor(): string {
     const colors = [
-      '#3B82F6', '#8B5CF6', '#EC4899', '#10B981',
-      '#F59E0B', '#EF4444', '#06B6D4', '#84CC16'
+      '#3B82F6',
+      '#8B5CF6',
+      '#EC4899',
+      '#10B981',
+      '#F59E0B',
+      '#EF4444',
+      '#06B6D4',
+      '#84CC16',
     ];
-    return colors[Math.floor(Math.random() * colors.length)] as string;
+    return colors[Math.floor(Math.random() * colors.length)]!;
   }
 
   private computeDiffs(content1: string, content2: string): VersionDiff[] {
@@ -325,11 +334,11 @@ class VersioningService {
 
     // Simple line-by-line diff algorithm
     const maxLines = Math.max(lines1.length, lines2.length);
-    
+
     for (let i = 0; i < maxLines; i++) {
       const line1 = lines1[i];
       const line2 = lines2[i];
-      
+
       if (line1 === undefined && line2 !== undefined) {
         diffs.push({
           type: 'addition',

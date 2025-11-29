@@ -4,12 +4,14 @@
  */
 
 import React from 'react';
+
+import { cn } from '../../../lib/utils';
 import { Project } from '../../../types';
-import WritingStatsCard from './WritingStatsCard';
+
+import GoalsProgress from './GoalsProgress';
 import ProductivityChart from './ProductivityChart';
 import SessionTimeline from './SessionTimeline';
-import GoalsProgress from './GoalsProgress';
-import { cn } from '../../../lib/utils';
+import WritingStatsCard from './WritingStatsCard';
 
 interface AnalyticsContentProps {
   project: Project;
@@ -17,13 +19,14 @@ interface AnalyticsContentProps {
   className?: string;
 }
 
-const AnalyticsContent: React.FC<AnalyticsContentProps> = ({
-  project,
-  activeView,
-  className
-}) => {
+const AnalyticsContent: React.FC<AnalyticsContentProps> = ({ project, activeView, className }) => {
   const stats = {
-    totalWords: project.analytics?.totalWordCount ?? project.chapters.reduce((sum, chapter) => sum + chapter.content.split(/\s+/).filter(Boolean).length, 0),
+    totalWords:
+      project.analytics?.totalWordCount ??
+      project.chapters.reduce(
+        (sum, chapter) => sum + chapter.content.split(/\s+/).filter(Boolean).length,
+        0
+      ),
     chaptersCompleted: project.worldState.chaptersCompleted,
     totalChapters: project.worldState.chaptersCount,
     timeSpent: project.analytics?.estimatedReadingTime ?? 0,
@@ -41,7 +44,10 @@ const AnalyticsContent: React.FC<AnalyticsContentProps> = ({
   const wordCountSeries = Array.from({ length: 7 }, (_, index) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - index));
-    const averageWords = stats.totalWords > 0 ? Math.round(stats.totalWords / Math.max(1, stats.totalChapters || 1)) : 0;
+    const averageWords =
+      stats.totalWords > 0
+        ? Math.round(stats.totalWords / Math.max(1, stats.totalChapters || 1))
+        : 0;
     const dateStr = date.toISOString().split('T')[0];
     return {
       date: dateStr ?? date.toISOString().substring(0, 10),
@@ -69,21 +75,27 @@ const AnalyticsContent: React.FC<AnalyticsContentProps> = ({
     switch (activeView) {
       case 'overview':
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className='space-y-6'>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
               <WritingStatsCard {...stats} />
               <WritingStatsCard {...stats} />
               <WritingStatsCard {...stats} />
             </div>
-            <ProductivityChart wordCountData={wordCountSeries} productivityData={productivitySeries} />
+            <ProductivityChart
+              wordCountData={wordCountSeries}
+              productivityData={productivitySeries}
+            />
           </div>
         );
 
       case 'productivity':
         return (
-          <div className="space-y-6">
-            <ProductivityChart wordCountData={wordCountSeries} productivityData={productivitySeries} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className='space-y-6'>
+            <ProductivityChart
+              wordCountData={wordCountSeries}
+              productivityData={productivitySeries}
+            />
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <WritingStatsCard {...stats} />
               <WritingStatsCard {...stats} />
             </div>
@@ -92,7 +104,7 @@ const AnalyticsContent: React.FC<AnalyticsContentProps> = ({
 
       case 'goals':
         return (
-          <div className="space-y-6">
+          <div className='space-y-6'>
             <GoalsProgress
               chaptersCompleted={stats.chaptersCompleted}
               totalChapters={Math.max(stats.totalChapters, 1)}
@@ -104,27 +116,24 @@ const AnalyticsContent: React.FC<AnalyticsContentProps> = ({
 
       case 'timeline':
         return (
-          <div className="space-y-6">
+          <div className='space-y-6'>
             <SessionTimeline insights={timelineInsights} />
           </div>
         );
 
       default:
         return (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium text-foreground mb-2">Analytics Overview</h3>
-            <p className="text-muted-foreground">Select a view from the sidebar to see detailed analytics.</p>
+          <div className='py-12 text-center'>
+            <h3 className='mb-2 text-lg font-medium text-foreground'>Analytics Overview</h3>
+            <p className='text-muted-foreground'>
+              Select a view from the sidebar to see detailed analytics.
+            </p>
           </div>
         );
     }
   };
 
-
-  return (
-    <div className={cn("", className)}>
-      {renderContent()}
-    </div>
-  );
+  return <div className={cn('', className)}>{renderContent()}</div>;
 };
 
 export default AnalyticsContent;
