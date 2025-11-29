@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   MessageSquare,
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { cn } from '../../../lib/utils';
+import { DetailedFeedbackModal } from './DetailedFeedbackModal';
 import type { ReaderFeedback } from '../types';
 
 interface FeedbackWidgetProps {
@@ -131,6 +132,18 @@ export const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
   feedbackFilter,
   onFilterChange
 }) => {
+  const [selectedFeedback, setSelectedFeedback] = useState<ReaderFeedback | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleFeedbackClick = (feedbackItem: ReaderFeedback) => {
+    setSelectedFeedback(feedbackItem);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedFeedback(null);
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -202,13 +215,18 @@ export const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
             <FeedbackCard
               key={item.id}
               feedback={item}
-              onExpand={() => {
-                // TODO: Open detailed feedback modal
-              }}
+              onExpand={() => handleFeedbackClick(item)}
             />
           ))
         )}
       </div>
+
+      {/* Detailed Feedback Modal */}
+      <DetailedFeedbackModal
+        feedback={selectedFeedback}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </motion.div>
   );
 };

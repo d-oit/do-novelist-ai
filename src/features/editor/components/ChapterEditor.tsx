@@ -10,11 +10,15 @@ import {
   Wand2,
   Play,
   RefreshCw,
-  FileText
+  FileText,
+  Brain,
+  PanelRightOpen,
+  PanelRightClose
 } from 'lucide-react';
 import { Project, Chapter } from '../../../types';
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
+import { WritingAssistantPanel } from '../../writing-assistant';
 
 interface ChapterEditorProps {
   project: Project;
@@ -40,6 +44,7 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
     summary?: string;
     content?: string;
   }>({});
+  const [showWritingAssistant, setShowWritingAssistant] = useState(false);
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -120,9 +125,31 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
   }
 
   return (
-    <div className={cn("space-y-6", className)}>
-      {/* Chapter Header */}
-      <div className="space-y-4">
+    <div className={cn("flex gap-6", className)}>
+      {/* Main Editor Panel */}
+      <div className={cn("flex-1 space-y-6", showWritingAssistant ? "lg:w-2/3" : "w-full")}>
+        {/* Writing Assistant Toggle Button */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold">
+            {selectedChapter.title || 'Untitled Chapter'}
+          </h2>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setShowWritingAssistant(!showWritingAssistant)}
+          >
+            <Brain className="w-4 h-4 mr-2" />
+            AI Assistant
+            {showWritingAssistant ? (
+              <PanelRightClose className="w-4 h-4 ml-2" />
+            ) : (
+              <PanelRightOpen className="w-4 h-4 ml-2" />
+            )}
+          </Button>
+        </div>
+
+        {/* Chapter Header */}
+        <div className="space-y-4">
         {/* Title */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
@@ -290,6 +317,21 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
           </div>
         )}
       </div>
+      </div>
+
+      {/* Writing Assistant Panel */}
+      {showWritingAssistant && (
+        <div className="w-full lg:w-1/3 min-w-[350px] border-l border-border pl-6">
+          <WritingAssistantPanel
+            content={selectedChapter.content}
+            chapterId={selectedChapter.id}
+            projectId={project.id}
+            characterContext={[]}
+            plotContext={project.idea || ''}
+            className="sticky top-6"
+          />
+        </div>
+      )}
     </div>
   );
 };
