@@ -14,7 +14,6 @@ const mockGetAll = vi.fn();
 const mockPut = vi.fn();
 const mockDelete = vi.fn();
 const mockCreateObjectStore = vi.fn();
-const _mockCreateIndex = vi.fn();
 
 const mockDB = {
   close: mockClose,
@@ -30,7 +29,7 @@ const mockRequest = {
 };
 
 global.indexedDB = {
-  open: mockOpenDB.mockImplementation((name, version) => {
+  open: mockOpenDB.mockImplementation((_name, _version) => {
     setTimeout(() => {
       if (mockRequest.onsuccess) {
         mockRequest.onsuccess({ target: mockRequest });
@@ -75,7 +74,7 @@ describe('ProjectService', () => {
     });
 
     // Setup getAll operation
-    mockGetAll.mockImplementation((id) => {
+    mockGetAll.mockImplementation((_id) => {
       const results = storage.projects;
       const request = createRequest(results);
       setTimeout(() => request.onsuccess?.({ target: request }), 0);
@@ -194,7 +193,7 @@ describe('ProjectService', () => {
 
       const project = await projectService.create(data);
 
-      expect(project.status).toBe(PublishStatus.PublishStatus.DRAFT);
+      expect(project.status).toBe(PublishStatus.DRAFT);
     });
 
     it('should initialize empty chapters array', async () => {
@@ -396,17 +395,17 @@ describe('ProjectService', () => {
 
       await projectService.create(data);
 
-      const projects = await projectService.getByStatus(PublishStatus.PublishStatus.DRAFT);
+      const projects = await projectService.getByStatus(PublishStatus.DRAFT);
 
       expect(Array.isArray(projects)).toBe(true);
       expect(projects.length).toBeGreaterThan(0);
       projects.forEach(project => {
-        expect(project.status).toBe(PublishStatus.PublishStatus.DRAFT);
+        expect(project.status).toBe(PublishStatus.DRAFT);
       });
     });
 
     it('should return empty array when no projects match status', async () => {
-      const projects = await projectService.getByStatus(PublishStatus.PublishStatus.PUBLISHED);
+      const projects = await projectService.getByStatus(PublishStatus.PUBLISHED);
 
       expect(Array.isArray(projects)).toBe(true);
     });

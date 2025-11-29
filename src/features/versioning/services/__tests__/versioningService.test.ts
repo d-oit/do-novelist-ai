@@ -14,7 +14,6 @@ const mockGetAll = vi.fn();
 const mockPut = vi.fn();
 const mockDelete = vi.fn();
 const mockCreateObjectStore = vi.fn();
-const _mockCreateIndex = vi.fn();
 
 const mockDB = {
   close: mockClose,
@@ -266,8 +265,8 @@ describe('VersioningService', () => {
 
       const history = await versioningService.getVersionHistory(testChapter.id);
 
-      expect(history[0].id).toBe(version2.id);
-      expect(history[1].id).toBe(version1.id);
+      expect(history[0]?.id).toBe(version2.id);
+      expect(history[1]?.id).toBe(version1.id);
     });
 
     it('should return empty array for chapter with no versions', async () => {
@@ -400,7 +399,7 @@ describe('VersioningService', () => {
 
       expect(branch).toBeDefined();
       expect(branch.id).toMatch(/^branch_/);
-      expect(branch._name).toBe('Alternative Ending');
+      expect(branch.name).toBe('Alternative Ending');
       expect(branch.description).toBe('Exploring a different story direction');
       expect(branch.parentVersionId).toBe(_version.id);
       expect(branch.isActive).toBe(false);

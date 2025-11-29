@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useProjects, selectFilteredProjects } from '../useProjects';
 import { projectService } from '../../services/projectService';
-import type { Project, WritingStyle, Language } from '../../../../types';
+import type { Project, Language } from '../../../../types';
 import { PublishStatus, ChapterStatus } from '../../../../types';
 import type { ProjectCreationData, ProjectUpdateData } from '../../types';
 
@@ -20,7 +20,7 @@ const createMockProject = (overrides: Partial<Project> = {}): Project => ({
     perspective: 'third-person',
     tense: 'past',
     complexity: 'moderate'
-  } as WritingStyle,
+  } as any,
   status: PublishStatus.DRAFT as any,
   chapters: [],
   coverImage: '',
@@ -114,7 +114,15 @@ describe('useProjects', () => {
         summary: 'Summary',
         content: 'This is a test chapter with some words',
         status: ChapterStatus.COMPLETE as any,
-        orderIndex: 0
+        orderIndex: 0,
+        wordCount: 10,
+        characterCount: 50,
+        estimatedReadingTime: 1,
+        tags: [],
+        notes: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        scenes: []
       }]
     });
     mockProjectService.getAll.mockResolvedValue([project]);
@@ -207,7 +215,7 @@ describe('useProjects', () => {
         perspective: 'first-person',
         tense: 'present',
         complexity: 'moderate'
-      } as WritingStyle,
+      } as any,
       targetWordCount: 75000
     } as any;
 
@@ -233,7 +241,7 @@ describe('useProjects', () => {
         perspective: 'third-person',
         tense: 'past',
         complexity: 'moderate'
-      } as WritingStyle
+      } as any
     } as any;
 
     const { result } = renderHook(() => useProjects());
@@ -259,7 +267,7 @@ describe('useProjects', () => {
         perspective: 'third-person',
         tense: 'past',
         complexity: 'moderate'
-      } as WritingStyle
+      } as any
     } as any;
 
     await expect(async () => {
@@ -582,7 +590,15 @@ describe('useProjects', () => {
           summary: 'Summary',
           content: 'word1 word2 word3 word4 word5',
           status: ChapterStatus.DRAFTING as any,
-          orderIndex: 0
+          orderIndex: 0,
+          wordCount: 5,
+          characterCount: 25,
+          estimatedReadingTime: 1,
+          tags: [],
+          notes: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          scenes: []
         }]
       }),
       createMockProject({
@@ -592,7 +608,15 @@ describe('useProjects', () => {
           summary: 'Summary',
           content: 'word1 word2 word3',
           status: ChapterStatus.DRAFTING as any,
-          orderIndex: 0
+          orderIndex: 0,
+          wordCount: 3,
+          characterCount: 15,
+          estimatedReadingTime: 1,
+          tags: [],
+          notes: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          scenes: []
         }]
       })
     ];
@@ -612,14 +636,74 @@ describe('useProjects', () => {
     const projects = [
       createMockProject({
         chapters: [
-          { id: 'ch1', title: 'Ch1', summary: '', content: '', status: ChapterStatus.COMPLETE as any, orderIndex: 0 },
-          { id: 'ch2', title: 'Ch2', summary: '', content: '', status: ChapterStatus.DRAFTING as any, orderIndex: 1 }
+          {
+            id: 'ch1',
+            title: 'Ch1',
+            summary: '',
+            content: '',
+            status: ChapterStatus.COMPLETE as any,
+            orderIndex: 0,
+            wordCount: 0,
+            characterCount: 0,
+            estimatedReadingTime: 0,
+            tags: [],
+            notes: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            scenes: []
+          },
+          {
+            id: 'ch2',
+            title: 'Ch2',
+            summary: '',
+            content: '',
+            status: ChapterStatus.DRAFTING as any,
+            orderIndex: 1,
+            wordCount: 0,
+            characterCount: 0,
+            estimatedReadingTime: 0,
+            tags: [],
+            notes: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            scenes: []
+          }
         ]
       }),
       createMockProject({
         chapters: [
-          { id: 'ch3', title: 'Ch3', summary: '', content: '', status: ChapterStatus.COMPLETE as any, orderIndex: 0 },
-          { id: 'ch4', title: 'Ch4', summary: '', content: '', status: ChapterStatus.COMPLETE as any, orderIndex: 1 }
+          {
+            id: 'ch3',
+            title: 'Ch3',
+            summary: '',
+            content: '',
+            status: ChapterStatus.COMPLETE as any,
+            orderIndex: 0,
+            wordCount: 0,
+            characterCount: 0,
+            estimatedReadingTime: 0,
+            tags: [],
+            notes: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            scenes: []
+          },
+          {
+            id: 'ch4',
+            title: 'Ch4',
+            summary: '',
+            content: '',
+            status: ChapterStatus.COMPLETE as any,
+            orderIndex: 1,
+            wordCount: 0,
+            characterCount: 0,
+            estimatedReadingTime: 0,
+            tags: [],
+            notes: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            scenes: []
+          }
         ]
       })
     ];

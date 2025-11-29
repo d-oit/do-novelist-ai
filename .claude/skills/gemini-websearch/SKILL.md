@@ -6,18 +6,18 @@ capabilities: ["gemini-web-search", "content-extraction", "result-validation", "
 
 # Gemini Web Search
 
-Advanced web search using Gemini CLI in headless mode with tool restriction. All searches use Gemini's `google_web_search` tool with grounding and citations.
+Advanced web search using Gemini CLI in headless mode with tool restriction. All searches use Gemini's `google_web_search` tool.
 
 ## Quick Start
 
 **Basic search:**
 ```
-python .claude/skills/gemini-websearch/scripts/search.py "React 19 features"
+python .claude/skills/gemini-websearch/scripts/search.py "search for React 19 features"
 ```
 
 **With validation:**
 ```
-python .claude/skills/gemini-websearch/scripts/search.py "TypeScript 5.4 new features" --validate
+python .claude/skills/gemini-websearch/scripts/search.py "search for TypeScript 5.4 new features" --validate
 ```
 
 **Batch mode:**
@@ -37,11 +37,11 @@ Copy this checklist for research tasks:
 ```
 Research Progress:
 - [ ] Step 1: Check cache (1-hour TTL)
-- [ ] Step 2: Formulate focused search query
+- [ ] Step 2: Formulate focused search query (prefix with "search ")
 - [ ] Step 3: Execute headless Gemini search
-- [ ] Step 4: Parse JSON and extract grounding metadata
+- [ ] Step 4: Parse JSON and extract response content
 - [ ] Step 5: Validate quality and relevance
-- [ ] Step 6: Review citations and sources
+- [ ] Step 6: Review search success and content quality
 - [ ] Step 7: Log analytics
 ```
 
@@ -176,7 +176,7 @@ Optional `~/.gemini-search/config.json`:
   "validation": {
     "enabled": true,
     "min_quality": 0.6,
-    "min_citations": 2,
+    "min_citations": 0,
     "min_relevance": 0.5,
     "retry_on_fail": true,
     "max_retries": 2

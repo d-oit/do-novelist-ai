@@ -1,12 +1,16 @@
 {
-  "total_searches": 7,
+  "total_searches": 11,
   "cache_hits": 1,
-  "cache_misses": 6,
-  "avg_latency_ms": 40359.08644539969,
+  "cache_misses": 10,
+  "avg_latency_ms": 48413.93260522322,
   "quality_scores": [
     0.0,
     0.0,
     0.0,
+    0.9,
+    0.885,
+    0.7328333333333333,
+    0.9,
     0.9
   ],
   "failed_validations": 3,
@@ -64,6 +68,38 @@
       "timestamp": "2025-11-29T13:07:00.471366",
       "cached": false,
       "latency_ms": 65453.362703323364,
+      "quality": 0.9,
+      "valid": true
+    },
+    {
+      "query": "search for the svelte 5 new features",
+      "timestamp": "2025-11-29T13:26:50.951684",
+      "cached": false,
+      "latency_ms": 35369.708776474,
+      "quality": 0.885,
+      "valid": true
+    },
+    {
+      "query": "search for the astro 5 new features",
+      "timestamp": "2025-11-29T13:34:04.408145",
+      "cached": false,
+      "latency_ms": 52337.886095047,
+      "quality": 0.7328333333333333,
+      "valid": true
+    },
+    {
+      "query": "search for the vite 6 new features",
+      "timestamp": "2025-11-29T13:35:59.120880",
+      "cached": false,
+      "latency_ms": 100447.74150848389,
+      "quality": 0.9,
+      "valid": true
+    },
+    {
+      "query": "search for astro 6 new features",
+      "timestamp": "2025-11-29T13:40:01.863643",
+      "cached": false,
+      "latency_ms": 61884.31715965271,
       "quality": 0.9,
       "valid": true
     }
