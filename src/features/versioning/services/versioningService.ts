@@ -15,6 +15,19 @@ class VersioningService {
     return VersioningService.instance;
   }
 
+  /**
+   * Get the current user's name from settings or default
+   */
+  private getUserName(): string {
+    try {
+      const settings = JSON.parse(localStorage.getItem('novelist_settings') || '{}');
+      const userName = settings.userName || settings.authorName;
+      return userName || 'Anonymous User';
+    } catch {
+      return 'Anonymous User';
+    }
+  }
+
   async init(): Promise<void> {
     return new Promise((resolve, _reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
@@ -61,7 +74,7 @@ class VersioningService {
       content: chapter.content,
       status: chapter.status,
       timestamp: new Date(),
-      authorName: 'Current User', // TODO: Get from user context
+      authorName: this.getUserName(),
       message: message || this.generateAutoMessage(type, chapter),
       type,
       contentHash: await this.generateContentHash(chapter.content),

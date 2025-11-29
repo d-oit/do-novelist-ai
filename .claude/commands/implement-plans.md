@@ -6,7 +6,7 @@ version: 1.0.0
 
 ## Overview
 
-This command reads all markdown files in the @plans\ folder, identifies pending tasks, and uses the **goap-agent skill** to intelligently plan and execute them through coordinated multi-agent execution with quality gates and atomic git operations.
+This command reads all markdown files in the @plans\ folder, identifies pending tasks, and uses the **goap-agent skill** to intelligently plan and execute them through coordinated multi-agent execution with quality gates and atomic git operations. Start with search for any TODO or other missing implementation. Get the latest PR, main branch codebase before start.
 
 ## Execution Flow
 

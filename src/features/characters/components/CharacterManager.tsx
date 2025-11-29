@@ -8,6 +8,7 @@ import { CharacterGrid } from './CharacterGrid';
 import { CharacterEditor } from './CharacterEditor';
 import { CharacterStats } from './CharacterStats';
 import type { Character } from '../types';
+import { validateCharacter } from '../../../lib/character-validation';
 
 interface CharacterManagerProps {
   projectId: string;
@@ -42,6 +43,19 @@ export const CharacterManager: React.FC<CharacterManagerProps> = ({
     load(projectId);
   }, [projectId, load]);
 
+  // Helper function to get character validation status
+  const getCharacterValidationStatus = (char: Character): 'valid' | 'warnings' | 'errors' => {
+    try {
+      const validation = validateCharacter.create(char, char.projectId);
+      if (!validation.success) return 'errors';
+      // For now, consider all successful validations as 'valid'
+      // This can be enhanced later with actual warning detection
+      return 'valid';
+    } catch {
+      return 'errors';
+    }
+  };
+
   // Filter logic
   const filteredCharacters = useMemo(() => {
     return characters.filter(char => {
@@ -64,9 +78,20 @@ export const CharacterManager: React.FC<CharacterManagerProps> = ({
         return false;
       }
 
-      // Validation Status (Placeholder logic)
+      // Validation Status filtering
       if (filters.validationStatus !== 'all') {
-        // TODO: Implement validation status filtering
+        const hasValidation = getCharacterValidationStatus(char);
+        switch (filters.validationStatus) {
+          case 'valid':
+            if (hasValidation !== 'valid') return false;
+            break;
+          case 'warnings':
+            if (hasValidation !== 'warnings') return false;
+            break;
+          case 'errors':
+            if (hasValidation !== 'errors') return false;
+            break;
+        }
       }
 
       return true;
