@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Project, PublishStatus, Chapter, ProjectSettings } from '../../../types';
 import { generateEpub } from '../../../lib/epub';
-import { translateContent } from '../../../lib/gemini';
+import { translateContent } from '../../../lib/ai';
 import { usePublishingAnalytics } from '../../publishing';
 import { Download, Globe, Rocket, Target, Languages, Loader2, FileCheck, Settings, BarChart3, Upload, TrendingUp } from 'lucide-react';
 import PublishingDashboard from '../../publishing/components/PublishingDashboard';

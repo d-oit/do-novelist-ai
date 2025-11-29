@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, FileText, X, Sparkles, Book, Plus, Loader2, Wand2, ChevronDown, ChevronUp } from 'lucide-react';
 import { iconButtonTarget } from '../../../lib/utils';
-import { brainstormProject } from '../../../lib/gemini';
+import { brainstormProject } from '../../../lib/ai';
 
 interface ProjectWizardProps {
   isOpen: boolean;

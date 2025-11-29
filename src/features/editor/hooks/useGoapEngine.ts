@@ -11,7 +11,7 @@ import {
   buildWorld,
   enhancePlot,
   polishDialogue
-} from '../../../lib/gemini';
+} from '../../../lib/ai';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {

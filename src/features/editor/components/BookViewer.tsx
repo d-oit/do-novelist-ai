@@ -16,7 +16,7 @@ import CoverGenerator from './CoverGenerator';
 import PublishPanel from './PublishPanel';
 import { VersionHistory, VersionComparison, useVersioning } from '../../versioning';
 import { AnalyticsDashboard, useAnalytics } from '../../analytics';
-import { generateChapterIllustration } from '../../../lib/gemini';
+import { generateChapterIllustration } from '../../../lib/ai';
 import { useEditorState } from '../hooks/useEditorState';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';

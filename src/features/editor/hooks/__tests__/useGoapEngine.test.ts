@@ -3,11 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useGoapEngine } from '../useGoapEngine';
 import { Project, PublishStatus, ChapterStatus } from '../../../../types';
-import * as gemini from '../../../../lib/gemini';
+import * as ai from '../../../../lib/ai';
 import { createChapter } from '../../../../shared/utils';
 
-// Mock Gemini functions
-vi.mock('../../../../lib/gemini');
+// Mock AI functions
+vi.mock('../../../../lib/ai');
 
 const mockProject: Project = {
   id: 'p1',
@@ -125,7 +125,7 @@ describe('useGoapEngine Hook', () => {
         title: 'Generated Title',
         chapters: [{ orderIndex: 1, title: 'Ch 1', summary: 'Sum 1' }]
       };
-      vi.mocked(gemini.generateOutline).mockResolvedValue(mockOutline);
+      vi.mocked(ai.generateOutline).mockResolvedValue(mockOutline);
 
       const action = result.current.availableActions.find(a => a.name === 'create_outline')!;
 
@@ -133,7 +133,7 @@ describe('useGoapEngine Hook', () => {
         await result.current.executeAction(action);
       });
 
-      expect(gemini.generateOutline).toHaveBeenCalledWith(project.idea, project.style);
+      expect(ai.generateOutline).toHaveBeenCalledWith(project.idea, project.style);
       expect(setProject).toHaveBeenCalled();
       expect(project.title).toBe('Generated Title');
       expect(project.chapters).toHaveLength(1);
@@ -166,7 +166,7 @@ describe('useGoapEngine Hook', () => {
 
       const { result } = renderHook(() => useGoapEngine(project, setProject, setSelectedChapterId));
 
-      vi.mocked(gemini.writeChapterContent).mockResolvedValue('# Content');
+      vi.mocked(ai.writeChapterContent).mockResolvedValue('# Content');
 
       const action = result.current.availableActions.find(a => a.name === 'write_chapter_parallel')!;
 
@@ -174,7 +174,7 @@ describe('useGoapEngine Hook', () => {
         await result.current.executeAction(action);
       });
 
-      expect(gemini.writeChapterContent).toHaveBeenCalledTimes(2);
+      expect(ai.writeChapterContent).toHaveBeenCalledTimes(2);
       expect(project.chapters[0]?.status).toBe(ChapterStatus.COMPLETE);
       expect(project.chapters[0]?.content).toBe('# Content');
       expect(project.worldState.chaptersCompleted).toBe(2);
