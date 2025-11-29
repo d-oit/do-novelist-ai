@@ -54,11 +54,12 @@ function getModel(provider: AIProvider, complexity: 'fast' | 'standard' | 'advan
 }
 
 /**
- * Execute AI generation with automatic fallback
+ * Execute AI generation with automatic fallback and analytics
  */
 async function executeWithFallback<T>(
-  operation: (provider: AIProvider) => Promise<T>,
-  operationName: string
+  operation: (provider: AIProvider) => Promise<{ result: T; promptTokens: number; completionTokens: number }>,
+  operationName: string,
+  userId?: string
 ): Promise<T> {
   const providers = enabledProviders;
 
@@ -69,14 +70,62 @@ async function executeWithFallback<T>(
   let lastError: Error | null = null;
 
   for (const provider of providers) {
+    const startTime = Date.now();
+
     try {
       console.log(`[AI] Attempting ${operationName} with provider: ${provider}`);
-      const result = await operation(provider);
+      const { result, promptTokens, completionTokens } = await operation(provider);
+      const latencyMs = Date.now() - startTime;
+
       console.log(`[AI] Success with provider: ${provider}`);
+
+      // Log usage analytics if userId provided
+      if (userId) {
+        try {
+          const { logAIUsage } = await import('../services/ai-analytics-service');
+          await logAIUsage(
+            userId,
+            provider,
+            getModelForTask(provider, 'standard', config),
+            promptTokens,
+            completionTokens,
+            latencyMs,
+            true,
+            null,
+            operationName
+          );
+        } catch (analyticsError) {
+          console.warn('Failed to log analytics:', analyticsError);
+        }
+      }
+
       return result;
     } catch (error) {
-      console.warn(`[AI] Provider ${provider} failed for ${operationName}:`, error);
-      lastError = error instanceof Error ? error : new Error(String(error));
+      const latencyMs = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      console.warn(`[AI] Provider ${provider} failed for ${operationName}:`, errorMessage);
+      lastError = error instanceof Error ? error : new Error(errorMessage);
+
+      // Log failed usage analytics
+      if (userId) {
+        try {
+          const { logAIUsage } = await import('../services/ai-analytics-service');
+          await logAIUsage(
+            userId,
+            provider,
+            getModelForTask(provider, 'standard', config),
+            0,
+            0,
+            latencyMs,
+            false,
+            errorMessage,
+            operationName
+          );
+        } catch (analyticsError) {
+          console.warn('Failed to log analytics:', analyticsError);
+        }
+      }
 
       // If fallback is disabled or this is the last provider, throw immediately
       if (!config.enableFallback || provider === providers[providers.length - 1]) {

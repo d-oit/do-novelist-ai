@@ -52,7 +52,8 @@
       "WebFetch(domain:geminicli.com)",
       "Skill(task-decomposition)",
       "Bash(npx:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []
