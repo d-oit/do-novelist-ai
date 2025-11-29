@@ -128,12 +128,18 @@ class VersioningService {
 
   async deleteVersion(versionId: string): Promise<boolean> {
     if (!this.db) await this.init();
-    
+
+    // Check if version exists first
+    const version = await this.getVersion(versionId);
+    if (!version) {
+      return false;
+    }
+
     return new Promise((resolve, _reject) => {
       const transaction = this.db!.transaction(['versions'], 'readwrite');
       const store = transaction.objectStore('versions');
       const request = store.delete(versionId);
-      
+
       request.onsuccess = () => resolve(true);
       request.onerror = () => {
         console.error('Failed to delete version:', request.error);

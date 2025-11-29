@@ -1,0 +1,28 @@
+{
+  "total_searches": 2,
+  "cache_hits": 0,
+  "cache_misses": 2,
+  "avg_latency_ms": 48358.35158824921,
+  "quality_scores": [
+    0.0
+  ],
+  "failed_validations": 1,
+  "queries": [
+    {
+      "query": "React 19 features",
+      "timestamp": "2025-11-29T11:49:23.905664",
+      "cached": false,
+      "latency_ms": 54970.707654953,
+      "quality": null,
+      "valid": true
+    },
+    {
+      "query": "TypeScript 5.4 new features",
+      "timestamp": "2025-11-29T12:39:44.031467",
+      "cached": false,
+      "latency_ms": 41745.99552154541,
+      "quality": 0.0,
+      "valid": false
+    }
+  ]
+}

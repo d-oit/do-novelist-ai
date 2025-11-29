@@ -16,6 +16,10 @@ test.describe('Feature: Publishing Panel', () => {
     await page.getByTestId('wizard-title-input').fill('Book to Export');
     await page.getByTestId('wizard-style-input').fill('Simple');
     await page.getByTestId('wizard-submit-btn').click();
+    await expect(page.getByTestId('project-wizard-overlay')).toBeHidden({ timeout: 10000 });
+
+    // Wait for sidebar to be visible
+    await expect(page.getByTestId('chapter-sidebar')).toBeVisible({ timeout: 10000 });
 
     // Navigate to Publish Panel
     await page.getByTestId('chapter-item-publish').click();

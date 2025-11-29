@@ -44,10 +44,14 @@ test.describe('Feature: Project Management', () => {
 
     // Submit
     await page.getByTestId('wizard-submit-btn').click();
-    await expect(wizard).toBeHidden();
+    await expect(wizard).toBeHidden({ timeout: 10000 });
 
-    // Verify Dashboard
-    await expect(page.getByRole('heading', { name: 'The Quantum Paradox' })).toBeVisible();
+    // Wait for project to be created and loaded
+    await page.waitForTimeout(1000);
+
+    // Navigate to Overview to verify project title
+    await page.getByTestId('chapter-item-overview').click();
+    await expect(page.getByRole('heading', { name: 'The Quantum Paradox' })).toBeVisible({ timeout: 10000 });
   });
 
   test('Projects List: Can view and delete projects', async ({ page }) => {

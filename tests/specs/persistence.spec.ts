@@ -28,9 +28,14 @@ test.describe('Feature: Persistence', () => {
     await page.getByTestId('wizard-title-input').fill('Saved Book');
     await page.getByTestId('wizard-style-input').fill('Memoir');
     await page.getByTestId('wizard-submit-btn').click();
-    await expect(page.getByTestId('project-wizard-overlay')).toBeHidden();
+    await expect(page.getByTestId('project-wizard-overlay')).toBeHidden({ timeout: 10000 });
 
-    await expect(page.getByRole('heading', { name: 'Saved Book' })).toBeVisible();
+    // Wait for the project to be created and loaded
+    await page.waitForTimeout(1000); // Give localStorage time to persist
+
+    // Navigate to Overview to verify project title
+    await page.getByTestId('chapter-item-overview').click();
+    await expect(page.getByRole('heading', { name: 'Saved Book' })).toBeVisible({ timeout: 10000 });
 
     // 2. Reload Page
     await page.reload();

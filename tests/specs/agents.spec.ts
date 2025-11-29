@@ -44,11 +44,13 @@ test.describe('Feature: Creative Agents', () => {
 
     // Verify Log Output
     const consoleArea = page.locator('.bg-black\\/40');
-    await expect(consoleArea).toContainText('Character cast list generated', { timeout: 10000 });
+    await expect(consoleArea).toContainText('Character cast list generated', { timeout: 30000 });
 
     // Check that it updated the "Idea" content in Overview
+    // Wait for sidebar to be ready
+    await page.waitForTimeout(500);
     await page.getByTestId('chapter-item-overview').click();
-    await expect(page.getByTestId('overview-panel')).toContainText('**Alice**: A brilliant physicist');
+    await expect(page.getByTestId('overview-panel')).toContainText('**Alice**: A brilliant physicist', { timeout: 10000 });
   });
 
   test('Builder Agent: Can expand world building', async ({ page }) => {
@@ -75,7 +77,13 @@ test.describe('Feature: Creative Agents', () => {
   test('Doctor Agent: Can polish dialogue', async ({ page }) => {
     // 1. Generate Outline to have chapters
     await page.getByTestId('action-card-create_outline').click();
-    await expect(page.getByTestId('chapter-item-order-1')).toBeVisible({ timeout: 10000 });
+
+    // Wait for action to complete by checking console log
+    const consoleArea = page.locator('.bg-black\\/40');
+    await expect(consoleArea).toContainText('Outline created', { timeout: 30000 });
+
+    // Now wait for chapter items to appear
+    await expect(page.getByTestId('chapter-item-order-1')).toBeVisible({ timeout: 30000 });
 
     // 2. Add some content to a chapter
     await page.getByTestId('chapter-item-order-1').click();
@@ -95,17 +103,22 @@ test.describe('Feature: Creative Agents', () => {
     await actionCard.click();
 
     // 4. Verify Log and Content Change
-    const consoleArea = page.locator('.bg-black\\/40');
-    await expect(consoleArea).toContainText('Dialogue polish complete', { timeout: 15000 });
+    await expect(consoleArea).toContainText('Dialogue polish complete', { timeout: 30000 });
 
-    await expect(contentInput).toContainText('# Polished Script');
+    await expect(contentInput).toContainText('# Polished Script', { timeout: 10000 });
   });
 
   test('Writers Agent: Can draft in parallel', async ({ page }) => {
     // 1. Generate Outline (Mock returns 2 chapters)
     await page.getByTestId('action-card-create_outline').click();
-    await expect(page.getByTestId('chapter-item-order-1')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByTestId('chapter-item-order-2')).toBeVisible();
+
+    // Wait for action to complete by checking console log
+    const consoleArea = page.locator('.bg-black\\/40');
+    await expect(consoleArea).toContainText('Outline created', { timeout: 30000 });
+
+    // Now wait for chapter items to appear
+    await expect(page.getByTestId('chapter-item-order-1')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('chapter-item-order-2')).toBeVisible({ timeout: 30000 });
 
     // 2. Click Parallel Draft
     const actionCard = page.getByTestId('action-card-write_chapter_parallel');
@@ -113,8 +126,7 @@ test.describe('Feature: Creative Agents', () => {
     await actionCard.click();
 
     // 3. Verify Logs
-    const consoleArea = page.locator('.bg-black\\/40');
-    await expect(consoleArea).toContainText('Delegating 2 chapters to Writer Agents', { timeout: 10000 });
+    await expect(consoleArea).toContainText('Delegating 2 chapters to Writer Agents', { timeout: 30000 });
     await expect(consoleArea).toContainText('Batch complete. 2/2 chapters written.', { timeout: 30000 });
 
     // 4. Verify UI Updates

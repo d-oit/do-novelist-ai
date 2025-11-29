@@ -12,22 +12,22 @@ Advanced web search using Gemini CLI in headless mode with tool restriction. All
 
 **Basic search:**
 ```
-python scripts/search.py "React 19 features"
+python .claude/skills/gemini-websearch/scripts/search.py "React 19 features"
 ```
 
 **With validation:**
 ```
-python scripts/search.py "TypeScript 5.4 new features" --validate
+python .claude/skills/gemini-websearch/scripts/search.py "TypeScript 5.4 new features" --validate
 ```
 
 **Batch mode:**
 ```
-python scripts/search.py queries.txt --batch --output results/
+python .claude/skills/gemini-websearch/scripts/search.py queries.txt --batch --output results/
 ```
 
 **View analytics:**
 ```
-python scripts/search.py --show-analytics
+python .claude/skills/gemini-websearch/scripts/search.py --show-analytics
 ```
 
 ## Search Workflow
@@ -83,7 +83,7 @@ For detailed examples see [examples.md](examples.md)
 
 **Batch searches with validation:**
 ```
-python scripts/search.py queries.txt \
+python .claude/skills/gemini-websearch/scripts/search.py queries.txt \
   --batch \
   --output results/ \
   --validate \
@@ -92,7 +92,7 @@ python scripts/search.py queries.txt \
 
 **Research with retry logic:**
 ```
-python scripts/search.py "complex technical query" \
+python .claude/skills/gemini-websearch/scripts/search.py "complex technical query" \
   --validate \
   --min-citations 3 \
   --min-relevance 0.6 \
@@ -102,12 +102,12 @@ python scripts/search.py "complex technical query" \
 
 **Disable cache for fresh results:**
 ```
-python scripts/search.py "breaking news topic" --no-cache
+python .claude/skills/gemini-websearch/scripts/search.py "breaking news topic" --no-cache
 ```
 
 **Clear cache:**
 ```
-python scripts/search.py --clear-cache
+python .claude/skills/gemini-websearch/scripts/search.py --clear-cache
 ```
 
 ## Configuration
@@ -183,22 +183,22 @@ Optional `~/.gemini-search/config.json`:
 
 **Single search:**
 ```
-python scripts/search.py "query" [options]
+python .claude/skills/gemini-websearch/scripts/search.py "query" [options]
 ```
 
 **Batch search:**
 ```
-python scripts/search.py queries.txt --batch [options]
+python .claude/skills/gemini-websearch/scripts/search.py queries.txt --batch [options]
 ```
 
 **Show analytics:**
 ```
-python scripts/search.py --show-analytics
+python .claude/skills/gemini-websearch/scripts/search.py --show-analytics
 ```
 
 **Clear cache:**
 ```
-python scripts/search.py --clear-cache
+python .claude/skills/gemini-websearch/scripts/search.py --clear-cache
 ```
 
 ### Options

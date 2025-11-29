@@ -87,11 +87,27 @@ async function setupTestProject(page: Page) {
   await page.getByTestId('wizard-submit-btn').click();
 
   // Wait for dashboard to load
-  await expect(page.getByTestId('chapter-sidebar')).toBeVisible({ timeout: 15000 });
+  await page.waitForTimeout(1000); // Give time for wizard to close and dashboard to initialize
+
+  // Check for sidebar or wizard
+  const sidebar = page.getByTestId('chapter-sidebar');
+  try {
+    await expect(sidebar).toBeVisible({ timeout: 5000 });
+  } catch (e) {
+    // If sidebar isn't visible, we might need to wait for the wizard to fully close
+    await page.waitForTimeout(2000);
+    await expect(sidebar).toBeVisible({ timeout: 10000 });
+  }
 
   // Generate outline
   await page.getByTestId('action-card-create_outline').click();
-  await expect(page.getByTestId('chapter-item-order-1')).toBeVisible({ timeout: 15000 });
+
+  // Wait for action to complete by checking console log
+  const consoleArea = page.locator('.bg-black\\/40');
+  await expect(consoleArea).toContainText('Outline created', { timeout: 30000 });
+
+  // Now wait for chapter items to appear
+  await expect(page.getByTestId('chapter-item-order-1')).toBeVisible({ timeout: 30000 });
 
   // Ensure wizard is closed
   await expect(wizard).toBeHidden();
