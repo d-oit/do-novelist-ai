@@ -51,7 +51,8 @@
       "Skill(parallel-execution)",
       "WebFetch(domain:geminicli.com)",
       "Skill(task-decomposition)",
-      "Bash(npx:*)"
+      "Bash(npx:*)",
+      "Bash(npm run test:*)"
     ],
     "deny": [],
     "ask": []
