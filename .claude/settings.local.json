@@ -20,7 +20,7 @@
       "Bash(npm install:*)",
       "Bash(timeout 60 bash -c \"npm run test:e2e 2>&1\":*)",
       "Skill(gemini-websearch)",
-      "Bash(python scripts/search.py:*)",
+      "Bash(python .claude/skills/gemini-websearch/scripts/:*)",
       "Bash(gemini:*)",
       "Bash(gemini --help:*)",
       "Bash(gemini.cmd:*)",
@@ -36,7 +36,14 @@
       "Bash(npm test)",
       "Skill(playwright-skill)",
       "Bash(gh pr merge:*)",
-      "Bash(gh pr checks:*)"
+      "Bash(gh pr checks:*)",
+      "Skill(goap-agent)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest:*)",
+      "Bash(gh pr list:*)",
+      "SlashCommand(/implement-plans check with gh first all pr and use existing branch if it fits)",
+      "Bash(jobs:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

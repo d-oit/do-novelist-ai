@@ -42,10 +42,12 @@ test.describe('Feature: Dashboard & Tools', () => {
 
   test('Cover Generator: Can generate cover', async ({ page }) => {
     // Navigate to Overview (default, but ensuring)
+    // Wait for sidebar to be visible first
+    await expect(page.getByTestId('chapter-sidebar')).toBeVisible({ timeout: 10000 });
     await page.getByTestId('chapter-item-overview').click();
 
     const generateBtn = page.getByTestId('generate-cover-btn');
-    await expect(generateBtn).toBeVisible();
+    await expect(generateBtn).toBeVisible({ timeout: 10000 });
 
     await generateBtn.click();
     await expect(generateBtn).toHaveText('Generating...');

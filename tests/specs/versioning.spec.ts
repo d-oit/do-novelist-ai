@@ -16,7 +16,13 @@ test.describe('Version History Feature', () => {
 
     // Create outline to get chapters
     await page.getByTestId('action-card-create_outline').click();
-    await expect(page.getByTestId('chapter-item-order-1')).toBeVisible({ timeout: 10000 });
+
+    // Wait for action to complete by checking console log
+    const consoleArea = page.locator('.bg-black\\/40');
+    await expect(consoleArea).toContainText('Outline created', { timeout: 30000 });
+
+    // Now wait for chapter items to appear
+    await expect(page.getByTestId('chapter-item-order-1')).toBeVisible({ timeout: 30000 });
 
     // Navigate to first chapter
     await page.getByTestId('chapter-item-order-1').click();
