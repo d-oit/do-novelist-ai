@@ -209,7 +209,8 @@ describe('VersioningService', () => {
       const _version = await versioningService.saveVersion(testChapter, undefined, 'restore');
 
       expect(_version.type).toBe('restore');
-      expect(_version.message).toContain('Restored _version');
+      expect(_version.message).toContain('Restored version of:');
+      expect(_version.message).toContain(testChapter.title);
     });
 
     it('should generate unique _version IDs', async () => {
