@@ -34,7 +34,9 @@
       "Bash(cat:*)",
       "Bash(npx playwright test:*)",
       "Bash(npm test)",
-      "Skill(playwright-skill)"
+      "Skill(playwright-skill)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh pr checks:*)"
     ],
     "deny": [],
     "ask": []

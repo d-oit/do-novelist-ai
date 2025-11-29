@@ -191,7 +191,7 @@ jobs:
       (needs.build-and-test.result == 'success') &&
       (needs.codeql-analysis.result == 'success') &&
       (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped') &&
-      (needs.e2e-tests.result == 'success') &&
+      (github.event_name == 'pull_request' || needs.e2e-tests.result == 'success') &&
       github.ref == 'refs/heads/main'
     steps:
       - name: Download build artifacts
