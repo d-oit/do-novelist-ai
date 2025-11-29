@@ -6,6 +6,7 @@ test.describe('Feature: Navigation & UX', () => {
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await setupTestProject(page);
   });
 
@@ -72,6 +73,9 @@ async function setupTestProject(page: Page) {
       await newProjectBtn.click();
     }
   }
+
+  // Wait for wizard to be fully loaded
+  await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
 
   // Ensure wizard is now visible
   await expect(wizard).toBeVisible();

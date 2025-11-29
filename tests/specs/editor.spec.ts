@@ -7,9 +7,11 @@ test.describe('Feature: Book Editor', () => {
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
     // Open the wizard
     await page.getByTestId('nav-new-project').click();
+    await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
 
     // Setup: Create a project quickly
     await page.getByTestId('wizard-idea-input').fill('Test Book');

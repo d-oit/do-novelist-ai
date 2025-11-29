@@ -379,7 +379,7 @@ Phase 3: Validate
 - **agent-coordination**: Use for Phase 6 (coordinating multiple agents)
 - **parallel-execution**: Use for parallel strategy implementation
 - **loop-agent**: Use for iterative refinement strategy implementation
-- All specialized agents (feature-implementer, debugger, test-runner, etc.)
+- All specialized agents (feature-implementer, debugger, test-runner, frontend-design-system, playwright-skill, etc.)
 
 ## Quick Example
 

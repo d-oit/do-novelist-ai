@@ -7,8 +7,10 @@ test.describe('Smoke Test: Critical User Journey', () => {
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     // Open the wizard
     await page.getByTestId('nav-new-project').click();
+    await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
   });
 
   test('End-to-End Flow: Wizard -> Outline -> Export', async ({ page }) => {

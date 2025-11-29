@@ -1,4 +1,9 @@
-Refactor code to improve quality and maintainability.
+---
+name: refactor
+description: Refactor code to improve quality and maintainability. Use goap-agent skill with multi-agent coordination
+version: 1.0.0
+---
+
 
 Systematic refactoring while preserving functionality.
 
