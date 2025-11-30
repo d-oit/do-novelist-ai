@@ -50,36 +50,48 @@ const GoalCard: React.FC<{
   const colorClass = goalTypeColors[goal.type];
 
   const progressPercentage = useMemo(() => {
-    if (goal.target.words && goal.current.words >= 0) {
+    if (
+      goal.target.words !== undefined &&
+      goal.current.words !== undefined &&
+      goal.current.words >= 0
+    ) {
       return Math.min((goal.current.words / goal.target.words) * 100, 100);
     }
-    if (goal.target.time && goal.current.time >= 0) {
+    if (
+      goal.target.time !== undefined &&
+      goal.current.time !== undefined &&
+      goal.current.time >= 0
+    ) {
       return Math.min((goal.current.time / goal.target.time) * 100, 100);
     }
-    if (goal.target.chapters && goal.current.chapters >= 0) {
+    if (
+      goal.target.chapters !== undefined &&
+      goal.current.chapters !== undefined &&
+      goal.current.chapters >= 0
+    ) {
       return Math.min((goal.current.chapters / goal.target.chapters) * 100, 100);
     }
     return 0;
   }, [goal]);
 
   const isCompleted = progressPercentage >= 100;
-  const isOverdue = goal.endDate && new Date() > goal.endDate && !isCompleted;
+  const isOverdue = goal.endDate !== undefined && new Date() > goal.endDate && !isCompleted;
 
-  const getProgressText = () => {
-    if (goal.target.words) {
+  const getProgressText = (): string => {
+    if (goal.target.words !== undefined) {
       return `${goal.current.words.toLocaleString()} / ${goal.target.words.toLocaleString()} words`;
     }
-    if (goal.target.time) {
+    if (goal.target.time !== undefined) {
       return `${Math.round(goal.current.time / 60)}h / ${Math.round(goal.target.time / 60)}h`;
     }
-    if (goal.target.chapters) {
+    if (goal.target.chapters !== undefined) {
       return `${goal.current.chapters} / ${goal.target.chapters} chapters`;
     }
     return '';
   };
 
-  const getDaysRemaining = () => {
-    if (!goal.endDate) return null;
+  const getDaysRemaining = (): number | null => {
+    if (goal.endDate === undefined) return null;
     const today = new Date();
     const diffTime = goal.endDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -94,7 +106,7 @@ const GoalCard: React.FC<{
         className={cn(
           'relative overflow-hidden p-4',
           isCompleted && 'bg-green-500/5 ring-2 ring-green-500/30',
-          isOverdue && 'bg-red-500/5 ring-2 ring-red-500/30'
+          isOverdue && 'bg-red-500/5 ring-2 ring-red-500/30',
         )}
       >
         <div className='mb-3 flex items-start justify-between'>
@@ -116,18 +128,27 @@ const GoalCard: React.FC<{
 
           <div className='flex items-center gap-1'>
             <button
-              onClick={() => onEdit(goal)}
+              onClick={() => void onEdit(goal)}
               className={iconButtonTarget(
-                'rounded opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100'
+                'rounded opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100',
               )}
               aria-label='Edit goal'
             >
               <Edit3 className='h-4 w-4' />
             </button>
             <button
+              onClick={() => void onDelete(goal.id)}
+              className={iconButtonTarget(
+                'rounded text-red-500 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-600 group-hover:opacity-100',
+              )}
+              aria-label='Delete goal'
+            >
+              <Trash2 className='h-4 w-4' />
+            </button>
+            <button
               onClick={() => onDelete(goal.id)}
               className={iconButtonTarget(
-                'rounded text-red-500 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-600 group-hover:opacity-100'
+                'rounded text-red-500 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-600 group-hover:opacity-100',
               )}
               aria-label='Delete goal'
             >
@@ -146,7 +167,7 @@ const GoalCard: React.FC<{
             <motion.div
               className={cn(
                 'h-2 rounded-full',
-                isCompleted ? 'bg-green-500' : isOverdue ? 'bg-red-500' : 'bg-primary'
+                isCompleted ? 'bg-green-500' : isOverdue ? 'bg-red-500' : 'bg-primary',
               )}
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
@@ -178,7 +199,7 @@ const GoalCard: React.FC<{
                     ? 'text-red-500'
                     : daysRemaining <= 3
                       ? 'text-orange-500'
-                      : 'text-muted-foreground'
+                      : 'text-muted-foreground',
                 )}
               >
                 {daysRemaining > 0
@@ -208,13 +229,13 @@ const GoalForm: React.FC<{
   onSave: (goal: Omit<WritingGoals, 'id' | 'current'>) => Promise<void>;
   onCancel: () => void;
 }> = ({ goal, projectId, onSave, onCancel }) => {
-  const [type, setType] = useState<WritingGoals['type']>(goal?.type || 'daily');
-  const [targetWords, setTargetWords] = useState(goal?.target.words?.toString() || '');
-  const [targetTime, setTargetTime] = useState(goal?.target.time?.toString() || '');
-  const [targetChapters, setTargetChapters] = useState(goal?.target.chapters?.toString() || '');
-  const [endDate, setEndDate] = useState(goal?.endDate?.toISOString().split('T')[0] || '');
+  const [type, setType] = useState<WritingGoals['type']>(goal?.type ?? 'daily');
+  const [targetWords, setTargetWords] = useState(goal?.target.words?.toString() ?? '');
+  const [targetTime, setTargetTime] = useState(goal?.target.time?.toString() ?? '');
+  const [targetChapters, setTargetChapters] = useState(goal?.target.chapters?.toString() ?? '');
+  const [endDate, setEndDate] = useState(goal?.endDate?.toISOString().split('T')[0] ?? '');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
     const target: WritingGoals['target'] = {};
@@ -225,16 +246,16 @@ const GoalForm: React.FC<{
     const goalData: Omit<WritingGoals, 'id' | 'current'> = {
       type,
       target,
-      startDate: goal?.startDate || new Date(),
+      startDate: goal?.startDate ?? new Date(),
       endDate: endDate ? new Date(endDate) : undefined,
       isActive: true,
-      ...(projectId ? { projectId } : {}),
+      ...(projectId != null ? { projectId } : {}),
     };
 
     await onSave(goalData);
   };
 
-  const getDefaultTarget = () => {
+  const getDefaultTarget = (): string => {
     switch (type) {
       case 'daily':
         return '500';
@@ -266,7 +287,7 @@ const GoalForm: React.FC<{
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className='space-y-4'>
+        <form onSubmit={e => void handleSubmit(e)} className='space-y-4'>
           {/* Goal Type */}
           <div>
             <label className='mb-2 block text-sm font-medium'>Goal Type</label>
@@ -283,7 +304,7 @@ const GoalForm: React.FC<{
                     'rounded-lg border p-3 text-sm font-medium capitalize transition-colors',
                     type === t
                       ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border bg-secondary hover:bg-secondary/80'
+                      : 'border-border bg-secondary hover:bg-secondary/80',
                   )}
                 >
                   {t}
@@ -375,7 +396,9 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ projectId, onClose, classNa
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<WritingGoals | undefined>();
 
-  const handleCreateGoal = async (goalData: Omit<WritingGoals, 'id' | 'current'>) => {
+  const handleCreateGoal = async (
+    goalData: Omit<WritingGoals, 'id' | 'current'>,
+  ): Promise<void> => {
     try {
       await analytics.createGoal(goalData);
       setShowForm(false);
@@ -385,12 +408,12 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ projectId, onClose, classNa
     }
   };
 
-  const handleEditGoal = (goal: WritingGoals) => {
+  const handleEditGoal = (goal: WritingGoals): void => {
     setEditingGoal(goal);
     setShowForm(true);
   };
 
-  const handleDeleteGoal = async (goalId: string) => {
+  const handleDeleteGoal = (goalId: string): void => {
     if (window.confirm('Are you sure you want to delete this goal?')) {
       // Implementation would call analytics service to delete goal
       console.log('Delete goal:', goalId);

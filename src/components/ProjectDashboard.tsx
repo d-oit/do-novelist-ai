@@ -3,7 +3,7 @@ import React from 'react';
 
 import BookViewer from '../features/editor/components/BookViewerRefactored';
 import { GoapEngine } from '../features/editor/hooks/useGoapEngine';
-import { Project, Chapter } from '../types';
+import { Project, Chapter, RefineOptions } from '../types';
 
 import ActionCard from './ActionCard';
 import AgentConsole from './AgentConsole';
@@ -66,7 +66,7 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
                   action={action}
                   isActive={engine.currentAction?.name === action.name}
                   disabled={!engine.isActionAvailable(action) || project.isGenerating}
-                  onClick={() => engine.executeAction(action)}
+                  onClick={() => void engine.executeAction(action)}
                 />
               ))}
             </div>
@@ -84,11 +84,13 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
           project={project}
           selectedChapterId={selectedChapterId}
           onSelectChapter={onSelectChapter}
-          onRefineChapter={engine.handleRefineChapter}
+          onRefineChapter={(chapterId: string, options: RefineOptions) => {
+            void engine.handleRefineChapter(chapterId, options);
+          }}
           onUpdateChapter={onUpdateChapter}
           onUpdateProject={onUpdateProject}
           onAddChapter={onAddChapter}
-          onContinueChapter={engine.handleContinueChapter}
+          onContinueChapter={chapterId => void engine.handleContinueChapter(chapterId)}
         />
       </div>
     </div>

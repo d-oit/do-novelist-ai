@@ -118,11 +118,11 @@ const SimpleLineChart: React.FC<SimpleLineChartProps> = ({
 
       {/* X-axis labels */}
       <div className='flex justify-between text-xs text-muted-foreground'>
-        <span>{data[0]?.label || data[0]?.date}</span>
+        <span>{data[0]?.label ?? data[0]?.date}</span>
         <span>
-          {data[Math.floor(data.length / 2)]?.label || data[Math.floor(data.length / 2)]?.date}
+          {data[Math.floor(data.length / 2)]?.label ?? data[Math.floor(data.length / 2)]?.date}
         </span>
-        <span>{data[data.length - 1]?.label || data[data.length - 1]?.date}</span>
+        <span>{data[data.length - 1]?.label ?? data[data.length - 1]?.date}</span>
       </div>
     </div>
   );

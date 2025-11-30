@@ -8,7 +8,8 @@ import React, { useState } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import { Project, ChapterStatus } from '../../../types';
+import { Project } from '../../../types';
+import { ChapterStatus } from '../../../shared/types';
 
 interface ProjectOverviewProps {
   project: Project;
@@ -22,15 +23,15 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
   className,
 }) => {
   const [editingField, setEditingField] = useState<string | null>(null);
-  const [tempValues, setTempValues] = useState<Record<string, any>>({});
+  const [tempValues, setTempValues] = useState<Record<string, unknown>>({});
 
-  const handleStartEdit = (field: string, currentValue: any) => {
+  const handleStartEdit = (field: string, currentValue: unknown): void => {
     setEditingField(field);
     setTempValues({ [field]: currentValue });
   };
 
-  const handleSaveEdit = () => {
-    if (editingField && tempValues[editingField] !== undefined) {
+  const handleSaveEdit = (): void => {
+    if (editingField !== null && tempValues[editingField] !== undefined) {
       onUpdateProject({
         [editingField]: tempValues[editingField],
         updatedAt: new Date(),
@@ -41,7 +42,7 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
     setTempValues({});
   };
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = (): void => {
     setEditingField(null);
     setTempValues({});
   };
@@ -49,7 +50,7 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
   const EditableField: React.FC<{
     field: string;
     label: string;
-    value: any;
+    value: unknown;
     type?: 'text' | 'textarea' | 'select';
     options?: string[];
     placeholder?: string;
@@ -63,7 +64,7 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
           <label className='block text-sm font-medium text-foreground'>{label}</label>
           {type === 'textarea' ? (
             <textarea
-              value={tempValues[field] || ''}
+              value={(tempValues[field] as string) ?? ''}
               onChange={e => setTempValues({ ...tempValues, [field]: e.target.value })}
               className='w-full resize-none rounded-lg border border-border bg-background px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-primary'
               placeholder={placeholder}
@@ -74,7 +75,7 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
             />
           ) : type === 'select' ? (
             <select
-              value={tempValues[field] || ''}
+              value={(tempValues[field] as string) ?? ''}
               onChange={e => setTempValues({ ...tempValues, [field]: e.target.value })}
               className='w-full rounded-lg border border-border bg-background px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-primary'
             >
@@ -87,7 +88,7 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
           ) : (
             <input
               type='text'
-              value={tempValues[field] || ''}
+              value={(tempValues[field] as string) ?? ''}
               onChange={e => setTempValues({ ...tempValues, [field]: e.target.value })}
               className='w-full rounded-lg border border-border bg-background px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-primary'
               placeholder={placeholder}
@@ -118,9 +119,9 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
           className='group w-full cursor-pointer rounded-lg border border-border/50 bg-card/50 px-3 py-2 transition-colors hover:border-border hover:bg-card'
         >
           <div className='flex items-center gap-3'>
-            {icon && <span className='text-muted-foreground'>{icon}</span>}
+            {icon !== null && <span className='text-muted-foreground'>{icon}</span>}
             <span className='flex-1 text-foreground'>
-              {value || placeholder || `Click to add ${label.toLowerCase()}...`}
+              {(value as string) ?? placeholder ?? `Click to add ${label.toLowerCase()}...`}
             </span>
             <Edit3 className='h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100' />
           </div>
@@ -221,9 +222,15 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
           </div>
           <div className='text-center'>
             <div className='text-2xl font-bold text-primary'>
-              {project.chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0)}
+              {project.chapters.reduce((sum, ch) => sum + (ch.wordCount ?? 0), 0)}
             </div>
             <div className='text-sm text-muted-foreground'>Words</div>
+          </div>
+          <div className='text-center'>
+            <div className='text-2xl font-bold text-primary'>
+              {project.chapters.filter(ch => ch.status === ChapterStatus.COMPLETE).length}
+            </div>
+            <div className='text-sm text-muted-foreground'>Complete</div>
           </div>
           <div className='text-center'>
             <div className='text-2xl font-bold text-primary'>
@@ -236,7 +243,7 @@ const ProjectOverview: React.FC<ProjectOverviewProps> = ({
               {Math.round(
                 (project.chapters.filter(ch => ch.status === ChapterStatus.COMPLETE).length /
                   Math.max(1, project.chapters.length)) *
-                  100
+                  100,
               )}
               %
             </div>

@@ -62,7 +62,7 @@ export class ErrorHandler {
   private errorListeners: Set<(error: AppError) => void> = new Set();
   private handledErrorsCount = 0;
 
-  constructor(config: Partial<ErrorHandlerConfig> = {}) {
+  public constructor(config: Partial<ErrorHandlerConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.initializeGlobalHandlers();
   }
@@ -76,7 +76,7 @@ export class ErrorHandler {
     // Uncaught exceptions
     if (this.config.enableGlobalHandlers) {
       window.addEventListener('error', event => {
-        const error = toAppError(event.error || event.message, 'global-error');
+        const error = toAppError(event.error ?? event.message, 'global-error');
         this.handle(error, { source: 'window.onerror', fatal: true });
       });
 
@@ -93,14 +93,14 @@ export class ErrorHandler {
   /**
    * Handle an error with logging and reporting
    */
-  handle(
+  public handle(
     error: unknown,
     options: {
       context?: string;
       source?: string;
       fatal?: boolean;
       report?: boolean;
-    } = {}
+    } = {},
   ): AppError {
     const appError = toAppError(error, options.context);
     this.handledErrorsCount++;
@@ -120,7 +120,7 @@ export class ErrorHandler {
     });
 
     // Re-throw if fatal
-    if (options.fatal) {
+    if (options.fatal === true) {
       throw appError;
     }
 
@@ -132,19 +132,23 @@ export class ErrorHandler {
    */
   private reportError(error: AppError, options: { source?: string; fatal?: boolean }): void {
     const context = {
-      source: options.source || 'error-handler',
-      fatal: options.fatal || false,
+      source: options.source ?? 'error-handler',
+      fatal: options.fatal ?? false,
       count: this.handledErrorsCount,
     };
 
     // Console logging
-    if (this.config.reporting.reportToConsole) {
+    if (this.config.reporting.reportToConsole === true) {
       logger.logError(error, context);
     }
 
     // Sentry reporting
-    if (this.config.reporting.reportToSentry && typeof window !== 'undefined') {
-      const Sentry = (window as any).Sentry;
+    if (this.config.reporting.reportToSentry === true && typeof window !== 'undefined') {
+      const Sentry = (
+        window as {
+          Sentry?: { captureException: (error: Error, options: Record<string, unknown>) => void };
+        }
+      ).Sentry;
       if (Sentry) {
         Sentry.captureException(error, {
           level: this.mapSeverityToSentry(error.severity),
@@ -158,7 +162,7 @@ export class ErrorHandler {
     }
 
     // Analytics
-    if (this.config.reporting.reportToAnalytics) {
+    if (this.config.reporting.reportToAnalytics === true) {
       logger.info('Error reported', {
         errorCode: error.code,
         errorName: error.name,
@@ -190,9 +194,9 @@ export class ErrorHandler {
   /**
    * Execute operation with retry logic
    */
-  async executeWithRetry<T>(
+  public async executeWithRetry<T>(
     operation: () => Promise<Result<T, AppError>>,
-    options: RetryOptions = {}
+    options: RetryOptions = {},
   ): Promise<Result<T, AppError>> {
     const retryOptions = { ...this.config.defaultRetryOptions, ...options };
 
@@ -206,24 +210,24 @@ export class ErrorHandler {
         if (
           isErr(result) &&
           retryOptions.retryCondition &&
-          !retryOptions.retryCondition(result.error!)
+          !retryOptions.retryCondition(result.error)
         ) {
           return result;
         }
         return result;
       },
       retryOptions.maxAttempts ?? 3,
-      retryOptions.delayMs ?? 500
+      retryOptions.delayMs ?? 500,
     );
   }
 
   /**
    * Execute operation with retry and timeout
    */
-  async executeWithRetryAndTimeout<T>(
+  public async executeWithRetryAndTimeout<T>(
     operation: () => Promise<Result<T, AppError>>,
     timeoutMs: number,
-    options: RetryOptions = {}
+    options: RetryOptions = {},
   ): Promise<Result<T, AppError>> {
     const retryOptions = { ...this.config.defaultRetryOptions, ...options };
 
@@ -231,7 +235,7 @@ export class ErrorHandler {
       async () => {
         const timeoutPromise = new Promise<Result<T, AppError>>(resolve => {
           setTimeout(() => {
-            resolve(err(toAppError(new Error('Operation timed out'), 'timeout') as AppError));
+            resolve(err(toAppError(new Error('Operation timed out'), 'timeout')));
           }, timeoutMs);
         });
 
@@ -239,28 +243,28 @@ export class ErrorHandler {
         if (
           isErr(result) &&
           retryOptions.retryCondition &&
-          !retryOptions.retryCondition(result.error!)
+          !retryOptions.retryCondition(result.error)
         ) {
           return result;
         }
         return result;
       },
       retryOptions.maxAttempts ?? 3,
-      retryOptions.delayMs ?? 500
+      retryOptions.delayMs ?? 500,
     );
   }
 
   /**
    * Wrap async function with error handling
    */
-  wrapAsync<T extends unknown[], R>(
+  public wrapAsync<T extends unknown[], R>(
     fn: (...args: T) => Promise<R>,
-    context?: string
+    context?: string,
   ): (...args: T) => Promise<Result<R, AppError>> {
     return async (...args: T): Promise<Result<R, AppError>> => {
       return tryCatchAsync(
         async () => fn(...args),
-        error => toAppError(error, context)
+        error => toAppError(error, context),
       );
     };
   }
@@ -268,14 +272,14 @@ export class ErrorHandler {
   /**
    * Wrap sync function with error handling
    */
-  wrapSync<T extends unknown[], R>(
+  public wrapSync<T extends unknown[], R>(
     fn: (...args: T) => R,
-    context?: string
+    context?: string,
   ): (...args: T) => Result<R, AppError> {
     return (...args: T): Result<R, AppError> => {
       return tryCatch(
         () => fn(...args),
-        error => toAppError(error, context)
+        error => toAppError(error, context),
       );
     };
   }
@@ -283,7 +287,7 @@ export class ErrorHandler {
   /**
    * Add error listener
    */
-  addErrorListener(listener: (error: AppError) => void): () => void {
+  public addErrorListener(listener: (error: AppError) => void): () => void {
     this.errorListeners.add(listener);
     return () => this.errorListeners.delete(listener);
   }
@@ -291,14 +295,14 @@ export class ErrorHandler {
   /**
    * Remove error listener
    */
-  removeErrorListener(listener: (error: AppError) => void): void {
+  public removeErrorListener(listener: (error: AppError) => void): void {
     this.errorListeners.delete(listener);
   }
 
   /**
    * Get error statistics
    */
-  getStats(): {
+  public getStats(): {
     handledErrorsCount: number;
     listenersCount: number;
     config: ErrorHandlerConfig;
@@ -313,21 +317,21 @@ export class ErrorHandler {
   /**
    * Update configuration
    */
-  updateConfig(newConfig: Partial<ErrorHandlerConfig>): void {
+  public updateConfig(newConfig: Partial<ErrorHandlerConfig>): void {
     this.config = { ...this.config, ...newConfig };
   }
 
   /**
    * Get user-friendly error message
    */
-  getUserMessage(error: unknown): string {
+  public getUserMessage(error: unknown): string {
     return getErrorMessage(error);
   }
 
   /**
    * Check if error should be retried
    */
-  shouldRetry(error: unknown): boolean {
+  public shouldRetry(error: unknown): boolean {
     const appError = toAppError(error);
     const defaultCondition = this.config.defaultRetryOptions.retryCondition;
     return defaultCondition ? defaultCondition(appError) : appError.retryable;
@@ -336,7 +340,7 @@ export class ErrorHandler {
   /**
    * Recover from error
    */
-  async recoverFromError<T>(error: unknown, recoveryFn: () => Promise<T>): Promise<T> {
+  public async recoverFromError<T>(error: unknown, recoveryFn: () => Promise<T>): Promise<T> {
     const appError = toAppError(error);
     logger.warn('Attempting to recover from error', {
       errorCode: appError.code,
@@ -368,21 +372,21 @@ export const handleError = (error: unknown, context?: string): AppError => {
 
 export const executeWithRetry = <T>(
   operation: () => Promise<Result<T, AppError>>,
-  options?: RetryOptions
+  options?: RetryOptions,
 ): Promise<Result<T, AppError>> => {
   return errorHandler.executeWithRetry(operation, options);
 };
 
 export const wrapAsync = <T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
-  context?: string
+  context?: string,
 ): ((...args: T) => Promise<Result<R, AppError>>) => {
   return errorHandler.wrapAsync(fn, context);
 };
 
 export const wrapSync = <T extends unknown[], R>(
   fn: (...args: T) => R,
-  context?: string
+  context?: string,
 ): ((...args: T) => Result<R, AppError>) => {
   return errorHandler.wrapSync(fn, context);
 };
@@ -398,15 +402,20 @@ export const shouldRetry = (error: unknown): boolean => {
 /**
  * React error boundary helper
  */
-export const createErrorHandler = (componentName: string) => {
+export const createErrorHandler = (
+  componentName: string,
+): {
+  handleError: (error: unknown) => void;
+  getErrorMessage: (error: unknown) => string;
+} => {
   return {
-    handleError: (error: unknown) => {
+    handleError: (error: unknown): void => {
       errorHandler.handle(error, {
         context: componentName,
         source: 'react-component',
       });
     },
-    getErrorMessage: (error: unknown) => {
+    getErrorMessage: (error: unknown): string => {
       return errorHandler.getUserMessage(error);
     },
   };

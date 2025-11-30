@@ -56,7 +56,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     return `${prefix}${formatted}${suffix}`;
   };
 
-  const getVariantStyles = () => {
+  const getVariantStyles = (): string => {
     switch (variant) {
       case 'success':
         return 'from-green-500/5 via-card/90 to-green-500/10 border-green-500/20';
@@ -69,7 +69,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     }
   };
 
-  const getTrendColor = () => {
+  const getTrendColor = (): string => {
     if (trend === 'up') return 'text-green-600';
     if (trend === 'down') return 'text-red-600';
     if (change !== undefined) {
@@ -91,7 +91,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
                 <TrendingUp
                   className={cn(
                     'h-3 w-3',
-                    (trend === 'down' || (trend === undefined && change < 0)) && 'rotate-180'
+                    (trend === 'down' || (trend === undefined && change < 0)) && 'rotate-180',
                   )}
                 />
                 {Math.abs(change).toFixed(1)}% {changeLabel}
@@ -99,7 +99,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
             )}
           </div>
 
-          {icon && <div className={cn('rounded-xl bg-secondary/50 p-3', color)}>{icon}</div>}
+          {icon !== undefined && (
+            <div className={cn('rounded-xl bg-secondary/50 p-3', color)}>{icon}</div>
+          )}
         </div>
 
         <div className='pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent' />

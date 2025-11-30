@@ -69,7 +69,7 @@ describe('ProjectService', () => {
     // Setup get operation
     mockGet.mockImplementation(id => {
       const project = storage.projects.find(p => p.id === id);
-      const request = createRequest(project || null);
+      const request = createRequest(project ?? null);
       setTimeout(() => request.onsuccess?.({ target: request }), 0);
       return request;
     });
@@ -479,9 +479,7 @@ describe('ProjectService', () => {
         title: 'New Title',
       };
 
-      await expect(projectService.update('non-existent-id', updates)).rejects.toThrow(
-        'Project not found'
-      );
+      await expect(projectService.update('non-existent-id', updates)).rejects.toThrow('Project not found');
     });
 
     it('should update multiple fields at once', async () => {
@@ -609,10 +607,7 @@ describe('ProjectService', () => {
         style: 'Fantasy',
       };
 
-      const [project1, project2] = await Promise.all([
-        projectService.create(data1),
-        projectService.create(data2),
-      ]);
+      const [project1, project2] = await Promise.all([projectService.create(data1), projectService.create(data2)]);
 
       expect(project1.id).toBeDefined();
       expect(project2.id).toBeDefined();

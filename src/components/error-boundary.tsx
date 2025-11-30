@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
   private retryCount = 0;
   private readonly maxRetries = 3;
 
-  constructor(props: Props) {
+  public constructor(props: Props) {
     super(props);
     this.state = {
       hasError: false,
@@ -38,7 +38,7 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): State {
     return {
       hasError: true,
       error,
@@ -46,12 +46,12 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
-  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     this.setState({ errorInfo });
 
     // Log error using error handler
     errorHandler.handle(error, {
-      context: this.props.componentName || 'ErrorBoundary',
+      context: this.props.componentName ?? 'ErrorBoundary',
       source: 'react-error-boundary',
     });
 
@@ -78,7 +78,7 @@ export class ErrorBoundary extends Component<Props, State> {
     });
   }
 
-  handleRetry = (): void => {
+  private handleRetry = (): void => {
     this.retryCount++;
 
     if (this.retryCount <= this.maxRetries) {
@@ -102,7 +102,7 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   };
 
-  override render(): ReactNode {
+  public override render(): ReactNode {
     if (this.state.hasError && this.state.error) {
       // Use custom fallback if provided
       if (this.props.fallback) {
@@ -138,10 +138,10 @@ export class ErrorBoundary extends Component<Props, State> {
 /**
  * Page-level error boundary
  */
-export const PageErrorBoundary: React.FC<Props> = ({ children, componentName }) => (
+export const PageErrorBoundary: React.FC<Props> = ({ children, componentName }): ReactNode => (
   <ErrorBoundary
     level='page'
-    componentName={componentName || 'Page'}
+    componentName={componentName ?? 'Page'}
     fallback={({ error, retry }) => (
       <div className='flex min-h-[400px] flex-col items-center justify-center p-12'>
         <h1 className='mb-4 text-2xl font-bold text-destructive'>Page Error</h1>
@@ -167,10 +167,10 @@ export const PageErrorBoundary: React.FC<Props> = ({ children, componentName }) 
 /**
  * Section-level error boundary
  */
-export const SectionErrorBoundary: React.FC<Props> = ({ children, componentName }) => (
+export const SectionErrorBoundary: React.FC<Props> = ({ children, componentName }): ReactNode => (
   <ErrorBoundary
     level='section'
-    componentName={componentName || 'Section'}
+    componentName={componentName ?? 'Section'}
     fallback={({ error }) => (
       <div className='flex flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-8'>
         <div className='mb-2 font-medium text-destructive'>This section encountered an error</div>
@@ -185,10 +185,10 @@ export const SectionErrorBoundary: React.FC<Props> = ({ children, componentName 
 /**
  * Component-level error boundary (minimal)
  */
-export const ComponentErrorBoundary: React.FC<Props> = ({ children, componentName }) => (
+export const ComponentErrorBoundary: React.FC<Props> = ({ children, componentName }): ReactNode => (
   <ErrorBoundary
     level='component'
-    componentName={componentName || 'Component'}
+    componentName={componentName ?? 'Component'}
     fallback={() => <div className='text-sm text-destructive'>⚠️ Error rendering component</div>}
   >
     {children}
@@ -200,15 +200,20 @@ export const ComponentErrorBoundary: React.FC<Props> = ({ children, componentNam
  */
 export const withErrorBoundary = <P extends object>(
   Component: ComponentType<P>,
-  errorBoundaryProps?: Omit<Props, 'children'>
+  errorBoundaryProps?: Omit<Props, 'children'>,
 ): ComponentType<P> => {
-  const WrappedComponent = (props: P) => (
-    <ErrorBoundary {...errorBoundaryProps} componentName={Component.displayName || Component.name}>
-      <Component {...props} />
-    </ErrorBoundary>
-  );
+  const WrappedComponent = (props: P): ReactNode => {
+    return (
+      <ErrorBoundary
+        {...errorBoundaryProps}
+        componentName={Component.displayName ?? Component.name}
+      >
+        <Component {...props} />
+      </ErrorBoundary>
+    );
+  };
 
-  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName ?? Component.name})`;
 
   return WrappedComponent;
 };
@@ -216,9 +221,17 @@ export const withErrorBoundary = <P extends object>(
 /**
  * Hook for error handling in function components
  */
-export const useErrorHandler = (componentName?: string) => {
-  const handleError = (error: unknown, context?: string) => {
-    const fullContext = context ? `${componentName}:${context}` : componentName;
+export const useErrorHandler = (
+  componentName?: string,
+): {
+  handleError: (error: unknown, context?: string) => void;
+  getErrorMessage: (error: unknown) => string;
+} => {
+  const handleError = (error: unknown, context?: string): void => {
+    const fullContext =
+      context !== null && context !== undefined
+        ? `${componentName ?? ''}:${context}`
+        : (componentName ?? '');
     errorHandler.handle(error, {
       context: fullContext,
       source: 'react-hook',
@@ -235,9 +248,9 @@ export const useErrorHandler = (componentName?: string) => {
 /**
  * Editor-specific error boundary
  */
-export const EditorErrorBoundary: React.FC<Props> = ({ children, componentName }) => (
+export const EditorErrorBoundary: React.FC<Props> = ({ children, componentName }): ReactNode => (
   <ErrorBoundary
-    componentName={componentName || 'Editor'}
+    componentName={componentName ?? 'Editor'}
     level='section'
     fallback={({ error, retry }) => (
       <div className='flex min-h-[300px] flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-6'>
@@ -271,9 +284,9 @@ export const EditorErrorBoundary: React.FC<Props> = ({ children, componentName }
 /**
  * Projects-specific error boundary
  */
-export const ProjectsErrorBoundary: React.FC<Props> = ({ children, componentName }) => (
+export const ProjectsErrorBoundary: React.FC<Props> = ({ children, componentName }): ReactNode => (
   <ErrorBoundary
-    componentName={componentName || 'Projects'}
+    componentName={componentName ?? 'Projects'}
     level='section'
     fallback={({ error }) => (
       <div className='flex flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-6'>
@@ -292,9 +305,9 @@ export const ProjectsErrorBoundary: React.FC<Props> = ({ children, componentName
 /**
  * AI Service-specific error boundary
  */
-export const AIServiceErrorBoundary: React.FC<Props> = ({ children, componentName }) => (
+export const AIServiceErrorBoundary: React.FC<Props> = ({ children, componentName }): ReactNode => (
   <ErrorBoundary
-    componentName={componentName || 'AIService'}
+    componentName={componentName ?? 'AIService'}
     level='section'
     fallback={({ error }) => (
       <div className='flex flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-6'>

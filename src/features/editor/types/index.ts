@@ -27,7 +27,7 @@ export const RefineOptionsSchema = z.object({
         'description',
         'plot_consistency',
         'tone',
-      ])
+      ]),
     )
     .default(['grammar', 'style']),
   preserveLength: z.boolean().default(false),
@@ -35,6 +35,7 @@ export const RefineOptionsSchema = z.object({
 });
 
 export type RefineOptions = z.infer<typeof RefineOptionsSchema>;
+export type AIModel = z.infer<typeof RefineOptionsSchema.shape.model>;
 
 // ============================================================================
 // Editor Content State
@@ -69,7 +70,7 @@ export interface EditorState extends EditorContent, EditorUIState {
   hasUnsavedChanges: boolean;
   lastSavedSummary: string;
   lastSavedContent: string;
-  comparisonVersions: [any, any] | null;
+  comparisonVersions: [EditorContent, EditorContent] | null;
   refineSettings: RefineOptions;
 }
 
@@ -120,7 +121,7 @@ export type EditorAction =
   | { type: 'SET_GENERATING_IMAGE'; payload: boolean }
   | { type: 'TOGGLE_VERSION_HISTORY'; payload: boolean }
   | { type: 'TOGGLE_ANALYTICS'; payload: boolean }
-  | { type: 'SHOW_COMPARISON'; payload: [any, any] }
+  | { type: 'SHOW_COMPARISON'; payload: [EditorContent, EditorContent] }
   | { type: 'CLOSE_COMPARISON' }
   | { type: 'UPDATE_REFINE_SETTINGS'; payload: Partial<RefineOptions> }
   | { type: 'RESET' };
@@ -140,6 +141,21 @@ export interface DraftMetadata {
 export interface SavedDraft extends DraftMetadata {
   content: string;
   summary: string;
+}
+
+// ============================================================================
+// AI Generation Results
+// ============================================================================
+
+export interface OutlineChapter {
+  orderIndex: number;
+  title: string;
+  summary: string;
+}
+
+export interface OutlineResult {
+  title: string;
+  chapters: OutlineChapter[];
 }
 
 // ============================================================================

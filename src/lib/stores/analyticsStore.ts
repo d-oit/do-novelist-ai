@@ -3,14 +3,14 @@ import { devtools, persist } from 'zustand/middleware';
 
 import { analyticsService } from '../../features/analytics/services/analyticsService';
 import {
-  type WritingSession,
-  type WritingGoals,
-  type ProjectAnalytics,
-  type WritingInsights,
-  type DailyStats,
-  type WeeklyStats,
-  type ChartDataPoint,
   type AnalyticsFilter,
+  type ChartDataPoint,
+  type DailyStats,
+  type ProjectAnalytics,
+  type WeeklyStats,
+  type WritingGoals,
+  type WritingInsights,
+  type WritingSession,
 } from '../../features/analytics/types';
 
 import { type Project } from '@/types';
@@ -86,7 +86,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         error: null,
 
         // Initialize
-        init: async () => {
+        init: async (): Promise<void> => {
           try {
             set({ isLoading: true, error: null });
             await analyticsService.init();
@@ -100,7 +100,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Start Session
-        startSession: async (projectId: string, chapterId?: string) => {
+        startSession: async (projectId: string, chapterId?: string): Promise<WritingSession> => {
           try {
             set({ isLoading: true, error: null });
             const session = await analyticsService.startWritingSession(projectId, chapterId);
@@ -121,7 +121,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // End Session
-        endSession: async metrics => {
+        endSession: async (metrics): Promise<void> => {
           const { currentSession } = get();
           if (!currentSession) return;
 
@@ -129,7 +129,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
             set({ isLoading: true, error: null });
 
             // Provide default metrics if not provided
-            const sessionMetrics = metrics || {
+            const sessionMetrics = metrics ?? {
               wordsAdded: 0,
               wordsRemoved: 0,
               charactersTyped: 0,
@@ -152,7 +152,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Track Progress
-        trackProgress: async (_projectId: string, wordsWritten: number, chapterIds: string[]) => {
+        trackProgress: async (_projectId: string, wordsWritten: number, chapterIds: string[]): Promise<void> => {
           const { currentSession } = get();
           if (!currentSession) return;
 
@@ -172,10 +172,10 @@ export const useAnalyticsStore = create<AnalyticsState>()(
             set(state => ({
               currentSession: state.currentSession
                 ? {
-                    ...state.currentSession,
-                    wordsAdded: state.currentSession.wordsAdded + wordsWritten,
-                    netWordCount: state.currentSession.netWordCount + wordsWritten,
-                  }
+                  ...state.currentSession,
+                  wordsAdded: state.currentSession.wordsAdded + wordsWritten,
+                  netWordCount: state.currentSession.netWordCount + wordsWritten,
+                }
                 : null,
             }));
           } catch (err) {
@@ -186,7 +186,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Load Project Analytics
-        loadProjectAnalytics: async project => {
+        loadProjectAnalytics: async (project): Promise<void> => {
           try {
             set({ isLoading: true, error: null });
             const analytics = await analyticsService.getProjectAnalytics(project);
@@ -203,7 +203,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Load Goals
-        loadGoals: async (projectId: string) => {
+        loadGoals: async (projectId: string): Promise<void> => {
           try {
             const goals = await analyticsService.getGoals(projectId);
             set({ goals });
@@ -215,11 +215,11 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Load Insights
-        loadInsights: async filter => {
+        loadInsights: async (filter): Promise<void> => {
           try {
             set({ isLoading: true, error: null });
             const insights = await analyticsService.getWritingInsights(
-              filter || {
+              filter ?? {
                 dateRange: {
                   start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
                   end: new Date(),
@@ -237,10 +237,10 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Load Weekly Stats
-        loadWeeklyStats: async weekStart => {
+        loadWeeklyStats: async (weekStart): Promise<void> => {
           try {
             set({ isLoading: true, error: null });
-            const stats = await analyticsService.getWeeklyStats(weekStart || new Date());
+            const stats = await analyticsService.getWeeklyStats(weekStart ?? new Date());
             set({ weeklyStats: stats, isLoading: false });
           } catch (err) {
             set({
@@ -251,7 +251,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Load Charts
-        loadWordCountChart: async (projectId, days = 30) => {
+        loadWordCountChart: async (projectId, days = 30): Promise<void> => {
           try {
             const data = await analyticsService.getWordCountChartData(projectId, days);
             set({ wordCountChart: data });
@@ -260,7 +260,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
           }
         },
 
-        loadProductivityChart: async (days = 30) => {
+        loadProductivityChart: async (days = 30): Promise<void> => {
           // Placeholder as per original hook
           const data: ChartDataPoint[] = [];
           const end = new Date();
@@ -269,18 +269,18 @@ export const useAnalyticsStore = create<AnalyticsState>()(
           for (let i = 0; i < days; i++) {
             const d = new Date(start);
             d.setDate(d.getDate() + i);
-            const dateStr = d.toISOString().split('T')[0];
+            const dateStr = d.toISOString().split('T')[0] ?? '';
             data.push({
-              date: dateStr || '',
+              date: dateStr,
               value: Math.floor(Math.random() * 50) + 10,
-              label: d.toLocaleDateString('en-US', { weekday: 'short' }) || '',
+              label: d.toLocaleDateString('en-US', { weekday: 'short' }) ?? '',
             });
           }
           set({ productivityChart: data });
         },
 
         // Create Goal
-        createGoal: async goalData => {
+        createGoal: async (goalData): Promise<WritingGoals> => {
           try {
             const goal = await analyticsService.createGoal(goalData);
             set(state => ({
@@ -295,7 +295,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Update Goal
-        updateGoal: async (id, data) => {
+        updateGoal: async (id, data): Promise<void> => {
           try {
             await analyticsService.updateGoalProgress(id);
             // Ideally fetch updated goal
@@ -310,7 +310,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Delete Goal
-        deleteGoal: async id => {
+        deleteGoal: async (id): Promise<void> => {
           try {
             await analyticsService.deleteGoal(id);
             set(state => ({
@@ -324,7 +324,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Reset Store
-        reset: () => {
+        reset: (): void => {
           set({
             currentSession: null,
             projectAnalytics: null,
@@ -355,13 +355,17 @@ export const useAnalyticsStore = create<AnalyticsState>()(
 );
 
 // Selectors
-export const selectCurrentSession = (state: AnalyticsState) => state.currentSession;
-export const selectIsTracking = (state: AnalyticsState) => state.isTracking;
-export const selectProjectAnalytics = (state: AnalyticsState) => state.projectAnalytics;
-export const selectGoals = (state: AnalyticsState) => state.goals;
-export const selectInsights = (state: AnalyticsState) => state.insights;
-export const selectWeeklyStats = (state: AnalyticsState) => state.weeklyStats;
-export const selectCharts = (state: AnalyticsState) => ({
+export const selectCurrentSession = (state: AnalyticsState): WritingSession | null => state.currentSession;
+export const selectIsTracking = (state: AnalyticsState): boolean => state.isTracking;
+export const selectProjectAnalytics = (state: AnalyticsState): ProjectAnalytics | null => state.projectAnalytics;
+export const selectGoals = (state: AnalyticsState): WritingGoals[] => state.goals;
+export const selectInsights = (state: AnalyticsState): WritingInsights | null => state.insights;
+export const selectWeeklyStats = (state: AnalyticsState): WeeklyStats | null => state.weeklyStats;
+export const selectCharts = (state: AnalyticsState): {
+  wordCount: ChartDataPoint[];
+  productivity: ChartDataPoint[];
+  streak: ChartDataPoint[];
+} => ({
   wordCount: state.wordCountChart,
   productivity: state.productivityChart,
   streak: state.streakChart,

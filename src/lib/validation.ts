@@ -4,17 +4,17 @@
  */
 
 import { ChapterStatus, PublishStatus } from '../shared/types';
-import { isProjectId, createProjectId, createChapterId } from '../types/guards';
+import { createChapterId, createProjectId, isProjectId } from '../types/guards';
 import {
-  ProjectSchema,
   ChapterSchema,
   CreateProjectSchema,
+  ProjectSchema,
+  RefineOptionsSchema,
   UpdateChapterSchema,
   UpdateProjectSchema,
-  RefineOptionsSchema,
   validateData,
-  type Project,
   type Chapter,
+  type Project,
   type ValidationResult,
 } from '../types/schemas';
 
@@ -25,7 +25,7 @@ import {
 export class ValidationService {
   private static instance: ValidationService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): ValidationService {
     if (!ValidationService.instance) {
@@ -257,7 +257,7 @@ export class ValidationService {
       const chapter = validation.data;
 
       // Additional business logic validation
-      if (projectId && !chapter.id.startsWith(projectId)) {
+      if ((projectId != null) && !chapter.id.startsWith(projectId)) {
         return {
           success: false,
           error: 'Chapter ID must start with project ID',
@@ -515,14 +515,14 @@ export const validationService = ValidationService.getInstance();
  * Quick validation functions for common use cases
  */
 export const validate = {
-  project: (data: unknown) => validationService.validateProjectIntegrity(data as Project),
-  chapter: (data: unknown, projectId?: string) =>
+  project: (data: unknown): ValidationResult => validationService.validateProjectIntegrity(data as Project),
+  chapter: (data: unknown, projectId?: string): ValidationResult =>
     validationService.validateChapter(data, projectId),
-  createProject: (data: unknown) => validationService.validateCreateProject(data),
-  updateProject: (data: unknown) => validationService.validateUpdateProject(data),
-  updateChapter: (data: unknown) => validationService.validateUpdateChapter(data),
-  refineOptions: (data: unknown) => validationService.validateRefineOptions(data),
-  content: (content: string) => validationService.validateAndFormatContent(content),
+  createProject: (data: unknown): ValidationResult => validationService.validateCreateProject(data),
+  updateProject: (data: unknown): ValidationResult => validationService.validateUpdateProject(data),
+  updateChapter: (data: unknown): ValidationResult => validationService.validateUpdateChapter(data),
+  refineOptions: (data: unknown): ValidationResult => validationService.validateRefineOptions(data),
+  content: (content: string): ValidationResult => validationService.validateAndFormatContent(content),
 };
 
 /**

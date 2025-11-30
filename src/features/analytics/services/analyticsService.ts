@@ -17,7 +17,7 @@ interface SessionProgress {
   timeSpent: number;
 }
 
-const buildDailyKey = (projectId: string, date: string) => `${projectId}|${date}`;
+const buildDailyKey = (projectId: string, date: string): string => `${projectId}|${date}`;
 
 const START_OF_WEEK = 1; // Monday
 
@@ -27,18 +27,18 @@ class AnalyticsService {
   private readonly goals = new Map<string, WritingGoals>();
   private readonly dailyStats = new Map<string, DailyStats>();
 
-  async init(): Promise<void> {
+  public async init(): Promise<void> {
     return Promise.resolve();
   }
 
-  async startWritingSession(projectId: string, chapterId?: string): Promise<WritingSession> {
+  public async startWritingSession(projectId: string, chapterId?: string): Promise<WritingSession> {
     const id = `session_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     const now = new Date();
 
     const baseSession: WritingSession = {
       id,
       projectId,
-      ...(chapterId ? { chapterId } : {}),
+      ...(chapterId !== undefined ? { chapterId } : {}),
       startTime: now,
       endTime: now,
       duration: 0,
@@ -53,10 +53,10 @@ class AnalyticsService {
 
     this.sessions.set(id, baseSession);
     this.sessionProjects.set(id, projectId);
-    return baseSession;
+    return Promise.resolve(baseSession);
   }
 
-  async endWritingSession(
+  public async endWritingSession(
     sessionId: string,
     metrics: {
       wordsAdded: number;
@@ -64,7 +64,7 @@ class AnalyticsService {
       charactersTyped: number;
       backspacesPressed: number;
       aiWordsGenerated?: number;
-    }
+    },
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) {
@@ -92,7 +92,7 @@ class AnalyticsService {
     await this.updateDailyStatsForSession(updated);
   }
 
-  async trackProgress(sessionId: string, progress: SessionProgress): Promise<void> {
+  public async trackProgress(sessionId: string, progress: SessionProgress): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error('Session not found');
@@ -106,22 +106,23 @@ class AnalyticsService {
     };
 
     this.sessions.set(sessionId, updated);
+    return Promise.resolve();
   }
 
-  async getProjectAnalytics(project: Project): Promise<ProjectAnalytics> {
+  public async getProjectAnalytics(project: Project): Promise<ProjectAnalytics> {
     const totalWords = project.chapters.reduce(
       (sum, chapter) => sum + this.countWords(chapter.content),
-      0
+      0,
     );
     const totalChapters = project.chapters.length;
     const completedChapters = project.chapters.filter(
-      chapter => chapter.status.toLowerCase() === 'complete'
+      chapter => chapter.status.toLowerCase() === 'complete',
     ).length;
     const averageChapterLength = totalChapters > 0 ? totalWords / totalChapters : 0;
     const writingProgress = totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
     const projectStats = this.collectDailyStatsForProject(project.id);
 
-    return {
+    return Promise.resolve({
       projectId: project.id,
       title: project.title,
       createdAt: new Date(project.createdAt ?? Date.now()),
@@ -135,7 +136,7 @@ class AnalyticsService {
       lastActivity:
         projectStats.length > 0
           ? new Date(
-              `${projectStats[projectStats.length - 1]?.date ?? new Date().toISOString().substring(0, 10)}T00:00:00Z`
+              `${projectStats[projectStats.length - 1]?.date ?? new Date().toISOString().substring(0, 10)}T00:00:00Z`,
             )
           : new Date(),
       wordCountHistory: projectStats.map(stat => ({
@@ -154,16 +155,18 @@ class AnalyticsService {
           ? { ...base, completionDate: new Date() }
           : base;
       }),
-    };
+    });
   }
 
-  async getGoals(projectId: string): Promise<WritingGoals[]> {
-    return Array.from(this.goals.values()).filter(
-      goal => goal.projectId === projectId || goal.projectId === undefined
+  public async getGoals(projectId: string): Promise<WritingGoals[]> {
+    return Promise.resolve(
+      Array.from(this.goals.values()).filter(
+        goal => goal.projectId === projectId || goal.projectId === undefined,
+      ),
     );
   }
 
-  async createGoal(goal: Omit<WritingGoals, 'id' | 'current'>): Promise<WritingGoals> {
+  public async createGoal(goal: Omit<WritingGoals, 'id' | 'current'>): Promise<WritingGoals> {
     const id = `goal_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const created: WritingGoals = {
       ...goal,
@@ -176,10 +179,10 @@ class AnalyticsService {
     };
 
     this.goals.set(id, created);
-    return created;
+    return Promise.resolve(created);
   }
 
-  async updateGoalProgress(id: string): Promise<void> {
+  public async updateGoalProgress(id: string): Promise<void> {
     const goal = this.goals.get(id);
     if (!goal) {
       throw new Error('Goal not found');
@@ -192,13 +195,15 @@ class AnalyticsService {
     };
 
     this.goals.set(id, goal);
+    return Promise.resolve();
   }
 
-  async deleteGoal(id: string): Promise<void> {
+  public async deleteGoal(id: string): Promise<void> {
     this.goals.delete(id);
+    return Promise.resolve();
   }
 
-  async getWritingInsights(filter?: AnalyticsFilter): Promise<WritingInsights> {
+  public async getWritingInsights(filter?: AnalyticsFilter): Promise<WritingInsights> {
     const range = filter?.dateRange ?? {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       end: new Date(),
@@ -214,7 +219,7 @@ class AnalyticsService {
       totalSessions > 0
         ? statsInRange.reduce(
             (sum, stat) => sum + stat.averageSessionLength * stat.sessionsCount,
-            0
+            0,
           ) / totalSessions
         : 0;
 
@@ -225,7 +230,7 @@ class AnalyticsService {
     const preferredDays = this.collectPreferredDays(statsInRange);
     const consistencyScore = Math.min(100, totalSessions * 5);
 
-    return {
+    return Promise.resolve({
       productivity: {
         averageWordsPerHour,
         peakWritingHours: peakHours.length > 0 ? peakHours : [8, 9, 10],
@@ -241,7 +246,7 @@ class AnalyticsService {
       aiUsage: {
         totalWordsGenerated: statsInRange.reduce(
           (sum, stat) => sum + (stat.aiAssistancePercentage / 100) * stat.wordsWritten,
-          0
+          0,
         ),
         assistancePercentage:
           statsInRange.length > 0
@@ -253,10 +258,10 @@ class AnalyticsService {
       },
       streaks: this.computeStreaks(statsInRange),
       milestones: [],
-    };
+    });
   }
 
-  async getWeeklyStats(weekStart: Date): Promise<WeeklyStats> {
+  public async getWeeklyStats(weekStart: Date): Promise<WeeklyStats> {
     const start = this.getStartOfWeek(weekStart);
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
@@ -270,7 +275,7 @@ class AnalyticsService {
         ? stats.reduce((max, current) => (current.wordsWritten > max.wordsWritten ? current : max))
         : undefined;
 
-    return {
+    return Promise.resolve({
       weekStart: start.toISOString().slice(0, 10),
       totalWords,
       totalTime,
@@ -283,10 +288,10 @@ class AnalyticsService {
         wordsAchieved: totalWords,
         timeAchieved: totalTime,
       },
-    };
+    });
   }
 
-  async getWordCountChartData(projectId: string, days: number): Promise<ChartDataPoint[]> {
+  public async getWordCountChartData(projectId: string, days: number): Promise<ChartDataPoint[]> {
     const now = new Date();
     const result: ChartDataPoint[] = [];
 
@@ -302,12 +307,12 @@ class AnalyticsService {
       });
     }
 
-    return result;
+    return Promise.resolve(result);
   }
 
-  private async updateDailyStatsForSession(session: WritingSession): Promise<void> {
+  private updateDailyStatsForSession(session: WritingSession): Promise<void> {
     const projectId = this.sessionProjects.get(session.id);
-    if (!projectId) return;
+    if (projectId === undefined) return;
 
     const dateKey =
       session.endTime.toISOString().split('T')[0] ?? session.endTime.toISOString().substring(0, 10);
@@ -331,7 +336,7 @@ class AnalyticsService {
       };
 
       this.dailyStats.set(key, stats);
-      return;
+      return Promise.resolve();
     }
 
     const previousWords = existing.wordsWritten;
@@ -350,6 +355,7 @@ class AnalyticsService {
     existing.aiAssistancePercentage = totalWords > 0 ? (totalAiWords / totalWords) * 100 : 0;
 
     this.dailyStats.set(key, existing);
+    return Promise.resolve();
   }
 
   private collectDailyStatsForProject(projectId: string): DailyStats[] {

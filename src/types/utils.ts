@@ -5,7 +5,7 @@
 
 import React from 'react';
 
-import { ProjectId, ChapterId, Temperature } from './schemas';
+import { ChapterId, ProjectId, Temperature } from './schemas';
 
 // =============================================================================
 // UTILITY TYPES
@@ -120,16 +120,16 @@ export type AsyncTransformer<TInput, TOutput> = (input: TInput) => Promise<TOutp
  */
 export type ApiResponse<TData = unknown> =
   | {
-      success: true;
-      data: TData;
-      message?: string;
-    }
+    success: true;
+    data: TData;
+    message?: string;
+  }
   | {
-      success: false;
-      error: string;
-      code?: string;
-      details?: unknown;
-    };
+    success: false;
+    error: string;
+    code?: string;
+    details?: unknown;
+  };
 
 /**
  * Paginated API response
@@ -212,14 +212,14 @@ export interface ComponentBaseProps {
 /**
  * Props with children
  */
-export type WithChildren<T = {}> = T & {
+export type WithChildren<T = object> = T & {
   children: React.ReactNode;
 };
 
 /**
  * Optional children props
  */
-export type WithOptionalChildren<T = {}> = T & {
+export type WithOptionalChildren<T = object> = T & {
   children?: React.ReactNode;
 };
 
@@ -309,19 +309,19 @@ export type AppEvent =
   | { type: 'CHAPTER_DELETED'; payload: { projectId: ProjectId; chapterId: ChapterId } }
   | { type: 'GENERATION_STARTED'; payload: { projectId: ProjectId; actionName: string } }
   | {
-      type: 'GENERATION_COMPLETED';
-      payload: { projectId: ProjectId; actionName: string; duration: number };
-    }
+    type: 'GENERATION_COMPLETED';
+    payload: { projectId: ProjectId; actionName: string; duration: number };
+  }
   | {
-      type: 'GENERATION_FAILED';
-      payload: { projectId: ProjectId; actionName: string; error: string };
-    }
+    type: 'GENERATION_FAILED';
+    payload: { projectId: ProjectId; actionName: string; error: string };
+  }
   | { type: 'SETTINGS_UPDATED'; payload: { projectId: ProjectId; settings: Partial<unknown> } }
   | { type: 'EXPORT_STARTED'; payload: { projectId: ProjectId; format: string } }
   | {
-      type: 'EXPORT_COMPLETED';
-      payload: { projectId: ProjectId; format: string; filePath: string };
-    };
+    type: 'EXPORT_COMPLETED';
+    payload: { projectId: ProjectId; format: string; filePath: string };
+  };
 
 /**
  * Event listener type

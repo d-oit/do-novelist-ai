@@ -25,7 +25,7 @@ const AnalyticsContent: React.FC<AnalyticsContentProps> = ({ project, activeView
       project.analytics?.totalWordCount ??
       project.chapters.reduce(
         (sum, chapter) => sum + chapter.content.split(/\s+/).filter(Boolean).length,
-        0
+        0,
       ),
     chaptersCompleted: project.worldState.chaptersCompleted,
     totalChapters: project.worldState.chaptersCount,
@@ -71,7 +71,7 @@ const AnalyticsContent: React.FC<AnalyticsContentProps> = ({ project, activeView
     totalWords: stats.totalWords,
   };
 
-  const renderContent = () => {
+  const renderContent = (): JSX.Element => {
     switch (activeView) {
       case 'overview':
         return (

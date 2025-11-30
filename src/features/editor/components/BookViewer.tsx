@@ -1,10 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 
 import { Project, Chapter, ChapterStatus, RefineOptions } from '../../../types/index';
+import { AIModel } from '../types';
 
 // ...
 
-const getStatusConfig = (status: ChapterStatus) => {
+const getStatusConfig = (
+  status: ChapterStatus,
+): {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  color: string;
+  bg: string;
+  border: string;
+  label: string;
+} => {
   switch (status) {
     case ChapterStatus.COMPLETE:
       return {
@@ -78,7 +87,7 @@ import { generateChapterIllustration } from '../../../lib/ai';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-function cn(...inputs: ClassValue[]) {
+function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
@@ -128,7 +137,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
   // Initialize state when chapter changes
   useEffect(() => {
     if (selectedChapter) {
-      actions.setChapter(selectedChapter.summary || '', selectedChapter.content || '');
+      actions.setChapter(selectedChapter.summary ?? '', selectedChapter.content ?? '');
 
       // Start analytics session when switching chapters
       if (!analytics.isTracking) {
@@ -154,7 +163,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
   // Auto-save logic
   useEffect(() => {
     if (
-      !selectedChapterId ||
+      selectedChapterId == null ||
       !onUpdateChapter ||
       selectedChapterId === 'overview' ||
       selectedChapterId === 'publish'
@@ -176,14 +185,19 @@ const BookViewer: React.FC<BookViewerProps> = ({
         }
       }
     }, 3000);
-    return () => clearTimeout(timer);
+    return (): void => clearTimeout(timer);
   }, [state.summary, state.content, selectedChapterId, onUpdateChapter]);
 
   // Save on unmount/change chapter
-  useEffect(() => {
-    return () => {
+  useEffect((): (() => void) => {
+    return (): void => {
       const chapterId = currentChapterIdRef.current;
-      if (!chapterId || !onUpdateChapter || chapterId === 'overview' || chapterId === 'publish')
+      if (
+        chapterId == null ||
+        !onUpdateChapter ||
+        chapterId === 'overview' ||
+        chapterId === 'publish'
+      )
         return;
 
       const { summary, content, lastSavedSummary, lastSavedContent } = stateRef.current;
@@ -193,15 +207,15 @@ const BookViewer: React.FC<BookViewerProps> = ({
     };
   }, [selectedChapterId]);
 
-  const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     actions.updateSummary(e.target.value);
   };
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     actions.updateContent(e.target.value);
   };
 
-  const getWordCount = (text: string) =>
+  const getWordCount = (text: string): number =>
     text
       .trim()
       .split(/\s+/)
@@ -209,16 +223,16 @@ const BookViewer: React.FC<BookViewerProps> = ({
   const currentWordCount = getWordCount(state.content);
   const readingTime = Math.max(1, Math.ceil(currentWordCount / 230));
 
-  const handleGenerateIllustration = async () => {
+  const handleGenerateIllustration = async (): Promise<void> => {
     if (!selectedChapter || !onUpdateChapter) return;
     actions.setGeneratingImage(true);
     try {
       const image = await generateChapterIllustration(
         selectedChapter.title,
         selectedChapter.summary,
-        project.style
+        project.style,
       );
-      if (image) {
+      if (image != null) {
         onUpdateChapter(selectedChapter.id, { illustration: image });
       } else {
         alert('Failed to generate illustration. Please try again.');
@@ -233,8 +247,8 @@ const BookViewer: React.FC<BookViewerProps> = ({
 
   const saveVersion = async (
     type: 'manual' | 'auto' | 'ai-generated' | 'restore' = 'manual',
-    message?: string
-  ) => {
+    message?: string,
+  ): Promise<void> => {
     if (!selectedChapter) return;
 
     const currentChapter: Chapter = {
@@ -250,7 +264,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
     }
   };
 
-  const handleRestoreVersion = (restoredChapter: Chapter) => {
+  const handleRestoreVersion = (restoredChapter: Chapter): void => {
     if (!onUpdateChapter) return;
 
     actions.setChapter(restoredChapter.summary, restoredChapter.content);
@@ -267,14 +281,14 @@ const BookViewer: React.FC<BookViewerProps> = ({
     <div
       className={cn(
         'relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 md:flex-row',
-        state.isFocusMode && 'fixed inset-0 z-50 m-0 rounded-none border-none'
+        state.isFocusMode && 'fixed inset-0 z-50 m-0 rounded-none border-none',
       )}
     >
       {/* Mobile Header */}
       <div
         className={cn(
           'flex items-center justify-between border-b border-border bg-secondary/10 p-4 md:hidden',
-          state.isFocusMode && 'hidden'
+          state.isFocusMode && 'hidden',
         )}
       >
         <div className='flex items-center gap-2 text-sm font-semibold'>
@@ -303,7 +317,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
         className={cn(
           'absolute inset-y-0 left-0 z-20 flex w-64 flex-col border-r border-border bg-card shadow-2xl transition-all duration-300 ease-in-out md:relative md:bg-secondary/5 md:shadow-none',
           state.isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
-          state.isFocusMode && 'md:w-0 md:-translate-x-full md:border-none'
+          state.isFocusMode && 'md:w-0 md:-translate-x-full md:border-none',
         )}
         data-testid='chapter-sidebar'
       >
@@ -320,7 +334,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                 'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors',
                 selectedChapterId === 'overview'
                   ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
               )}
               data-testid='chapter-item-overview'
             >
@@ -332,7 +346,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                 'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors',
                 selectedChapterId === 'publish'
                   ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
               )}
               data-testid='chapter-item-publish'
             >
@@ -356,7 +370,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                     'group flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs transition-colors',
                     selectedChapterId === chapter.id
                       ? 'bg-primary/10 font-medium text-primary'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
                   )}
                   data-testid={`chapter-item-order-${chapter.orderIndex}`}
                 >
@@ -365,7 +379,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                       'h-3 w-3 shrink-0',
                       selectedChapterId === chapter.id
                         ? 'text-primary'
-                        : 'text-muted-foreground group-hover:text-foreground'
+                        : 'text-muted-foreground group-hover:text-foreground',
                     )}
                   />
                   <span className='flex-1 truncate'>
@@ -455,16 +469,16 @@ const BookViewer: React.FC<BookViewerProps> = ({
           <div
             className={cn(
               'mx-auto flex min-h-full w-full flex-col transition-all duration-500',
-              state.isFocusMode ? 'max-w-4xl px-6 pt-20 md:px-12' : 'max-w-3xl p-6 md:p-12'
+              state.isFocusMode ? 'max-w-4xl px-6 pt-20 md:px-12' : 'max-w-3xl p-6 md:p-12',
             )}
             data-testid='chapter-editor'
           >
             {/* Cinematic Chapter Illustration */}
-            {selectedChapter.illustration && (
+            {selectedChapter.illustration != null && (
               <div
                 className={cn(
                   'group relative mb-8 aspect-[21/9] w-full overflow-hidden rounded-xl border border-white/5 shadow-2xl',
-                  state.isFocusMode && 'mx-auto max-w-5xl'
+                  state.isFocusMode && 'mx-auto max-w-5xl',
                 )}
               >
                 <img
@@ -495,7 +509,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
             <div
               className={cn(
                 'mb-6 flex flex-col gap-3',
-                state.isFocusMode && 'opacity-50 transition-opacity hover:opacity-100'
+                state.isFocusMode && 'opacity-50 transition-opacity hover:opacity-100',
               )}
             >
               <div className='flex flex-col justify-between gap-4 sm:flex-row sm:items-center'>
@@ -507,7 +521,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                     <>
                       <div className='hidden h-4 w-px bg-border sm:block' />
                       <div className='group relative'>
-                        {(() => {
+                        {((): JSX.Element => {
                           const config = getStatusConfig(selectedChapter.status);
                           const StatusIcon = config.icon;
                           return (
@@ -517,7 +531,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                                   'flex cursor-pointer items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide transition-all hover:shadow-sm',
                                   config.bg,
                                   config.color,
-                                  config.border
+                                  config.border,
                                 )}
                               >
                                 <StatusIcon className='h-3 w-3' />
@@ -560,7 +574,9 @@ const BookViewer: React.FC<BookViewerProps> = ({
                     <div
                       className={cn(
                         'h-1.5 w-1.5 rounded-full transition-colors',
-                        state.hasUnsavedChanges ? 'animate-pulse bg-amber-500' : 'bg-emerald-500/50'
+                        state.hasUnsavedChanges
+                          ? 'animate-pulse bg-amber-500'
+                          : 'bg-emerald-500/50',
                       )}
                     />
                     <span className='hidden text-[10px] font-semibold uppercase tracking-wider opacity-70 md:inline'>
@@ -580,7 +596,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
               <div
                 className={cn(
                   'group transition-all duration-500',
-                  state.isFocusMode ? 'hidden' : 'block'
+                  state.isFocusMode ? 'hidden' : 'block',
                 )}
               >
                 <label className='mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground opacity-70'>
@@ -611,7 +627,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                           className='w-full rounded border border-border bg-background px-3 py-2 text-xs focus:border-primary focus:outline-none'
                           value={state.refineSettings.model}
                           onChange={e =>
-                            actions.updateRefineSettings({ model: e.target.value as any })
+                            actions.updateRefineSettings({ model: e.target.value as AIModel })
                           }
                           disabled={project.isGenerating}
                         >
@@ -731,7 +747,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                     'w-full flex-1 resize-y rounded-md bg-transparent p-4 font-serif text-lg leading-relaxed text-foreground transition-all placeholder:text-muted-foreground/30 focus:outline-none',
                     state.isFocusMode
                       ? 'min-h-[80vh] border-none text-xl leading-loose shadow-none ring-0 md:text-2xl'
-                      : 'min-h-[500px] border border-border/50 shadow-inner hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20'
+                      : 'min-h-[500px] border border-border/50 shadow-inner hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20',
                   )}
                   value={state.content}
                   onChange={handleContentChange}
@@ -739,7 +755,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                     if (
                       state.content !== state.lastSavedContent &&
                       onUpdateChapter &&
-                      selectedChapterId
+                      selectedChapterId != null
                     ) {
                       onUpdateChapter(selectedChapterId, { content: state.content });
                       actions.markSaved();

@@ -23,27 +23,31 @@ class EditorService {
   /**
    * Initialize the IndexedDB database
    */
-  async init(): Promise<void> {
+  public async init(): Promise<IDBDatabase> {
     this.logger.debug('Initializing IndexedDB', {
       dbName: this.dbName,
       version: this.version,
     });
 
+    if (this.db) {
+      return this.db;
+    }
+
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onerror = () => {
+      request.onerror = (): void => {
         const error = createStorageError(
-          `Failed to open IndexedDB: ${request.error?.message || 'Unknown error'}`,
+          `Failed to open IndexedDB: ${request.error?.message ?? 'Unknown error'}`,
           {
             store: this.dbName,
             operation: 'write',
-            cause: request.error || undefined,
+            cause: request.error ?? undefined,
             context: {
               dbName: this.dbName,
               version: this.version,
             },
-          }
+          },
         );
 
         this.logger.error('Failed to open IndexedDB', {
@@ -55,7 +59,7 @@ class EditorService {
         reject(error);
       };
 
-      request.onsuccess = () => {
+      request.onsuccess = (): void => {
         this.db = request.result;
 
         // Log successful connection
@@ -71,10 +75,10 @@ class EditorService {
           objectStores: Array.from(this.db.objectStoreNames),
         });
 
-        resolve();
+        resolve(this.db);
       };
 
-      request.onupgradeneeded = event => {
+      request.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         this.logger.info('Upgrading database schema', {
@@ -102,7 +106,7 @@ class EditorService {
   /**
    * Check if database is initialized and healthy
    */
-  async isHealthy(): Promise<boolean> {
+  public async isHealthy(): Promise<boolean> {
     if (!this.db) {
       return false;
     }
@@ -119,13 +123,13 @@ class EditorService {
   /**
    * Save a draft to IndexedDB
    */
-  async saveDraft(
+  public async saveDraft(
     chapterId: string,
     projectId: string,
     content: string,
-    summary: string
+    summary: string,
   ): Promise<SavedDraft> {
-    if (!this.db) await this.init();
+    const db = await this.init();
 
     const wordCount = content.split(/\s+/).filter(word => word.length > 0).length;
     const existingDraft = await this.loadDraft(chapterId);
@@ -142,52 +146,52 @@ class EditorService {
     };
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['drafts'], 'readwrite');
+      const transaction = db.transaction(['drafts'], 'readwrite');
       const store = transaction.objectStore('drafts');
       const request = store.put(draft);
 
-      request.onsuccess = () => resolve(draft);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve(draft);
+      request.onerror = (): void => reject(request.error);
     });
   }
 
   /**
    * Load a draft from IndexedDB
    */
-  async loadDraft(chapterId: string): Promise<SavedDraft | null> {
-    if (!this.db) await this.init();
+  public async loadDraft(chapterId: string): Promise<SavedDraft | null> {
+    const db = await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['drafts'], 'readonly');
+    return new Promise<SavedDraft | null>((resolve, reject) => {
+      const transaction = db.transaction(['drafts'], 'readonly');
       const store = transaction.objectStore('drafts');
       const request = store.get(chapterId);
 
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve(request.result ?? null);
+      request.onerror = (): void => reject(request.error);
     });
   }
 
   /**
    * Get all drafts for a project
    */
-  async getDraftsByProject(projectId: string): Promise<SavedDraft[]> {
-    if (!this.db) await this.init();
+  public async getDraftsByProject(projectId: string): Promise<SavedDraft[]> {
+    const db = await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['drafts'], 'readonly');
+      const transaction = db.transaction(['drafts'], 'readonly');
       const store = transaction.objectStore('drafts');
       const index = store.index('projectId');
       const request = index.getAll(projectId);
 
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve(request.result);
+      request.onerror = (): void => reject(request.error);
     });
   }
 
   /**
    * Get draft metadata without loading full content
    */
-  async getDraftMetadata(chapterId: string): Promise<DraftMetadata | null> {
+  public async getDraftMetadata(chapterId: string): Promise<DraftMetadata | null> {
     if (!this.db) await this.init();
 
     const draft = await this.loadDraft(chapterId);
@@ -200,41 +204,40 @@ class EditorService {
   /**
    * Delete a draft
    */
-  async deleteDraft(chapterId: string): Promise<void> {
-    if (!this.db) await this.init();
+  public async deleteDraft(chapterId: string): Promise<void> {
+    const db = await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['drafts'], 'readwrite');
+      const transaction = db.transaction(['drafts'], 'readwrite');
       const store = transaction.objectStore('drafts');
       const request = store.delete(chapterId);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void => reject(request.error);
     });
   }
 
   /**
    * Delete all drafts for a project
    */
-  async deleteDraftsByProject(projectId: string): Promise<void> {
-    if (!this.db) await this.init();
-
+  public async deleteDraftsByProject(projectId: string): Promise<void> {
+    const db = await this.init();
     const drafts = await this.getDraftsByProject(projectId);
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['drafts'], 'readwrite');
+      const transaction = db.transaction(['drafts'], 'readwrite');
       const store = transaction.objectStore('drafts');
 
       let deletedCount = 0;
       drafts.forEach(draft => {
         const request = store.delete(draft.chapterId);
-        request.onsuccess = () => {
+        request.onsuccess = (): void => {
           deletedCount++;
           if (deletedCount === drafts.length) {
             resolve();
           }
         };
-        request.onerror = () => reject(request.error);
+        request.onerror = (): void => reject(request.error);
       });
 
       // Handle edge case of no drafts
@@ -247,7 +250,7 @@ class EditorService {
   /**
    * Check if a draft exists
    */
-  async hasDraft(chapterId: string): Promise<boolean> {
+  public async hasDraft(chapterId: string): Promise<boolean> {
     const draft = await this.loadDraft(chapterId);
     return draft !== null;
   }
@@ -255,7 +258,7 @@ class EditorService {
   /**
    * Get all draft metadata for a project (lightweight operation)
    */
-  async getAllDraftMetadata(projectId: string): Promise<DraftMetadata[]> {
+  public async getAllDraftMetadata(projectId: string): Promise<DraftMetadata[]> {
     const drafts = await this.getDraftsByProject(projectId);
     return drafts.map(({ content: _content, summary: _summary, ...metadata }) => metadata);
   }
@@ -263,16 +266,16 @@ class EditorService {
   /**
    * Clear all drafts (use with caution!)
    */
-  async clearAllDrafts(): Promise<void> {
-    if (!this.db) await this.init();
+  public async clearAllDrafts(): Promise<void> {
+    const db = await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['drafts'], 'readwrite');
+      const transaction = db.transaction(['drafts'], 'readwrite');
       const store = transaction.objectStore('drafts');
       const request = store.clear();
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void => reject(request.error);
     });
   }
 }

@@ -19,7 +19,7 @@ interface EditorState {
   // Feature State
   showVersionHistory: boolean;
   showVersionComparison: boolean;
-  comparisonVersions: [any, any] | null;
+  comparisonVersions: [EditorContent, EditorContent] | null;
   showAnalytics: boolean;
 
   // Settings
@@ -37,7 +37,7 @@ type EditorAction =
   | { type: 'SET_GENERATING_IMAGE'; payload: boolean }
   | { type: 'TOGGLE_VERSION_HISTORY'; payload: boolean }
   | { type: 'TOGGLE_ANALYTICS'; payload: boolean }
-  | { type: 'SHOW_COMPARISON'; payload: [any, any] }
+  | { type: 'SHOW_COMPARISON'; payload: [EditorContent, EditorContent] }
   | { type: 'CLOSE_COMPARISON' }
   | { type: 'UPDATE_REFINE_SETTINGS'; payload: Partial<RefineOptions> }
   | { type: 'RESET' };
@@ -132,24 +132,41 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
 }
 
 // Hook
-export function useEditorState() {
+export function useEditorState(): {
+  state: EditorState;
+  actions: {
+    setChapter: (summary: string, content: string) => void;
+    updateSummary: (summary: string) => void;
+    updateContent: (content: string) => void;
+    markSaved: () => void;
+    toggleSidebar: () => void;
+    toggleFocusMode: () => void;
+    setGeneratingImage: (generating: boolean) => void;
+    setShowVersionHistory: (show: boolean) => void;
+    setShowAnalytics: (show: boolean) => void;
+    showComparison: (v1: EditorContent, v2: EditorContent) => void;
+    closeComparison: () => void;
+    updateRefineSettings: (settings: Partial<RefineOptions>) => void;
+    reset: () => void;
+  };
+} {
   const [state, dispatch] = useReducer(editorReducer, initialState);
 
   const actions = {
     setChapter: useCallback(
       (summary: string, content: string) =>
         dispatch({ type: 'SET_CHAPTER', payload: { summary, content } }),
-      []
+      [],
     ),
 
     updateSummary: useCallback(
       (summary: string) => dispatch({ type: 'UPDATE_SUMMARY', payload: summary }),
-      []
+      [],
     ),
 
     updateContent: useCallback(
       (content: string) => dispatch({ type: 'UPDATE_CONTENT', payload: content }),
-      []
+      [],
     ),
 
     markSaved: useCallback(() => dispatch({ type: 'MARK_SAVED' }), []),
@@ -160,22 +177,23 @@ export function useEditorState() {
 
     setGeneratingImage: useCallback(
       (isGenerating: boolean) => dispatch({ type: 'SET_GENERATING_IMAGE', payload: isGenerating }),
-      []
+      [],
     ),
 
     setShowVersionHistory: useCallback(
       (show: boolean) => dispatch({ type: 'TOGGLE_VERSION_HISTORY', payload: show }),
-      []
+      [],
     ),
 
     setShowAnalytics: useCallback(
       (show: boolean) => dispatch({ type: 'TOGGLE_ANALYTICS', payload: show }),
-      []
+      [],
     ),
 
     showComparison: useCallback(
-      (v1: any, v2: any) => dispatch({ type: 'SHOW_COMPARISON', payload: [v1, v2] }),
-      []
+      (v1: EditorContent, v2: EditorContent) =>
+        dispatch({ type: 'SHOW_COMPARISON', payload: [v1, v2] }),
+      [],
     ),
 
     closeComparison: useCallback(() => dispatch({ type: 'CLOSE_COMPARISON' }), []),
@@ -183,7 +201,7 @@ export function useEditorState() {
     updateRefineSettings: useCallback(
       (settings: Partial<RefineOptions>) =>
         dispatch({ type: 'UPDATE_REFINE_SETTINGS', payload: settings }),
-      []
+      [],
     ),
 
     reset: useCallback(() => dispatch({ type: 'RESET' }), []),

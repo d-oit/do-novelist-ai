@@ -43,7 +43,7 @@ export const useCharacters = create<CharactersState>()(
       error: null,
 
       // Initialize service
-      init: async () => {
+      init: async (): Promise<void> => {
         try {
           set({ isLoading: true });
           await characterService.init();
@@ -57,7 +57,7 @@ export const useCharacters = create<CharactersState>()(
       },
 
       // Load characters
-      load: async (projectId: string) => {
+      load: async (projectId: string): Promise<void> => {
         try {
           set({ isLoading: true, error: null });
           const characters = await characterService.getAll(projectId);
@@ -71,7 +71,9 @@ export const useCharacters = create<CharactersState>()(
       },
 
       // Create character
-      create: async characterData => {
+      create: async (
+        characterData: Omit<Character, 'id' | 'createdAt' | 'updatedAt'>,
+      ): Promise<void> => {
         try {
           set({ isLoading: true, error: null });
           const newCharacter: Character = {
@@ -95,7 +97,7 @@ export const useCharacters = create<CharactersState>()(
       },
 
       // Update character
-      update: async (id, data) => {
+      update: async (id: string, data: Partial<Character>): Promise<void> => {
         try {
           set({ isLoading: true, error: null });
           const updated = await characterService.update(id, data);
@@ -113,7 +115,7 @@ export const useCharacters = create<CharactersState>()(
       },
 
       // Delete character
-      delete: async id => {
+      delete: async (id: string): Promise<void> => {
         try {
           set({ isLoading: true, error: null });
           await characterService.delete(id);
@@ -131,22 +133,22 @@ export const useCharacters = create<CharactersState>()(
       },
 
       // Select character
-      select: id => {
+      select: (id: string | null): void => {
         set({ selectedId: id });
       },
 
       // Set filters
-      setFilters: newFilters => {
+      setFilters: (newFilters: Partial<CharacterFilters>): void => {
         set(state => ({
           filters: { ...state.filters, ...newFilters },
         }));
       },
 
       // Set editing mode
-      setEditing: isEditing => {
+      setEditing: (isEditing: boolean): void => {
         set({ isEditing });
       },
     }),
-    { name: 'CharactersStore' }
-  )
+    { name: 'CharactersStore' },
+  ),
 );

@@ -62,7 +62,7 @@ export const CharacterEditor: React.FC<CharacterEditorProps> = ({
     }
   }, [character, isOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
@@ -99,14 +99,14 @@ export const CharacterEditor: React.FC<CharacterEditorProps> = ({
             </button>
           </CardHeader>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={e => void handleSubmit(e)}>
             <CardContent className='space-y-6 pt-6'>
-              {error && (
+              {error !== null ? (
                 <div className='flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive'>
                   <AlertCircle className='h-4 w-4' />
                   {error}
                 </div>
-              )}
+              ) : null}
 
               <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 <div className='space-y-2'>
@@ -114,7 +114,7 @@ export const CharacterEditor: React.FC<CharacterEditorProps> = ({
                   <input
                     required
                     type='text'
-                    value={formData.name}
+                    value={formData.name ?? ''}
                     onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     className='w-full rounded-md border bg-background px-3 py-2'
                     placeholder='Character Name'
@@ -124,7 +124,7 @@ export const CharacterEditor: React.FC<CharacterEditorProps> = ({
                 <div className='space-y-2'>
                   <label className='text-sm font-medium'>Role</label>
                   <select
-                    value={formData.role}
+                    value={formData.role ?? 'supporting'}
                     onChange={e =>
                       setFormData(prev => ({ ...prev, role: e.target.value as CharacterRole }))
                     }
@@ -142,7 +142,7 @@ export const CharacterEditor: React.FC<CharacterEditorProps> = ({
               <div className='space-y-2'>
                 <label className='text-sm font-medium'>Character Arc</label>
                 <select
-                  value={formData.arc}
+                  value={formData.arc ?? 'flat'}
                   onChange={e =>
                     setFormData(prev => ({ ...prev, arc: e.target.value as CharacterArc }))
                   }
@@ -160,7 +160,7 @@ export const CharacterEditor: React.FC<CharacterEditorProps> = ({
                 <label className='text-sm font-medium'>Motivation</label>
                 <textarea
                   required
-                  value={formData.motivation}
+                  value={formData.motivation ?? ''}
                   onChange={e => setFormData(prev => ({ ...prev, motivation: e.target.value }))}
                   className='min-h-[80px] w-full rounded-md border bg-background px-3 py-2'
                   placeholder='What drives this character?'
@@ -171,7 +171,7 @@ export const CharacterEditor: React.FC<CharacterEditorProps> = ({
                 <label className='text-sm font-medium'>Goal</label>
                 <textarea
                   required
-                  value={formData.goal}
+                  value={formData.goal ?? ''}
                   onChange={e => setFormData(prev => ({ ...prev, goal: e.target.value }))}
                   className='min-h-[80px] w-full rounded-md border bg-background px-3 py-2'
                   placeholder='What do they want to achieve?'
@@ -182,7 +182,7 @@ export const CharacterEditor: React.FC<CharacterEditorProps> = ({
                 <label className='text-sm font-medium'>Conflict</label>
                 <textarea
                   required
-                  value={formData.conflict}
+                  value={formData.conflict ?? ''}
                   onChange={e => setFormData(prev => ({ ...prev, conflict: e.target.value }))}
                   className='min-h-[80px] w-full rounded-md border bg-background px-3 py-2'
                   placeholder='What stands in their way?'
@@ -192,7 +192,7 @@ export const CharacterEditor: React.FC<CharacterEditorProps> = ({
               <div className='space-y-2'>
                 <label className='text-sm font-medium'>Backstory (Optional)</label>
                 <textarea
-                  value={formData.backstory}
+                  value={formData.backstory ?? ''}
                   onChange={e => setFormData(prev => ({ ...prev, backstory: e.target.value }))}
                   className='min-h-[100px] w-full rounded-md border bg-background px-3 py-2'
                   placeholder='Relevant history...'

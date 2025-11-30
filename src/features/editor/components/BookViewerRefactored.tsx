@@ -18,7 +18,7 @@ interface BookViewerProps {
   onUpdateChapter: (chapterId: string, updates: Partial<Chapter>) => void;
   onUpdateProject: (updates: Partial<Project>) => void;
   onAddChapter: () => void;
-  onRefineChapter?: (chapterId: string, options: any) => void;
+  onRefineChapter?: (chapterId: string, options: RefineOptions) => void;
   onContinueChapter?: (chapterId: string) => void;
 }
 

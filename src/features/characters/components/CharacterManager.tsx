@@ -39,7 +39,7 @@ export const CharacterManager: React.FC<CharacterManagerProps> = ({ projectId, c
 
   // Load characters on mount
   useEffect(() => {
-    load(projectId);
+    void load(projectId);
   }, [projectId, load]);
 
   // Helper function to get character validation status
@@ -59,7 +59,7 @@ export const CharacterManager: React.FC<CharacterManagerProps> = ({ projectId, c
   const filteredCharacters = useMemo(() => {
     return characters.filter(char => {
       // Search
-      if (filters.search) {
+      if (filters.search && filters.search.length > 0) {
         const term = filters.search.toLowerCase();
         if (
           !char.name.toLowerCase().includes(term) &&
@@ -99,26 +99,26 @@ export const CharacterManager: React.FC<CharacterManagerProps> = ({ projectId, c
     });
   }, [characters, filters]);
 
-  const handleCreate = () => {
+  const handleCreate = (): void => {
     setEditingChar(undefined);
     setEditing(true);
   };
 
-  const handleEdit = (char: Character) => {
+  const handleEdit = (char: Character): void => {
     setEditingChar(char);
     setEditing(true);
   };
 
-  const handleSave = async (data: Partial<Character>) => {
+  const handleSave = async (data: Partial<Character>): Promise<void> => {
     if (editingChar) {
       await update(editingChar.id, data);
     } else {
-      await create({ ...data, projectId } as any);
+      await create({ ...data, projectId } as Omit<Character, 'id' | 'createdAt' | 'updatedAt'>);
     }
     setEditing(false);
   };
 
-  const handleToggleSelection = (id: string) => {
+  const handleToggleSelection = (id: string): void => {
     const newSet = new Set(selectedIds);
     if (newSet.has(id)) {
       newSet.delete(id);
@@ -128,7 +128,7 @@ export const CharacterManager: React.FC<CharacterManagerProps> = ({ projectId, c
     setSelectedIds(newSet);
   };
 
-  if (error) {
+  if (error !== null) {
     return (
       <div className='flex items-center gap-2 rounded-lg bg-destructive/10 p-4 text-destructive'>
         <AlertCircle className='h-5 w-5' />
@@ -148,7 +148,7 @@ export const CharacterManager: React.FC<CharacterManagerProps> = ({ projectId, c
           </h2>
           <p className='text-muted-foreground'>Manage your story's cast and their relationships</p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={() => handleCreate()}>
           <Plus className='mr-2 h-4 w-4' />
           New Character
         </Button>
@@ -165,10 +165,10 @@ export const CharacterManager: React.FC<CharacterManagerProps> = ({ projectId, c
         characters={filteredCharacters}
         selectedIds={selectedIds}
         loading={isLoading}
-        onSelect={char => select(char.id)}
+        onSelect={char => void select(char.id)}
         onToggleSelection={handleToggleSelection}
         onEdit={handleEdit}
-        onDelete={deleteCharacter}
+        onDelete={id => void deleteCharacter(id)}
         onCreate={handleCreate}
       />
 

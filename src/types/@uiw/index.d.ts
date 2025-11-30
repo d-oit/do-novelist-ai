@@ -10,7 +10,7 @@ declare module '@uiw/react-md-editor' {
     hideToolbar?: boolean;
     visibleToolbar?: boolean;
     hidePreview?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   const MDEditor: React.FC<MDEditorProps>;

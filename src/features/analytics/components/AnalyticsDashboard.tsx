@@ -24,7 +24,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ project, onClos
   const [showAllStats, setShowAllStats] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadData = async (): Promise<void> => {
       await Promise.all([
         analytics.loadProjectAnalytics(project),
         analytics.loadWeeklyStats(),
@@ -34,10 +34,10 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ project, onClos
       ]);
     };
 
-    loadData();
+    void loadData();
   }, [project.id]);
 
-  const refreshData = async () => {
+  const refreshData = async (): Promise<void> => {
     setIsRefreshing(true);
     try {
       await Promise.all([
@@ -54,7 +54,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ project, onClos
     }
   };
 
-  const exportData = async () => {
+  const exportData = async (): Promise<void> => {
     try {
       const data = await analytics.exportAnalytics('json');
       const blob = new Blob([data], { type: 'application/json' });
@@ -103,7 +103,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ project, onClos
     <motion.div
       className={cn(
         'flex h-full flex-col overflow-hidden rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm',
-        className
+        className,
       )}
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -134,7 +134,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ project, onClos
           <Button
             variant='outline'
             size='sm'
-            onClick={refreshData}
+            onClick={() => void refreshData()}
             disabled={isRefreshing}
             className='text-xs'
           >
@@ -142,7 +142,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ project, onClos
             Refresh
           </Button>
 
-          <Button variant='outline' size='sm' onClick={exportData} className='text-xs'>
+          <Button variant='outline' size='sm' onClick={() => void exportData()} className='text-xs'>
             <Download className='mr-1 h-3 w-3' />
             Export
           </Button>

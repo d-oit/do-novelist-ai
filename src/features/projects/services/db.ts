@@ -1,5 +1,12 @@
 import { createClient, Client } from '@libsql/client/web';
-import { Project, PublishStatus } from '@shared/types';
+import {
+  Project,
+  PublishStatus,
+  WritingStyle,
+  WorldState,
+  Language,
+  ProjectSettings,
+} from '@shared/types';
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';
@@ -10,11 +17,41 @@ export interface DbConfig {
   useCloud: boolean;
 }
 
+interface DbProjectRow {
+  id: string;
+  title: string;
+  idea: string;
+  style: string; // JSON string
+  cover_image: string;
+  world_state: string; // JSON string
+  status: string;
+  language: string;
+  target_word_count: number;
+  settings: string; // JSON string
+  updated_at: string;
+}
+
+interface DbChapterRow {
+  id: string;
+  order_index: number;
+  title: string;
+  summary: string;
+  content: string;
+  status: string;
+  word_count: number;
+  character_count: number;
+  estimated_reading_time: number;
+  tags: string; // JSON string
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export const getStoredConfig = (): DbConfig => {
   // 1. Check LocalStorage (User overrides)
   const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-  if (stored) {
-    const parsed = JSON.parse(stored);
+  if (stored != null) {
+    const parsed = JSON.parse(stored) as DbConfig;
     // If user has explicitly explicitly configured, return it
     return parsed;
   }
@@ -24,13 +61,13 @@ export const getStoredConfig = (): DbConfig => {
   const envToken = typeof process !== 'undefined' ? process.env.TURSO_AUTH_TOKEN : '';
 
   return {
-    url: envUrl || '',
-    authToken: envToken || '',
-    useCloud: !!(envUrl && envToken), // Default to cloud if env vars exist
+    url: envUrl ?? '',
+    authToken: envToken ?? '',
+    useCloud: envUrl.length > 0 && envToken.length > 0, // Default to cloud if env vars exist
   };
 };
 
-export const saveStoredConfig = (config: DbConfig) => {
+export const saveStoredConfig = (config: DbConfig): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
   // Force client refresh
   dbClient = null;
@@ -57,7 +94,7 @@ const getClient = (): Client | null => {
 };
 
 export const db = {
-  init: async () => {
+  init: async (): Promise<void> => {
     const client = getClient();
     if (client) {
       try {
@@ -87,7 +124,7 @@ export const db = {
         } catch (_e) {}
         try {
           await client.execute(
-            'ALTER TABLE projects ADD COLUMN target_word_count INTEGER DEFAULT 50000'
+            'ALTER TABLE projects ADD COLUMN target_word_count INTEGER DEFAULT 50000',
           );
         } catch (_e) {}
         try {
@@ -115,7 +152,7 @@ export const db = {
     }
   },
 
-  saveProject: async (project: Project) => {
+  saveProject: async (project: Project): Promise<void> => {
     console.log(`[DB] Saving project: ${project.title} (${project.id})`);
     const client = getClient();
     if (client) {
@@ -132,12 +169,12 @@ export const db = {
             project.title,
             project.idea,
             project.style,
-            project.coverImage || '',
+            project.coverImage ?? '',
             JSON.stringify(project.worldState),
             project.status,
             project.language,
             project.targetWordCount,
-            JSON.stringify(project.settings || {}),
+            JSON.stringify(project.settings ?? {}),
           ],
         });
 
@@ -158,7 +195,10 @@ export const db = {
       }
     } else {
       // Local Save
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) || '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
+        string,
+        Project
+      >;
       projects[project.id] = { ...project, updatedAt: new Date().toISOString() };
       localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
       console.log(`[DB] Local save complete.`);
@@ -175,7 +215,7 @@ export const db = {
           args: [projectId],
         });
         if (pRes.rows.length === 0) return null;
-        const pRow = pRes.rows[0];
+        const pRow = pRes.rows[0] as DbProjectRow;
 
         const cRes = await client.execute({
           sql: 'SELECT * FROM chapters WHERE project_id = ? ORDER BY order_index',
@@ -183,21 +223,17 @@ export const db = {
         });
 
         const loadedProject: Project = {
-          id: pRow?.id as string,
-          title: pRow?.title as string,
-          idea: pRow?.idea as string,
-          style: pRow?.style as any,
-          coverImage: pRow?.cover_image as string,
-          worldState:
-            typeof pRow?.world_state === 'string'
-              ? JSON.parse(pRow.world_state)
-              : pRow?.world_state,
+          id: pRow.id,
+          title: pRow.title,
+          idea: pRow.idea,
+          style: JSON.parse(pRow.style) as WritingStyle,
+          coverImage: pRow.cover_image,
+          worldState: JSON.parse(pRow.world_state) as WorldState,
           isGenerating: false,
-          status: (pRow?.status as PublishStatus) || PublishStatus.DRAFT,
-          language: (pRow?.language as string) || 'en',
-          targetWordCount: (pRow?.target_word_count as number) || 50000,
-          settings:
-            typeof pRow?.settings === 'string' ? JSON.parse(pRow.settings) : pRow?.settings || {},
+          status: (pRow.status as PublishStatus) ?? PublishStatus.DRAFT,
+          language: pRow.language as Language,
+          targetWordCount: pRow.target_word_count,
+          settings: JSON.parse(pRow.settings) as ProjectSettings,
           genre: [],
           targetAudience: 'adult',
           contentWarnings: [],
@@ -215,13 +251,13 @@ export const db = {
           changeLog: [],
           createdAt: new Date(),
           updatedAt: new Date(),
-          chapters: cRes.rows.map(r => ({
-            id: r.id as string,
-            orderIndex: r.order_index as number,
-            title: r.title as string,
-            summary: r.summary as string,
-            content: r.content as string,
-            status: r.status as any,
+          chapters: cRes.rows.map((r: DbChapterRow) => ({
+            id: r.id,
+            orderIndex: r.order_index,
+            title: r.title,
+            summary: r.summary,
+            content: r.content,
+            status: r.status as ChapterStatus,
             wordCount: 0,
             characterCount: 0,
             estimatedReadingTime: 0,
@@ -239,7 +275,7 @@ export const db = {
         return null;
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) || '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
       const p = projects[projectId];
       if (!p) return null;
       console.log(`[DB] Local load success: ${p.title}`);
@@ -262,7 +298,7 @@ export const db = {
     if (client) {
       try {
         const res = await client.execute(
-          'SELECT id, title, style, cover_image, updated_at FROM projects ORDER BY updated_at DESC'
+          'SELECT id, title, style, cover_image, updated_at FROM projects ORDER BY updated_at DESC',
         );
         return res.rows.map(r => ({
           id: r.id as string,
@@ -276,13 +312,13 @@ export const db = {
         return [];
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) || '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
       return Object.values(projects)
         .map((p: any) => ({
           id: p.id,
           title: p.title,
           style: p.style,
-          updatedAt: p.updatedAt || new Date().toISOString(),
+          updatedAt: p.updatedAt ?? new Date().toISOString(),
           coverImage: p.coverImage,
         }))
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -299,13 +335,13 @@ export const db = {
             { sql: 'DELETE FROM chapters WHERE project_id = ?', args: [projectId] },
             { sql: 'DELETE FROM projects WHERE id = ?', args: [projectId] },
           ],
-          'write'
+          'write',
         );
       } catch (e) {
         console.error('Failed to delete from Cloud', e);
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) || '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
       delete projects[projectId];
       localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
     }

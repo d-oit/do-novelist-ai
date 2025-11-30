@@ -13,12 +13,12 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (): Promise<void> => {
     setIsGenerating(true);
     setError('');
     try {
       const base64Cover = await generateCoverImage(project.title, project.style, project.idea);
-      if (base64Cover) {
+      if (base64Cover != null) {
         onUpdateProject({ coverImage: base64Cover });
       } else {
         setError('Failed to generate image. Please try again.');
@@ -46,9 +46,9 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
       {/* Cover Preview Area */}
       <div className='group relative'>
         <div
-          className={`relative flex h-[400px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-card shadow-2xl transition-all ${!project.coverImage ? 'hover:border-primary/50' : 'border-transparent'} `}
+          className={`relative flex h-[400px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-card shadow-2xl transition-all ${project.coverImage == null ? 'hover:border-primary/50' : 'border-transparent'} `}
         >
-          {project.coverImage ? (
+          {project.coverImage != null ? (
             <img
               src={project.coverImage}
               alt='Generated Book Cover'
@@ -73,7 +73,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
         </div>
 
         {/* Download Action (Only if image exists) */}
-        {project.coverImage && !isGenerating && (
+        {project.coverImage != null && !isGenerating && (
           <a
             href={project.coverImage}
             download={`cover-${project.title.replace(/\s+/g, '-').toLowerCase()}.png`}
@@ -95,7 +95,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
         >
           {isGenerating ? (
             <>Generating...</>
-          ) : project.coverImage ? (
+          ) : project.coverImage != null ? (
             <>
               <RefreshCcw className='h-4 w-4' /> Regenerate Cover
             </>

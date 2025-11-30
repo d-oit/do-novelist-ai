@@ -116,12 +116,12 @@ export interface Project {
   publishedAt?: Date;
 
   // Collaboration
-  authors: {
+  authors: Array<{
     id: string;
     name: string;
     email: string;
     role: 'owner' | 'collaborator' | 'editor' | 'viewer';
-  }[];
+  }>;
 
   // Analytics
   analytics: {
@@ -181,6 +181,6 @@ export interface ProcessedAction {
 
 export interface ActionResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: Error;
 }

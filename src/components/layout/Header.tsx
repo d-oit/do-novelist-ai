@@ -17,13 +17,13 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape' && isMenuOpen) {
         setIsMenuOpen(false);
       }
     };
 
-    const handleResize = () => {
+    const handleResize = (): void => {
       if (window.innerWidth >= 768 && isMenuOpen) {
         setIsMenuOpen(false);
       }
@@ -32,7 +32,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
     document.addEventListener('keydown', handleKeyDown);
     window.addEventListener('resize', handleResize);
 
-    return () => {
+    return (): void => {
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('resize', handleResize);
     };
@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
   // Lock body scroll when mobile menu is open
   useScrollLock(isMenuOpen);
 
-  const handleNav = (view: 'dashboard' | 'projects' | 'settings') => {
+  const handleNav = (view: 'dashboard' | 'projects' | 'settings'): void => {
     onNavigate(view);
     setIsMenuOpen(false);
   };
@@ -54,26 +54,28 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
     view: 'dashboard' | 'projects' | 'settings';
     icon: React.ElementType;
     label: string;
-  }) => (
-    <button
-      onClick={() => handleNav(view)}
-      className={cn(
-        'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
-        'md:min-h-auto md:min-w-auto min-h-[44px] min-w-[44px]',
-        'hover:scale-[0.98] active:scale-95',
-        currentView === view
-          ? 'bg-primary/15 text-primary shadow-sm ring-1 ring-primary/20'
-          : 'text-muted-foreground hover:bg-secondary/80 hover:text-foreground hover:shadow-sm'
-      )}
-      data-testid={`nav-${view}`}
-      role='menuitem'
-      aria-current={currentView === view ? 'page' : undefined}
-      aria-label={`Navigate to ${label}`}
-    >
-      <Icon className='h-4 w-4' aria-hidden='true' />
-      <span className='font-medium'>{label}</span>
-    </button>
-  );
+  }): React.ReactElement => {
+    return (
+      <button
+        onClick={() => handleNav(view)}
+        className={cn(
+          'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+          'md:min-h-auto md:min-w-auto min-h-[44px] min-w-[44px]',
+          'hover:scale-[0.98] active:scale-95',
+          currentView === view
+            ? 'bg-primary/15 text-primary shadow-sm ring-1 ring-primary/20'
+            : 'text-muted-foreground hover:bg-secondary/80 hover:text-foreground hover:shadow-sm',
+        )}
+        data-testid={`nav-${view}`}
+        role='menuitem'
+        aria-current={currentView === view ? 'page' : undefined}
+        aria-label={`Navigate to ${label}`}
+      >
+        <Icon className='h-4 w-4' aria-hidden='true' />
+        <span className='font-medium'>{label}</span>
+      </button>
+    );
+  };
 
   return (
     <>
@@ -84,10 +86,10 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
           'border-b border-border/40',
           'bg-white/95 backdrop-blur-xl backdrop-saturate-150 dark:bg-slate-950/95',
           'shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.12)]',
-          'transition-all duration-300'
+          'transition-all duration-300',
         )}
         role='banner'
-        style={{ '--header-height': '4rem' } as any}
+        style={{ '--header-height': '4rem' } as React.CSSProperties}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -115,7 +117,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
               className={cn(
                 'rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 p-2.5',
                 'transition-all duration-200 group-hover:shadow-lg group-hover:shadow-primary/20',
-                'ring-1 ring-primary/10'
+                'ring-1 ring-primary/10',
               )}
             >
               <Database className='h-5 w-5 text-primary' aria-hidden='true' />
@@ -166,7 +168,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                 'ring-1 ring-slate-700/50',
                 'transition-all hover:bg-slate-800 hover:ring-slate-600',
                 'hover:scale-[0.98] hover:shadow-lg active:scale-95',
-                'shadow-lg shadow-indigo-500/10'
+                'shadow-lg shadow-indigo-500/10',
               )}
               data-testid='nav-new-project'
               aria-label='Create new project'
@@ -182,7 +184,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
               'p-2.5 text-muted-foreground hover:text-foreground md:hidden',
               'rounded-lg transition-all duration-200 hover:bg-secondary/50',
               'flex min-h-[44px] min-w-[44px] items-center justify-center',
-              'hover:scale-[0.98] active:scale-95'
+              'hover:scale-[0.98] active:scale-95',
             )}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             data-testid='mobile-menu-toggle'
@@ -206,7 +208,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
             <motion.div
               className={cn(
                 'fixed inset-0 bg-black/20 backdrop-blur-sm md:hidden',
-                zIndex('MODAL_BACKDROP')
+                zIndex('MODAL_BACKDROP'),
               )}
               onClick={() => setIsMenuOpen(false)}
               aria-hidden='true'
@@ -223,7 +225,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                 zIndex('MODAL'),
                 'h-[100dvh] bg-card/95 backdrop-blur-xl',
                 'border-t border-border/40',
-                'shadow-[0_8px_30px_rgb(0,0,0,0.12)]'
+                'shadow-[0_8px_30px_rgb(0,0,0,0.12)]',
               )}
               role='menu'
               aria-label='Mobile navigation menu'
@@ -270,7 +272,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                       'transition-all hover:bg-slate-800 hover:ring-slate-600',
                       'hover:scale-[0.98] hover:shadow-lg active:scale-95',
                       'shadow-lg shadow-indigo-500/10',
-                      'min-h-[44px]'
+                      'min-h-[44px]',
                     )}
                     aria-label='Create new project'
                   >

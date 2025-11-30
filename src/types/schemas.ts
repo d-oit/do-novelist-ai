@@ -379,7 +379,7 @@ export function validateData<T>(
       return { success: true, data: result.data };
     }
 
-    const errorMessage = context
+    const errorMessage = (context ?? undefined)
       ? `Validation failed for ${context}: ${result.error.message}`
       : `Validation failed: ${result.error.message}`;
 

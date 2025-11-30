@@ -25,7 +25,7 @@ interface ChapterEditorProps {
   project: Project;
   selectedChapterId: string | null;
   onUpdateChapter: (chapterId: string, updates: Partial<Chapter>) => void;
-  onRefineChapter?: (chapterId: string, options: any) => void;
+  onRefineChapter?: (chapterId: string, options: Record<string, unknown>) => void;
   onContinueChapter?: (chapterId: string) => void;
   className?: string;
 }
@@ -49,10 +49,10 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const selectedChapter =
-    selectedChapterId && selectedChapterId !== 'overview'
+  const selectedChapter: Chapter | undefined =
+    selectedChapterId !== null && selectedChapterId !== 'overview'
       ? project.chapters.find(c => c.id === selectedChapterId)
-      : null;
+      : undefined;
 
   useEffect(() => {
     if (editingField && textareaRef.current) {
@@ -63,13 +63,13 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
     }
   }, [editingField]);
 
-  const handleStartEdit = (field: 'title' | 'summary' | 'content', currentValue: string) => {
+  const handleStartEdit = (field: 'title' | 'summary' | 'content', currentValue: string): void => {
     setEditingField(field);
     setIsEditing(true);
     setTempValues({ [field]: currentValue });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = (): void => {
     if (selectedChapter && editingField && tempValues[editingField] !== undefined) {
       const updates: Partial<Chapter> = {
         [editingField]: tempValues[editingField],
@@ -78,8 +78,8 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
 
       // If content is being updated, recalculate word count
       if (editingField === 'content') {
-        updates.wordCount = tempValues.content?.split(/\s+/).length || 0;
-        updates.characterCount = tempValues.content?.length || 0;
+        updates.wordCount = tempValues.content?.split(/\s+/).length ?? 0;
+        updates.characterCount = tempValues.content?.length ?? 0;
       }
 
       onUpdateChapter(selectedChapter.id, updates);
@@ -90,13 +90,13 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
     setTempValues({});
   };
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = (): void => {
     setIsEditing(false);
     setEditingField(null);
     setTempValues({});
   };
 
-  const handleRefine = () => {
+  const handleRefine = (): void => {
     if (selectedChapter && onRefineChapter) {
       onRefineChapter(selectedChapter.id, {
         focus: ['grammar', 'style', 'flow'],
@@ -106,7 +106,7 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = (): void => {
     if (selectedChapter && onContinueChapter) {
       onContinueChapter(selectedChapter.id);
     }
@@ -132,7 +132,7 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
       <div className={cn('flex-1 space-y-6', showWritingAssistant ? 'lg:w-2/3' : 'w-full')}>
         {/* Writing Assistant Toggle Button */}
         <div className='flex items-center justify-between'>
-          <h2 className='text-lg font-semibold'>{selectedChapter.title || 'Untitled Chapter'}</h2>
+          <h2 className='text-lg font-semibold'>{selectedChapter.title ?? 'Untitled Chapter'}</h2>
           <Button
             size='sm'
             variant='outline'
@@ -157,7 +157,7 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
               <div className='space-y-2'>
                 <input
                   type='text'
-                  value={tempValues.title || ''}
+                  value={tempValues.title ?? ''}
                   onChange={e => setTempValues({ ...tempValues, title: e.target.value })}
                   className='w-full rounded-lg border border-border bg-background px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-primary'
                   placeholder='Enter chapter title...'
@@ -183,7 +183,7 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
               >
                 <div className='flex items-center justify-between'>
                   <span className='text-foreground'>
-                    {selectedChapter.title || 'Untitled Chapter'}
+                    {selectedChapter.title ?? 'Untitled Chapter'}
                   </span>
                   <Edit3 className='h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100' />
                 </div>
@@ -200,7 +200,7 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
               <div className='space-y-2'>
                 <textarea
                   ref={textareaRef}
-                  value={tempValues.summary || ''}
+                  value={tempValues.summary ?? ''}
                   onChange={e => setTempValues({ ...tempValues, summary: e.target.value })}
                   className='w-full resize-none rounded-lg border border-border bg-background px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-primary'
                   placeholder='Enter chapter summary...'
@@ -221,12 +221,12 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
               </div>
             ) : (
               <div
-                onClick={() => handleStartEdit('summary', selectedChapter.summary || '')}
+                onClick={() => handleStartEdit('summary', selectedChapter.summary ?? '')}
                 className='group min-h-[80px] w-full cursor-pointer rounded-lg border border-border/50 bg-card/50 px-3 py-2 transition-colors hover:border-border hover:bg-card'
               >
                 <div className='flex items-start justify-between'>
                   <span className='text-sm text-foreground'>
-                    {selectedChapter.summary || 'Click to add a summary...'}
+                    {selectedChapter.summary ?? 'Click to add a summary...'}
                   </span>
                   <Edit3 className='h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100' />
                 </div>
@@ -270,7 +270,7 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
             <div className='space-y-2'>
               <textarea
                 ref={textareaRef}
-                value={tempValues.content || ''}
+                value={tempValues.content ?? ''}
                 onChange={e => setTempValues({ ...tempValues, content: e.target.value })}
                 className='min-h-[300px] w-full resize-none rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm focus:border-transparent focus:ring-2 focus:ring-primary'
                 placeholder='Start writing your chapter content...'
@@ -285,8 +285,8 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
                 </Button>
               </div>
               <div className='text-xs text-muted-foreground'>
-                Words: {tempValues.content?.split(/\s+/).length || 0} | Characters:{' '}
-                {tempValues.content?.length || 0}
+                Words: {tempValues.content?.split(/\s+/).length ?? 0} | Characters:{' '}
+                {tempValues.content?.length ?? 0}
               </div>
             </div>
           ) : (
@@ -299,12 +299,12 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
                 <Edit3 className='h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100' />
               </div>
               <div className='whitespace-pre-wrap font-mono text-sm text-foreground'>
-                {selectedChapter.content || 'Click to start writing...'}
+                {selectedChapter.content ?? 'Click to start writing...'}
               </div>
               {selectedChapter.content && (
                 <div className='mt-2 border-t border-border/50 pt-2 text-xs text-muted-foreground'>
-                  Words: {selectedChapter.wordCount || 0} | Characters:{' '}
-                  {selectedChapter.characterCount || 0}
+                  Words: {selectedChapter.wordCount ?? 0} | Characters:{' '}
+                  {selectedChapter.characterCount ?? 0}
                 </div>
               )}
             </div>
@@ -320,7 +320,7 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
             chapterId={selectedChapter.id}
             projectId={project.id}
             characterContext={[]}
-            plotContext={project.idea || ''}
+            plotContext={project.idea ?? ''}
             className='sticky top-6'
           />
         </div>

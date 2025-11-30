@@ -96,10 +96,10 @@ export function calculateCost(
   provider: string,
   model: string,
   promptTokens: number,
-  completionTokens: number
+  completionTokens: number,
 ): CostBreakdown {
   const pricingKey = `${provider}:${model}`;
-  const pricing = PRICING_PER_1M_TOKENS[pricingKey] || { input: 0.1, output: 0.4 };
+  const pricing = PRICING_PER_1M_TOKENS[pricingKey] ?? { input: 0.1, output: 0.4 };
 
   const inputCost = (promptTokens / 1_000_000) * pricing.input;
   const outputCost = (completionTokens / 1_000_000) * pricing.output;
@@ -126,7 +126,7 @@ export async function logAIUsage(
   latencyMs: number,
   success: boolean,
   errorMessage: string | null,
-  requestType: string
+  requestType: string,
 ): Promise<void> {
   try {
     const costBreakdown = calculateCost(provider, model, promptTokens, completionTokens);
@@ -159,7 +159,7 @@ export async function logAIUsage(
 export async function getUsageStats(
   userId: string,
   startDate?: Date,
-  endDate?: Date
+  endDate?: Date,
 ): Promise<EnhancedUsageStats> {
   try {
     const startDateStr = startDate?.toISOString();
@@ -212,7 +212,7 @@ export async function getBudgetInfo(userId: string): Promise<BudgetInfo> {
     const stats = await getUserUsageStats(
       userId,
       startDate.toISOString(),
-      new Date().toISOString()
+      new Date().toISOString(),
     );
 
     const totalBudget = prefs.monthlyBudget;
@@ -255,7 +255,7 @@ export async function getBudgetInfo(userId: string): Promise<BudgetInfo> {
  */
 export function getOptimizationRecommendations(
   userStats: EnhancedUsageStats,
-  budgetInfo: BudgetInfo
+  budgetInfo: BudgetInfo,
 ): OptimizationRecommendation[] {
   const recommendations: OptimizationRecommendation[] = [];
 
@@ -319,8 +319,8 @@ export function compareProviderCosts(userStats: EnhancedUsageStats): Array<{
     .map((item: { provider: AIProvider; cost: number }) => {
       const tokens =
         userStats.providerBreakdown.find(
-          (p: { provider: AIProvider; tokens: number }) => p.provider === item.provider
-        )?.tokens || 0;
+          (p: { provider: AIProvider; tokens: number }) => p.provider === item.provider,
+        )?.tokens ?? 0;
 
       return {
         provider: item.provider,

@@ -57,7 +57,7 @@ class PublishingAnalyticsService {
     return PublishingAnalyticsService.instance;
   }
 
-  async init(): Promise<void> {
+  public async init(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
 
@@ -105,7 +105,11 @@ class PublishingAnalyticsService {
   }
 
   // Publication Management
-  async publishProject(project: Project, platforms: string[], metadata: any): Promise<Publication> {
+  public async publishProject(
+    project: Project,
+    platforms: string[],
+    metadata: any,
+  ): Promise<Publication> {
     if (!this.db) await this.init();
 
     const publication: Publication = {
@@ -140,7 +144,7 @@ class PublishingAnalyticsService {
     return {
       id: `inst_${Date.now()}_${platformId}`,
       platformId,
-      platformName: platform?.name || 'Unknown Platform',
+      platformName: platform?.name ?? 'Unknown Platform',
       publicationUrl: baseUrl,
       publishedAt: new Date(),
       lastUpdated: new Date(),
@@ -191,7 +195,7 @@ class PublishingAnalyticsService {
   }
 
   // Analytics Data Retrieval
-  async getPublicationAnalytics(publicationId: string): Promise<PlatformAnalytics> {
+  public async getPublicationAnalytics(publicationId: string): Promise<PlatformAnalytics> {
     const publication = await this.getPublication(publicationId);
     if (!publication) throw new Error('Publication not found');
 
@@ -228,7 +232,7 @@ class PublishingAnalyticsService {
       // Merge geographic data
       Object.entries(analytics.geographics).forEach(([country, count]) => {
         aggregatedAnalytics.geographics[country] =
-          (aggregatedAnalytics.geographics[country] || 0) + count;
+          (aggregatedAnalytics.geographics[country] ?? 0) + count;
       });
     });
 
@@ -244,9 +248,9 @@ class PublishingAnalyticsService {
     return aggregatedAnalytics;
   }
 
-  async getEngagementMetrics(
+  public async getEngagementMetrics(
     publicationId: string,
-    timeframe: { start: Date; end: Date }
+    timeframe: { start: Date; end: Date },
   ): Promise<EngagementMetrics> {
     // In real implementation, this would fetch from various platform APIs
     const mockMetrics: EngagementMetrics = {
@@ -274,7 +278,7 @@ class PublishingAnalyticsService {
     return mockMetrics;
   }
 
-  async getReaderFeedback(publicationId: string, limit = 50): Promise<ReaderFeedback[]> {
+  public async getReaderFeedback(publicationId: string, limit = 50): Promise<ReaderFeedback[]> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -293,7 +297,7 @@ class PublishingAnalyticsService {
     });
   }
 
-  async getReaderInsights(publicationId: string): Promise<ReaderInsights> {
+  public async getReaderInsights(publicationId: string): Promise<ReaderInsights> {
     const analytics = await this.getPublicationAnalytics(publicationId);
     const engagement = await this.getEngagementMetrics(publicationId, {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
@@ -335,8 +339,8 @@ class PublishingAnalyticsService {
   }
 
   // Goal Management
-  async createPublishingGoal(
-    goal: Omit<PublishingGoals, 'id' | 'current'>
+  public async createPublishingGoal(
+    goal: Omit<PublishingGoals, 'id' | 'current'>,
   ): Promise<PublishingGoals> {
     const newGoal: PublishingGoals = {
       ...goal,
@@ -356,7 +360,7 @@ class PublishingAnalyticsService {
     });
   }
 
-  async getPublishingGoals(publicationId: string): Promise<PublishingGoals[]> {
+  public async getPublishingGoals(publicationId: string): Promise<PublishingGoals[]> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -371,7 +375,7 @@ class PublishingAnalyticsService {
   }
 
   // Trends and Predictions
-  async getPublishingTrends(_publicationId: string, days = 30): Promise<PublishingTrends> {
+  public async getPublishingTrends(_publicationId: string, days = 30): Promise<PublishingTrends> {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - days);
@@ -405,7 +409,7 @@ class PublishingAnalyticsService {
   }
 
   // Alerts and Notifications
-  async getPublishingAlerts(limit = 20): Promise<PublishingAlert[]> {
+  public async getPublishingAlerts(limit = 20): Promise<PublishingAlert[]> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -425,9 +429,9 @@ class PublishingAnalyticsService {
   }
 
   // Data Export
-  async exportPublishingAnalytics(
+  public async exportPublishingAnalytics(
     publicationIds: string[],
-    format: 'json' | 'csv' | 'xlsx'
+    format: 'json' | 'csv' | 'xlsx',
   ): Promise<string> {
     const exportData: {
       publications: Publication[];
@@ -463,7 +467,7 @@ class PublishingAnalyticsService {
   }
 
   // Platform Integration
-  async connectPlatform(platformId: string, credentials: any): Promise<boolean> {
+  public async connectPlatform(platformId: string, credentials: any): Promise<boolean> {
     const platform = this.mockPlatforms.find(p => p.id === platformId);
     if (!platform) return false;
 
@@ -474,11 +478,11 @@ class PublishingAnalyticsService {
     return true;
   }
 
-  async getConnectedPlatforms(): Promise<PublishingPlatform[]> {
+  public async getConnectedPlatforms(): Promise<PublishingPlatform[]> {
     return this.mockPlatforms.filter(p => p.isConnected);
   }
 
-  async getAllPlatforms(): Promise<PublishingPlatform[]> {
+  public async getAllPlatforms(): Promise<PublishingPlatform[]> {
     return [...this.mockPlatforms];
   }
 
@@ -606,7 +610,7 @@ class PublishingAnalyticsService {
   }
 
   private formatPeakTimes(
-    peakTimes: { hour: number; dayOfWeek: number; activityLevel: number }[]
+    peakTimes: { hour: number; dayOfWeek: number; activityLevel: number }[],
   ): string[] {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return peakTimes.slice(0, 3).map(time => `${days[time.dayOfWeek]} at ${time.hour}:00`);
@@ -656,7 +660,7 @@ class PublishingAnalyticsService {
 
   private generateRecommendations(
     analytics: PlatformAnalytics,
-    engagement: EngagementMetrics
+    engagement: EngagementMetrics,
   ): {
     type: 'content' | 'marketing' | 'pricing' | 'timing';
     priority: 'high' | 'medium' | 'low';
@@ -693,7 +697,7 @@ class PublishingAnalyticsService {
   }
 
   private generateTrendMetrics(
-    days: number
+    days: number,
   ): { date: string; views: number; engagement: number; rating: number }[] {
     const metrics: { date: string; views: number; engagement: number; rating: number }[] = [];
     for (let i = 0; i < days; i++) {
@@ -727,7 +731,7 @@ class PublishingAnalyticsService {
       clicks: number;
       conversions: number;
       spend: number;
-    }
+    },
   ): Promise<void> {
     try {
       console.log(`Tracking campaign ${campaignId}:`, metrics);

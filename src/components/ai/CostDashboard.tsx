@@ -13,16 +13,16 @@ interface CostDashboardProps {
   userId: string;
 }
 
-export function CostDashboard({ userId }: CostDashboardProps) {
+export const CostDashboard = ({ userId }: CostDashboardProps): JSX.Element => {
   const [usageStats, setUsageStats] = useState<EnhancedUsageStats | null>(null);
   const [budgetInfo, setBudgetInfo] = useState<BudgetInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [userId]);
 
-  const loadData = async () => {
+  const loadData = async (): Promise<void> => {
     try {
       const [stats, budget] = await Promise.all([getUsageStats(userId), getBudgetInfo(userId)]);
 
@@ -39,10 +39,10 @@ export function CostDashboard({ userId }: CostDashboardProps) {
     return (
       <div className='rounded-lg border bg-white p-6'>
         <div className='animate-pulse space-y-4'>
-          <div className='h-4 w-1/4 rounded bg-gray-200'></div>
+          <div className='h-4 w-1/4 rounded bg-gray-200' />
           <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
             {[1, 2, 3].map(i => (
-              <div key={i} className='h-24 rounded bg-gray-200'></div>
+              <div key={i} className='h-24 rounded bg-gray-200' />
             ))}
           </div>
         </div>
@@ -117,7 +117,7 @@ export function CostDashboard({ userId }: CostDashboardProps) {
                       : 'bg-green-500'
                 }`}
                 style={{ width: `${Math.min(budgetInfo.usagePercentage, 100)}%` }}
-              ></div>
+              />
             </div>
           </div>
           <div className='flex justify-between text-sm text-gray-600'>
@@ -138,7 +138,7 @@ export function CostDashboard({ userId }: CostDashboardProps) {
                   className='flex items-center justify-between rounded bg-gray-50 p-3'
                 >
                   <div className='flex items-center gap-3'>
-                    <div className='h-3 w-3 rounded-full bg-blue-500'></div>
+                    <div className='h-3 w-3 rounded-full bg-blue-500' />
                     <span className='font-medium capitalize'>{item.provider}</span>
                   </div>
                   <div className='text-right'>
@@ -146,7 +146,7 @@ export function CostDashboard({ userId }: CostDashboardProps) {
                     <div className='text-xs text-gray-500'>{item.percentage.toFixed(1)}%</div>
                   </div>
                 </div>
-              )
+              ),
             )
           ) : (
             <p className='text-sm text-gray-500'>No usage data</p>
@@ -182,4 +182,4 @@ export function CostDashboard({ userId }: CostDashboardProps) {
       </div>
     </div>
   );
-}
+};

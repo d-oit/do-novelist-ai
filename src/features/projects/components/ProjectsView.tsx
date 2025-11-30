@@ -27,7 +27,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
     loadProjects();
   }, [currentProject.id]);
 
-  const loadProjects = async () => {
+  const loadProjects = async (): Promise<void> => {
     setIsLoading(true);
     try {
       const list = await db.getAllProjects();
@@ -39,7 +39,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string): Promise<void> => {
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this project? This cannot be undone.')) {
       try {
@@ -128,7 +128,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
                         {currentProject.title}
                       </h3>
                       <p className='mt-1 text-gray-500 dark:text-gray-400'>
-                        {currentProject.idea || 'No description provided.'}
+                        {currentProject.idea ?? 'No description provided.'}
                       </p>
                     </div>
                     <div className='text-right'>
@@ -195,7 +195,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
                           <button
                             onClick={e => handleDelete(e, p.id)}
                             className={iconButtonTarget(
-                              'rounded text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-red-400'
+                              'rounded text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-red-400',
                             )}
                             aria-label='Delete project'
                             title='Delete Project'

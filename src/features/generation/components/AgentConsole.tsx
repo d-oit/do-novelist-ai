@@ -6,7 +6,7 @@ interface AgentConsoleProps {
   logs: LogEntry[];
 }
 
-const LogIcon = ({ type }: { type: LogEntry['type'] }) => {
+const LogIcon = ({ type }: { type: LogEntry['type'] }): React.ReactElement => {
   switch (type) {
     case 'success':
       return <CheckCircle2 className='h-3 w-3 text-green-500' />;

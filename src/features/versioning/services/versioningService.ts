@@ -28,7 +28,7 @@ class VersioningService {
     }
   }
 
-  async init(): Promise<void> {
+  public async init(): Promise<void> {
     return new Promise((resolve, _reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
 
@@ -59,10 +59,10 @@ class VersioningService {
     });
   }
 
-  async saveVersion(
+  public async saveVersion(
     chapter: Chapter,
     message?: string,
-    type: ChapterVersion['type'] = 'manual'
+    type: ChapterVersion['type'] = 'manual',
   ): Promise<ChapterVersion> {
     if (!this.db) await this.init();
 
@@ -92,7 +92,7 @@ class VersioningService {
     });
   }
 
-  async getVersionHistory(chapterId: string): Promise<ChapterVersion[]> {
+  public async getVersionHistory(chapterId: string): Promise<ChapterVersion[]> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, _reject) => {
@@ -103,7 +103,7 @@ class VersioningService {
 
       request.onsuccess = () => {
         const versions = request.result.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
         );
         resolve(versions);
       };
@@ -111,7 +111,7 @@ class VersioningService {
     });
   }
 
-  async restoreVersion(versionId: string): Promise<Chapter | null> {
+  public async restoreVersion(versionId: string): Promise<Chapter | null> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, _reject) => {
@@ -139,7 +139,7 @@ class VersioningService {
     });
   }
 
-  async deleteVersion(versionId: string): Promise<boolean> {
+  public async deleteVersion(versionId: string): Promise<boolean> {
     if (!this.db) await this.init();
 
     // Check if version exists first
@@ -161,7 +161,10 @@ class VersioningService {
     });
   }
 
-  async compareVersions(versionId1: string, versionId2: string): Promise<VersionCompareResult> {
+  public async compareVersions(
+    versionId1: string,
+    versionId2: string,
+  ): Promise<VersionCompareResult> {
     const [version1, version2] = await Promise.all([
       this.getVersion(versionId1),
       this.getVersion(versionId2),
@@ -189,7 +192,11 @@ class VersioningService {
     };
   }
 
-  async createBranch(name: string, description: string, parentVersionId: string): Promise<Branch> {
+  public async createBranch(
+    name: string,
+    description: string,
+    parentVersionId: string,
+  ): Promise<Branch> {
     if (!this.db) await this.init();
 
     const branch: Branch = {
@@ -212,7 +219,7 @@ class VersioningService {
     });
   }
 
-  async getBranches(chapterId: string): Promise<Branch[]> {
+  public async getBranches(chapterId: string): Promise<Branch[]> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, _reject) => {
@@ -228,17 +235,17 @@ class VersioningService {
     });
   }
 
-  async switchBranch(_branchId: string): Promise<boolean> {
+  public async switchBranch(_branchId: string): Promise<boolean> {
     // Implementation for switching branches
     return true;
   }
 
-  async mergeBranch(_sourceBranchId: string, _targetBranchId: string): Promise<boolean> {
+  public async mergeBranch(_sourceBranchId: string, _targetBranchId: string): Promise<boolean> {
     // Implementation for merging branches
     return true;
   }
 
-  async deleteBranch(branchId: string): Promise<boolean> {
+  public async deleteBranch(branchId: string): Promise<boolean> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, _reject) => {
@@ -251,7 +258,7 @@ class VersioningService {
     });
   }
 
-  async exportVersionHistory(chapterId: string, format: 'json' | 'csv'): Promise<string> {
+  public async exportVersionHistory(chapterId: string, format: 'json' | 'csv'): Promise<string> {
     const versions = await this.getVersionHistory(chapterId);
 
     if (format === 'json') {

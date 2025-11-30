@@ -14,17 +14,18 @@ class CharacterService {
   /**
    * Initialize the database
    */
-  async init(): Promise<void> {
-    return new Promise((resolve, reject) => {
+  public async init(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Failed to open database'));
+      request.onsuccess = (): void => {
         this.db = request.result;
         resolve();
       };
 
-      request.onupgradeneeded = event => {
+      request.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Characters store
@@ -47,56 +48,77 @@ class CharacterService {
   /**
    * Get all characters for a project
    */
-  async getAll(projectId: string): Promise<Character[]> {
+  public async getAll(projectId: string): Promise<Character[]> {
     if (!this.db) await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['characters'], 'readonly');
+    return new Promise<Character[]>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+      const transaction = this.db.transaction(['characters'], 'readonly');
       const store = transaction.objectStore('characters');
       const index = store.index('projectId');
       const request = index.getAll(projectId);
 
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => {
+        resolve(request.result);
+      };
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Failed to get characters'));
     });
   }
 
   /**
    * Get a single character by ID
    */
-  async getById(id: string): Promise<Character | null> {
+  public async getById(id: string): Promise<Character | null> {
     if (!this.db) await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['characters'], 'readonly');
+    return new Promise<Character | null>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+      const transaction = this.db.transaction(['characters'], 'readonly');
       const store = transaction.objectStore('characters');
       const request = store.get(id);
 
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => {
+        resolve(request.result as Character | null);
+      };
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Failed to get character'));
     });
   }
 
   /**
    * Create a new character
    */
-  async create(character: Character): Promise<Character> {
+  public async create(character: Character): Promise<Character> {
     if (!this.db) await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['characters'], 'readwrite');
+    return new Promise<Character>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+      const transaction = this.db.transaction(['characters'], 'readwrite');
       const store = transaction.objectStore('characters');
       const request = store.add(character);
 
-      request.onsuccess = () => resolve(character);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => {
+        resolve(character);
+      };
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Failed to create character'));
     });
   }
 
   /**
    * Update an existing character
    */
-  async update(id: string, data: Partial<Character>): Promise<Character> {
+  public async update(id: string, data: Partial<Character>): Promise<Character> {
     if (!this.db) await this.init();
 
     const existing = await this.getById(id);
@@ -108,40 +130,58 @@ class CharacterService {
       updatedAt: Date.now(),
     };
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['characters'], 'readwrite');
+    return new Promise<Character>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+      const transaction = this.db.transaction(['characters'], 'readwrite');
       const store = transaction.objectStore('characters');
       const request = store.put(updated);
 
-      request.onsuccess = () => resolve(updated);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => {
+        resolve(updated);
+      };
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Failed to update character'));
     });
   }
 
   /**
    * Delete a character
    */
-  async delete(id: string): Promise<void> {
+  public async delete(id: string): Promise<void> {
     if (!this.db) await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['characters'], 'readwrite');
+    return new Promise<void>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+      const transaction = this.db.transaction(['characters'], 'readwrite');
       const store = transaction.objectStore('characters');
       const request = store.delete(id);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => {
+        resolve();
+      };
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Failed to delete character'));
     });
   }
 
   /**
    * Get relationships for a character
    */
-  async getRelationships(characterId: string): Promise<CharacterRelationship[]> {
+  public async getRelationships(characterId: string): Promise<CharacterRelationship[]> {
     if (!this.db) await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['relationships'], 'readonly');
+    return new Promise<CharacterRelationship[]>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+      const transaction = this.db.transaction(['relationships'], 'readonly');
       const store = transaction.objectStore('relationships');
       const indexA = store.index('characterAId');
       const indexB = store.index('characterBId');
@@ -152,10 +192,10 @@ class CharacterService {
       const requestA = indexA.getAll(characterId);
       const requestB = indexB.getAll(characterId);
 
-      requestA.onsuccess = () => {
-        resultsA.push(...requestA.result);
-        requestB.onsuccess = () => {
-          resultsB.push(...requestB.result);
+      requestA.onsuccess = (): void => {
+        resultsA.push(...(requestA.result as CharacterRelationship[]));
+        requestB.onsuccess = (): void => {
+          resultsB.push(...(requestB.result as CharacterRelationship[]));
           // Combine and deduplicate
           const allRelationships = [...resultsA, ...resultsB];
           const unique = Array.from(new Map(allRelationships.map(r => [r.id, r])).values());
@@ -163,40 +203,58 @@ class CharacterService {
         };
       };
 
-      requestA.onerror = () => reject(requestA.error);
-      requestB.onerror = () => reject(requestB.error);
+      requestA.onerror = (): void =>
+        reject(new Error(requestA.error?.message ?? 'Failed to get relationships'));
+      requestB.onerror = (): void =>
+        reject(new Error(requestB.error?.message ?? 'Failed to get relationships'));
     });
   }
 
   /**
    * Create a relationship between two characters
    */
-  async createRelationship(relationship: CharacterRelationship): Promise<CharacterRelationship> {
+  public async createRelationship(
+    relationship: CharacterRelationship,
+  ): Promise<CharacterRelationship> {
     if (!this.db) await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['relationships'], 'readwrite');
+    return new Promise<CharacterRelationship>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+      const transaction = this.db.transaction(['relationships'], 'readwrite');
       const store = transaction.objectStore('relationships');
       const request = store.add(relationship);
 
-      request.onsuccess = () => resolve(relationship);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => {
+        resolve(relationship);
+      };
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Failed to create relationship'));
     });
   }
 
   /**
    * Delete a relationship
    */
-  async deleteRelationship(id: string): Promise<void> {
+  public async deleteRelationship(id: string): Promise<void> {
     if (!this.db) await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['relationships'], 'readwrite');
+    return new Promise<void>((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not initialized'));
+        return;
+      }
+      const transaction = this.db.transaction(['relationships'], 'readwrite');
       const store = transaction.objectStore('relationships');
       const request = store.delete(id);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => {
+        resolve();
+      };
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Failed to delete relationship'));
     });
   }
 }

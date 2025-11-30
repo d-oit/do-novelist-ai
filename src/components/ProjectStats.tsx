@@ -2,6 +2,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 import { Project } from '../types';
+import { PublishStatus } from '../shared/types';
 
 interface ProjectStatsProps {
   project: Project;
@@ -22,7 +23,7 @@ const ProjectStats: React.FC<ProjectStatsProps> = ({ project }) => {
         .trim()
         .split(/\s+/)
         .filter(w => w.length > 0).length || 0),
-    0
+    0,
   );
   const targetWords = project.targetWordCount || 50000;
   const wordProgress = Math.min(100, Math.round((totalWords / targetWords) * 100));
@@ -34,11 +35,11 @@ const ProjectStats: React.FC<ProjectStatsProps> = ({ project }) => {
     {
       name: 'Status',
       value:
-        project.status === 'Published'
+        project.status === PublishStatus.PUBLISHED
           ? 100
-          : project.status === 'Review'
+          : project.status === PublishStatus.REVIEW
             ? 75
-            : project.status === 'Editing'
+            : project.status === PublishStatus.EDITING
               ? 50
               : 25,
     },

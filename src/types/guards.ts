@@ -4,38 +4,38 @@
  */
 
 import {
-  ProjectSchema,
-  ChapterSchema,
-  WorldStateSchema,
-  ProjectSettingsSchema,
   AgentActionSchema,
-  LogEntrySchema,
-  RefineOptionsSchema,
+  ChapterSchema,
   CreateProjectSchema,
+  LANGUAGES,
+  LogEntrySchema,
+  ProjectFilterSchema,
+  ProjectSchema,
+  ProjectSettingsSchema,
+  RefineOptionsSchema,
   UpdateChapterSchema,
   UpdateProjectSchema,
-  ProjectFilterSchema,
-  type Project,
-  type Chapter,
-  type WorldState,
-  type ProjectSettings,
+  WorldStateSchema,
+  WRITING_STYLES,
   type AgentAction,
-  type LogEntry,
-  type RefineOptions,
+  type Base64Image,
+  type Chapter,
+  type ChapterId,
   type CreateProject,
-  type UpdateChapter,
-  type UpdateProject,
+  type Language,
+  type LogEntry,
+  type LogId,
+  type Project,
   type ProjectFilter,
   type ProjectId,
-  type ChapterId,
-  type LogId,
-  type Base64Image,
-  type WordCount,
+  type ProjectSettings,
+  type RefineOptions,
   type Temperature,
-  WRITING_STYLES,
-  LANGUAGES,
+  type UpdateChapter,
+  type UpdateProject,
+  type WordCount,
+  type WorldState,
   type WritingStyle,
-  type Language,
 } from './schemas';
 
 // =============================================================================
@@ -337,7 +337,7 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 /**
  * Type guard for functions
  */
-export function isFunction(value: unknown): value is Function {
+export function isFunction(value: unknown): value is (...args: unknown[]) => unknown {
   return typeof value === 'function';
 }
 
@@ -351,10 +351,10 @@ export function isFunction(value: unknown): value is Function {
 export function assertType<T>(
   value: unknown,
   guard: (value: unknown) => value is T,
-  errorMessage?: string
+  errorMessage: string = `Value does not match expected type`
 ): asserts value is T {
   if (!guard(value)) {
-    throw new TypeError(errorMessage || `Value does not match expected type`);
+    throw new TypeError(errorMessage);
   }
 }
 

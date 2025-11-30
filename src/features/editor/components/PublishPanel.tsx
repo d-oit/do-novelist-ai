@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 
 import { translateContent } from '../../../lib/ai';
 import { generateEpub } from '../../../lib/epub';
-import { Project, PublishStatus, Chapter, ProjectSettings } from '../../../types';
+import { Project, PublishStatus, Chapter, ProjectSettings, Language } from '../../../types';
 import { usePublishingAnalytics } from '../../publishing';
 import PublishingDashboard from '../../publishing/components/PublishingDashboard';
 import PublishingSetup from '../../publishing/components/PublishingSetup';
@@ -44,10 +44,10 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
   const [currentPublicationId, setCurrentPublicationId] = useState<string | null>(null);
 
   // Settings Helpers (Defensive default)
-  const settings: ProjectSettings = project.settings || { enableDropCaps: true };
+  const settings: ProjectSettings = project.settings ?? { enableDropCaps: true };
   const enableDropCaps = settings.enableDropCaps;
 
-  const handleUpdateSettings = (newSettings: Partial<ProjectSettings>) => {
+  const handleUpdateSettings = (newSettings: Partial<ProjectSettings>): void => {
     onUpdateProject({
       settings: { ...settings, ...newSettings },
     });
@@ -61,12 +61,12 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
         .trim()
         .split(/\s+/)
         .filter(w => w.length > 0).length || 0),
-    0
+    0,
   );
-  const targetWords = project.targetWordCount || 50000;
+  const targetWords = project.targetWordCount ?? 50000;
   const progress = Math.min(100, Math.round((totalWords / targetWords) * 100));
 
-  const handleDownloadEpub = async () => {
+  const handleDownloadEpub = async (): Promise<void> => {
     setIsExporting(true);
     try {
       const blob = await generateEpub(project, enableDropCaps);
@@ -85,10 +85,10 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
     }
   };
 
-  const handleTranslate = async () => {
+  const handleTranslate = async (): Promise<void> => {
     if (
       !confirm(
-        `This will overwrite the content of your chapters with a ${targetLang} translation. It is recommended to duplicate your project first (Not implemented). Proceed?`
+        `This will overwrite the content of your chapters with a ${targetLang} translation. It is recommended to duplicate your project first (Not implemented). Proceed?`,
       )
     )
       return;
@@ -97,7 +97,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
     try {
       const code = LANGUAGE_CODES[targetLang];
       if (code) {
-        onUpdateProject({ language: code as any });
+        onUpdateProject({ language: code });
       }
       for (const chapter of project.chapters) {
         if (chapter.content) {
@@ -134,7 +134,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
   const LANGUAGES = Object.keys(LANGUAGE_CODES);
 
   // Normalize language for display (handle 'en' vs 'English')
-  const currentLanguage = LANGUAGES.find(l => LANGUAGE_CODES[l] === project.language) || 'English';
+  const currentLanguage = LANGUAGES.find(l => LANGUAGE_CODES[l] === project.language) ?? 'English';
 
   return (
     <div className='animate-in fade-in mx-auto max-w-4xl space-y-8 p-6 duration-500'>
@@ -354,7 +354,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
                     <div className='grid grid-cols-2 gap-2 text-xs'>
                       <div className='rounded bg-secondary/30 p-2 text-center'>
                         <div className='font-bold text-blue-600'>
-                          {publishingAnalytics.analytics?.views.toLocaleString() || '0'}
+                          {publishingAnalytics.analytics?.views.toLocaleString() ?? '0'}
                         </div>
                         <div className='text-muted-foreground'>Total Views</div>
                       </div>
@@ -368,7 +368,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
 
                     <button
                       onClick={() => {
-                        setCurrentPublicationId(publishingAnalytics.publications[0]?.id || null);
+                        setCurrentPublicationId(publishingAnalytics.publications[0]?.id ?? null);
                         setShowAnalytics(true);
                       }}
                       className='flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700'
@@ -465,7 +465,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm md:p-8'>
           <PublishingDashboard
             project={project}
-            publicationId={currentPublicationId || undefined}
+            publicationId={currentPublicationId ?? undefined}
             onClose={() => setShowAnalytics(false)}
             className='h-[90vh] w-full max-w-5xl shadow-2xl'
           />

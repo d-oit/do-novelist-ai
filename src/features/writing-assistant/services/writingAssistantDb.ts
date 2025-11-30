@@ -110,11 +110,11 @@ class WritingAssistantDb {
   /**
    * Save analysis results to database for historical tracking
    */
-  async saveAnalysisHistory(
+  public async saveAnalysisHistory(
     analysis: ContentAnalysis,
     projectId: string,
     acceptedCount = 0,
-    dismissedCount = 0
+    dismissedCount = 0,
   ): Promise<void> {
     if (!this.userId) return;
 
@@ -151,12 +151,12 @@ class WritingAssistantDb {
   /**
    * Record user feedback on suggestions for machine learning
    */
-  async recordSuggestionFeedback(
+  public async recordSuggestionFeedback(
     suggestion: WritingSuggestion,
     action: 'accepted' | 'dismissed' | 'ignored',
     chapterId: string,
     projectId: string,
-    appliedText?: string
+    appliedText?: string,
   ): Promise<void> {
     if (!this.userId) return;
 
@@ -185,7 +185,7 @@ class WritingAssistantDb {
   /**
    * Sync user preferences across devices (optional)
    */
-  async syncPreferences(config: WritingAssistantConfig): Promise<void> {
+  public async syncPreferences(config: WritingAssistantConfig): Promise<void> {
     if (!this.userId) return;
 
     try {
@@ -208,7 +208,7 @@ class WritingAssistantDb {
   /**
    * Load preferences from database (fallback if localStorage is empty)
    */
-  async loadPreferences(): Promise<WritingAssistantConfig | null> {
+  public async loadPreferences(): Promise<WritingAssistantConfig | null> {
     if (!this.userId) return null;
 
     try {
@@ -223,9 +223,9 @@ class WritingAssistantDb {
   /**
    * Get writing analytics for progress tracking
    */
-  async getWritingAnalytics(
+  public async getWritingAnalytics(
     projectId: string,
-    timeRange: 'week' | 'month' | 'year' = 'month'
+    timeRange: 'week' | 'month' | 'year' = 'month',
   ): Promise<{
     progressMetrics: WritingProgressMetrics[];
     improvementTrends: {
@@ -276,7 +276,7 @@ class WritingAssistantDb {
   /**
    * Clean up old data (privacy-friendly)
    */
-  async cleanupOldData(retentionDays = 365): Promise<void> {
+  public async cleanupOldData(retentionDays = 365): Promise<void> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
@@ -305,7 +305,7 @@ class WritingAssistantDb {
     }
 
     const sorted = history.sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
     );
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
@@ -366,7 +366,7 @@ class WritingAssistantDb {
   }
 
   private async upsertUserPreferences(
-    record: Omit<UserWritingPreferences, 'createdAt' | 'updatedAt'>
+    record: Omit<UserWritingPreferences, 'createdAt' | 'updatedAt'>,
   ): Promise<void> {
     // await db.insert(userPreferencesTable).values(record).onConflictDoUpdate(...);
     console.log('Syncing preferences for user:', record.userId);
@@ -381,7 +381,7 @@ class WritingAssistantDb {
   private async getProgressMetrics(
     userId: string,
     projectId: string,
-    timeRange: string
+    timeRange: string,
   ): Promise<WritingProgressMetrics[]> {
     console.log('Loading progress metrics:', userId, projectId, timeRange);
     return [];
@@ -390,7 +390,7 @@ class WritingAssistantDb {
   private async getAnalysisHistory(
     userId: string,
     projectId: string,
-    timeRange: string
+    timeRange: string,
   ): Promise<AnalysisHistory[]> {
     console.log('Loading analysis history:', userId, projectId, timeRange);
     return [];
@@ -399,7 +399,7 @@ class WritingAssistantDb {
   private async getSuggestionFeedback(
     userId: string,
     projectId: string,
-    timeRange: string
+    timeRange: string,
   ): Promise<SuggestionFeedback[]> {
     console.log('Loading suggestion feedback:', userId, projectId, timeRange);
     return [];

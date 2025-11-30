@@ -31,14 +31,15 @@ export interface AIServiceConfig {
  */
 export function getAIConfig(): AIServiceConfig {
   // Vercel AI Gateway API key (single key for all providers)
-  const gatewayApiKey = import.meta.env.VITE_AI_GATEWAY_API_KEY || '';
+  const env = import.meta.env as Record<string, string | undefined>;
+  const gatewayApiKey = env.VITE_AI_GATEWAY_API_KEY ?? '';
 
   return {
-    defaultProvider: (import.meta.env.VITE_DEFAULT_AI_PROVIDER as AIProvider) || 'mistral',
-    enableFallback: import.meta.env.VITE_ENABLE_AUTO_FALLBACK !== 'false',
+    defaultProvider: (env.VITE_DEFAULT_AI_PROVIDER as AIProvider) ?? 'mistral',
+    enableFallback: env.VITE_ENABLE_AUTO_FALLBACK !== 'false',
     gatewayApiKey,
-    defaultModel: import.meta.env.VITE_DEFAULT_AI_MODEL || 'mistral:mistral-medium-latest',
-    thinkingModel: import.meta.env.VITE_THINKING_AI_MODEL || 'mistral:mistral-medium',
+    defaultModel: env.VITE_DEFAULT_AI_MODEL ?? 'mistral:mistral-medium-latest',
+    thinkingModel: env.VITE_THINKING_AI_MODEL ?? 'mistral:mistral-medium',
 
     providers: {
       mistral: {
@@ -49,7 +50,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'mistral-medium-latest',
           advanced: 'mistral-large-latest',
         },
-        enabled: !!gatewayApiKey,
+        enabled: Boolean(gatewayApiKey),
       },
 
       openai: {
@@ -60,7 +61,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'gpt-4o',
           advanced: 'gpt-4o',
         },
-        enabled: !!gatewayApiKey,
+        enabled: Boolean(gatewayApiKey),
       },
 
       anthropic: {
@@ -71,7 +72,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'claude-3-5-sonnet-20241022',
           advanced: 'claude-3-5-sonnet-20241022',
         },
-        enabled: !!gatewayApiKey,
+        enabled: Boolean(gatewayApiKey),
       },
 
       google: {
@@ -82,7 +83,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'gemini-2.0-flash-exp',
           advanced: 'gemini-exp-1206',
         },
-        enabled: !!gatewayApiKey,
+        enabled: Boolean(gatewayApiKey),
       },
     },
   };
@@ -115,7 +116,7 @@ export function getEnabledProviders(config: AIServiceConfig): AIProvider[] {
 export function getModelForTask(
   provider: AIProvider,
   complexity: 'fast' | 'standard' | 'advanced',
-  config: AIServiceConfig
+  config: AIServiceConfig,
 ): string {
   return config.providers[provider].models[complexity];
 }

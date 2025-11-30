@@ -22,19 +22,19 @@ export const projectWizardSchema = z.object({
     .string()
     .min(1, 'Project title is required')
     .max(MAX_TITLE_LENGTH, `Title must be ${MAX_TITLE_LENGTH} characters or less`)
-    .refine(val => val.trim().length > 0, 'Project title cannot be empty or just whitespace'),
+    .refine(val => (val.trim().length > 0), 'Project title cannot be empty or just whitespace'),
 
   style: z
     .string()
     .min(1, 'Writing style is required')
     .max(MAX_STYLE_LENGTH, `Style must be ${MAX_STYLE_LENGTH} characters or less`)
-    .refine(val => val.trim().length > 0, 'Writing style cannot be empty or just whitespace'),
+    .refine(val => (val.trim().length > 0), 'Writing style cannot be empty or just whitespace'),
 
   idea: z
     .string()
     .min(10, 'Book idea must be at least 10 characters')
     .max(MAX_IDEA_LENGTH, `Idea must be ${MAX_IDEA_LENGTH} characters or less`)
-    .refine(val => val.trim().length > 0, 'Book idea cannot be empty or just whitespace'),
+    .refine(val => (val.trim().length > 0), 'Book idea cannot be empty or just whitespace'),
 
   tone: z.string().max(100, 'Tone must be 100 characters or less').optional(),
 
@@ -57,7 +57,7 @@ export type ProjectWizardFormData = z.infer<typeof projectWizardSchema>;
 
 // Validation error types
 export class ValidationError extends Error {
-  constructor(
+  public constructor(
     message: string,
     public field?: string,
     public code?: string
@@ -71,7 +71,7 @@ export class ValidationError extends Error {
  * Validates a chapter title
  */
 export function validateChapterTitle(title: string): string {
-  if (!title || title.trim().length === 0) {
+  if (!title || (title.trim().length === 0)) {
     throw new ValidationError('Title cannot be empty', 'title', 'EMPTY_TITLE');
   }
 
@@ -94,7 +94,7 @@ export function validateChapterTitle(title: string): string {
  * Validates a project title
  */
 export function validateProjectTitle(title: string): string {
-  if (!title || title.trim().length === 0) {
+  if (!title || (title.trim().length === 0)) {
     throw new ValidationError('Project title cannot be empty', 'title', 'EMPTY_TITLE');
   }
 

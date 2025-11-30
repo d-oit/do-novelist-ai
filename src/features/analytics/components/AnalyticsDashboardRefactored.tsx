@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import { Project, ChapterStatus } from '../../../types';
+import { Project, ChapterStatus } from '../../../shared/types';
 
 import AnalyticsContent from './AnalyticsContent';
 import AnalyticsSidebar from './AnalyticsSidebar';
@@ -28,7 +28,7 @@ const AnalyticsDashboardRefactored: React.FC<AnalyticsDashboardProps> = ({
   const [activeView, setActiveView] = useState('overview');
   const [isCompact, setIsCompact] = useState(false);
 
-  const handleExport = () => {
+  const handleExport = (): void => {
     // Export analytics data
     const data = {
       project: project.title,
@@ -56,13 +56,13 @@ const AnalyticsDashboardRefactored: React.FC<AnalyticsDashboardProps> = ({
       exit={{ opacity: 0, scale: 0.95 }}
       className={cn(
         'fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm',
-        className
+        className,
       )}
     >
       <div
         className={cn(
           'rounded-lg border border-border bg-background shadow-2xl',
-          'flex h-[90vh] w-full max-w-7xl flex-col overflow-hidden'
+          'flex h-[90vh] w-full max-w-7xl flex-col overflow-hidden',
         )}
       >
         {/* Header */}

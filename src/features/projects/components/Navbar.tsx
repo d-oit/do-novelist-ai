@@ -11,7 +11,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView, onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleNav = (view: 'dashboard' | 'projects' | 'settings') => {
+  const handleNav = (view: 'dashboard' | 'projects' | 'settings'): void => {
     onNavigate(view);
     setIsMenuOpen(false);
   };
@@ -24,15 +24,17 @@ const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView
     view: 'dashboard' | 'projects' | 'settings';
     icon: React.ElementType;
     label: string;
-  }) => (
-    <button
-      onClick={() => handleNav(view)}
-      className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${currentView === view ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
-      data-testid={`nav-${view}`}
-    >
-      <Icon className='h-4 w-4' /> {label}
-    </button>
-  );
+  }): React.ReactElement => {
+    return (
+      <button
+        onClick={() => handleNav(view)}
+        className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${currentView === view ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+        data-testid={`nav-${view}`}
+      >
+        <Icon className='h-4 w-4' /> {label}
+      </button>
+    );
+  };
 
   return (
     <nav className='sticky top-0 z-40 w-full border-b border-border bg-card/50 backdrop-blur-md'>

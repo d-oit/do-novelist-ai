@@ -34,8 +34,8 @@ function mapUserAIToProviderData(pref: UserAIPreference): ProviderPreferenceData
     selectedModel: pref.selectedModel,
     fallbackProviders: pref.fallbackProviders,
     temperature: pref.temperature,
-    maxTokens: pref.maxTokensPerRequest || 4000,
-    monthlyBudget: pref.budgetLimit || 50,
+    maxTokens: pref.maxTokensPerRequest ?? 4000,
+    monthlyBudget: pref.budgetLimit ?? 50,
     autoFallback: pref.enableFallback,
     costOptimization: false, // Default value as it's not in database schema
   };
@@ -47,10 +47,10 @@ function mapUserAIToProviderData(pref: UserAIPreference): ProviderPreferenceData
 function mapProviderDataToUserAI(
   data: ProviderPreferenceData,
   userId: string,
-  existingId?: string
+  existingId?: string,
 ): Omit<UserAIPreference, 'createdAt' | 'updatedAt'> {
   return {
-    id: existingId || crypto.randomUUID(),
+    id: existingId ?? crypto.randomUUID(),
     userId,
     selectedProvider: data.selectedProvider,
     selectedModel: data.selectedModel,
@@ -87,7 +87,7 @@ export async function loadUserPreferences(userId: string): Promise<ProviderPrefe
   try {
     const userPrefs = await getUserAIPreference(userId);
 
-    if (!userPrefs) {
+    if (userPrefs === null) {
       return getDefaultConfig();
     }
 
@@ -103,7 +103,7 @@ export async function loadUserPreferences(userId: string): Promise<ProviderPrefe
  */
 export async function saveUserPreferences(
   userId: string,
-  preferences: Partial<ProviderPreferenceData>
+  preferences: Partial<ProviderPreferenceData>,
 ): Promise<void> {
   try {
     const validatedPrefs = validatePreferences(preferences);
@@ -146,12 +146,12 @@ export function getActiveProviders(prefs: ProviderPreferenceData): AIProvider[] 
  */
 export function validateProviderModel(
   provider: AIProvider,
-  model: string
+  model: string,
 ): { valid: boolean; error?: string } {
   const aiConfig = getAIConfig();
   const providerConfig = aiConfig.providers[provider];
 
-  if (!providerConfig) {
+  if (providerConfig === undefined) {
     return { valid: false, error: `Unknown provider: ${provider}` };
   }
 
@@ -178,7 +178,7 @@ export function validateProviderModel(
 export function getOptimalModel(
   provider: AIProvider,
   taskType: 'fast' | 'standard' | 'advanced',
-  _prefs: ProviderPreferenceData
+  _prefs: ProviderPreferenceData,
 ): string {
   const aiConfig = getAIConfig();
   return aiConfig.providers[provider].models[taskType];
@@ -202,7 +202,7 @@ function getDefaultConfig(): ProviderPreferenceData {
  * Private: Validate preference data
  */
 function validatePreferences(
-  prefs: Partial<ProviderPreferenceData>
+  prefs: Partial<ProviderPreferenceData>,
 ): Omit<ProviderPreferenceData, 'selectedProvider'> {
   const validated: Partial<ProviderPreferenceData> = {};
 

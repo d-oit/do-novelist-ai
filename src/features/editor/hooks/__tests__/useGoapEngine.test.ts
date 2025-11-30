@@ -97,13 +97,13 @@ describe('useGoapEngine Hook', () => {
 
       // Initially, hasOutline is false, so create_outline should be available
       const createOutline = result.current.availableActions.find(a => a.name === 'create_outline');
-      expect(result.current.isActionAvailable(createOutline!)).toBe(true);
+      expect(createOutline).toBeDefined();
+      expect(result.current.isActionAvailable(createOutline)).toBe(true);
 
       // write_chapter_parallel requires hasOutline: true
-      const writeChapter = result.current.availableActions.find(
-        a => a.name === 'write_chapter_parallel'
-      );
-      expect(result.current.isActionAvailable(writeChapter!)).toBe(false);
+      const writeChapter = result.current.availableActions.find(a => a.name === 'write_chapter_parallel');
+      expect(writeChapter).toBeDefined();
+      expect(result.current.isActionAvailable(writeChapter)).toBe(false);
     });
 
     it('should handle specialized logic for write_chapter_parallel', () => {
@@ -112,12 +112,11 @@ describe('useGoapEngine Hook', () => {
       project.worldState.chaptersCount = 0;
 
       const { result } = renderHook(() => useGoapEngine(project, setProject, setSelectedChapterId));
-      const writeChapter = result.current.availableActions.find(
-        a => a.name === 'write_chapter_parallel'
-      );
+      const writeChapter = result.current.availableActions.find(a => a.name === 'write_chapter_parallel');
+      expect(writeChapter).toBeDefined();
 
       // Should be false because chaptersCount is 0
-      expect(result.current.isActionAvailable(writeChapter!)).toBe(false);
+      expect(result.current.isActionAvailable(writeChapter)).toBe(false);
     });
   });
 
@@ -131,7 +130,8 @@ describe('useGoapEngine Hook', () => {
       };
       vi.mocked(ai.generateOutline).mockResolvedValue(mockOutline);
 
-      const action = result.current.availableActions.find(a => a.name === 'create_outline')!;
+      const action = result.current.availableActions.find(a => a.name === 'create_outline');
+      expect(action).toBeDefined();
 
       await act(async () => {
         await result.current.executeAction(action);
@@ -143,9 +143,7 @@ describe('useGoapEngine Hook', () => {
       expect(project.chapters).toHaveLength(1);
       expect(project.worldState.hasOutline).toBe(true);
       expect(result.current.logs).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ agentName: 'Architect', type: 'success' }),
-        ])
+        expect.arrayContaining([expect.objectContaining({ agentName: 'Architect', type: 'success' })]),
       );
     });
 
@@ -174,9 +172,7 @@ describe('useGoapEngine Hook', () => {
 
       vi.mocked(ai.writeChapterContent).mockResolvedValue('# Content');
 
-      const action = result.current.availableActions.find(
-        a => a.name === 'write_chapter_parallel'
-      )!;
+      const action = result.current.availableActions.find(a => a.name === 'write_chapter_parallel')!;
 
       await act(async () => {
         await result.current.executeAction(action);

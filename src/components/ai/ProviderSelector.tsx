@@ -8,7 +8,10 @@ interface ProviderSelectorProps {
   onProviderChange?: (provider: AIProvider, model: string) => void;
 }
 
-export function ProviderSelector({ userId, onProviderChange }: ProviderSelectorProps) {
+export const ProviderSelector = ({
+  userId,
+  onProviderChange,
+}: ProviderSelectorProps): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<AIProvider>('google');
   const [selectedModel, setSelectedModel] = useState<string>('gemini-2.0-flash-exp');
@@ -17,18 +20,18 @@ export function ProviderSelector({ userId, onProviderChange }: ProviderSelectorP
   const config = getAIConfig();
 
   useEffect(() => {
-    loadUserPreferences(userId).then(prefs => {
+    void loadUserPreferences(userId).then(prefs => {
       setSelectedProvider(prefs.selectedProvider);
       setSelectedModel(prefs.selectedModel);
       setLoading(false);
     });
   }, [userId]);
 
-  const handleProviderSelect = async (provider: AIProvider, model: string) => {
+  const handleProviderSelect = async (provider: AIProvider, model: string): Promise<void> => {
     try {
       await saveUserPreferences(userId, {
         selectedProvider: provider,
-        selectedModel: model
+        selectedModel: model,
       });
 
       setSelectedProvider(provider);
@@ -43,78 +46,84 @@ export function ProviderSelector({ userId, onProviderChange }: ProviderSelectorP
     }
   };
 
-  const getStatusIcon = (provider: AIProvider) => {
+  const getStatusIcon = (provider: AIProvider): JSX.Element => {
     const isEnabled = config.providers[provider].enabled;
 
     if (!isEnabled) {
-      return <XCircle className="w-4 h-4 text-gray-400" />;
+      return <XCircle className='h-4 w-4 text-gray-400' />;
     }
 
-    return <CheckCircle className="w-4 h-4 text-green-500" />;
+    return <CheckCircle className='h-4 w-4 text-green-500' />;
   };
 
   const providers: AIProvider[] = ['openai', 'anthropic', 'google'];
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        <span className="text-sm text-gray-600">Loading...</span>
+      <div className='flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2'>
+        <Loader2 className='h-4 w-4 animate-spin' />
+        <span className='text-sm text-gray-600'>Loading...</span>
       </div>
     );
   }
 
   return (
-    <div className="relative">
+    <div className='relative'>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors"
+        className='flex items-center gap-2 rounded-lg border bg-white px-3 py-2 transition-colors hover:bg-gray-50'
       >
-        <Zap className="w-4 h-4 text-blue-500" />
-        <span className="text-sm font-medium">
+        <Zap className='h-4 w-4 text-blue-500' />
+        <span className='text-sm font-medium'>
           {selectedProvider}:{selectedModel}
         </span>
-        <ChevronDown className="w-4 h-4 text-gray-400" />
+        <ChevronDown className='h-4 w-4 text-gray-400' />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-96 bg-white border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
-          <div className="p-4">
-            <h3 className="font-semibold mb-4">Choose AI Provider & Model</h3>
+        <div className='absolute left-0 top-full z-50 mt-2 max-h-96 w-96 overflow-y-auto rounded-lg border bg-white shadow-lg'>
+          <div className='p-4'>
+            <h3 className='mb-4 font-semibold'>Choose AI Provider & Model</h3>
 
             {providers.map(provider => {
               const providerConfig = config.providers[provider];
               const isSelected = selectedProvider === provider;
 
               return (
-                <div key={provider} className="mb-4">
-                  <h4 className="font-medium text-sm text-gray-900 mb-2 flex items-center gap-2">
+                <div key={provider} className='mb-4'>
+                  <h4 className='mb-2 flex items-center gap-2 text-sm font-medium text-gray-900'>
                     {getStatusIcon(provider)}
-                    <span className="capitalize">{provider}</span>
-                    <span className={`ml-2 px-2 py-1 text-xs rounded ${
-                      providerConfig.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'
-                    }`}>
+                    <span className='capitalize'>{provider}</span>
+                    <span
+                      className={`ml-2 rounded px-2 py-1 text-xs ${
+                        providerConfig.enabled
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}
+                    >
                       {providerConfig.enabled ? 'Enabled' : 'Not Configured'}
                     </span>
                   </h4>
 
-                  <div className="space-y-2 ml-6">
+                  <div className='ml-6 space-y-2'>
                     {Object.entries(providerConfig.models).map(([type, model]) => (
                       <button
                         key={model}
-                        onClick={() => providerConfig.enabled && handleProviderSelect(provider, model)}
+                        onClick={() =>
+                          providerConfig.enabled && void handleProviderSelect(provider, model)
+                        }
                         disabled={!providerConfig.enabled}
-                        className={`w-full text-left p-3 rounded border text-sm transition-colors ${
+                        className={`w-full rounded border p-3 text-left text-sm transition-colors ${
                           isSelected && selectedModel === model
-                            ? 'bg-blue-50 border-blue-200 text-blue-900'
+                            ? 'border-blue-200 bg-blue-50 text-blue-900'
                             : providerConfig.enabled
-                            ? 'hover:bg-gray-50 border-gray-200'
-                            : 'opacity-50 cursor-not-allowed border-gray-100'
+                              ? 'border-gray-200 hover:bg-gray-50'
+                              : 'cursor-not-allowed border-gray-100 opacity-50'
                         }`}
                       >
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{model}</span>
-                          <span className="text-xs text-gray-500 capitalize">{type}</span>
+                        <div className='flex items-center justify-between'>
+                          <span className='font-medium'>{model}</span>
+                          <span className='text-xs capitalize text-gray-500'>{type}</span>
                         </div>
                       </button>
                     ))}
@@ -127,4 +136,4 @@ export function ProviderSelector({ userId, onProviderChange }: ProviderSelectorP
       )}
     </div>
   );
-}
+};

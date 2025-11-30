@@ -13,7 +13,7 @@ interface AISettingsPanelProps {
   userId: string;
 }
 
-export function AISettingsPanel({ userId }: AISettingsPanelProps) {
+export const AISettingsPanel = ({ userId }: AISettingsPanelProps) => {
   const [preferences, setPreferences] = useState<ProviderPreferenceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -45,8 +45,8 @@ export function AISettingsPanel({ userId }: AISettingsPanelProps) {
     return (
       <div className='rounded-lg border bg-white p-6'>
         <div className='animate-pulse space-y-4'>
-          <div className='h-4 w-1/4 rounded bg-gray-200'></div>
-          <div className='h-32 rounded bg-gray-200'></div>
+          <div className='h-4 w-1/4 rounded bg-gray-200' />
+          <div className='h-32 rounded bg-gray-200' />
         </div>
       </div>
     );
@@ -218,21 +218,21 @@ export function AISettingsPanel({ userId }: AISettingsPanelProps) {
               <div className='rounded-lg border p-4'>
                 <h4 className='mb-2 font-medium'>OpenAI</h4>
                 <div className='flex items-center gap-2'>
-                  <div className='h-2 w-2 rounded-full bg-green-500'></div>
+                  <div className='h-2 w-2 rounded-full bg-green-500' />
                   <span className='text-sm text-gray-600'>Operational</span>
                 </div>
               </div>
               <div className='rounded-lg border p-4'>
                 <h4 className='mb-2 font-medium'>Anthropic</h4>
                 <div className='flex items-center gap-2'>
-                  <div className='h-2 w-2 rounded-full bg-green-500'></div>
+                  <div className='h-2 w-2 rounded-full bg-green-500' />
                   <span className='text-sm text-gray-600'>Operational</span>
                 </div>
               </div>
               <div className='rounded-lg border p-4'>
                 <h4 className='mb-2 font-medium'>Google</h4>
                 <div className='flex items-center gap-2'>
-                  <div className='h-2 w-2 rounded-full bg-green-500'></div>
+                  <div className='h-2 w-2 rounded-full bg-green-500' />
                   <span className='text-sm text-gray-600'>Operational</span>
                 </div>
               </div>

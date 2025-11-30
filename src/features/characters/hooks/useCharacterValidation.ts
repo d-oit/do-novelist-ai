@@ -4,7 +4,18 @@ import { characterValidationService } from '../../../lib/character-validation';
 import { type Character } from '../../../types/character-schemas';
 import { type CharacterValidationResult } from '../types';
 
-export function useCharacterValidation(character: Character | null) {
+export function useCharacterValidation(character: Character | null): {
+  isValid: boolean;
+  score: number;
+  issues: Array<{
+    field: string;
+    message: string;
+    severity: 'warning';
+    suggestion: string | undefined;
+  }>;
+  strengths: string[];
+  validate: (character: Character) => CharacterValidationResult;
+} {
   const validationResult = useMemo<CharacterValidationResult | null>(() => {
     if (!character) return null;
 

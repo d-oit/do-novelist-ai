@@ -4,25 +4,25 @@
  */
 
 import {
-  CharacterSchema,
-  CharacterRelationshipSchema,
-  CharacterGroupSchema,
   CharacterConflictSchema,
+  CharacterGroupSchema,
+  CharacterRelationshipSchema,
+  CharacterSchema,
+  CharacterSearchSchema,
   CreateCharacterSchema,
   UpdateCharacterSchema,
-  CharacterSearchSchema,
   type Character,
-  type CharacterRole,
   type CharacterArcType,
+  type CharacterConflict,
+  type CharacterGroup,
+  type CharacterRelationship,
+  type CharacterRole,
+  type CharacterSearch,
+  type CreateCharacter,
+  type EmotionalState,
   type PersonalityTrait,
   type RelationshipType,
-  type EmotionalState,
-  type CharacterRelationship,
-  type CharacterGroup,
-  type CharacterConflict,
-  type CreateCharacter,
   type UpdateCharacter,
-  type CharacterSearch,
 } from './character-schemas';
 import { type ProjectId } from './schemas';
 
@@ -255,7 +255,7 @@ export function isAntagonist(character: Character): boolean {
  * Check if a character has a defined character arc
  */
 export function hasCharacterArc(character: Character): boolean {
-  return !!character.arc;
+  return character.arc !== null && character.arc !== undefined;
 }
 
 /**
@@ -348,7 +348,7 @@ export function validateCharacterImportance(role: CharacterRole, importance: num
  */
 export function validateCharacterArc(character: Character): boolean {
   if (character.importance >= 7) {
-    return !!character.arc;
+    return character.arc !== null && character.arc !== undefined;
   }
   return true; // Arc is optional for less important characters
 }

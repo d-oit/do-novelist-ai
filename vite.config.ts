@@ -10,7 +10,16 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: '0.0.0.0',
     },
-    plugins: [react()],
+    plugins: [
+      react({
+        // Enable Fast Refresh for development
+        fastRefresh: true,
+        // Configure JSX runtime for React 17+
+        jsxRuntime: 'automatic',
+        // Enable HMR for CSS and other assets
+        devTarget: 'es2020',
+      }),
+    ],
     define: {
       'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },

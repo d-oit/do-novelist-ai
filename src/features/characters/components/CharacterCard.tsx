@@ -41,8 +41,8 @@ const CHARACTER_ROLE_ICONS: Record<CharacterRole, React.ComponentType<{ classNam
 };
 
 // Fallback for missing icons if schema changed
-const getRoleIcon = (role: CharacterRole) => {
-  return CHARACTER_ROLE_ICONS[role] || Users;
+const getRoleIcon = (role: CharacterRole): React.ComponentType<{ className?: string }> => {
+  return CHARACTER_ROLE_ICONS[role] ?? Users;
 };
 
 const CHARACTER_ROLE_COLORS: Record<CharacterRole, string> = {
@@ -67,7 +67,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   const roleColor = CHARACTER_ROLE_COLORS[character.role] || 'text-gray-500';
 
   // Helper to determine tier (simplified from original)
-  const getTier = (role: CharacterRole) => {
+  const getTier = (role: CharacterRole): 'main' | 'supporting' | 'minor' => {
     if (role === 'protagonist' || role === 'antagonist') return 'main';
     if (role === 'supporting' || role === 'love-interest' || role === 'mentor') return 'supporting';
     return 'minor';
@@ -87,7 +87,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
         isSelected
           ? 'border-primary ring-2 ring-primary/20'
           : 'border-border hover:border-border/60',
-        'hover:shadow-lg'
+        'hover:shadow-lg',
       )}
       onClick={() => onSelect(character)}
     >
@@ -106,7 +106,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
 
       {/* Character Portrait */}
       <div className='mb-3 flex items-start gap-3'>
-        {character.imageUrl ? (
+        {character.imageUrl?.length > 0 ? (
           <img
             src={character.imageUrl}
             alt={character.name}
@@ -116,7 +116,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
           <div
             className={cn(
               'flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-muted to-muted/50',
-              roleColor
+              roleColor,
             )}
           >
             <IconComponent className='h-6 w-6' />
@@ -144,7 +144,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
             tier === 'supporting' &&
               'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200',
             tier === 'minor' &&
-              'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200'
+              'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
           )}
         >
           {tier}
@@ -173,7 +173,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
             onDelete(character.id);
           }}
           className={iconButtonTarget(
-            'rounded transition-colors hover:bg-destructive/10 hover:text-destructive'
+            'rounded transition-colors hover:bg-destructive/10 hover:text-destructive',
           )}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}

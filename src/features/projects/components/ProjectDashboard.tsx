@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useProjects } from '../hooks/useProjects';
+import { Project } from '@shared/types';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
@@ -15,7 +16,7 @@ export const ProjectDashboard: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error != null) {
     return (
       <Card data-testid='card'>
         <CardContent>Error: {error}</CardContent>
@@ -25,7 +26,7 @@ export const ProjectDashboard: React.FC = () => {
 
   return (
     <div>
-      {projects.map((project: any) => (
+      {projects.map((project: Project) => (
         <Card key={project.id} data-testid='card'>
           <CardHeader>
             <CardTitle>{project.title}</CardTitle>

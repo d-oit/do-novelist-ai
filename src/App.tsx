@@ -77,7 +77,7 @@ const App: React.FC = () => {
   const engine = useGoapEngine(project, setProject, setSelectedChapterId);
 
   useEffect(() => {
-    const initApp = async () => {
+    const initApp = async (): Promise<void> => {
       try {
         await db.init();
         setIsLoading(false);
@@ -86,13 +86,13 @@ const App: React.FC = () => {
         setIsLoading(false);
       }
     };
-    initApp();
+    void initApp();
   }, []);
 
-  useEffect(() => {
+  useEffect((): (() => void) | undefined => {
     if (project.id !== 'new_session' && !isLoading) {
       const saveTimer = setTimeout(() => {
-        db.saveProject(project);
+        void db.saveProject(project);
       }, 2000);
       return () => clearTimeout(saveTimer);
     }
@@ -103,14 +103,14 @@ const App: React.FC = () => {
     title: string,
     style: string,
     idea: string,
-    targetWordCount: number
-  ) => {
+    targetWordCount: number,
+  ): void => {
     const newId = `proj_${Date.now()}`;
     const newProject: Project = {
       ...INITIAL_PROJECT,
       id: newId,
       title,
-      style: style as any,
+      style: style as Project['style'],
       idea,
       targetWordCount: targetWordCount || 50000,
       genre: [],
@@ -130,26 +130,26 @@ const App: React.FC = () => {
     };
 
     setProject(newProject);
-    db.saveProject(newProject);
+    void db.saveProject(newProject);
     engine.addLog('System', 'Project Initialized.', 'info');
     setShowWizard(false);
     setCurrentView('dashboard');
     setSelectedChapterId('overview');
   };
 
-  const handleLoadProject = async (id: string) => {
+  const handleLoadProject = async (id: string): Promise<void> => {
     setIsLoading(true);
     try {
       const loaded = await db.loadProject(id);
-      if (loaded) {
+      if (loaded !== null && loaded !== undefined) {
         setProject({
           ...INITIAL_PROJECT,
           ...loaded,
-          settings: { ...INITIAL_PROJECT.settings, ...(loaded.settings || {}) },
+          settings: { ...INITIAL_PROJECT.settings, ...loaded.settings },
         });
         setCurrentView('dashboard');
         setSelectedChapterId('overview');
-        engine.addLog('System', `Loaded project: ${loaded.title}`, 'info');
+        engine.addLog('System', `Loaded project: ${loaded.title ?? 'Unknown'}`, 'info');
       } else {
         alert('Failed to load project.');
       }
@@ -160,18 +160,18 @@ const App: React.FC = () => {
     setIsLoading(false);
   };
 
-  const handleUpdateChapter = (chapterId: string, updates: Partial<Chapter>) => {
+  const handleUpdateChapter = (chapterId: string, updates: Partial<Chapter>): void => {
     setProject(prev => ({
       ...prev,
       chapters: prev.chapters.map(c => (c.id === chapterId ? { ...c, ...updates } : c)),
     }));
   };
 
-  const handleUpdateProject = (updates: Partial<Project>) => {
+  const handleUpdateProject = (updates: Partial<Project>): void => {
     setProject(prev => ({ ...prev, ...updates }));
   };
 
-  const handleAddChapter = () => {
+  const handleAddChapter = (): void => {
     setProject(prev => {
       const nextIndex =
         prev.chapters.length > 0 ? Math.max(...prev.chapters.map(c => c.orderIndex)) + 1 : 1;
@@ -256,7 +256,9 @@ const App: React.FC = () => {
               <ProjectsView
                 currentProject={project}
                 onNewProject={() => setShowWizard(true)}
-                onLoadProject={handleLoadProject}
+                onLoadProject={(id: string): void => {
+                  void handleLoadProject(id);
+                }}
                 onNavigate={setCurrentView}
               />
             </div>

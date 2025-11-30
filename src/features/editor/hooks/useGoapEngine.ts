@@ -21,6 +21,7 @@ import {
   RefineOptions,
   WorldState,
 } from '../../../types';
+import { OutlineChapter } from '../types';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {
@@ -135,7 +136,7 @@ export interface GoapEngine {
   handleRefineChapter: (
     chapterId: string,
     options: RefineOptions,
-    currentContent?: string
+    currentContent?: string,
   ) => Promise<void>;
   handleContinueChapter: (chapterId: string) => Promise<void>;
   addLog: (agentName: string, message: string, type: LogEntry['type']) => void;
@@ -145,7 +146,7 @@ export interface GoapEngine {
 export const useGoapEngine = (
   project: Project,
   setProject: React.Dispatch<React.SetStateAction<Project>>,
-  setSelectedChapterId: (id: string) => void
+  setSelectedChapterId: (id: string) => void,
 ): GoapEngine => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [availableActions] = useState<AgentAction[]>(INITIAL_ACTIONS);
@@ -166,10 +167,10 @@ export const useGoapEngine = (
         },
       ]);
     },
-    []
+    [],
   );
 
-  const executeAction = async (action: AgentAction) => {
+  const executeAction = async (action: AgentAction): Promise<void> => {
     if (project.isGenerating) return;
 
     setProject(p => ({ ...p, isGenerating: true }));
@@ -186,10 +187,10 @@ export const useGoapEngine = (
         addLog(
           'Architect',
           `Outline generated with ${result.chapters.length} chapters.`,
-          'success'
+          'success',
         );
 
-        const newChapters: Chapter[] = result.chapters.map((c: any) => ({
+        const newChapters: Chapter[] = result.chapters.map((c: OutlineChapter) => ({
           id: `${project.id}_ch_${c.orderIndex}`,
           orderIndex: c.orderIndex,
           title: c.title,
@@ -261,7 +262,7 @@ export const useGoapEngine = (
         addLog(
           'Planner',
           `Delegating ${pendingChapters.length} chapters to Writer Agents (Parallel Mode).`,
-          'thought'
+          'thought',
         );
 
         // Mark selected as drafting
@@ -270,7 +271,7 @@ export const useGoapEngine = (
           chapters: prev.chapters.map(c =>
             pendingChapters.some(pc => pc.id === c.id)
               ? { ...c, status: ChapterStatus.DRAFTING }
-              : c
+              : c,
           ),
         }));
 
@@ -286,28 +287,28 @@ export const useGoapEngine = (
                 chapter.title,
                 chapter.summary,
                 project.style,
-                prevSummary
+                prevSummary,
               );
               return { id: chapter.id, content, success: true };
             } catch (_e) {
               addLog('Writer', `Failed to draft "${chapter.title}"`, 'error');
               return { id: chapter.id, content: '', success: false };
             }
-          })
+          }),
         );
 
         const successCount = results.filter(r => r.success).length;
         addLog(
           'Writer',
           `Batch complete. ${successCount}/${pendingChapters.length} chapters written.`,
-          'success'
+          'success',
         );
 
         setProject(prev => ({
           ...prev,
           chapters: prev.chapters.map(c => {
             const result = results.find(r => r.id === c.id);
-            if (result?.success) {
+            if (result?.success === true) {
               return { ...c, content: result.content, status: ChapterStatus.COMPLETE };
             }
             // If failed, revert to PENDING so it can be retried
@@ -334,7 +335,7 @@ export const useGoapEngine = (
         addLog(
           'Planner',
           `Assigning Dialogue Coach to Chapter ${chapterToFix.orderIndex}...`,
-          'thought'
+          'thought',
         );
         setSelectedChapterId(chapterToFix.id);
         const polished = await polishDialogue(chapterToFix.content, project.style);
@@ -342,7 +343,7 @@ export const useGoapEngine = (
         setProject(prev => ({
           ...prev,
           chapters: prev.chapters.map(c =>
-            c.id === chapterToFix.id ? { ...c, content: polished } : c
+            c.id === chapterToFix.id ? { ...c, content: polished } : c,
           ),
         }));
         addLog('Doctor', 'Dialogue polish complete. Script tightened.', 'success');
@@ -365,13 +366,13 @@ export const useGoapEngine = (
   const handleRefineChapter = async (
     chapterId: string,
     options: RefineOptions,
-    currentContent?: string
-  ) => {
+    currentContent?: string,
+  ): Promise<void> => {
     if (project.isGenerating) return;
     const chapter = project.chapters.find(c => c.id === chapterId);
-    const contentToRefine = currentContent !== undefined ? currentContent : chapter?.content;
+    const contentToRefine = currentContent ?? chapter?.content;
 
-    if (!chapter || !contentToRefine) return;
+    if (!chapter || contentToRefine == null) return;
     setProject(p => ({ ...p, isGenerating: true }));
     addLog('Editor', `Starting refinement for "${chapter.title}"...`, 'info');
 
@@ -380,12 +381,12 @@ export const useGoapEngine = (
         contentToRefine,
         chapter.summary,
         project.style,
-        options
+        options,
       );
       setProject(prev => ({
         ...prev,
         chapters: prev.chapters.map(c =>
-          c.id === chapterId ? { ...c, content: refinedContent } : c
+          c.id === chapterId ? { ...c, content: refinedContent } : c,
         ),
       }));
       addLog('Editor', `Refinement complete.`, 'success');
@@ -396,7 +397,7 @@ export const useGoapEngine = (
     }
   };
 
-  const handleContinueChapter = async (chapterId: string) => {
+  const handleContinueChapter = async (chapterId: string): Promise<void> => {
     if (project.isGenerating) return;
     const chapter = project.chapters.find(c => c.id === chapterId);
     if (!chapter) return;
@@ -419,13 +420,13 @@ export const useGoapEngine = (
                 content: updatedContent,
                 status: ChapterStatus.DRAFTING,
               }
-            : c
+            : c,
         ),
       }));
       addLog(
         'Writer',
         `Added ${newContent.length} chars to Chapter ${chapter.orderIndex}.`,
-        'success'
+        'success',
       );
     } catch (err) {
       addLog('Writer', `Failed to continue chapter: ${(err as Error).message}`, 'error');
@@ -456,7 +457,7 @@ export const useGoapEngine = (
       }
     }, 1500);
 
-    return () => {
+    return (): void => {
       controller.abort();
       clearTimeout(timer);
     };
@@ -470,7 +471,7 @@ export const useGoapEngine = (
     setAutoPilot,
   ]);
 
-  const isActionAvailable = (action: AgentAction) => {
+  const isActionAvailable = (action: AgentAction): boolean => {
     // 1. Check if Action is explicitly disabled or specialized logic
     if (action.name === 'write_chapter_parallel') {
       // Don't draft if all chapters are done or no chapters exist

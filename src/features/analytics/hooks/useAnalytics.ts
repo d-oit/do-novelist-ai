@@ -70,12 +70,12 @@ export const useAnalytics = (): UseAnalyticsReturn => {
   useEffect(() => {
     const controller = new AbortController();
 
-    store.init().catch(err => {
-      if (err.name === 'AbortError') return;
+    store.init().catch((err: unknown) => {
+      if (err instanceof Error && err.name === 'AbortError') return;
       console.error('Failed to initialize analytics:', err);
     });
 
-    return () => {
+    return (): void => {
       controller.abort();
     };
   }, [store]);
@@ -96,7 +96,7 @@ export const useAnalytics = (): UseAnalyticsReturn => {
 
       return session;
     },
-    [store]
+    [store],
   );
 
   const endSession = useCallback(async () => {
@@ -120,7 +120,7 @@ export const useAnalytics = (): UseAnalyticsReturn => {
         sessionMetrics.current.initialWordCount = oldCount;
       }
     },
-    [store.isTracking]
+    [store.isTracking],
   );
 
   const trackKeystroke = useCallback(
@@ -133,7 +133,7 @@ export const useAnalytics = (): UseAnalyticsReturn => {
         sessionMetrics.current.charactersTyped++;
       }
     },
-    [store.isTracking]
+    [store.isTracking],
   );
 
   const trackAIGeneration = useCallback(
@@ -141,12 +141,12 @@ export const useAnalytics = (): UseAnalyticsReturn => {
       if (!store.isTracking) return;
       sessionMetrics.current.aiWordsGenerated += wordsGenerated;
     },
-    [store.isTracking]
+    [store.isTracking],
   );
 
   // Export Logic (kept here as it's a utility)
   const exportAnalytics = useCallback(
-    async (format: 'json' | 'csv' | 'pdf'): Promise<string> => {
+    (format: 'json' | 'csv' | 'pdf'): Promise<string> => {
       const exportData = {
         projectAnalytics: store.projectAnalytics,
         weeklyStats: store.weeklyStats,
@@ -161,29 +161,31 @@ export const useAnalytics = (): UseAnalyticsReturn => {
       };
 
       if (format === 'json') {
-        return JSON.stringify(exportData, null, 2);
+        return Promise.resolve(JSON.stringify(exportData, null, 2));
       } else if (format === 'csv') {
         // Simple CSV conversion
-        return Object.entries(exportData)
-          .map(([key, value]) => `${key},${JSON.stringify(value)}`)
-          .join('\n');
+        return Promise.resolve(
+          Object.entries(exportData)
+            .map(([key, value]) => `${key},${JSON.stringify(value)}`)
+            .join('\n'),
+        );
       } else {
-        throw new Error('PDF export not yet implemented');
+        return Promise.reject(new Error('PDF export not yet implemented'));
       }
     },
-    [store]
+    [store],
   );
 
   // Auto-end session on page unload
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = (): void => {
       if (store.currentSession && store.isTracking) {
-        endSession();
+        void endSession();
       }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    return (): void => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [store.currentSession, store.isTracking, endSession]);
 
   return {

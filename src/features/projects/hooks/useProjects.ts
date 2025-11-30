@@ -57,7 +57,7 @@ export const useProjects = create<ProjectsState>()(
       error: null,
 
       // Initialize
-      init: async () => {
+      init: async (): Promise<void> => {
         try {
           await projectService.init();
           await get().loadAll();
@@ -68,7 +68,7 @@ export const useProjects = create<ProjectsState>()(
       },
 
       // Load all projects
-      loadAll: async () => {
+      loadAll: async (): Promise<void> => {
         set({ isLoading: true, error: null });
         try {
           const projects = await projectService.getAll();
@@ -82,26 +82,26 @@ export const useProjects = create<ProjectsState>()(
       },
 
       // Load project statistics
-      loadStats: async () => {
+      loadStats: async (): Promise<void> => {
         try {
           const { projects } = get();
           const stats: ProjectStats = {
             totalProjects: projects.length,
             activeProjects: projects.filter(
-              p => p.status === PublishStatus.EDITING || p.status === PublishStatus.DRAFT
+              p => p.status === PublishStatus.EDITING || p.status === PublishStatus.DRAFT,
             ).length,
             completedProjects: projects.filter(p => p.status === PublishStatus.PUBLISHED).length,
             totalWords: projects.reduce(
               (sum, p) =>
                 sum + p.chapters.reduce((chSum, ch) => chSum + ch.content.split(' ').length, 0),
-              0
+              0,
             ),
             totalChapters: projects.reduce((sum, p) => sum + p.chapters.length, 0),
             averageProgress:
               projects.length > 0
                 ? projects.reduce((sum, p) => {
                     const completed = p.chapters.filter(
-                      ch => ch.status === ChapterStatus.COMPLETE
+                      ch => ch.status === ChapterStatus.COMPLETE,
                     ).length;
                     return (
                       sum + (p.chapters.length > 0 ? (completed / p.chapters.length) * 100 : 0)
@@ -116,7 +116,7 @@ export const useProjects = create<ProjectsState>()(
       },
 
       // Create new project
-      create: async (data: ProjectCreationData) => {
+      create: async (data: ProjectCreationData): Promise<Project> => {
         set({ isLoading: true, error: null });
         try {
           const project = await projectService.create(data);
@@ -137,13 +137,13 @@ export const useProjects = create<ProjectsState>()(
       },
 
       // Update project
-      update: async (id: string, data: ProjectUpdateData) => {
+      update: async (id: string, data: ProjectUpdateData): Promise<void> => {
         set({ isLoading: true, error: null });
         try {
           await projectService.update(id, data);
           set(state => ({
             projects: state.projects.map(p =>
-              p.id === id ? ({ ...p, ...data, updatedAt: Date.now() } as unknown as Project) : p
+              p.id === id ? ({ ...p, ...data, updatedAt: Date.now() } as unknown as Project) : p,
             ),
             selectedProject:
               state.selectedProject?.id === id
@@ -166,7 +166,7 @@ export const useProjects = create<ProjectsState>()(
       },
 
       // Delete project
-      delete: async (id: string) => {
+      delete: async (id: string): Promise<void> => {
         set({ isLoading: true, error: null });
         try {
           await projectService.delete(id);
@@ -186,25 +186,25 @@ export const useProjects = create<ProjectsState>()(
       },
 
       // Select project
-      select: (id: string) => {
+      select: (id: string): void => {
         const project = get().projects.find(p => p.id === id);
-        set({ selectedProject: project || null });
+        set({ selectedProject: project ?? null });
       },
 
       // Update filters
-      setFilters: (newFilters: Partial<ProjectFilters>) => {
+      setFilters: (newFilters: Partial<ProjectFilters>): void => {
         set(state => ({
           filters: { ...state.filters, ...newFilters },
         }));
       },
 
       // Clear error
-      clearError: () => {
+      clearError: (): void => {
         set({ error: null });
       },
     }),
-    { name: 'ProjectsStore' }
-  )
+    { name: 'ProjectsStore' },
+  ),
 );
 
 /**
@@ -217,7 +217,7 @@ export const selectFilteredProjects = (state: ProjectsState): Project[] => {
   if (state.filters.search) {
     const search = state.filters.search.toLowerCase();
     filtered = filtered.filter(
-      p => p.title.toLowerCase().includes(search) || p.idea.toLowerCase().includes(search)
+      p => p.title.toLowerCase().includes(search) || p.idea.toLowerCase().includes(search),
     );
   }
 
@@ -229,7 +229,7 @@ export const selectFilteredProjects = (state: ProjectsState): Project[] => {
       completed: PublishStatus.PUBLISHED,
     };
     const targetStatus = statusMap[state.filters.status];
-    if (targetStatus) {
+    if (targetStatus != null) {
       filtered = filtered.filter(p => p.status === targetStatus);
     }
   }

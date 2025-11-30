@@ -17,17 +17,21 @@ class ProjectService {
   /**
    * Initialize IndexedDB
    */
-  async init(): Promise<void> {
+  public async init(): Promise<IDBDatabase> {
+    if (this.db) {
+      return this.db;
+    }
+
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
+      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => {
         this.db = request.result;
-        resolve();
+        resolve(this.db);
       };
 
-      request.onupgradeneeded = event => {
+      request.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Create projects store
@@ -44,40 +48,40 @@ class ProjectService {
   /**
    * Get all projects
    */
-  async getAll(): Promise<Project[]> {
-    if (!this.db) await this.init();
+  public async getAll(): Promise<Project[]> {
+    const db = await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readonly');
+    return new Promise<Project[]>((resolve, reject) => {
+      const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const request = store.getAll();
 
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve(request.result ?? []);
+      request.onerror = (): void => reject(request.error);
     });
   }
 
   /**
    * Get project by ID
    */
-  async getById(id: string): Promise<Project | null> {
-    if (!this.db) await this.init();
+  public async getById(id: string): Promise<Project | null> {
+    const db = await this.init();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readonly');
+    return new Promise<Project | null>((resolve, reject) => {
+      const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const request = store.get(id);
 
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve(request.result ?? null);
+      request.onerror = (): void => reject(request.error);
     });
   }
 
   /**
    * Create new project
    */
-  async create(data: ProjectCreationData): Promise<Project> {
-    if (!this.db) await this.init();
+  public async create(data: ProjectCreationData): Promise<Project> {
+    const db = await this.init();
 
     const now = Date.now();
     const project: Project = {
@@ -104,13 +108,13 @@ class ProjectService {
         targetAudienceDefined: false,
       },
       isGenerating: false,
-      language: (data.language || 'en') as Language,
-      targetWordCount: data.targetWordCount || 50000,
+      language: (data.language ?? 'en') as Language,
+      targetWordCount: data.targetWordCount ?? 50000,
       settings: {
         enableDropCaps: true,
       },
-      genre: data.genre || [],
-      targetAudience: (data.targetAudience || 'adult') as
+      genre: data.genre ?? [],
+      targetAudience: (data.targetAudience ?? 'adult') as
         | 'children'
         | 'young_adult'
         | 'adult'
@@ -131,20 +135,20 @@ class ProjectService {
     };
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.add(project);
 
-      request.onsuccess = () => resolve(project);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve(project);
+      request.onerror = (): void => reject(request.error);
     });
   }
 
   /**
    * Update project
    */
-  async update(id: string, data: ProjectUpdateData): Promise<void> {
-    if (!this.db) await this.init();
+  public async update(id: string, data: ProjectUpdateData): Promise<void> {
+    const db = await this.init();
 
     const project = await this.getById(id);
     if (!project) {
@@ -158,7 +162,7 @@ class ProjectService {
     };
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.put(updated);
 
@@ -170,41 +174,41 @@ class ProjectService {
   /**
    * Delete project
    */
-  async delete(id: string): Promise<void> {
-    if (!this.db) await this.init();
+  public async delete(id: string): Promise<void> {
+    const db = await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.delete(id);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void => reject(request.error);
     });
   }
 
   /**
    * Get projects by status
    */
-  async getByStatus(status: string): Promise<Project[]> {
-    if (!this.db) await this.init();
+  public async getByStatus(status: string): Promise<Project[]> {
+    const db = await this.init();
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readonly');
+      const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const index = store.index('status');
       const request = index.getAll(status);
 
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve(request.result || []);
+      request.onerror = (): void => reject(request.error);
     });
   }
 
   /**
    * Save project (full update)
    */
-  async save(project: Project): Promise<void> {
-    if (!this.db) await this.init();
+  public async save(project: Project): Promise<void> {
+    const db = await this.init();
 
     const updated = {
       ...project,
@@ -212,12 +216,12 @@ class ProjectService {
     };
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.put(updated);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void => reject(request.error);
     });
   }
 }

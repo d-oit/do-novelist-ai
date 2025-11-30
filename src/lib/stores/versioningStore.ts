@@ -2,11 +2,11 @@ import { create } from 'zustand';
 
 import { versioningService } from '../../features/versioning/services/versioningService';
 import {
-  ChapterVersion,
   Branch,
+  ChapterVersion,
+  SortOrder,
   VersionCompareResult,
   VersionFilter,
-  SortOrder,
 } from '../../features/versioning/types';
 import { Chapter } from '../../types';
 
@@ -51,7 +51,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
   error: null,
 
   // Actions
-  loadVersionHistory: async (chapterId: string) => {
+  loadVersionHistory: async (chapterId: string): Promise<void> => {
     set({ isLoading: true, error: null });
     try {
       const history = await versioningService.getVersionHistory(chapterId);
@@ -64,10 +64,10 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  loadBranches: async (chapterId: string) => {
+  loadBranches: async (chapterId: string): Promise<void> => {
     try {
       const branchList = await versioningService.getBranches(chapterId);
-      const active = branchList.find(b => b.isActive) || branchList[0] || null;
+      const active = branchList.find(b => b.isActive) ?? branchList[0] ?? null;
       set({ branches: branchList, currentBranch: active });
     } catch (err) {
       console.error('Failed to load branches:', err);
@@ -78,7 +78,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     chapter: Chapter,
     message?: string,
     type: ChapterVersion['type'] = 'manual'
-  ) => {
+  ): Promise<ChapterVersion> => {
     set({ isLoading: true, error: null });
     try {
       const version = await versioningService.saveVersion(chapter, message, type);
@@ -94,7 +94,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  restoreVersion: async (versionId: string) => {
+  restoreVersion: async (versionId: string): Promise<Chapter | null> => {
     set({ isLoading: true, error: null });
     try {
       const chapter = await versioningService.restoreVersion(versionId);
@@ -109,7 +109,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  deleteVersion: async (versionId: string) => {
+  deleteVersion: async (versionId: string): Promise<boolean> => {
     try {
       const success = await versioningService.deleteVersion(versionId);
       if (success) {
@@ -124,7 +124,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  compareVersions: async (versionId1: string, versionId2: string) => {
+  compareVersions: async (versionId1: string, versionId2: string): Promise<VersionCompareResult | null> => {
     try {
       return await versioningService.compareVersions(versionId1, versionId2);
     } catch (err) {
@@ -133,7 +133,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  createBranch: async (name: string, description: string, parentVersionId: string) => {
+  createBranch: async (name: string, description: string, parentVersionId: string): Promise<Branch> => {
     try {
       const branch = await versioningService.createBranch(name, description, parentVersionId);
       set(state => ({ branches: [...state.branches, branch] }));
@@ -145,13 +145,13 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  switchBranch: async (branchId: string) => {
+  switchBranch: async (branchId: string): Promise<boolean> => {
     try {
       const success = await versioningService.switchBranch(branchId);
       if (success) {
         set(state => {
           const updatedBranches = state.branches.map(b => ({ ...b, isActive: b.id === branchId }));
-          const newBranch = updatedBranches.find(b => b.id === branchId) || null;
+          const newBranch = updatedBranches.find(b => b.id === branchId) ?? null;
           return { branches: updatedBranches, currentBranch: newBranch };
         });
       }
@@ -162,7 +162,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  mergeBranch: async (sourceBranchId: string, targetBranchId: string) => {
+  mergeBranch: async (sourceBranchId: string, targetBranchId: string): Promise<boolean> => {
     try {
       return await versioningService.mergeBranch(sourceBranchId, targetBranchId);
     } catch (err) {
@@ -171,7 +171,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  deleteBranch: async (branchId: string) => {
+  deleteBranch: async (branchId: string): Promise<boolean> => {
     try {
       const success = await versioningService.deleteBranch(branchId);
       if (success) {
@@ -186,7 +186,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  getFilteredVersions: (filter: VersionFilter, sortOrder: SortOrder) => {
+  getFilteredVersions: (filter: VersionFilter, sortOrder: SortOrder): ChapterVersion[] => {
     const { versions } = get();
     const filtered = filter === 'all' ? versions : versions.filter(v => v.type === filter);
 
@@ -206,7 +206,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     });
   },
 
-  searchVersions: (query: string) => {
+  searchVersions: (query: string): ChapterVersion[] => {
     const { versions } = get();
     const lowercaseQuery = query.toLowerCase();
     return versions.filter(
@@ -218,11 +218,11 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     );
   },
 
-  getVersionHistory: async (chapterId: string) => {
+  getVersionHistory: async (chapterId: string): Promise<ChapterVersion[]> => {
     return await versioningService.getVersionHistory(chapterId);
   },
 
-  exportVersionHistory: async (chapterId: string, format: 'json' | 'csv') => {
+  exportVersionHistory: async (chapterId: string, format: 'json' | 'csv'): Promise<string> => {
     return await versioningService.exportVersionHistory(chapterId, format);
   },
 }));

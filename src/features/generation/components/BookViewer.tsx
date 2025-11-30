@@ -102,28 +102,28 @@ const BookViewer: React.FC<BookViewerProps> = ({
         selectedChapter.summary !== lastSavedSummary.current &&
         selectedChapter.summary !== summary
       ) {
-        setSummary(selectedChapter.summary || '');
-        lastSavedSummary.current = selectedChapter.summary || '';
+        setSummary(selectedChapter.summary ?? '');
+        lastSavedSummary.current = selectedChapter.summary ?? '';
       }
       if (
         selectedChapter.content !== lastSavedContent.current &&
         selectedChapter.content !== content
       ) {
-        setContent(selectedChapter.content || '');
-        lastSavedContent.current = selectedChapter.content || '';
+        setContent(selectedChapter.content ?? '');
+        lastSavedContent.current = selectedChapter.content ?? '';
       }
     }
   }, [selectedChapter?.summary, selectedChapter?.content]);
 
-  useEffect(() => {
+  useEffect((): (() => void) => {
     if (
-      !selectedChapterId ||
-      !onUpdateChapter ||
+      selectedChapterId == null ||
+      onUpdateChapter == null ||
       selectedChapterId === 'overview' ||
       selectedChapterId === 'publish'
     )
-      return;
-    const timer = setTimeout(() => {
+      return () => {};
+    const timer = setTimeout((): void => {
       const needsSaveSummary = summary !== lastSavedSummary.current;
       const needsSaveContent = content !== lastSavedContent.current;
       if (needsSaveSummary || needsSaveContent) {
@@ -136,10 +136,15 @@ const BookViewer: React.FC<BookViewerProps> = ({
     return () => clearTimeout(timer);
   }, [summary, content, selectedChapterId, onUpdateChapter]);
 
-  useEffect(() => {
+  useEffect((): (() => void) => {
     return () => {
       const chapterId = currentChapterIdRef.current;
-      if (!chapterId || !onUpdateChapter || chapterId === 'overview' || chapterId === 'publish')
+      if (
+        chapterId == null ||
+        onUpdateChapter == null ||
+        chapterId === 'overview' ||
+        chapterId === 'publish'
+      )
         return;
       const finalSummary = currentSummaryRef.current;
       const finalContent = currentContentRef.current;
@@ -150,24 +155,24 @@ const BookViewer: React.FC<BookViewerProps> = ({
     };
   }, [selectedChapterId]);
 
-  const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     setSummary(e.target.value);
     setHasUnsavedChanges(true);
   };
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     setContent(e.target.value);
     setHasUnsavedChanges(true);
   };
 
-  const getWordCount = (text: string) =>
+  const getWordCount = (text: string): number =>
     text
       .trim()
       .split(/\s+/)
       .filter(w => w.length > 0).length;
   const currentWordCount = getWordCount(content);
 
-  const getStatusIcon = (status: ChapterStatus) => {
+  const getStatusIcon = (status: ChapterStatus): React.ReactElement => {
     switch (status) {
       case ChapterStatus.COMPLETE:
         return <CheckCircle2 className='h-3 w-3 text-green-500' />;
@@ -308,7 +313,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
         </div>
 
         {/* View Routing */}
-        {selectedChapterId === 'overview' && onUpdateProject ? (
+        {selectedChapterId === 'overview' && onUpdateProject != null ? (
           <div
             className='mx-auto min-h-full w-full max-w-3xl p-6 md:p-8'
             data-testid='overview-panel'

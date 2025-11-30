@@ -20,7 +20,7 @@ const AlertCard: React.FC<{
   onMarkAsRead: () => void;
   onDismiss: () => void;
 }> = ({ alert, onMarkAsRead, onDismiss }) => {
-  const getAlertIcon = (type: string) => {
+  const getAlertIcon = (type: string): React.ComponentType<any> => {
     switch (type) {
       case 'milestone':
         return Award;
@@ -33,7 +33,7 @@ const AlertCard: React.FC<{
     }
   };
 
-  const getAlertColor = (priority: string) => {
+  const getAlertColor = (priority: string): string => {
     switch (priority) {
       case 'urgent':
         return 'border-red-500 bg-red-500/5';
@@ -59,7 +59,7 @@ const AlertCard: React.FC<{
         className={cn(
           'relative border-l-4 p-4',
           getAlertColor(alert.priority),
-          !alert.isRead && 'ring-1 ring-primary/20'
+          !alert.isRead && 'ring-1 ring-primary/20',
         )}
       >
         <div className='flex items-start justify-between'>

@@ -89,12 +89,12 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
   // Computed values
   const averageRating = useMemo(() => {
     const rated = store.feedback.filter(f => f.rating);
-    return rated.length > 0 ? rated.reduce((sum, f) => sum + (f.rating || 0), 0) / rated.length : 0;
+    return rated.length > 0 ? rated.reduce((sum, f) => sum + (f.rating ?? 0), 0) / rated.length : 0;
   }, [store.feedback]);
 
   const totalReviews = useMemo(
     () => store.feedback.filter(f => f.type === 'review').length,
-    [store.feedback]
+    [store.feedback],
   );
 
   const sentimentBreakdown = useMemo(
@@ -103,7 +103,7 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
       neutral: store.feedback.filter(f => f.sentiment === 'neutral').length,
       negative: store.feedback.filter(f => f.sentiment === 'negative').length,
     }),
-    [store.feedback]
+    [store.feedback],
   );
 
   // Helper Functions (Logic kept in hook)
@@ -111,7 +111,7 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
     async (publicationId: string) => {
       await store.loadPublicationData(publicationId);
     },
-    [store]
+    [store],
   );
 
   const exportAnalytics = useCallback(
@@ -123,7 +123,7 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
         throw new Error(err instanceof Error ? err.message : 'Failed to export analytics');
       }
     },
-    []
+    [],
   );
 
   const generateReport = useCallback(async (publicationId: string): Promise<string> => {
@@ -170,7 +170,7 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
         return true;
       });
     },
-    [store.feedback]
+    [store.feedback],
   );
 
   const searchFeedback = useCallback(
@@ -180,10 +180,10 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
         item =>
           item.content?.toLowerCase().includes(lowercaseQuery) ||
           item.author.name.toLowerCase().includes(lowercaseQuery) ||
-          item.topics.some(topic => topic.toLowerCase().includes(lowercaseQuery))
+          item.topics.some(topic => topic.toLowerCase().includes(lowercaseQuery)),
       );
     },
-    [store.feedback]
+    [store.feedback],
   );
 
   // Performance Monitoring (Effect to generate alerts based on data)

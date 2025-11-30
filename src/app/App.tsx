@@ -70,18 +70,18 @@ const App: React.FC = () => {
 
   // App Initialization
   useEffect(() => {
-    const initApp = async () => {
+    const initApp = async (): Promise<void> => {
       await db.init();
       setIsLoading(false);
     };
-    initApp();
+    void initApp();
   }, []);
 
   // Auto-save Logic
-  useEffect(() => {
+  useEffect((): (() => void) | undefined => {
     if (project.id !== 'new_session' && !isLoading) {
       const saveTimer = setTimeout(() => {
-        db.saveProject(project);
+        void db.saveProject(project);
       }, 2000); // Debounced save
       return () => clearTimeout(saveTimer);
     }
@@ -92,8 +92,8 @@ const App: React.FC = () => {
     title: string,
     style: string,
     idea: string,
-    targetWordCount: number
-  ) => {
+    targetWordCount: number,
+  ): void => {
     const newId = `proj_${Date.now()}`;
     const newProject: Project = {
       ...INITIAL_PROJECT,
@@ -110,7 +110,7 @@ const App: React.FC = () => {
     };
 
     setProject(newProject);
-    db.saveProject(newProject);
+    void db.saveProject(newProject);
 
     engine.addLog('System', 'Project Initialized.', 'info');
     engine.addLog('System', `Idea registered: ${idea.substring(0, 50)}...`, 'thought');
@@ -121,7 +121,7 @@ const App: React.FC = () => {
     setSelectedChapterId('overview');
   };
 
-  const handleLoadProject = async (id: string) => {
+  const handleLoadProject = async (id: string): Promise<void> => {
     setIsLoading(true);
     const loaded = await db.loadProject(id);
     if (loaded) {
@@ -130,7 +130,7 @@ const App: React.FC = () => {
         ...INITIAL_PROJECT,
         ...loaded,
         // Ensure deep merge for settings if they are missing in DB but present in initial
-        settings: { ...INITIAL_PROJECT.settings, ...(loaded.settings || {}) },
+        settings: { ...INITIAL_PROJECT.settings, ...(loaded.settings ?? {}) },
       });
       setCurrentView('dashboard');
       setSelectedChapterId('overview');
@@ -141,18 +141,18 @@ const App: React.FC = () => {
     setIsLoading(false);
   };
 
-  const handleUpdateChapter = (chapterId: string, updates: Partial<Chapter>) => {
+  const handleUpdateChapter = (chapterId: string, updates: Partial<Chapter>): void => {
     setProject(prev => ({
       ...prev,
       chapters: prev.chapters.map(c => (c.id === chapterId ? { ...c, ...updates } : c)),
     }));
   };
 
-  const handleUpdateProject = (updates: Partial<Project>) => {
+  const handleUpdateProject = (updates: Partial<Project>): void => {
     setProject(prev => ({ ...prev, ...updates }));
   };
 
-  const handleAddChapter = () => {
+  const handleAddChapter = (): void => {
     setProject(prev => {
       const nextIndex =
         prev.chapters.length > 0 ? Math.max(...prev.chapters.map(c => c.orderIndex)) + 1 : 1;
@@ -238,7 +238,9 @@ const App: React.FC = () => {
                         action={action}
                         isActive={engine.currentAction?.name === action.name}
                         disabled={!engine.isActionAvailable(action) || project.isGenerating}
-                        onClick={() => engine.executeAction(action)}
+                        onClick={(): void => {
+                          void engine.executeAction(action);
+                        }}
                       />
                     ))}
                   </div>
@@ -256,11 +258,15 @@ const App: React.FC = () => {
                 project={project}
                 selectedChapterId={selectedChapterId}
                 onSelectChapter={setSelectedChapterId}
-                onRefineChapter={engine.handleRefineChapter}
+                onRefineChapter={(chapterId: string): void => {
+                  void engine.handleRefineChapter(chapterId);
+                }}
                 onUpdateChapter={handleUpdateChapter}
                 onUpdateProject={handleUpdateProject}
                 onAddChapter={handleAddChapter}
-                onContinueChapter={engine.handleContinueChapter}
+                onContinueChapter={(chapterId: string): void => {
+                  void engine.handleContinueChapter(chapterId);
+                }}
               />
             </div>
           </div>
@@ -271,7 +277,9 @@ const App: React.FC = () => {
             <ProjectsView
               currentProject={project}
               onNewProject={() => setShowWizard(true)}
-              onLoadProject={handleLoadProject}
+              onLoadProject={(id: string): void => {
+                void handleLoadProject(id);
+              }}
               onNavigate={setCurrentView}
             />
           </div>

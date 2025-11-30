@@ -8,7 +8,7 @@ import { useEffect } from 'react';
  *
  * @param isLocked - Whether scroll should be locked
  */
-export function useScrollLock(isLocked: boolean) {
+export function useScrollLock(isLocked: boolean): void {
   useEffect(() => {
     if (!isLocked) return;
 
@@ -24,7 +24,7 @@ export function useScrollLock(isLocked: boolean) {
     document.body.style.paddingRight = `${scrollbarWidth}px`;
 
     // Cleanup on unmount
-    return () => {
+    return (): void => {
       document.body.style.overflow = originalOverflow;
       document.body.style.paddingRight = originalPaddingRight;
     };

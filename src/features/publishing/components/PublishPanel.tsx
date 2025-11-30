@@ -47,7 +47,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
         .trim()
         .split(/\s+/)
         .filter(w => w.length > 0).length || 0),
-    0
+    0,
   );
   const targetWords = project.targetWordCount || 50000;
   const progress = Math.min(100, Math.round((totalWords / targetWords) * 100));
@@ -74,7 +74,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
   const handleTranslate = async () => {
     if (
       !confirm(
-        `This will overwrite the content of your chapters with a ${targetLang} translation. It is recommended to duplicate your project first (Not implemented). Proceed?`
+        `This will overwrite the content of your chapters with a ${targetLang} translation. It is recommended to duplicate your project first (Not implemented). Proceed?`,
       )
     )
       return;
@@ -114,7 +114,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
 
   // Normalize language for display (handle 'en' vs 'English')
   const currentLanguage =
-    LANGUAGES.find(l => l.toLowerCase() === (project.language || '').toLowerCase()) ||
+    LANGUAGES.find(l => l.toLowerCase() === (project.language ?? '').toLowerCase()) ||
     (project.language === 'en' ? 'English' : project.language) ||
     'English';
 

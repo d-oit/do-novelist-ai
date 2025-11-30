@@ -79,7 +79,10 @@ function initLatencyHistory(provider: AIProvider): void {
  */
 function recordLatency(provider: AIProvider, latencyMs: number): void {
   initLatencyHistory(provider);
-  const history = latencyHistories.get(provider)!;
+  const history = latencyHistories.get(provider);
+  if (!history) {
+    return;
+  }
 
   history.latencies.push(latencyMs);
 
@@ -96,7 +99,7 @@ function calculatePercentile(sortedValues: number[], percentile: number): number
   if (sortedValues.length === 0) return 0;
 
   const index = Math.ceil((percentile / 100) * sortedValues.length) - 1;
-  return sortedValues[Math.max(0, index)] || 0;
+  return sortedValues[Math.max(0, index)] ?? 0;
 }
 
 /**
@@ -124,8 +127,8 @@ export function getLatencyStats(provider: AIProvider): {
     p50: calculatePercentile(sorted, 50),
     p95: calculatePercentile(sorted, 95),
     p99: calculatePercentile(sorted, 99),
-    min: sorted[0] || 0,
-    max: sorted[sorted.length - 1] || 0,
+    min: sorted[0] ?? 0,
+    max: sorted[sorted.length - 1] ?? 0,
   };
 }
 
@@ -143,7 +146,10 @@ function isLatencySpike(provider: AIProvider, currentLatency: number): boolean {
 /**
  * Create AI provider instance
  */
-function createProviderInstance(provider: AIProvider, apiKey: string) {
+function createProviderInstance(
+  provider: AIProvider,
+  apiKey: string,
+): ReturnType<typeof createOpenAI | typeof createAnthropic | typeof createGoogleGenerativeAI> {
   switch (provider) {
     case 'openai':
       return createOpenAI({ apiKey });
@@ -162,7 +168,7 @@ function createProviderInstance(provider: AIProvider, apiKey: string) {
 async function performHealthCheck(
   provider: AIProvider,
   modelName: string,
-  apiKey: string
+  apiKey: string,
 ): Promise<{
   success: boolean;
   latencyMs: number;
@@ -224,7 +230,10 @@ async function performHealthCheck(
  */
 function updateCircuitBreaker(provider: AIProvider, success: boolean): void {
   initCircuitBreaker(provider);
-  const breaker = circuitBreakers.get(provider)!;
+  const breaker = circuitBreakers.get(provider);
+  if (!breaker) {
+    return;
+  }
 
   if (success) {
     // Reset on success
@@ -243,7 +252,7 @@ function updateCircuitBreaker(provider: AIProvider, success: boolean): void {
     if (breaker.failureCount >= CIRCUIT_BREAKER_THRESHOLD && !breaker.isOpen) {
       breaker.isOpen = true;
       console.warn(
-        `[HealthService] Circuit breaker opened for ${provider} - ${breaker.failureCount} consecutive failures`
+        `[HealthService] Circuit breaker opened for ${provider} - ${breaker.failureCount} consecutive failures`,
       );
     }
   }
@@ -255,7 +264,7 @@ function updateCircuitBreaker(provider: AIProvider, success: boolean): void {
 function shouldAttemptRecovery(provider: AIProvider): boolean {
   const breaker = circuitBreakers.get(provider);
 
-  if (!breaker || !breaker.isOpen || !breaker.lastFailureTime) {
+  if (breaker === undefined || breaker.isOpen === false || breaker.lastFailureTime === null) {
     return true; // Not open or no failure time, allow check
   }
 
@@ -281,7 +290,10 @@ function recordHealthCheckResult(provider: AIProvider, success: boolean): void {
     });
   }
 
-  const tracker = errorRateTrackers.get(provider)!;
+  const tracker = errorRateTrackers.get(provider);
+  if (!tracker) {
+    return;
+  }
   tracker.recentChecks.push({ success, timestamp: Date.now() });
 
   // Keep last 20 checks
@@ -307,7 +319,7 @@ function getErrorRate(provider: AIProvider): number {
 function determineHealthStatus(
   errorRate: number,
   isLatencySpike: boolean,
-  circuitBreakerOpen: boolean
+  circuitBreakerOpen: boolean,
 ): 'operational' | 'degraded' | 'outage' {
   if (circuitBreakerOpen || errorRate >= 50) {
     return 'outage';
@@ -339,12 +351,12 @@ function calculateUptime(provider: AIProvider): number {
  */
 export async function checkProviderHealth(
   provider: AIProvider,
-  userId: string = 'system'
+  userId: string = 'system',
 ): Promise<void> {
   // Check if circuit breaker allows the check
   if (!shouldAttemptRecovery(provider)) {
     console.log(
-      `[HealthService] Skipping ${provider} - circuit breaker open, waiting for recovery window`
+      `[HealthService] Skipping ${provider} - circuit breaker open, waiting for recovery window`,
     );
     return;
   }
@@ -380,7 +392,7 @@ export async function checkProviderHealth(
   const hasLatencySpike = result.success && isLatencySpike(provider, result.latencyMs);
 
   // Determine health status
-  const status = determineHealthStatus(errorRate, hasLatencySpike, breaker?.isOpen || false);
+  const status = determineHealthStatus(errorRate, hasLatencySpike, breaker?.isOpen ?? false);
 
   // Prepare health record
   const now = new Date().toISOString();
@@ -423,7 +435,7 @@ export async function checkProviderHealth(
     errorRate: `${errorRate.toFixed(1)}%`,
     uptime: `${health.uptime.toFixed(1)}%`,
     latency: `${result.latencyMs}ms`,
-    circuitBreaker: breaker?.isOpen ? 'OPEN' : 'CLOSED',
+    circuitBreaker: breaker?.isOpen === true ? 'OPEN' : 'CLOSED',
   });
 }
 
@@ -456,7 +468,7 @@ export function startHealthMonitoring(userId: string = 'system'): void {
   }
 
   console.log(
-    `[HealthService] Starting periodic health monitoring (interval: ${HEALTH_CHECK_INTERVAL_MS / 1000}s)`
+    `[HealthService] Starting periodic health monitoring (interval: ${HEALTH_CHECK_INTERVAL_MS / 1000}s)`,
   );
 
   // Run initial check
@@ -538,7 +550,7 @@ export async function getHealthReport(): Promise<{
   const healthRecords = await getProviderHealth();
 
   const providerReports = providers.map(provider => {
-    const health = healthRecords.find((h: AIProviderHealth) => h.provider === provider) || null;
+    const health = healthRecords.find((h: AIProviderHealth) => h.provider === provider) ?? null;
 
     return {
       provider,
@@ -549,7 +561,9 @@ export async function getHealthReport(): Promise<{
   });
 
   // Determine overall status
-  const statuses = providerReports.filter(r => r.health).map(r => r.health!.status);
+  const statuses = providerReports
+    .filter((r): r is typeof r & { health: NonNullable<typeof r.health> } => r.health !== null)
+    .map(r => r.health.status);
 
   let overallStatus: 'operational' | 'degraded' | 'outage' = 'operational';
 

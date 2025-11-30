@@ -13,7 +13,7 @@ class SettingsService {
   /**
    * Load settings from localStorage
    */
-  async load(): Promise<Settings> {
+  public async load(): Promise<Settings> {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
 
@@ -43,7 +43,7 @@ class SettingsService {
   /**
    * Save settings to localStorage
    */
-  async save(settings: Settings): Promise<void> {
+  public async save(settings: Settings): Promise<void> {
     try {
       const validation = validateSettings(settings);
 
@@ -61,7 +61,7 @@ class SettingsService {
   /**
    * Reset settings to defaults
    */
-  async reset(): Promise<Settings> {
+  public async reset(): Promise<Settings> {
     try {
       localStorage.removeItem(STORAGE_KEY);
       return DEFAULT_SETTINGS;
@@ -74,7 +74,7 @@ class SettingsService {
   /**
    * Export settings as JSON
    */
-  async export(): Promise<string> {
+  public async export(): Promise<string> {
     const settings = await this.load();
     return JSON.stringify(settings, null, 2);
   }
@@ -82,7 +82,7 @@ class SettingsService {
   /**
    * Import settings from JSON
    */
-  async import(json: string): Promise<Settings> {
+  public async import(json: string): Promise<Settings> {
     try {
       const parsed = JSON.parse(json);
       const validation = validateSettings(parsed);
@@ -102,7 +102,7 @@ class SettingsService {
   /**
    * Get a specific setting value
    */
-  async get<K extends keyof Settings>(key: K): Promise<Settings[K]> {
+  public async get<K extends keyof Settings>(key: K): Promise<Settings[K]> {
     const settings = await this.load();
     return settings[key];
   }
@@ -110,7 +110,7 @@ class SettingsService {
   /**
    * Update a specific setting value
    */
-  async set<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {
+  public async set<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {
     const settings = await this.load();
     const updated = { ...settings, [key]: value };
     await this.save(updated);

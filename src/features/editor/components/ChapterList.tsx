@@ -9,7 +9,8 @@ import React from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import { Project, Chapter, ChapterStatus } from '../../../types';
+import { Project, Chapter } from '../../../types';
+import { ChapterStatus } from '../../../shared/types';
 
 interface ChapterListProps {
   project: Project;
@@ -26,7 +27,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
   onAddChapter,
   className,
 }) => {
-  const getStatusColor = (status: Chapter['status']) => {
+  const getStatusColor = (status: Chapter['status']): string => {
     switch (status) {
       case ChapterStatus.COMPLETE:
         return 'bg-green-500/20 text-green-400 ring-green-500/30';
@@ -39,7 +40,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
     }
   };
 
-  const getStatusText = (status: Chapter['status']) => {
+  const getStatusText = (status: Chapter['status']): string => {
     switch (status) {
       case ChapterStatus.PENDING:
         return 'Pending';
@@ -75,7 +76,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
             'border border-border/50 hover:border-primary/50',
             selectedChapterId === 'overview'
               ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
-              : 'bg-card/50 hover:bg-card'
+              : 'bg-card/50 hover:bg-card',
           )}
         >
           <div className='flex items-center gap-3'>
@@ -105,7 +106,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
                 'border border-border/50 hover:border-primary/50',
                 selectedChapterId === chapter.id
                   ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
-                  : 'bg-card/50 hover:bg-card'
+                  : 'bg-card/50 hover:bg-card',
               )}
             >
               <div className='flex items-center gap-3'>
@@ -115,25 +116,25 @@ const ChapterList: React.FC<ChapterListProps> = ({
                 <div className='min-w-0 flex-1'>
                   <div className='flex items-center gap-2'>
                     <span className='text-sm font-medium text-foreground'>
-                      {index + 1}. {chapter.title || 'Untitled Chapter'}
+                      {index + 1}. {chapter.title ?? 'Untitled Chapter'}
                     </span>
                     <span
                       className={cn(
                         'rounded px-1.5 py-0.5 text-xs font-medium ring-1',
-                        getStatusColor(chapter.status)
+                        getStatusColor(chapter.status),
                       )}
                     >
                       {getStatusText(chapter.status)}
                     </span>
                   </div>
                   <p className='mt-0.5 truncate text-xs text-muted-foreground'>
-                    {chapter.summary || chapter.content
-                      ? chapter.summary || chapter.content.substring(0, 60) + '...'
+                    {(chapter.summary ?? chapter.content)
+                      ? (chapter.summary ?? chapter.content.substring(0, 60) + '...')
                       : 'No content yet'}
                   </p>
                   <div className='mt-1 flex items-center gap-2'>
                     <span className='text-xs text-muted-foreground'>
-                      {chapter.wordCount || 0} words
+                      {chapter.wordCount ?? 0} words
                     </span>
                   </div>
                 </div>

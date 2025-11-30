@@ -8,7 +8,7 @@ import { BarChart3, TrendingUp, Target, Clock } from 'lucide-react';
 import React from 'react';
 
 import { cn } from '../../../lib/utils';
-import { Project, ChapterStatus } from '../../../types';
+import { Project, ChapterStatus } from '../../../shared/types';
 
 interface AnalyticsSidebarProps {
   project: Project;
@@ -33,7 +33,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
   // Calculate quick stats
   const totalWords = project.chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0);
   const completedChapters = project.chapters.filter(
-    ch => ch.status === ChapterStatus.COMPLETE
+    ch => ch.status === ChapterStatus.COMPLETE,
   ).length;
 
   const progressPercentage =
@@ -83,7 +83,7 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
                   'border border-border/50 hover:border-primary/50',
                   isActive
                     ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
-                    : 'bg-card/50 hover:bg-card'
+                    : 'bg-card/50 hover:bg-card',
                 )}
               >
                 <div className='flex items-center gap-3'>

@@ -42,12 +42,12 @@ class WritingAssistantService {
   /**
    * Analyze chapter content and provide comprehensive feedback
    */
-  async analyzeContent(
+  public async analyzeContent(
     content: string,
     chapterId: string,
     config: WritingAssistantConfig,
     characterContext?: any[],
-    plotContext?: string
+    plotContext?: string,
   ): Promise<ContentAnalysis> {
     try {
       // Run parallel analyses
@@ -117,7 +117,7 @@ class WritingAssistantService {
    */
   private async generateWritingSuggestions(
     content: string,
-    config: WritingAssistantConfig
+    config: WritingAssistantConfig,
   ): Promise<WritingSuggestion[]> {
     if (!import.meta.env.VITE_GEMINI_API_KEY) {
       return this.getMockSuggestions(content);
@@ -171,7 +171,7 @@ class WritingAssistantService {
    */
   private parseAISuggestions(
     aiResponse: string,
-    config: WritingAssistantConfig
+    config: WritingAssistantConfig,
   ): WritingSuggestion[] {
     try {
       // Try to extract JSON from response
@@ -398,7 +398,7 @@ class WritingAssistantService {
    */
   private async detectPlotHoles(
     content: string,
-    _plotContext?: string
+    _plotContext?: string,
   ): Promise<PlotHoleDetection[]> {
     // This would use AI to analyze plot consistency
     // For now, return basic detection
@@ -407,7 +407,7 @@ class WritingAssistantService {
     // Check for timeline inconsistencies
     const timeReferences =
       content.match(
-        /\b(yesterday|today|tomorrow|last week|next month|morning|evening|night)\b/gi
+        /\b(yesterday|today|tomorrow|last week|next month|morning|evening|night)\b/gi,
       ) || [];
     if (timeReferences.length > 3) {
       plotHoles.push({
@@ -430,7 +430,7 @@ class WritingAssistantService {
    */
   private async analyzeCharacterConsistency(
     _content: string,
-    _characterContext?: any[]
+    _characterContext?: any[],
   ): Promise<CharacterConsistencyIssue[]> {
     // This would cross-reference character behavior, speech patterns, etc.
     // Basic implementation for now
@@ -627,7 +627,7 @@ class WritingAssistantService {
   private analyzeParagraphs(content: string): ParagraphAnalysis {
     const paragraphs = content.split('\n\n').filter(p => p.trim().length > 0);
     const sentences = paragraphs.map(
-      p => p.split(/[.!?]+/).filter(s => s.trim().length > 0).length
+      p => p.split(/[.!?]+/).filter(s => s.trim().length > 0).length,
     );
 
     const avgLength = sentences.reduce((acc, len) => acc + len, 0) / sentences.length;
@@ -678,10 +678,10 @@ class WritingAssistantService {
       ];
 
       const hasCoordinating = coordinatingConjunctions.some(conj =>
-        sentence.toLowerCase().includes(` ${conj} `)
+        sentence.toLowerCase().includes(` ${conj} `),
       );
       const hasSubordinating = subordinatingConjunctions.some(conj =>
-        sentence.toLowerCase().includes(` ${conj} `)
+        sentence.toLowerCase().includes(` ${conj} `),
       );
 
       if (hasCoordinating && hasSubordinating) compoundComplex++;

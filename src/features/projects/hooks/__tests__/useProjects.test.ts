@@ -86,7 +86,7 @@ describe('useProjects', () => {
     mockProjectService.init.mockResolvedValue();
     mockProjectService.getAll.mockResolvedValue([]);
     mockProjectService.create.mockImplementation(async data =>
-      createMockProject({ title: data.title, idea: data.idea })
+      createMockProject({ title: data.title, idea: data.idea }),
     );
     mockProjectService.update.mockResolvedValue();
     mockProjectService.delete.mockResolvedValue();
@@ -159,10 +159,7 @@ describe('useProjects', () => {
 
   // Load All Tests
   it('loads all projects', async () => {
-    const mockProjects = [
-      createMockProject({ title: 'Project 1' }),
-      createMockProject({ title: 'Project 2' }),
-    ];
+    const mockProjects = [createMockProject({ title: 'Project 1' }), createMockProject({ title: 'Project 2' })];
     mockProjectService.getAll.mockResolvedValue(mockProjects);
 
     const { result } = renderHook(() => useProjects());
@@ -439,10 +436,7 @@ describe('useProjects', () => {
 
   // Selection Tests
   it('selects a project by ID', async () => {
-    const projects = [
-      createMockProject({ title: 'Project 1' }),
-      createMockProject({ title: 'Project 2' }),
-    ];
+    const projects = [createMockProject({ title: 'Project 1' }), createMockProject({ title: 'Project 2' })];
     mockProjectService.getAll.mockResolvedValue(projects);
 
     const { result } = renderHook(() => useProjects());
@@ -451,11 +445,13 @@ describe('useProjects', () => {
       await result.current.loadAll();
     });
 
+    expect(projects[0]).toBeDefined();
+
     act(() => {
-      result.current.select(projects[0]!.id);
+      result.current.select(projects[0].id);
     });
 
-    expect(result.current.selectedProject?.id).toBe(projects[0]!.id);
+    expect(result.current.selectedProject?.id).toBe(projects[0].id);
   });
 
   it('sets null when selecting non-existent project', async () => {

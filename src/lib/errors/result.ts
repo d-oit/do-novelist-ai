@@ -231,7 +231,7 @@ export const withTimeout = <T>(
 ): Promise<Result<T, AppError>> => {
   return new Promise(resolve => {
     const timeout = setTimeout(() => {
-      resolve(err(toAppError(new Error('Operation timed out'), 'withTimeout') as AppError));
+      resolve(err(toAppError(new Error('Operation timed out'), 'withTimeout')));
     }, timeoutMs);
 
     promise

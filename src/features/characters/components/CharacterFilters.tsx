@@ -22,7 +22,7 @@ const ROLES: CharacterRole[] = [
 ];
 
 export const CharacterFilters: React.FC<CharacterFiltersProps> = ({ filters, onFilterChange }) => {
-  const toggleRole = (role: CharacterRole) => {
+  const toggleRole = (role: CharacterRole): void => {
     const currentRoles = filters.roles;
     const newRoles = currentRoles.includes(role)
       ? currentRoles.filter(r => r !== role)
@@ -63,7 +63,7 @@ export const CharacterFilters: React.FC<CharacterFiltersProps> = ({ filters, onF
                   'rounded-full border px-3 py-1 text-xs transition-colors',
                   filters.roles.includes(role)
                     ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border bg-background hover:bg-accent'
+                    : 'border-border bg-background hover:bg-accent',
                 )}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -86,7 +86,7 @@ export const CharacterFilters: React.FC<CharacterFiltersProps> = ({ filters, onF
                   'rounded-md border px-3 py-1 text-xs capitalize transition-colors',
                   filters.validationStatus === status
                     ? 'border-secondary bg-secondary text-secondary-foreground'
-                    : 'border-border bg-background hover:bg-accent'
+                    : 'border-border bg-background hover:bg-accent',
                 )}
               >
                 {status}

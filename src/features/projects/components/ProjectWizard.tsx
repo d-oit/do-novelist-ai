@@ -59,7 +59,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
 
   if (!isOpen) return null;
 
-  const handleBrainstorm = async (field: 'title' | 'style' | 'idea') => {
+  const handleBrainstorm = async (field: 'title' | 'style' | 'idea'): Promise<void> => {
     // Construct a rich context including tone and audience if available
     let promptContext = idea;
     if (tone && tone !== 'Neutral') promptContext += `\nDesired Tone: ${tone}`;
@@ -87,7 +87,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
     }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles: File[] = Array.from(e.target.files);
       setFiles(prev => [...prev, ...newFiles]);
@@ -104,7 +104,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
             setIdea(prev => prev + `\n\n--- Content from ${file.name} ---\n${text}`);
           } else {
             setIdea(
-              prev => prev + `\n\n[Attached File: ${file.name} - Binary content omitted in demo]`
+              prev => prev + `\n\n[Attached File: ${file.name} - Binary content omitted in demo]`,
             );
           }
         } catch (err) {
@@ -115,7 +115,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (): void => {
     if (!title || !style || !idea) return;
 
     // Combine basic style with advanced options if present
@@ -191,7 +191,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
           <button
             onClick={onCancel}
             className={iconButtonTarget(
-              'rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
+              'rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
             )}
             aria-label='Close project wizard'
             data-testid='wizard-cancel-btn'
@@ -212,7 +212,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                 className='flex items-center gap-1.5 rounded border border-border bg-secondary px-2 py-1 text-[10px] text-primary transition-all hover:bg-secondary/80 disabled:opacity-50'
                 data-testid='wizard-brainstorm-idea'
               >
-                {brainstorming.idea ? (
+                {brainstorming.idea != null ? (
                   <Loader2 className='h-3 w-3 animate-spin' />
                 ) : (
                   <Sparkles className='h-3 w-3' />
@@ -315,7 +315,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                   title='Generate Title from Idea'
                   data-testid='wizard-brainstorm-title'
                 >
-                  {brainstorming.title ? (
+                  {brainstorming.title != null ? (
                     <Loader2 className='h-4 w-4 animate-spin' />
                   ) : (
                     <Wand2 className='h-4 w-4' />
@@ -343,7 +343,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                   title='Suggest Style from Idea'
                   data-testid='wizard-brainstorm-style'
                 >
-                  {brainstorming.style ? (
+                  {brainstorming.style != null ? (
                     <Loader2 className='h-4 w-4 animate-spin' />
                   ) : (
                     <Wand2 className='h-4 w-4' />

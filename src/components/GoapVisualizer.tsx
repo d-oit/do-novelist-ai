@@ -2,6 +2,7 @@ import { Check, Circle, Loader2, Zap } from 'lucide-react';
 import React from 'react';
 
 import { Project, AgentAction } from '../types';
+import { PublishStatus } from '../shared/types';
 
 interface GoapVisualizerProps {
   project: Project;
@@ -17,7 +18,7 @@ const GoapVisualizer: React.FC<GoapVisualizerProps> = ({ project, currentAction 
   if (worldState.hasOutline && worldState.chaptersCompleted > 0) activeStage = 2;
   if (worldState.chaptersCompleted === worldState.chaptersCount && worldState.chaptersCount > 0)
     activeStage = 3;
-  if (project.status === 'Published') activeStage = 4;
+  if (project.status === PublishStatus.PUBLISHED) activeStage = 4;
 
   const stages = [
     { id: 0, label: 'Concept', icon: Zap },
