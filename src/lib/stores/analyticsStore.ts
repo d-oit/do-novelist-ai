@@ -260,7 +260,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
           }
         },
 
-        loadProductivityChart: async (days = 30): Promise<void> => {
+        async loadProductivityChart(days = 30): Promise<void> {
           // Placeholder as per original hook
           const data: ChartDataPoint[] = [];
           const end = new Date();
