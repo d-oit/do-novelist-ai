@@ -37,10 +37,10 @@ export interface LogService {
  * Console log service (default)
  */
 export class ConsoleLogService implements LogService {
-  name = 'console';
+  public name = 'console';
   private minLevel: LogLevel;
 
-  constructor(minLevel: LogLevel = 'info') {
+  public constructor(minLevel: LogLevel = 'info') {
     this.minLevel = minLevel;
   }
 
@@ -61,7 +61,7 @@ export class ConsoleLogService implements LogService {
     return `[${date}] [${entry.level.toUpperCase()}] ${entry.message}${contextStr}${errorStr}`;
   }
 
-  log(entry: LogEntry): void {
+  public log(entry: LogEntry): void {
     if (!this.shouldLog(entry.level)) return;
 
     const formatted = this.formatEntry(entry);
@@ -81,7 +81,7 @@ export class ConsoleLogService implements LogService {
     }
   }
 
-  debug(message: string, context?: Record<string, unknown>): void {
+  public debug(message: string, context?: Record<string, unknown>): void {
     if (!this.shouldLog('debug')) return;
     this.log({
       timestamp: Date.now(),
@@ -92,7 +92,7 @@ export class ConsoleLogService implements LogService {
     });
   }
 
-  info(message: string, context?: Record<string, unknown>): void {
+  public info(message: string, context?: Record<string, unknown>): void {
     if (!this.shouldLog('info')) return;
     this.log({
       timestamp: Date.now(),
@@ -103,7 +103,7 @@ export class ConsoleLogService implements LogService {
     });
   }
 
-  warn(message: string, context?: Record<string, unknown>): void {
+  public warn(message: string, context?: Record<string, unknown>): void {
     if (!this.shouldLog('warn')) return;
     this.log({
       timestamp: Date.now(),
@@ -114,7 +114,7 @@ export class ConsoleLogService implements LogService {
     });
   }
 
-  error(message: string | Error, context?: Record<string, unknown>): void {
+  public error(message: string | Error, context?: Record<string, unknown>): void {
     if (!this.shouldLog('error')) return;
     this.log({
       timestamp: Date.now(),
@@ -132,17 +132,17 @@ export class ConsoleLogService implements LogService {
  * Sentry log service (for production error tracking)
  */
 export class SentryLogService implements LogService {
-  name = 'sentry';
+  public name = 'sentry';
 
-  constructor() {}
+  public constructor() {}
 
-  async ensureSentryLoaded(): Promise<void> {
+  public async ensureSentryLoaded(): Promise<void> {
     if (typeof window === 'undefined' || !(window as any).Sentry) {
       return;
     }
   }
 
-  log(entry: LogEntry): void {
+  public log(entry: LogEntry): void {
     this.ensureSentryLoaded().then(() => {
       const Sentry = (window as any).Sentry;
       if (!Sentry) return;
@@ -163,7 +163,7 @@ export class SentryLogService implements LogService {
     });
   }
 
-  debug(message: string, context?: Record<string, unknown>): void {
+  public debug(message: string, context?: Record<string, unknown>): void {
     this.log({
       timestamp: Date.now(),
       level: 'debug',
@@ -173,7 +173,7 @@ export class SentryLogService implements LogService {
     });
   }
 
-  info(message: string, context?: Record<string, unknown>): void {
+  public info(message: string, context?: Record<string, unknown>): void {
     this.log({
       timestamp: Date.now(),
       level: 'info',
@@ -183,7 +183,7 @@ export class SentryLogService implements LogService {
     });
   }
 
-  warn(message: string, context?: Record<string, unknown>): void {
+  public warn(message: string, context?: Record<string, unknown>): void {
     this.log({
       timestamp: Date.now(),
       level: 'warn',
@@ -193,7 +193,7 @@ export class SentryLogService implements LogService {
     });
   }
 
-  error(message: string | Error, context?: Record<string, unknown>): void {
+  public error(message: string | Error, context?: Record<string, unknown>): void {
     this.log({
       timestamp: Date.now(),
       level: 'error',
@@ -212,7 +212,7 @@ export class Logger {
   private services: LogService[];
   private minLevel: LogLevel;
 
-  constructor(services: LogService[] = [new ConsoleLogService()], minLevel: LogLevel = 'info') {
+  public constructor(services: LogService[] = [new ConsoleLogService()], minLevel: LogLevel = 'info') {
     this.services = services;
     this.minLevel = minLevel;
   }
@@ -247,19 +247,19 @@ export class Logger {
     this.services.forEach(service => service.log(entry));
   }
 
-  debug(message: string, context?: Record<string, unknown>): void {
+  public debug(message: string, context?: Record<string, unknown>): void {
     this.log('debug', message, context);
   }
 
-  info(message: string, context?: Record<string, unknown>): void {
+  public info(message: string, context?: Record<string, unknown>): void {
     this.log('info', message, context);
   }
 
-  warn(message: string, context?: Record<string, unknown>): void {
+  public warn(message: string, context?: Record<string, unknown>): void {
     this.log('warn', message, context);
   }
 
-  error(message: string | Error, context?: Record<string, unknown>): void {
+  public error(message: string | Error, context?: Record<string, unknown>): void {
     this.log(
       'error',
       message instanceof Error ? message.message : message,
@@ -271,7 +271,7 @@ export class Logger {
   /**
    * Log an error with full context
    */
-  logError(error: unknown, context?: Record<string, unknown>): void {
+  public logError(error: unknown, context?: Record<string, unknown>): void {
     const appError = error instanceof Error ? error : new Error(String(error));
 
     this.log(
@@ -293,7 +293,7 @@ export class Logger {
   /**
    * Create a child logger with additional context
    */
-  child(context: Record<string, unknown>): Logger {
+  public child(context: Record<string, unknown>): Logger {
     return new Logger(
       this.services.map(service => ({
         ...service,
