@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 
 import { translateContent } from '../../../lib/ai';
 import { generateEpub } from '../../../lib/epub';
-import { Project, PublishStatus, Chapter, ProjectSettings, Language } from '../../../types';
+import { Project, PublishStatus, Chapter, ProjectSettings } from '../../../types';
 import { usePublishingAnalytics } from '../../publishing';
 import PublishingDashboard from '../../publishing/components/PublishingDashboard';
 import PublishingSetup from '../../publishing/components/PublishingSetup';
