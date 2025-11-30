@@ -19,11 +19,7 @@ interface CardHeaderProps {
 }
 
 const CardHeader: React.FC<CardHeaderProps> = ({ className, children }) => {
-  return (
-    <div className={`flex flex-col space-y-1.5 p-6 ${className ?? ''}`}>
-      {children}
-    </div>
-  );
+  return <div className={`flex flex-col space-y-1.5 p-6 ${className ?? ''}`}>{children}</div>;
 };
 
 interface CardTitleProps {
@@ -45,11 +41,7 @@ interface CardContentProps {
 }
 
 const CardContent: React.FC<CardContentProps> = ({ className, children }) => {
-  return (
-    <div className={`p-6 pt-0 ${className ?? ''}`}>
-      {children}
-    </div>
-  );
+  return <div className={`p-6 pt-0 ${className ?? ''}`}>{children}</div>;
 };
 
 export default Card;

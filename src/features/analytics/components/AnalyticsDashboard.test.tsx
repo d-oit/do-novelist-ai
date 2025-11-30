@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import AnalyticsDashboard from './AnalyticsDashboard';
-import { useAnalytics } from '../hooks/useAnalytics';
-import { Project, ChapterStatus, PublishStatus } from '../../../types';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+import { Project, ChapterStatus, PublishStatus } from '../../../types';
+import { useAnalytics } from '../hooks/useAnalytics';
+
+import AnalyticsDashboard from './AnalyticsDashboard';
 
 // Mock the analytics hook
 vi.mock('../hooks/useAnalytics');
@@ -115,7 +116,6 @@ const mockProject: Project = {
   changeLog: [],
 };
 
-
 const mockAnalyticsData = {
   projectAnalytics: {
     projectId: 'test-project',
@@ -217,16 +217,11 @@ describe('AnalyticsDashboard', () => {
   });
 
   it('renders analytics dashboard with project data', () => {
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     expect(screen.getByText('Analytics Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Insights for "Test Novel"')).toBeInTheDocument();
-    
+
     // Check for key statistics
     expect(screen.getByText('1,500')).toBeInTheDocument(); // Total words
     expect(screen.getByText(/1\/2/)).toBeInTheDocument(); // Chapters progress (includes percentage suffix)
@@ -242,23 +237,13 @@ describe('AnalyticsDashboard', () => {
       insights: null,
     } as any);
 
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     expect(screen.getByText('Loading analytics dashboard...')).toBeInTheDocument();
   });
 
   it('loads analytics data on mount', () => {
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     expect(mockAnalyticsHook.loadProjectAnalytics).toHaveBeenCalledWith(mockProject);
     expect(mockAnalyticsHook.loadWeeklyStats).toHaveBeenCalled();
@@ -268,12 +253,7 @@ describe('AnalyticsDashboard', () => {
   });
 
   it('can toggle between detailed and compact view', () => {
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     const toggleButton = screen.getByText('Compact');
     fireEvent.click(toggleButton);
@@ -283,16 +263,11 @@ describe('AnalyticsDashboard', () => {
 
     // WritingStatsCard is always shown, but other sections should be hidden in compact view
     // "This Week's Performance" is part of WritingStatsCard and always visible
-    expect(screen.getByText('This Week\'s Performance')).toBeInTheDocument();
+    expect(screen.getByText("This Week's Performance")).toBeInTheDocument();
   });
 
   it('can refresh analytics data', () => {
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     const refreshButton = screen.getByText('Refresh');
     fireEvent.click(refreshButton);
@@ -324,12 +299,7 @@ describe('AnalyticsDashboard', () => {
       return originalCreateElement(tagName);
     });
 
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     const exportButton = screen.getByText('Export');
     fireEvent.click(exportButton);
@@ -342,12 +312,7 @@ describe('AnalyticsDashboard', () => {
   });
 
   it('closes when close button is clicked', () => {
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     const closeButton = screen.getByText('Close');
     fireEvent.click(closeButton);
@@ -356,12 +321,7 @@ describe('AnalyticsDashboard', () => {
   });
 
   it('displays writing insights and recommendations', () => {
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     expect(screen.getByText('AI Insights & Recommendations')).toBeInTheDocument();
     expect(screen.getByText('Peak Performance')).toBeInTheDocument();
@@ -371,12 +331,7 @@ describe('AnalyticsDashboard', () => {
   });
 
   it('shows progress rings for goals', () => {
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     // Progress & Goals is part of GoalsProgress component which is in showAllStats section
     // The WritingStatsCard "Chapters" metric should always be visible (may appear multiple times)
@@ -394,12 +349,7 @@ describe('AnalyticsDashboard', () => {
       productivityChart: [],
     } as any);
 
-    render(
-      <AnalyticsDashboard
-        project={mockProject}
-        onClose={mockOnClose}
-      />
-    );
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     // Should still render the dashboard structure
     expect(screen.getByText('Analytics Dashboard')).toBeInTheDocument();

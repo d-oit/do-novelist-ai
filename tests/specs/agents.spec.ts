@@ -1,9 +1,8 @@
-
 import { test, expect } from '@playwright/test';
-import { setupGeminiMock } from '../utils/mock-gemini';
+
+import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
 test.describe('Feature: Creative Agents', () => {
-
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
@@ -50,7 +49,10 @@ test.describe('Feature: Creative Agents', () => {
     // Wait for sidebar to be ready
     await page.waitForTimeout(500);
     await page.getByTestId('chapter-item-overview').click();
-    await expect(page.getByTestId('overview-panel')).toContainText('**Alice**: A brilliant physicist', { timeout: 10000 });
+    await expect(page.getByTestId('overview-panel')).toContainText(
+      '**Alice**: A brilliant physicist',
+      { timeout: 10000 }
+    );
   });
 
   test('Builder Agent: Can expand world building', async ({ page }) => {
@@ -91,7 +93,9 @@ test.describe('Feature: Creative Agents', () => {
 
     const contentInput = page.getByTestId('chapter-content-input');
     await contentInput.click();
-    await contentInput.fill('Hello there, said Bob. Hi, said Alice. This is a longer piece of content to ensure it meets the minimum length requirement for dialogue polishing in the test suite.');
+    await contentInput.fill(
+      'Hello there, said Bob. Hi, said Alice. This is a longer piece of content to ensure it meets the minimum length requirement for dialogue polishing in the test suite.'
+    );
 
     // Wait for auto-save
     await page.waitForTimeout(2000);
@@ -126,8 +130,12 @@ test.describe('Feature: Creative Agents', () => {
     await actionCard.click();
 
     // 3. Verify Logs
-    await expect(consoleArea).toContainText('Delegating 2 chapters to Writer Agents', { timeout: 30000 });
-    await expect(consoleArea).toContainText('Batch complete. 2/2 chapters written.', { timeout: 30000 });
+    await expect(consoleArea).toContainText('Delegating 2 chapters to Writer Agents', {
+      timeout: 30000,
+    });
+    await expect(consoleArea).toContainText('Batch complete. 2/2 chapters written.', {
+      timeout: 30000,
+    });
 
     // 4. Verify UI Updates
     // Both chapters should be marked as complete (Green checkmark icon logic implies class change or status change)
@@ -136,5 +144,4 @@ test.describe('Feature: Creative Agents', () => {
     await page.getByTestId('chapter-item-order-2').click();
     await expect(page.getByTestId('chapter-content-input')).toContainText('# Generated Content');
   });
-
 });

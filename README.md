@@ -1,38 +1,48 @@
 # Novelist.ai - GOAP eBook Engine
 
-**An AI-powered eBook creator utilizing Goal-Oriented Action Planning (GOAP) architecture**
+**An AI-powered eBook creator utilizing Goal-Oriented Action Planning (GOAP)
+architecture**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.2-61dafb?logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.2-646cff?logo=vite)](https://vitejs.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-[Features](#-features) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Usage](#-usage) • [Development](#-development) • [Testing](#-testing)
-
-
+[Features](#-features) • [Architecture](#-architecture) •
+[Getting Started](#-getting-started) • [Usage](#-usage) •
+[Development](#-development) • [Testing](#-testing)
 
 ---
 
 ## 📖 Overview
 
-Novelist.ai is a sophisticated eBook generation platform that leverages **Goal-Oriented Action Planning (GOAP)** to orchestrate AI agents in creating complete novels. Unlike traditional linear AI writing tools, this engine uses intelligent planning to break down the complex task of novel writing into discrete, achievable goals with preconditions and effects.
+Novelist.ai is a sophisticated eBook generation platform that leverages
+**Goal-Oriented Action Planning (GOAP)** to orchestrate AI agents in creating
+complete novels. Unlike traditional linear AI writing tools, this engine uses
+intelligent planning to break down the complex task of novel writing into
+discrete, achievable goals with preconditions and effects.
 
 ### What is GOAP?
 
-GOAP (Goal-Oriented Action Planning) is an AI architecture pattern commonly used in game development that allows agents to autonomously plan sequences of actions to achieve goals. In Novelist.ai:
+GOAP (Goal-Oriented Action Planning) is an AI architecture pattern commonly used
+in game development that allows agents to autonomously plan sequences of actions
+to achieve goals. In Novelist.ai:
 
 - **Agents** (Architect, Writer, Editor, Doctor, etc.) have specialized roles
 - **Actions** have preconditions (what must be true) and effects (what changes)
-- **Planner** dynamically selects the optimal action sequence based on current world state
+- **Planner** dynamically selects the optimal action sequence based on current
+  world state
 - **World State** tracks progress (hasOutline, chaptersCompleted, etc.)
 
-This creates an adaptive, intelligent writing system that can handle complex multi-chapter projects with consistency and coherence.
+This creates an adaptive, intelligent writing system that can handle complex
+multi-chapter projects with consistency and coherence.
 
 ---
 
 ## ✨ Features
 
 ### 🤖 **Multi-Agent GOAP System**
+
 - **Architect Agent**: Generates story outlines using hero's journey structure
 - **Writer Agents**: Parallel chapter drafting with context awareness
 - **Editor Agent**: Consistency checking and plot hole detection
@@ -41,6 +51,7 @@ This creates an adaptive, intelligent writing system that can handle complex mul
 - **Builder Agent**: World-building, lore, and setting expansion
 
 ### 📚 **Intelligent Content Generation**
+
 - Hierarchical story generation (outline → chapters → content)
 - Context-aware chapter writing with previous chapter continuity
 - Dynamic content refinement with adjustable temperature and model selection
@@ -48,6 +59,7 @@ This creates an adaptive, intelligent writing system that can handle complex mul
 - Plot enhancement and dialogue polishing
 
 ### 🎨 **Rich User Interface**
+
 - Real-time GOAP visualizer showing planning stages
 - Agent console with color-coded logging
 - Interactive chapter editor with markdown support
@@ -55,6 +67,7 @@ This creates an adaptive, intelligent writing system that can handle complex mul
 - Dark mode support with theme persistence
 
 ### 📦 **Export & Publishing**
+
 - EPUB 3.0 generation with proper metadata
 - Cover image generation using Google Imagen
 - Chapter illustrations support
@@ -62,6 +75,7 @@ This creates an adaptive, intelligent writing system that can handle complex mul
 - Multi-language support
 
 ### 💾 **Data Management**
+
 - Turso (libSQL) database integration with localStorage fallback
 - Auto-save functionality (2-second debounce)
 - Project versioning and management
@@ -143,7 +157,7 @@ graph TD
     G --> H{Goal Achieved?}
     H -->|No| C
     H -->|Yes| I[Project Complete]
-    
+
     F --> J[Agent Actions]
     J --> K[Architect: Generate Outline]
     J --> L[Writer: Draft Chapters]
@@ -188,30 +202,34 @@ interface AgentAction {
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/novelist-goap-ebook-engine.git
    cd novelist-goap-ebook-engine
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Configure environment variables**
-   
+
    Create a `.env.local` file in the root directory:
+
    ```env
    VITE_GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
 4. **Start the development server**
+
    ```bash
    npm run dev
    ```
 
 5. **Open your browser**
-   
+
    Navigate to `http://localhost:5173`
 
 ---
@@ -248,27 +266,30 @@ interface AgentAction {
 ### Advanced Features
 
 #### Manual Chapter Management
+
 ```typescript
 // Add chapters manually
-onAddChapter() // Creates a new pending chapter
+onAddChapter(); // Creates a new pending chapter
 
 // Update chapter content
-onUpdateChapter(chapterId, { 
-  content: "New content...",
-  status: ChapterStatus.COMPLETE 
-})
+onUpdateChapter(chapterId, {
+  content: 'New content...',
+  status: ChapterStatus.COMPLETE,
+});
 ```
 
 #### Custom Refinement
+
 ```typescript
 // Refine with specific parameters
 handleRefineChapter(chapterId, {
-  model: "gemini-2.0-flash-exp",
-  temperature: 0.7
-})
+  model: 'gemini-2.0-flash-exp',
+  temperature: 0.7,
+});
 ```
 
 #### Agent Modes
+
 - **SINGLE**: One agent executes the action sequentially
 - **PARALLEL**: Multiple agents work simultaneously
 - **HYBRID**: Combination of sequential and parallel execution
@@ -302,7 +323,7 @@ npx tsc --noEmit     # Check TypeScript types without emitting files
 - **Styling**: Tailwind utility classes (e.g., `className="flex gap-2"`)
 - **Icons**: Use `lucide-react` for all icons
 - **Formatting**: 2 spaces indentation, semicolons required
-- **Naming**: 
+- **Naming**:
   - PascalCase for components (`AgentConsole`)
   - camelCase for variables/functions (`handleCreateProject`)
   - SCREAMING_SNAKE_CASE for constants (`INITIAL_ACTIONS`)
@@ -336,7 +357,8 @@ if (action.name === 'my_new_action') {
 
 ### Database Schema
 
-The app uses Turso (libSQL) with localStorage fallback. See `src/lib/db.ts` for implementation.
+The app uses Turso (libSQL) with localStorage fallback. See `src/lib/db.ts` for
+implementation.
 
 ```typescript
 // Projects table
@@ -358,6 +380,7 @@ The app uses Turso (libSQL) with localStorage fallback. See `src/lib/db.ts` for 
 ### E2E Testing with Playwright
 
 Tests are located in `tests/specs/` and cover:
+
 - Project creation workflow
 - GOAP planner execution
 - Chapter editing and refinement
@@ -381,6 +404,7 @@ npx playwright test --debug
 ### Test Utilities
 
 Helper functions are available in `tests/utils/`:
+
 - Page object models
 - Common test fixtures
 - Mock data generators
@@ -411,4 +435,5 @@ Contributions are welcome! Please follow these guidelines:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.

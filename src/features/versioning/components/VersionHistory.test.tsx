@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import VersionHistory from './VersionHistory';
-import { useVersioning } from '../hooks/useVersioning';
-import { Chapter, ChapterStatus } from '../../../types';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { createChapter } from '../../../shared/utils';
+import { Chapter, ChapterStatus } from '../../../types';
+import { useVersioning } from '../hooks/useVersioning';
+
+import VersionHistory from './VersionHistory';
 
 // Mock UI components to avoid import issues
 vi.mock('../../../components/ui/Button', () => ({
@@ -40,7 +42,7 @@ const mockChapter: Chapter = createChapter({
   summary: 'A test chapter for version history',
   content: 'This is the content of the test chapter.',
   status: ChapterStatus.DRAFTING,
-  orderIndex: 1
+  orderIndex: 1,
 });
 
 const mockVersions = [
@@ -236,10 +238,7 @@ describe('VersionHistory', () => {
     fireEvent.click(exportButton);
 
     await waitFor(() => {
-      expect(mockVersioningHook.exportVersionHistory).toHaveBeenCalledWith(
-        mockChapter.id,
-        'json'
-      );
+      expect(mockVersioningHook.exportVersionHistory).toHaveBeenCalledWith(mockChapter.id, 'json');
     });
 
     // Restore original functions

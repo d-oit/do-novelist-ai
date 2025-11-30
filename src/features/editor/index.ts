@@ -15,7 +15,7 @@ export type {
   GeneratedImage,
   EditorAction,
   DraftMetadata,
-  SavedDraft
+  SavedDraft,
 } from './types';
 
 // Services

@@ -1,15 +1,7 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  BookOpen,
-  Target,
-  Clock,
-  Zap,
-  PieChart,
-  Flame,
-  Brain,
-  Activity
-} from 'lucide-react';
+import { BookOpen, Target, Clock, Zap, PieChart, Flame, Brain, Activity } from 'lucide-react';
+import React from 'react';
+
 import MetricCard from '../../../components/ui/MetricCard';
 
 interface WritingStatsCardProps {
@@ -33,7 +25,7 @@ export const WritingStatsCard: React.FC<WritingStatsCardProps> = ({
   weeklyWords,
   currentStreak,
   aiAssistance,
-  className
+  className,
 }) => {
   const completionPercentage = Math.round((chaptersCompleted / Math.max(totalChapters, 1)) * 100);
   const timeHours = Math.round(timeSpent / 60);
@@ -47,41 +39,41 @@ export const WritingStatsCard: React.FC<WritingStatsCardProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <h3 className="font-serif font-semibold text-lg mb-4 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-primary" />
+        <h3 className='mb-4 flex items-center gap-2 font-serif text-lg font-semibold'>
+          <Activity className='h-5 w-5 text-primary' />
           Writing Overview
         </h3>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className='grid grid-cols-2 gap-4 lg:grid-cols-4'>
           <MetricCard
-            title="Total Words"
+            title='Total Words'
             value={totalWords}
-            icon={<BookOpen className="w-5 h-5" />}
-            color="text-blue-500"
-            variant="success"
+            icon={<BookOpen className='h-5 w-5' />}
+            color='text-blue-500'
+            variant='success'
           />
 
           <MetricCard
-            title="Chapters"
+            title='Chapters'
             value={`${chaptersCompleted}/${totalChapters}`}
             suffix={` (${completionPercentage}%)`}
-            icon={<Target className="w-5 h-5" />}
-            color="text-green-500"
+            icon={<Target className='h-5 w-5' />}
+            color='text-green-500'
           />
 
           <MetricCard
-            title="Time Invested"
+            title='Time Invested'
             value={`${timeHours}h ${timeMinutes}m`}
-            icon={<Clock className="w-5 h-5" />}
-            color="text-purple-500"
+            icon={<Clock className='h-5 w-5' />}
+            color='text-purple-500'
           />
 
           <MetricCard
-            title="Productivity"
+            title='Productivity'
             value={Math.round(productivity)}
-            suffix=" wph"
-            icon={<Zap className="w-5 h-5" />}
-            color="text-orange-500"
+            suffix=' wph'
+            icon={<Zap className='h-5 w-5' />}
+            color='text-orange-500'
           />
         </div>
       </motion.div>
@@ -91,36 +83,36 @@ export const WritingStatsCard: React.FC<WritingStatsCardProps> = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="mt-6"
+        className='mt-6'
       >
-        <h3 className="font-serif font-semibold text-lg mb-4 flex items-center gap-2">
-          <PieChart className="w-5 h-5 text-primary" />
+        <h3 className='mb-4 flex items-center gap-2 font-serif text-lg font-semibold'>
+          <PieChart className='h-5 w-5 text-primary' />
           This Week's Performance
         </h3>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
           <MetricCard
-            title="Weekly Words"
+            title='Weekly Words'
             value={weeklyWords}
             change={15}
-            icon={<PieChart className="w-5 h-5" />}
-            color="text-emerald-500"
-            variant="success"
+            icon={<PieChart className='h-5 w-5' />}
+            color='text-emerald-500'
+            variant='success'
           />
 
           <MetricCard
-            title="Writing Streak"
+            title='Writing Streak'
             value={`${currentStreak} days`}
-            icon={<Flame className="w-5 h-5" />}
-            color="text-red-500"
+            icon={<Flame className='h-5 w-5' />}
+            color='text-red-500'
           />
 
           <MetricCard
-            title="AI Assistance"
+            title='AI Assistance'
             value={Math.round(aiAssistance)}
-            suffix="%"
-            icon={<Brain className="w-5 h-5" />}
-            color="text-violet-500"
+            suffix='%'
+            icon={<Brain className='h-5 w-5' />}
+            color='text-violet-500'
           />
         </div>
       </motion.div>

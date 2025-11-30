@@ -1,4 +1,3 @@
-import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Target,
@@ -7,19 +6,20 @@ import {
   Trash2,
   Calendar,
   BookOpen,
-
   TrendingUp,
   CheckCircle2,
   AlertCircle,
   Trophy,
   Flame,
-  X
+  X,
 } from 'lucide-react';
-import { useAnalytics } from '../hooks/useAnalytics';
-import { WritingGoals } from '../types';
+import React, { useState, useMemo } from 'react';
+
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { cn, iconButtonTarget } from '../../../lib/utils';
+import { useAnalytics } from '../hooks/useAnalytics';
+import { WritingGoals } from '../types';
 
 interface GoalsManagerProps {
   projectId?: string;
@@ -48,7 +48,7 @@ const GoalCard: React.FC<{
 }> = ({ goal, onEdit, onDelete }) => {
   const IconComponent = goalTypeIcons[goal.type];
   const colorClass = goalTypeColors[goal.type];
-  
+
   const progressPercentage = useMemo(() => {
     if (goal.target.words && goal.current.words >= 0) {
       return Math.min((goal.current.words / goal.target.words) * 100, 100);
@@ -89,96 +89,111 @@ const GoalCard: React.FC<{
   const daysRemaining = getDaysRemaining();
 
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Card className={cn(
-        "p-4 relative overflow-hidden",
-        isCompleted && "ring-2 ring-green-500/30 bg-green-500/5",
-        isOverdue && "ring-2 ring-red-500/30 bg-red-500/5"
-      )}>
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className={cn("p-2 rounded-lg", colorClass)}>
-              <IconComponent className="w-4 h-4" />
+    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
+      <Card
+        className={cn(
+          'relative overflow-hidden p-4',
+          isCompleted && 'bg-green-500/5 ring-2 ring-green-500/30',
+          isOverdue && 'bg-red-500/5 ring-2 ring-red-500/30'
+        )}
+      >
+        <div className='mb-3 flex items-start justify-between'>
+          <div className='flex items-center gap-3'>
+            <div className={cn('rounded-lg p-2', colorClass)}>
+              <IconComponent className='h-4 w-4' />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h4 className="font-medium text-sm capitalize">{goal.type} Goal</h4>
-                {isCompleted && <CheckCircle2 className="w-4 h-4 text-green-500" />}
-                {isOverdue && <AlertCircle className="w-4 h-4 text-red-500" />}
+              <div className='flex items-center gap-2'>
+                <h4 className='text-sm font-medium capitalize'>{goal.type} Goal</h4>
+                {isCompleted && <CheckCircle2 className='h-4 w-4 text-green-500' />}
+                {isOverdue && <AlertCircle className='h-4 w-4 text-red-500' />}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className='text-xs text-muted-foreground'>
                 Started {goal.startDate.toLocaleDateString()}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className='flex items-center gap-1'>
             <button
               onClick={() => onEdit(goal)}
-              className={iconButtonTarget("opacity-0 group-hover:opacity-100 transition-opacity rounded hover:bg-muted")}
-              aria-label="Edit goal"
+              className={iconButtonTarget(
+                'rounded opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100'
+              )}
+              aria-label='Edit goal'
             >
-              <Edit3 className="w-4 h-4" />
+              <Edit3 className='h-4 w-4' />
             </button>
             <button
               onClick={() => onDelete(goal.id)}
-              className={iconButtonTarget("opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600 rounded hover:bg-red-500/10")}
-              aria-label="Delete goal"
+              className={iconButtonTarget(
+                'rounded text-red-500 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-600 group-hover:opacity-100'
+              )}
+              aria-label='Delete goal'
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className='h-4 w-4' />
             </button>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-3">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-muted-foreground">Progress</span>
-            <span className="text-xs font-medium">{Math.round(progressPercentage)}%</span>
+        <div className='mb-3'>
+          <div className='mb-2 flex items-center justify-between'>
+            <span className='text-xs text-muted-foreground'>Progress</span>
+            <span className='text-xs font-medium'>{Math.round(progressPercentage)}%</span>
           </div>
-          <div className="w-full bg-secondary/50 rounded-full h-2">
+          <div className='h-2 w-full rounded-full bg-secondary/50'>
             <motion.div
               className={cn(
-                "h-2 rounded-full",
-                isCompleted ? "bg-green-500" : isOverdue ? "bg-red-500" : "bg-primary"
+                'h-2 rounded-full',
+                isCompleted ? 'bg-green-500' : isOverdue ? 'bg-red-500' : 'bg-primary'
               )}
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 1, ease: 'easeOut' }}
             />
           </div>
         </div>
 
         {/* Goal Details */}
-        <div className="space-y-2 text-xs">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Target:</span>
-            <span className="font-medium">{getProgressText()}</span>
+        <div className='space-y-2 text-xs'>
+          <div className='flex justify-between'>
+            <span className='text-muted-foreground'>Target:</span>
+            <span className='font-medium'>{getProgressText()}</span>
           </div>
-          
+
           {daysRemaining !== null && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {daysRemaining > 0 ? 'Days remaining:' : daysRemaining === 0 ? 'Due today' : 'Overdue by:'}
+            <div className='flex justify-between'>
+              <span className='text-muted-foreground'>
+                {daysRemaining > 0
+                  ? 'Days remaining:'
+                  : daysRemaining === 0
+                    ? 'Due today'
+                    : 'Overdue by:'}
               </span>
-              <span className={cn(
-                "font-medium",
-                daysRemaining <= 0 ? "text-red-500" : daysRemaining <= 3 ? "text-orange-500" : "text-muted-foreground"
-              )}>
-                {daysRemaining > 0 ? `${daysRemaining} days` : 
-                 daysRemaining === 0 ? 'Today' : 
-                 `${Math.abs(daysRemaining)} days`}
+              <span
+                className={cn(
+                  'font-medium',
+                  daysRemaining <= 0
+                    ? 'text-red-500'
+                    : daysRemaining <= 3
+                      ? 'text-orange-500'
+                      : 'text-muted-foreground'
+                )}
+              >
+                {daysRemaining > 0
+                  ? `${daysRemaining} days`
+                  : daysRemaining === 0
+                    ? 'Today'
+                    : `${Math.abs(daysRemaining)} days`}
               </span>
             </div>
           )}
 
           {isCompleted && (
-            <div className="flex items-center gap-1 text-green-600 mt-3 p-2 bg-green-500/10 rounded">
-              <Trophy className="w-3 h-3" />
-              <span className="font-medium">Goal Completed!</span>
+            <div className='mt-3 flex items-center gap-1 rounded bg-green-500/10 p-2 text-green-600'>
+              <Trophy className='h-3 w-3' />
+              <span className='font-medium'>Goal Completed!</span>
             </div>
           )}
         </div>
@@ -193,14 +208,11 @@ const GoalForm: React.FC<{
   onSave: (goal: Omit<WritingGoals, 'id' | 'current'>) => Promise<void>;
   onCancel: () => void;
 }> = ({ goal, projectId, onSave, onCancel }) => {
-
   const [type, setType] = useState<WritingGoals['type']>(goal?.type || 'daily');
   const [targetWords, setTargetWords] = useState(goal?.target.words?.toString() || '');
   const [targetTime, setTargetTime] = useState(goal?.target.time?.toString() || '');
   const [targetChapters, setTargetChapters] = useState(goal?.target.chapters?.toString() || '');
-  const [endDate, setEndDate] = useState(
-    goal?.endDate?.toISOString().split('T')[0] || ''
-  );
+  const [endDate, setEndDate] = useState(goal?.endDate?.toISOString().split('T')[0] || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -222,14 +234,18 @@ const GoalForm: React.FC<{
     await onSave(goalData);
   };
 
-
   const getDefaultTarget = () => {
     switch (type) {
-      case 'daily': return '500';
-      case 'weekly': return '3500';
-      case 'monthly': return '15000';
-      case 'project': return '80000';
-      default: return '';
+      case 'daily':
+        return '500';
+      case 'weekly':
+        return '3500';
+      case 'monthly':
+        return '15000';
+      case 'project':
+        return '80000';
+      default:
+        return '';
     }
   };
 
@@ -238,36 +254,36 @@ const GoalForm: React.FC<{
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm'
     >
-      <Card className="w-full max-w-md p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-serif font-semibold text-lg">
+      <Card className='w-full max-w-md p-6'>
+        <div className='mb-4 flex items-center justify-between'>
+          <h3 className='font-serif text-lg font-semibold'>
             {goal ? 'Edit Goal' : 'Create New Goal'}
           </h3>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="w-4 h-4" />
+          <Button variant='ghost' size='sm' onClick={onCancel}>
+            <X className='h-4 w-4' />
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className='space-y-4'>
           {/* Goal Type */}
           <div>
-            <label className="block text-sm font-medium mb-2">Goal Type</label>
-            <div className="grid grid-cols-2 gap-2">
-              {(['daily', 'weekly', 'monthly', 'project'] as const).map((t) => (
+            <label className='mb-2 block text-sm font-medium'>Goal Type</label>
+            <div className='grid grid-cols-2 gap-2'>
+              {(['daily', 'weekly', 'monthly', 'project'] as const).map(t => (
                 <button
                   key={t}
-                  type="button"
+                  type='button'
                   onClick={() => {
                     setType(t);
                     if (!targetWords) setTargetWords(getDefaultTarget());
                   }}
                   className={cn(
-                    "p-3 rounded-lg border text-sm font-medium capitalize transition-colors",
+                    'rounded-lg border p-3 text-sm font-medium capitalize transition-colors',
                     type === t
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-secondary hover:bg-secondary/80 border-border"
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-border bg-secondary hover:bg-secondary/80'
                   )}
                 >
                   {t}
@@ -278,47 +294,47 @@ const GoalForm: React.FC<{
 
           {/* Target Words */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className='mb-2 block text-sm font-medium'>
               Target Words
-              <span className="text-muted-foreground ml-1">(optional)</span>
+              <span className='ml-1 text-muted-foreground'>(optional)</span>
             </label>
             <input
-              type="number"
+              type='number'
               value={targetWords}
-              onChange={(e) => setTargetWords(e.target.value)}
+              onChange={e => setTargetWords(e.target.value)}
               placeholder={getDefaultTarget()}
-              className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className='w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20'
             />
           </div>
 
           {/* Target Time */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className='mb-2 block text-sm font-medium'>
               Target Time (minutes)
-              <span className="text-muted-foreground ml-1">(optional)</span>
+              <span className='ml-1 text-muted-foreground'>(optional)</span>
             </label>
             <input
-              type="number"
+              type='number'
               value={targetTime}
-              onChange={(e) => setTargetTime(e.target.value)}
-              placeholder="60"
-              className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+              onChange={e => setTargetTime(e.target.value)}
+              placeholder='60'
+              className='w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20'
             />
           </div>
 
           {/* Target Chapters */}
           {(type === 'monthly' || type === 'project') && (
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className='mb-2 block text-sm font-medium'>
                 Target Chapters
-                <span className="text-muted-foreground ml-1">(optional)</span>
+                <span className='ml-1 text-muted-foreground'>(optional)</span>
               </label>
               <input
-                type="number"
+                type='number'
                 value={targetChapters}
-                onChange={(e) => setTargetChapters(e.target.value)}
-                placeholder="5"
-                className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                onChange={e => setTargetChapters(e.target.value)}
+                placeholder='5'
+                className='w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20'
               />
             </div>
           )}
@@ -326,25 +342,25 @@ const GoalForm: React.FC<{
           {/* End Date */}
           {type !== 'daily' && (
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className='mb-2 block text-sm font-medium'>
                 End Date
-                <span className="text-muted-foreground ml-1">(optional)</span>
+                <span className='ml-1 text-muted-foreground'>(optional)</span>
               </label>
               <input
-                type="date"
+                type='date'
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className='w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20'
               />
             </div>
           )}
 
-          <div className="flex gap-2 pt-4">
-            <Button type="submit" className="flex-1">
+          <div className='flex gap-2 pt-4'>
+            <Button type='submit' className='flex-1'>
               {goal ? 'Update Goal' : 'Create Goal'}
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type='button' variant='outline' onClick={onCancel}>
               Cancel
             </Button>
           </div>
@@ -385,29 +401,24 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ projectId, onClose, classNa
   const completedGoals = analytics.goals.filter(goal => !goal.isActive);
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn('space-y-6', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Target className="w-6 h-6 text-primary" />
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-3'>
+          <Target className='h-6 w-6 text-primary' />
           <div>
-            <h2 className="font-serif font-semibold text-xl">Writing Goals</h2>
-            <p className="text-sm text-muted-foreground">
-              Set and track your writing targets
-            </p>
+            <h2 className='font-serif text-xl font-semibold'>Writing Goals</h2>
+            <p className='text-sm text-muted-foreground'>Set and track your writing targets</p>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setShowForm(true)}
-            className="text-sm"
-          >
-            <Plus className="w-4 h-4 mr-1" />
+
+        <div className='flex items-center gap-2'>
+          <Button onClick={() => setShowForm(true)} className='text-sm'>
+            <Plus className='mr-1 h-4 w-4' />
             New Goal
           </Button>
           {onClose && (
-            <Button variant="outline" onClick={onClose} className="text-sm">
+            <Button variant='outline' onClick={onClose} className='text-sm'>
               Close
             </Button>
           )}
@@ -417,11 +428,11 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ projectId, onClose, classNa
       {/* Active Goals */}
       {activeGoals.length > 0 && (
         <div>
-          <h3 className="font-medium text-lg mb-4 flex items-center gap-2">
-            <Flame className="w-5 h-5 text-orange-500" />
+          <h3 className='mb-4 flex items-center gap-2 text-lg font-medium'>
+            <Flame className='h-5 w-5 text-orange-500' />
             Active Goals ({activeGoals.length})
           </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
             {activeGoals.map(goal => (
               <GoalCard
                 key={goal.id}
@@ -437,11 +448,11 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ projectId, onClose, classNa
       {/* Completed Goals */}
       {completedGoals.length > 0 && (
         <div>
-          <h3 className="font-medium text-lg mb-4 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-green-500" />
+          <h3 className='mb-4 flex items-center gap-2 text-lg font-medium'>
+            <Trophy className='h-5 w-5 text-green-500' />
             Completed Goals ({completedGoals.length})
           </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
             {completedGoals.slice(0, 4).map(goal => (
               <GoalCard
                 key={goal.id}
@@ -456,14 +467,14 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ projectId, onClose, classNa
 
       {/* Empty State */}
       {activeGoals.length === 0 && completedGoals.length === 0 && (
-        <div className="text-center py-12">
-          <Target className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-          <h3 className="font-medium text-lg mb-2">No Goals Set</h3>
-          <p className="text-muted-foreground mb-4">
+        <div className='py-12 text-center'>
+          <Target className='mx-auto mb-4 h-12 w-12 text-muted-foreground/50' />
+          <h3 className='mb-2 text-lg font-medium'>No Goals Set</h3>
+          <p className='mb-4 text-muted-foreground'>
             Create your first writing goal to start tracking progress
           </p>
           <Button onClick={() => setShowForm(true)}>
-            <Plus className="w-4 h-4 mr-1" />
+            <Plus className='mr-1 h-4 w-4' />
             Create Your First Goal
           </Button>
         </div>

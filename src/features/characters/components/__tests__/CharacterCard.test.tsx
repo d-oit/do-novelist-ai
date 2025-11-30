@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import { type Character, type CharacterRole, type CharacterArc } from '../../types';
 import { CharacterCard } from '../CharacterCard';
-import type { Character, CharacterRole, CharacterArc } from '../../types';
 
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
@@ -21,16 +22,18 @@ vi.mock('framer-motion', () => ({
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
-  Crown: ({ className }: any) => <div className={className} data-testid="crown-icon" />,
-  Sword: ({ className }: any) => <div className={className} data-testid="sword-icon" />,
-  Heart: ({ className }: any) => <div className={className} data-testid="heart-icon" />,
-  BookOpen: ({ className }: any) => <div className={className} data-testid="bookopen-icon" />,
-  Users: ({ className }: any) => <div className={className} data-testid="users-icon" />,
-  Zap: ({ className }: any) => <div className={className} data-testid="zap-icon" />,
-  Target: ({ className }: any) => <div className={className} data-testid="target-icon" />,
-  Edit3: ({ className }: any) => <div className={className} data-testid="edit3-icon" />,
-  Trash2: ({ className }: any) => <div className={className} data-testid="trash2-icon" />,
-  CheckCircle2: ({ className }: any) => <div className={className} data-testid="checkcircle2-icon" />,
+  Crown: ({ className }: any) => <div className={className} data-testid='crown-icon' />,
+  Sword: ({ className }: any) => <div className={className} data-testid='sword-icon' />,
+  Heart: ({ className }: any) => <div className={className} data-testid='heart-icon' />,
+  BookOpen: ({ className }: any) => <div className={className} data-testid='bookopen-icon' />,
+  Users: ({ className }: any) => <div className={className} data-testid='users-icon' />,
+  Zap: ({ className }: any) => <div className={className} data-testid='zap-icon' />,
+  Target: ({ className }: any) => <div className={className} data-testid='target-icon' />,
+  Edit3: ({ className }: any) => <div className={className} data-testid='edit3-icon' />,
+  Trash2: ({ className }: any) => <div className={className} data-testid='trash2-icon' />,
+  CheckCircle2: ({ className }: any) => (
+    <div className={className} data-testid='checkcircle2-icon' />
+  ),
 }));
 
 const createMockCharacter = (overrides?: Partial<Character>): Character => ({
@@ -381,7 +384,9 @@ describe('CharacterCard', () => {
         />
       );
 
-      expect(screen.getByText('A Very Long Character Name That Should Be Truncated')).toBeInTheDocument();
+      expect(
+        screen.getByText('A Very Long Character Name That Should Be Truncated')
+      ).toBeInTheDocument();
     });
 
     it('displays love-interest role correctly with hyphen replaced', () => {
@@ -417,8 +422,24 @@ describe('CharacterCard', () => {
     });
 
     it('renders all role icons correctly', () => {
-      const roles: CharacterRole[] = ['protagonist', 'antagonist', 'supporting', 'mentor', 'foil', 'love-interest', 'comic-relief'];
-      const expectedIcons = ['crown-icon', 'sword-icon', 'target-icon', 'bookopen-icon', 'zap-icon', 'heart-icon', 'users-icon'];
+      const roles: CharacterRole[] = [
+        'protagonist',
+        'antagonist',
+        'supporting',
+        'mentor',
+        'foil',
+        'love-interest',
+        'comic-relief',
+      ];
+      const expectedIcons = [
+        'crown-icon',
+        'sword-icon',
+        'target-icon',
+        'bookopen-icon',
+        'zap-icon',
+        'heart-icon',
+        'users-icon',
+      ];
 
       roles.forEach((role, index) => {
         const { unmount } = render(
@@ -432,7 +453,7 @@ describe('CharacterCard', () => {
           />
         );
 
-        expect(screen.getByTestId(expectedIcons[index] as string)).toBeInTheDocument();
+        expect(screen.getByTestId(expectedIcons[index]!)).toBeInTheDocument();
         unmount();
       });
     });

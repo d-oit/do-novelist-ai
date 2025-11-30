@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+
 import { WritingStyleSchema } from '../../../types';
 
 /**
@@ -45,7 +46,7 @@ export const ProjectCreationSchema = z.object({
   genre: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   language: z.string().optional(),
-  targetAudience: z.string().optional()
+  targetAudience: z.string().optional(),
 });
 
 export type ProjectCreationData = z.infer<typeof ProjectCreationSchema>;
@@ -53,7 +54,7 @@ export type ProjectCreationData = z.infer<typeof ProjectCreationSchema>;
 /**
  * Project update data
  */
-import type { WritingStyle, PublishStatus } from '../../../types';
+import { type WritingStyle, type PublishStatus } from '../../../types';
 
 export interface ProjectUpdateData {
   title?: string;

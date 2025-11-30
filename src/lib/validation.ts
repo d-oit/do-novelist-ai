@@ -3,7 +3,8 @@
  * Integrates Zod schemas with application logic
  */
 
-
+import { ChapterStatus, PublishStatus } from '../shared/types';
+import { isProjectId, createProjectId, createChapterId } from '../types/guards';
 import {
   ProjectSchema,
   ChapterSchema,
@@ -12,22 +13,14 @@ import {
   UpdateProjectSchema,
   RefineOptionsSchema,
   validateData,
-
   type Project,
   type Chapter,
-  type ValidationResult
+  type ValidationResult,
 } from '../types/schemas';
-import {
-      isProjectId,
-    createProjectId,
-  createChapterId,
-} from '../types/guards';
-import { ChapterStatus, PublishStatus } from '../shared/types';
 
 // =============================================================================
 // VALIDATION SERVICE CLASS
 // =============================================================================
-
 
 export class ValidationService {
   private static instance: ValidationService;
@@ -59,7 +52,7 @@ export class ValidationService {
       // Transform to full project
       const projectId = createProjectId();
       const now = new Date();
-      
+
       const fullProject: Project = {
         id: projectId,
         title: createValidation.data.title,
@@ -77,7 +70,7 @@ export class ValidationService {
           hasWorldBuilding: false,
           hasThemes: false,
           plotStructureDefined: false,
-          targetAudienceDefined: true
+          targetAudienceDefined: true,
         },
         isGenerating: false,
         status: PublishStatus.DRAFT,
@@ -92,7 +85,7 @@ export class ValidationService {
           darkMode: false,
           fontSize: 'medium',
           lineHeight: 'normal',
-          editorTheme: 'default'
+          editorTheme: 'default',
         },
         genre: createValidation.data.genre,
         targetAudience: createValidation.data.targetAudience,
@@ -107,14 +100,16 @@ export class ValidationService {
           averageChapterLength: 0,
           estimatedReadingTime: 0,
           generationCost: 0,
-          editingRounds: 0
+          editingRounds: 0,
         },
         version: '1.0.0',
-        changeLog: [{
-          version: '1.0.0',
-          changes: ['Project created'],
-          timestamp: now
-        }]
+        changeLog: [
+          {
+            version: '1.0.0',
+            changes: ['Project created'],
+            timestamp: now,
+          },
+        ],
       };
 
       // Validate the complete project
@@ -123,7 +118,7 @@ export class ValidationService {
       return {
         success: false,
         error: `Project creation validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -145,11 +140,13 @@ export class ValidationService {
           return {
             success: false,
             error: 'Completed chapters cannot exceed total chapters',
-            issues: [{
-              path: ['worldState', 'chaptersCompleted'],
-              message: 'Cannot exceed total chapters',
-              code: 'custom' as const
-            }]
+            issues: [
+              {
+                path: ['worldState', 'chaptersCompleted'],
+                message: 'Cannot exceed total chapters',
+                code: 'custom' as const,
+              },
+            ],
           };
         }
       }
@@ -172,7 +169,7 @@ export class ValidationService {
       const validatedProject = schemaValidation.data;
 
       // Cross-field validation
-      const issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }> = [];
+      const issues: { path: (string | number)[]; message: string; code: 'custom' }[] = [];
 
       // Check chapters consistency
       const actualChapterCount = validatedProject.chapters.length;
@@ -181,19 +178,21 @@ export class ValidationService {
         issues.push({
           path: ['worldState', 'chaptersCount'],
           message: `World state shows ${worldStateChapterCount} chapters but project has ${actualChapterCount}`,
-          code: 'custom' as const
+          code: 'custom' as const,
         });
       }
 
       // Check completed chapters consistency
-      const actualCompletedCount = validatedProject.chapters.filter(c => c.status === ChapterStatus.COMPLETE).length;
+      const actualCompletedCount = validatedProject.chapters.filter(
+        c => c.status === ChapterStatus.COMPLETE
+      ).length;
 
       const worldStateCompletedCount = validatedProject.worldState.chaptersCompleted;
       if (actualCompletedCount !== worldStateCompletedCount) {
         issues.push({
           path: ['worldState', 'chaptersCompleted'],
           message: `World state shows ${worldStateCompletedCount} completed chapters but ${actualCompletedCount} are actually complete`,
-          code: 'custom' as const
+          code: 'custom' as const,
         });
       }
 
@@ -204,7 +203,7 @@ export class ValidationService {
           issues.push({
             path: ['chapters', i, 'orderIndex'],
             message: `Chapter order index should be ${i + 1} but is ${orderIndices[i]}`,
-            code: 'custom' as const
+            code: 'custom' as const,
           });
           break;
         }
@@ -217,7 +216,7 @@ export class ValidationService {
           issues.push({
             path: ['chapters', index, 'id'],
             message: `Duplicate chapter ID: ${chapter.id}`,
-            code: 'custom' as const
+            code: 'custom' as const,
           });
         }
         chapterIds.add(chapter.id);
@@ -227,7 +226,7 @@ export class ValidationService {
         return {
           success: false,
           error: `Project integrity validation failed: ${issues.length} issue(s) found`,
-          issues
+          issues,
         };
       }
 
@@ -236,7 +235,7 @@ export class ValidationService {
       return {
         success: false,
         error: `Project integrity validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -262,25 +261,30 @@ export class ValidationService {
         return {
           success: false,
           error: 'Chapter ID must start with project ID',
-          issues: [{
-            path: ['id'],
-            message: `Chapter ID must start with project ID: ${projectId}`,
-            code: 'custom' as const
-          }]
+          issues: [
+            {
+              path: ['id'],
+              message: `Chapter ID must start with project ID: ${projectId}`,
+              code: 'custom' as const,
+            },
+          ],
         };
       }
 
       // Validate word count matches content
       const actualWordCount = this.countWords(chapter.content);
-      if (Math.abs(chapter.wordCount - actualWordCount) > 5) { // Allow small variance
+      if (Math.abs(chapter.wordCount - actualWordCount) > 5) {
+        // Allow small variance
         return {
           success: false,
           error: 'Chapter word count does not match content',
-          issues: [{
-            path: ['wordCount'],
-            message: `Word count is ${chapter.wordCount} but content has ${actualWordCount} words`,
-            code: 'custom' as const
-          }]
+          issues: [
+            {
+              path: ['wordCount'],
+              message: `Word count is ${chapter.wordCount} but content has ${actualWordCount} words`,
+              code: 'custom' as const,
+            },
+          ],
         };
       }
 
@@ -289,7 +293,7 @@ export class ValidationService {
       return {
         success: false,
         error: `Chapter validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -306,15 +310,20 @@ export class ValidationService {
     // If content is being updated, validate word count
     if (validation.data.content !== undefined) {
       const wordCount = this.countWords(validation.data.content);
-      if (validation.data.wordCount !== undefined && Math.abs(validation.data.wordCount - wordCount) > 5) {
+      if (
+        validation.data.wordCount !== undefined &&
+        Math.abs(validation.data.wordCount - wordCount) > 5
+      ) {
         return {
           success: false,
           error: 'Word count does not match content',
-          issues: [{
-            path: ['wordCount'],
-            message: `Provided word count ${validation.data.wordCount} does not match actual word count ${wordCount}`,
-            code: 'custom' as const
-          }]
+          issues: [
+            {
+              path: ['wordCount'],
+              message: `Provided word count ${validation.data.wordCount} does not match actual word count ${wordCount}`,
+              code: 'custom' as const,
+            },
+          ],
         };
       }
     }
@@ -357,7 +366,8 @@ export class ValidationService {
    */
   public updateProjectAnalytics(project: Project): Project {
     const totalWordCount = project.chapters.reduce((sum, chapter) => sum + chapter.wordCount, 0);
-    const averageChapterLength = project.chapters.length > 0 ? totalWordCount / project.chapters.length : 0;
+    const averageChapterLength =
+      project.chapters.length > 0 ? totalWordCount / project.chapters.length : 0;
     const estimatedReadingTime = this.calculateReadingTime(totalWordCount);
 
     return {
@@ -366,9 +376,9 @@ export class ValidationService {
         ...project.analytics,
         totalWordCount,
         averageChapterLength: Math.round(averageChapterLength),
-        estimatedReadingTime
+        estimatedReadingTime,
       },
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
@@ -387,7 +397,7 @@ export class ValidationService {
         return {
           success: false,
           error: 'Invalid project ID',
-          issues: []
+          issues: [],
         };
       }
 
@@ -409,7 +419,7 @@ export class ValidationService {
         tags: [],
         notes: '',
         createdAt: now,
-        updatedAt: now
+        updatedAt: now,
       };
 
       return this.validateChapter(chapter, projectId);
@@ -417,7 +427,7 @@ export class ValidationService {
       return {
         success: false,
         error: `Chapter creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -436,7 +446,7 @@ export class ValidationService {
     return {
       success: false,
       error: `Invalid ${typeName}`,
-      issues: []
+      issues: [],
     };
   }
 
@@ -461,7 +471,7 @@ export class ValidationService {
         return {
           success: false,
           error: 'Content must be a string',
-          issues: []
+          issues: [],
         };
       }
 
@@ -469,11 +479,13 @@ export class ValidationService {
         return {
           success: false,
           error: 'Content exceeds maximum length of 50,000 characters',
-          issues: [{
-            path: ['content'],
-            message: 'Content too long',
-            code: 'custom' as const
-          }]
+          issues: [
+            {
+              path: ['content'],
+              message: 'Content too long',
+              code: 'custom' as const,
+            },
+          ],
         };
       }
 
@@ -483,7 +495,7 @@ export class ValidationService {
       return {
         success: false,
         error: `Content validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -504,12 +516,13 @@ export const validationService = ValidationService.getInstance();
  */
 export const validate = {
   project: (data: unknown) => validationService.validateProjectIntegrity(data as Project),
-  chapter: (data: unknown, projectId?: string) => validationService.validateChapter(data, projectId),
+  chapter: (data: unknown, projectId?: string) =>
+    validationService.validateChapter(data, projectId),
   createProject: (data: unknown) => validationService.validateCreateProject(data),
   updateProject: (data: unknown) => validationService.validateUpdateProject(data),
   updateChapter: (data: unknown) => validationService.validateUpdateChapter(data),
   refineOptions: (data: unknown) => validationService.validateRefineOptions(data),
-  content: (content: string) => validationService.validateAndFormatContent(content)
+  content: (content: string) => validationService.validateAndFormatContent(content),
 };
 
 /**
@@ -527,7 +540,7 @@ export const assertValid = {
     if (!result.success) {
       throw new Error(`Invalid chapter: ${result.error}`);
     }
-  }
+  },
 };
 
 /**
@@ -536,10 +549,10 @@ export const assertValid = {
 export const safeConvert = {
   toProject: (data: unknown): Project | null => {
     const result = validate.project(data);
-    return result.success ? result.data as Project : null;
+    return result.success ? (result.data as Project) : null;
   },
   toChapter: (data: unknown): Chapter | null => {
     const result = validate.chapter(data);
-    return result.success ? result.data as Chapter : null;
-  }
+    return result.success ? (result.data as Chapter) : null;
+  },
 };

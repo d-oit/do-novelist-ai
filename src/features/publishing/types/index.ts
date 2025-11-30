@@ -108,15 +108,15 @@ export interface EngagementMetrics {
   uniqueReaders: number;
   averageReadingTime: number; // minutes
   completionRate: number; // percentage who finish
-  dropOffPoints: Array<{
+  dropOffPoints: {
     chapterIndex: number;
     dropOffRate: number;
-  }>;
-  peakReadingTimes: Array<{
+  }[];
+  peakReadingTimes: {
     hour: number;
     dayOfWeek: number;
     activityLevel: number;
-  }>;
+  }[];
   readerRetention: {
     day1: number;
     day7: number;
@@ -141,11 +141,11 @@ export interface PublishingGoals {
     end: Date;
   };
   isActive: boolean;
-  milestones: Array<{
+  milestones: {
     value: number;
     achievedAt?: Date;
     reward?: string;
-  }>;
+  }[];
 }
 
 export interface ReaderInsights {
@@ -157,40 +157,40 @@ export interface ReaderInsights {
     averageSessionDuration: number;
   };
   contentPerformance: {
-    mostPopularChapters: Array<{
+    mostPopularChapters: {
       chapterIndex: number;
       title: string;
       engagementScore: number;
-    }>;
-    sentimentTrends: Array<{
+    }[];
+    sentimentTrends: {
       chapter: number;
       sentiment: number; // -1 to 1
       topics: string[];
-    }>;
-    dropOffAnalysis: Array<{
+    }[];
+    dropOffAnalysis: {
       chapter: number;
       dropOffRate: number;
       commonFeedback: string[];
-    }>;
+    }[];
   };
   marketInsights: {
-    competitorComparison: Array<{
+    competitorComparison: {
       title: string;
       rating: number;
       views: number;
       similarityScore: number;
-    }>;
+    }[];
     genrePerformance: {
       ranking: number;
       percentile: number;
       trendingTopics: string[];
     };
-    recommendations: Array<{
+    recommendations: {
       type: 'content' | 'marketing' | 'pricing' | 'timing';
       priority: 'high' | 'medium' | 'low';
       suggestion: string;
       expectedImpact: string;
-    }>;
+    }[];
   };
 }
 
@@ -203,14 +203,14 @@ export interface PublishingCampaign {
   timeline: {
     start: Date;
     end: Date;
-    milestones: Array<{
+    milestones: {
       date: Date;
       title: string;
       description: string;
       completed: boolean;
-    }>;
+    }[];
   };
-  channels: Array<{
+  channels: {
     platform: string;
     content: string;
     scheduledAt: Date;
@@ -219,7 +219,7 @@ export interface PublishingCampaign {
       engagement: number;
       clicks: number;
     };
-  }>;
+  }[];
   budget?: {
     total: number;
     spent: number;
@@ -238,24 +238,24 @@ export interface PublishingTrends {
     start: Date;
     end: Date;
   };
-  metrics: Array<{
+  metrics: {
     date: string;
     views: number;
     engagement: number;
     rating: number;
     revenue?: number;
-  }>;
-  seasonality: Array<{
+  }[];
+  seasonality: {
     period: string; // 'Q1', 'summer', 'holiday', etc.
     multiplier: number;
     confidence: number;
-  }>;
-  predictions: Array<{
+  }[];
+  predictions: {
     metric: string;
     nextPeriod: number;
     confidence: number;
     factors: string[];
-  }>;
+  }[];
 }
 
 export interface PublishingAlert {
@@ -272,7 +272,7 @@ export interface PublishingAlert {
   publicationId?: string;
 }
 
-export type PublishingAnalyticsFilter = {
+export interface PublishingAnalyticsFilter {
   dateRange: {
     start: Date;
     end: Date;
@@ -284,7 +284,7 @@ export type PublishingAnalyticsFilter = {
     start: Date;
     end: Date;
   };
-};
+}
 
 export interface PublishingExport {
   format: 'json' | 'csv' | 'pdf' | 'xlsx';
@@ -293,7 +293,7 @@ export interface PublishingExport {
     end: Date;
   };
   includeCharts: boolean;
-  sections: Array<'overview' | 'engagement' | 'feedback' | 'revenue' | 'insights'>;
+  sections: ('overview' | 'engagement' | 'feedback' | 'revenue' | 'insights')[];
   publicationIds: string[];
 }
 

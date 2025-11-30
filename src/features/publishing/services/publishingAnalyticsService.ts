@@ -1,3 +1,4 @@
+import { Project } from '../../../types';
 import {
   Publication,
   PublishedInstance,
@@ -8,18 +9,17 @@ import {
   ReaderInsights,
   PublishingTrends,
   PublishingAlert,
-  PublishingPlatform
+  PublishingPlatform,
 } from '../types';
-import { Project } from '../../../types';
 
 class PublishingAnalyticsService {
   private static instance: PublishingAnalyticsService;
-  private dbName = 'novelist-publishing';
-  private dbVersion = 1;
+  private readonly dbName = 'novelist-publishing';
+  private readonly dbVersion = 1;
   private db: IDBDatabase | null = null;
-  
+
   // Mock data for platforms (in real app, this would come from API integrations)
-  private mockPlatforms: PublishingPlatform[] = [
+  private readonly mockPlatforms: PublishingPlatform[] = [
     {
       id: 'wattpad',
       name: 'Wattpad',
@@ -60,16 +60,16 @@ class PublishingAnalyticsService {
   async init(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
-      
+
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
         resolve();
       };
-      
-      request.onupgradeneeded = (event) => {
+
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
-        
+
         // Publications store
         if (!db.objectStoreNames.contains('publications')) {
           const pubStore = db.createObjectStore('publications', { keyPath: 'id' });
@@ -77,7 +77,7 @@ class PublishingAnalyticsService {
           pubStore.createIndex('status', 'status');
           pubStore.createIndex('publishedAt', 'publishedAt');
         }
-        
+
         // Feedback store
         if (!db.objectStoreNames.contains('feedback')) {
           const feedbackStore = db.createObjectStore('feedback', { keyPath: 'id' });
@@ -85,14 +85,14 @@ class PublishingAnalyticsService {
           feedbackStore.createIndex('type', 'type');
           feedbackStore.createIndex('timestamp', 'timestamp');
         }
-        
+
         // Goals store
         if (!db.objectStoreNames.contains('publishingGoals')) {
           const goalsStore = db.createObjectStore('publishingGoals', { keyPath: 'id' });
           goalsStore.createIndex('publicationId', 'publicationId');
           goalsStore.createIndex('type', 'type');
         }
-        
+
         // Alerts store
         if (!db.objectStoreNames.contains('alerts')) {
           const alertsStore = db.createObjectStore('alerts', { keyPath: 'id' });
@@ -129,14 +129,14 @@ class PublishingAnalyticsService {
 
     await this.savePublication(publication);
     await this.generateMockAnalyticsData(publication.id);
-    
+
     return publication;
   }
 
   private createPublishedInstance(platformId: string, project: Project): PublishedInstance {
     const platform = this.mockPlatforms.find(p => p.id === platformId);
     const baseUrl = this.generatePublicationUrl(platformId, project.title);
-    
+
     return {
       id: `inst_${Date.now()}_${platformId}`,
       platformId,
@@ -150,8 +150,11 @@ class PublishingAnalyticsService {
   }
 
   private generatePublicationUrl(platformId: string, title: string): string {
-    const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    
+    const slug = title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+
     switch (platformId) {
       case 'wattpad':
         return `https://www.wattpad.com/story/${slug}`;
@@ -221,10 +224,11 @@ class PublishingAnalyticsService {
       aggregatedAnalytics.bookmarks += analytics.bookmarks;
       aggregatedAnalytics.shares += analytics.shares;
       aggregatedAnalytics.rating.count += analytics.rating.count;
-      
+
       // Merge geographic data
       Object.entries(analytics.geographics).forEach(([country, count]) => {
-        aggregatedAnalytics.geographics[country] = (aggregatedAnalytics.geographics[country] || 0) + count;
+        aggregatedAnalytics.geographics[country] =
+          (aggregatedAnalytics.geographics[country] || 0) + count;
       });
     });
 
@@ -240,7 +244,10 @@ class PublishingAnalyticsService {
     return aggregatedAnalytics;
   }
 
-  async getEngagementMetrics(publicationId: string, timeframe: { start: Date; end: Date }): Promise<EngagementMetrics> {
+  async getEngagementMetrics(
+    publicationId: string,
+    timeframe: { start: Date; end: Date }
+  ): Promise<EngagementMetrics> {
     // In real implementation, this would fetch from various platform APIs
     const mockMetrics: EngagementMetrics = {
       publicationId,
@@ -267,7 +274,7 @@ class PublishingAnalyticsService {
     return mockMetrics;
   }
 
-  async getReaderFeedback(publicationId: string, limit: number = 50): Promise<ReaderFeedback[]> {
+  async getReaderFeedback(publicationId: string, limit = 50): Promise<ReaderFeedback[]> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -275,7 +282,7 @@ class PublishingAnalyticsService {
       const store = transaction.objectStore('feedback');
       const index = store.index('publicationId');
       const request = index.getAll(publicationId);
-      
+
       request.onsuccess = () => {
         const feedback = request.result
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -292,13 +299,13 @@ class PublishingAnalyticsService {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
       end: new Date(),
     });
-    
+
     const insights: ReaderInsights = {
       publicationId,
       audienceProfile: {
         primaryDemographic: this.determinePrimaryDemographic(analytics),
         topCountries: Object.entries(analytics.geographics)
-          .sort(([,a], [,b]) => b - a)
+          .sort(([, a], [, b]) => b - a)
           .slice(0, 5)
           .map(([country]) => country),
         peakReadingTimes: this.formatPeakTimes(engagement.peakReadingTimes),
@@ -328,7 +335,9 @@ class PublishingAnalyticsService {
   }
 
   // Goal Management
-  async createPublishingGoal(goal: Omit<PublishingGoals, 'id' | 'current'>): Promise<PublishingGoals> {
+  async createPublishingGoal(
+    goal: Omit<PublishingGoals, 'id' | 'current'>
+  ): Promise<PublishingGoals> {
     const newGoal: PublishingGoals = {
       ...goal,
       id: `goal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -341,7 +350,7 @@ class PublishingAnalyticsService {
       const transaction = this.db!.transaction(['publishingGoals'], 'readwrite');
       const store = transaction.objectStore('publishingGoals');
       const request = store.add(newGoal);
-      
+
       request.onsuccess = () => resolve(newGoal);
       request.onerror = () => reject(request.error);
     });
@@ -355,14 +364,14 @@ class PublishingAnalyticsService {
       const store = transaction.objectStore('publishingGoals');
       const index = store.index('publicationId');
       const request = index.getAll(publicationId);
-      
+
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
   }
 
   // Trends and Predictions
-  async getPublishingTrends(_publicationId: string, days: number = 30): Promise<PublishingTrends> {
+  async getPublishingTrends(_publicationId: string, days = 30): Promise<PublishingTrends> {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - days);
@@ -396,7 +405,7 @@ class PublishingAnalyticsService {
   }
 
   // Alerts and Notifications
-  async getPublishingAlerts(limit: number = 20): Promise<PublishingAlert[]> {
+  async getPublishingAlerts(limit = 20): Promise<PublishingAlert[]> {
     if (!this.db) await this.init();
 
     return new Promise((resolve, reject) => {
@@ -404,7 +413,7 @@ class PublishingAnalyticsService {
       const store = transaction.objectStore('alerts');
       const index = store.index('timestamp');
       const request = index.getAll();
-      
+
       request.onsuccess = () => {
         const alerts = request.result
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -416,7 +425,10 @@ class PublishingAnalyticsService {
   }
 
   // Data Export
-  async exportPublishingAnalytics(publicationIds: string[], format: 'json' | 'csv' | 'xlsx'): Promise<string> {
+  async exportPublishingAnalytics(
+    publicationIds: string[],
+    format: 'json' | 'csv' | 'xlsx'
+  ): Promise<string> {
     const exportData: {
       publications: Publication[];
       analytics: PlatformAnalytics[];
@@ -433,7 +445,7 @@ class PublishingAnalyticsService {
       const publication = await this.getPublication(id);
       const analytics = await this.getPublicationAnalytics(id);
       const feedback = await this.getReaderFeedback(id);
-      
+
       if (publication) {
         exportData.publications.push(publication);
         exportData.analytics.push(analytics);
@@ -454,11 +466,11 @@ class PublishingAnalyticsService {
   async connectPlatform(platformId: string, credentials: any): Promise<boolean> {
     const platform = this.mockPlatforms.find(p => p.id === platformId);
     if (!platform) return false;
-    
+
     // In real implementation, this would test API connection
     platform.isConnected = true;
     platform.credentials = credentials;
-    
+
     return true;
   }
 
@@ -478,7 +490,7 @@ class PublishingAnalyticsService {
       const transaction = this.db!.transaction(['publications'], 'readwrite');
       const store = transaction.objectStore('publications');
       const request = store.put(publication);
-      
+
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
@@ -491,7 +503,7 @@ class PublishingAnalyticsService {
       const transaction = this.db!.transaction(['publications'], 'readonly');
       const store = transaction.objectStore('publications');
       const request = store.get(publicationId);
-      
+
       request.onsuccess = () => resolve(request.result || null);
       request.onerror = () => reject(request.error);
     });
@@ -505,7 +517,7 @@ class PublishingAnalyticsService {
         publicationId,
         platformId: 'wattpad',
         type: 'review',
-        content: 'Amazing story! Couldn\'t put it down. The character development is incredible.',
+        content: "Amazing story! Couldn't put it down. The character development is incredible.",
         rating: 5,
         author: {
           id: 'reader_1',
@@ -536,7 +548,7 @@ class PublishingAnalyticsService {
       const transaction = this.db!.transaction(['feedback'], 'readwrite');
       const store = transaction.objectStore('feedback');
       const request = store.put(feedback);
-      
+
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
@@ -545,12 +557,12 @@ class PublishingAnalyticsService {
   private extractTags(project: Project): string[] {
     // Extract tags from project content and style
     const tags = [project.style.toLowerCase()];
-    
+
     // Add more sophisticated tag extraction based on content analysis
     if (project.idea.toLowerCase().includes('magic')) tags.push('magic');
     if (project.idea.toLowerCase().includes('romance')) tags.push('romance');
     if (project.idea.toLowerCase().includes('adventure')) tags.push('adventure');
-    
+
     return tags;
   }
 
@@ -560,7 +572,7 @@ class PublishingAnalyticsService {
     }, 0);
   }
 
-  private generateDropOffPoints(): Array<{ chapterIndex: number; dropOffRate: number }> {
+  private generateDropOffPoints(): { chapterIndex: number; dropOffRate: number }[] {
     const points = [];
     for (let i = 0; i < 10; i++) {
       points.push({
@@ -571,7 +583,7 @@ class PublishingAnalyticsService {
     return points;
   }
 
-  private generatePeakReadingTimes(): Array<{ hour: number; dayOfWeek: number; activityLevel: number }> {
+  private generatePeakReadingTimes(): { hour: number; dayOfWeek: number; activityLevel: number }[] {
     const times = [];
     for (let day = 0; day < 7; day++) {
       for (let hour = 0; hour < 24; hour++) {
@@ -588,20 +600,23 @@ class PublishingAnalyticsService {
   private determinePrimaryDemographic(analytics: PlatformAnalytics): string {
     // Simple logic - in real app this would be more sophisticated
     const demographics = analytics.demographics.ageGroups;
-    const topAge = Object.entries(demographics)
-      .sort(([,a], [,b]) => b - a)[0];
-    
+    const topAge = Object.entries(demographics).sort(([, a], [, b]) => b - a)[0];
+
     return topAge ? `${topAge[0]} age group` : '18-24 age group';
   }
 
-  private formatPeakTimes(peakTimes: Array<{ hour: number; dayOfWeek: number; activityLevel: number }>): string[] {
+  private formatPeakTimes(
+    peakTimes: { hour: number; dayOfWeek: number; activityLevel: number }[]
+  ): string[] {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return peakTimes.slice(0, 3).map(time => 
-      `${days[time.dayOfWeek]} at ${time.hour}:00`
-    );
+    return peakTimes.slice(0, 3).map(time => `${days[time.dayOfWeek]} at ${time.hour}:00`);
   }
 
-  private generatePopularChapters(): Array<{ chapterIndex: number; title: string; engagementScore: number }> {
+  private generatePopularChapters(): {
+    chapterIndex: number;
+    title: string;
+    engagementScore: number;
+  }[] {
     return [
       { chapterIndex: 0, title: 'Chapter 1: The Beginning', engagementScore: 95 },
       { chapterIndex: 5, title: 'Chapter 6: The Plot Twist', engagementScore: 92 },
@@ -609,7 +624,7 @@ class PublishingAnalyticsService {
     ];
   }
 
-  private generateSentimentTrends(): Array<{ chapter: number; sentiment: number; topics: string[] }> {
+  private generateSentimentTrends(): { chapter: number; sentiment: number; topics: string[] }[] {
     return [
       { chapter: 1, sentiment: 0.8, topics: ['introduction', 'world building'] },
       { chapter: 2, sentiment: 0.7, topics: ['character development', 'plot'] },
@@ -626,7 +641,12 @@ class PublishingAnalyticsService {
     ];
   }
 
-  private generateCompetitorComparison(): Array<{ title: string; rating: number; views: number; similarityScore: number }> {
+  private generateCompetitorComparison(): {
+    title: string;
+    rating: number;
+    views: number;
+    similarityScore: number;
+  }[] {
     return [
       { title: 'Similar Fantasy Epic', rating: 4.3, views: 15000, similarityScore: 0.85 },
       { title: 'Magic Academy Adventures', rating: 4.1, views: 12000, similarityScore: 0.72 },
@@ -634,14 +654,28 @@ class PublishingAnalyticsService {
     ];
   }
 
-  private generateRecommendations(analytics: PlatformAnalytics, engagement: EngagementMetrics): Array<{ type: 'content' | 'marketing' | 'pricing' | 'timing'; priority: 'high' | 'medium' | 'low'; suggestion: string; expectedImpact: string }> {
-    const recommendations: Array<{ type: 'content' | 'marketing' | 'pricing' | 'timing'; priority: 'high' | 'medium' | 'low'; suggestion: string; expectedImpact: string }> = [];
+  private generateRecommendations(
+    analytics: PlatformAnalytics,
+    engagement: EngagementMetrics
+  ): {
+    type: 'content' | 'marketing' | 'pricing' | 'timing';
+    priority: 'high' | 'medium' | 'low';
+    suggestion: string;
+    expectedImpact: string;
+  }[] {
+    const recommendations: {
+      type: 'content' | 'marketing' | 'pricing' | 'timing';
+      priority: 'high' | 'medium' | 'low';
+      suggestion: string;
+      expectedImpact: string;
+    }[] = [];
 
     if (engagement.completionRate < 0.5) {
       recommendations.push({
         type: 'content',
         priority: 'high',
-        suggestion: 'Consider shorter chapters or stronger chapter endings to improve completion rates',
+        suggestion:
+          'Consider shorter chapters or stronger chapter endings to improve completion rates',
         expectedImpact: 'Could increase completion rate by 15-25%',
       });
     }
@@ -658,8 +692,10 @@ class PublishingAnalyticsService {
     return recommendations;
   }
 
-  private generateTrendMetrics(days: number): Array<{ date: string; views: number; engagement: number; rating: number }> {
-    const metrics: Array<{ date: string; views: number; engagement: number; rating: number }> = [];
+  private generateTrendMetrics(
+    days: number
+  ): { date: string; views: number; engagement: number; rating: number }[] {
+    const metrics: { date: string; views: number; engagement: number; rating: number }[] = [];
     for (let i = 0; i < days; i++) {
       const date = new Date();
       date.setDate(date.getDate() - i);
@@ -684,12 +720,15 @@ class PublishingAnalyticsService {
   /**
    * Track campaign performance data
    */
-  public async trackCampaignPerformance(campaignId: string, metrics: {
-    impressions: number;
-    clicks: number;
-    conversions: number;
-    spend: number;
-  }): Promise<void> {
+  public async trackCampaignPerformance(
+    campaignId: string,
+    metrics: {
+      impressions: number;
+      clicks: number;
+      conversions: number;
+      spend: number;
+    }
+  ): Promise<void> {
     try {
       console.log(`Tracking campaign ${campaignId}:`, metrics);
       // Store metrics data - implementation would go here
@@ -707,10 +746,10 @@ class PublishingAnalyticsService {
       return [
         {
           type: 'content',
-          priority: 'high', 
+          priority: 'high',
           suggestion: 'Consider updating chapter titles for better engagement',
-          expectedImpact: 'Increase reader engagement by 15%'
-        }
+          expectedImpact: 'Increase reader engagement by 15%',
+        },
       ];
     } catch (error) {
       console.error('Failed to generate insights:', error);

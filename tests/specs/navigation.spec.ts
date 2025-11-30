@@ -1,8 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
-import { setupGeminiMock } from '../utils/mock-gemini';
+
+import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
 test.describe('Feature: Navigation & UX', () => {
-
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
@@ -47,7 +47,6 @@ test.describe('Feature: Navigation & UX', () => {
     // On desktop, sidebar remains hidden after exiting focus mode
     await expect(sidebar).toBeHidden();
   });
-
 });
 
 /**
@@ -59,14 +58,14 @@ async function setupTestProject(page: Page) {
   try {
     await expect(page.getByTestId('chapter-sidebar')).toBeVisible({ timeout: 3000 });
     return; // Already in dashboard
-  } catch (e) {
+  } catch (_e) {
     // Sidebar not visible, proceed to check for wizard
   }
 
   // Check for wizard overlay
   const wizard = page.getByTestId('project-wizard-overlay');
 
-  if (!await wizard.isVisible()) {
+  if (!(await wizard.isVisible())) {
     // If neither sidebar nor wizard is visible, try clicking "New Project" if available
     const newProjectBtn = page.getByTestId('nav-new-project');
     if (await newProjectBtn.isVisible()) {
@@ -93,7 +92,7 @@ async function setupTestProject(page: Page) {
   const sidebar = page.getByTestId('chapter-sidebar');
   try {
     await expect(sidebar).toBeVisible({ timeout: 5000 });
-  } catch (e) {
+  } catch (_e) {
     // If sidebar isn't visible, we might need to wait for the wizard to fully close
     await page.waitForTimeout(2000);
     await expect(sidebar).toBeVisible({ timeout: 10000 });

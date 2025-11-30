@@ -69,17 +69,17 @@ export interface ProjectAnalytics {
   writingProgress: number; // 0-100 percentage
   timeSpent: number; // total minutes
   lastActivity: Date;
-  wordCountHistory: Array<{
+  wordCountHistory: {
     date: string;
     wordCount: number;
-  }>;
-  chapterProgress: Array<{
+  }[];
+  chapterProgress: {
     chapterId: string;
     title: string;
     wordCount: number;
     status: string;
     completionDate?: Date;
-  }>;
+  }[];
 }
 
 export interface WritingGoals {
@@ -125,13 +125,13 @@ export interface WritingInsights {
     longestStreak: number;
     streakDates: string[];
   };
-  milestones: Array<{
+  milestones: {
     type: 'word_count' | 'chapter_completion' | 'streak' | 'productivity';
     title: string;
     description: string;
     achievedAt: Date;
     value: number;
-  }>;
+  }[];
 }
 
 export interface AnalyticsFilter {
@@ -151,22 +151,16 @@ export interface AnalyticsExport {
     end: Date;
   };
   includeCharts: boolean;
-  sections: Array<'summary' | 'goals' | 'insights' | 'sessions' | 'projects'>;
+  sections: ('summary' | 'goals' | 'insights' | 'sessions' | 'projects')[];
 }
 
-export type ChartDataPoint = {
+export interface ChartDataPoint {
   date: string;
   value: number;
   label?: string;
-};
+}
 
-export type AnalyticsChartType = 
-  | 'line' 
-  | 'bar' 
-  | 'area' 
-  | 'pie' 
-  | 'heatmap' 
-  | 'progress';
+export type AnalyticsChartType = 'line' | 'bar' | 'area' | 'pie' | 'heatmap' | 'progress';
 
 export interface ChartConfig {
   type: AnalyticsChartType;

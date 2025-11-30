@@ -4,6 +4,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import useWritingAssistant from '../useWritingAssistant';
 
 // Mock the service
@@ -28,8 +29,8 @@ vi.mock('../services/writingAssistantService', () => ({
           position: { start: 0, end: 15 },
           confidence: 0.8,
           reasoning: 'Sentence variety improves readability',
-          category: 'readability'
-        }
+          category: 'readability',
+        },
       ],
       plotHoles: [],
       characterIssues: [],
@@ -40,7 +41,7 @@ vi.mock('../services/writingAssistantService', () => ({
         averageDialogueLength: 0,
         issues: [],
         voiceConsistency: [],
-        tagAnalysis: { totalTags: 0, varietyScore: 0, overusedTags: [], suggestions: [] }
+        tagAnalysis: { totalTags: 0, varietyScore: 0, overusedTags: [], suggestions: [] },
       },
       styleProfile: {
         complexity: 'moderate',
@@ -50,14 +51,14 @@ vi.mock('../services/writingAssistantService', () => ({
         tense: 'past',
         strengths: [],
         improvements: [],
-        consistency: 80
+        consistency: 80,
       },
       toneAnalysis: {
         primary: 'neutral',
         intensity: 50,
         consistency: 80,
         emotionalRange: { dominant: ['neutral'], absent: [], variety: 50 },
-        moodProgression: []
+        moodProgression: [],
       },
       wordUsage: {
         vocabularyLevel: 'high_school',
@@ -66,27 +67,27 @@ vi.mock('../services/writingAssistantService', () => ({
         overusedWords: [],
         weakWords: [],
         cliches: [],
-        redundancies: []
+        redundancies: [],
       },
       paragraphAnalysis: {
         averageLength: 3,
         varietyScore: 70,
         lengthDistribution: { short: 1, medium: 2, long: 1 },
-        recommendations: []
+        recommendations: [],
       },
       sentenceVariety: {
         averageLength: 15,
         varietyScore: 75,
         typeDistribution: { simple: 0.4, compound: 0.3, complex: 0.2, compound_complex: 0.1 },
-        recommendations: []
+        recommendations: [],
       },
       transitionQuality: {
         quality: 60,
         missingTransitions: [],
-        weakTransitions: []
-      }
-    })
-  }
+        weakTransitions: [],
+      },
+    }),
+  },
 }));
 
 // Mock localStorage
@@ -94,10 +95,10 @@ const localStorageMock = {
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
-  clear: vi.fn()
+  clear: vi.fn(),
 };
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
+  value: localStorageMock,
 });
 
 describe('useWritingAssistant', () => {
@@ -125,7 +126,10 @@ describe('useWritingAssistant', () => {
     });
 
     expect(result.current.isActive).toBe(true);
-    expect(localStorageMock.setItem).toHaveBeenCalledWith('novelist_writing_assistant_active', 'true');
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      'novelist_writing_assistant_active',
+      'true'
+    );
   });
 
   it('should filter suggestions by category', () => {
@@ -187,14 +191,14 @@ describe('useWritingAssistant', () => {
       totalSuggestions: 0, // Initially 0, will update after analysis
       highPrioritySuggestions: 0,
       avgConfidence: 0,
-      topCategories: []
+      topCategories: [],
     });
   });
 
   it('should load configuration from localStorage', () => {
     const savedConfig = JSON.stringify({
       enableRealTimeAnalysis: false,
-      analysisDelay: 2000
+      analysisDelay: 2000,
     });
     localStorageMock.getItem.mockReturnValue(savedConfig);
 
@@ -210,7 +214,7 @@ describe('useWritingAssistant', () => {
     act(() => {
       result.current.updateConfig({
         enableRealTimeAnalysis: false,
-        analysisDelay: 3000
+        analysisDelay: 3000,
       });
     });
 

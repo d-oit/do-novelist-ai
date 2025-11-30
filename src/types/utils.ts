@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+
 import { ProjectId, ChapterId, Temperature } from './schemas';
 
 // =============================================================================
@@ -117,21 +118,23 @@ export type AsyncTransformer<TInput, TOutput> = (input: TInput) => Promise<TOutp
 /**
  * Standard API response wrapper
  */
-export type ApiResponse<TData = unknown> = {
-  success: true;
-  data: TData;
-  message?: string;
-} | {
-  success: false;
-  error: string;
-  code?: string;
-  details?: unknown;
-};
+export type ApiResponse<TData = unknown> =
+  | {
+      success: true;
+      data: TData;
+      message?: string;
+    }
+  | {
+      success: false;
+      error: string;
+      code?: string;
+      details?: unknown;
+    };
 
 /**
  * Paginated API response
  */
-export type PaginatedResponse<TData> = {
+export interface PaginatedResponse<TData> {
   items: TData[];
   pagination: {
     page: number;
@@ -141,18 +144,18 @@ export type PaginatedResponse<TData> = {
     hasNext: boolean;
     hasPrev: boolean;
   };
-};
+}
 
 /**
  * Search response with metadata
  */
-export type SearchResponse<TData> = {
+export interface SearchResponse<TData> {
   results: TData[];
   query: string;
   totalResults: number;
   searchTime: number; // milliseconds
   filters?: Record<string, unknown>;
-};
+}
 
 // =============================================================================
 // STATE MANAGEMENT TYPES
@@ -166,32 +169,32 @@ export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 /**
  * Async operation state
  */
-export type AsyncState<TData, TError = Error> = {
+export interface AsyncState<TData, TError = Error> {
   data: TData | null;
   loading: boolean;
   error: TError | null;
-};
+}
 
 /**
  * Form state type
  */
-export type FormState<TData> = {
+export interface FormState<TData> {
   values: TData;
   errors: Partial<Record<keyof TData, string>>;
   touched: Partial<Record<keyof TData, boolean>>;
   dirty: boolean;
   valid: boolean;
   submitting: boolean;
-};
+}
 
 /**
  * Modal state type
  */
-export type ModalState = {
+export interface ModalState {
   isOpen: boolean;
   data?: unknown;
   context?: string;
-};
+}
 
 // =============================================================================
 // COMPONENT PROP TYPES
@@ -305,11 +308,20 @@ export type AppEvent =
   | { type: 'CHAPTER_UPDATED'; payload: { projectId: ProjectId; chapterId: ChapterId } }
   | { type: 'CHAPTER_DELETED'; payload: { projectId: ProjectId; chapterId: ChapterId } }
   | { type: 'GENERATION_STARTED'; payload: { projectId: ProjectId; actionName: string } }
-  | { type: 'GENERATION_COMPLETED'; payload: { projectId: ProjectId; actionName: string; duration: number } }
-  | { type: 'GENERATION_FAILED'; payload: { projectId: ProjectId; actionName: string; error: string } }
+  | {
+      type: 'GENERATION_COMPLETED';
+      payload: { projectId: ProjectId; actionName: string; duration: number };
+    }
+  | {
+      type: 'GENERATION_FAILED';
+      payload: { projectId: ProjectId; actionName: string; error: string };
+    }
   | { type: 'SETTINGS_UPDATED'; payload: { projectId: ProjectId; settings: Partial<unknown> } }
   | { type: 'EXPORT_STARTED'; payload: { projectId: ProjectId; format: string } }
-  | { type: 'EXPORT_COMPLETED'; payload: { projectId: ProjectId; format: string; filePath: string } };
+  | {
+      type: 'EXPORT_COMPLETED';
+      payload: { projectId: ProjectId; format: string; filePath: string };
+    };
 
 /**
  * Event listener type
@@ -328,7 +340,7 @@ export type AsyncHookReturn<TData, TError = Error> = [
   {
     execute: () => Promise<void>;
     reset: () => void;
-  }
+  },
 ];
 
 /**
@@ -343,7 +355,7 @@ export type FormHookReturn<TData> = [
     setTouched: <K extends keyof TData>(key: K, touched: boolean) => void;
     reset: (initialValues?: TData) => void;
     submit: () => Promise<void>;
-  }
+  },
 ];
 
 // =============================================================================

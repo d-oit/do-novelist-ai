@@ -1,18 +1,27 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Project, AgentAction, AgentMode, LogEntry, Chapter, ChapterStatus, RefineOptions } from '@shared/types';
-import { generateOutline, writeChapterContent, refineChapterContent, analyzeConsistency, continueWriting } from '../services/geminiService';
+import { Project, AgentAction, AgentMode, LogEntry, Chapter, ChapterStatus } from '@shared/types';
 import { createChapter } from '@shared/utils';
+import React, { useState, useEffect, useCallback } from 'react';
+
+import {
+  generateOutline,
+  writeChapterContent,
+  refineChapterContent,
+  analyzeConsistency,
+  continueWriting,
+} from '@/lib/ai';
+import { type RefineOptions } from '@/types';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {
     name: 'create_outline',
     label: 'Architect: Generate Outline',
-    description: 'Analyzes the core idea and generates a structural chapter outline based on the hero\'s journey.',
+    description:
+      "Analyzes the core idea and generates a structural chapter outline based on the hero's journey.",
     cost: 150,
     agentMode: AgentMode.SINGLE,
     preconditions: { hasOutline: false },
     effects: { hasOutline: true },
-    promptTemplate: '...'
+    promptTemplate: '...',
   },
   {
     name: 'write_chapter_parallel',
@@ -22,7 +31,7 @@ const INITIAL_ACTIONS: AgentAction[] = [
     agentMode: AgentMode.PARALLEL,
     preconditions: { hasOutline: true },
     effects: { chaptersCompleted: 1 },
-    promptTemplate: '...'
+    promptTemplate: '...',
   },
   {
     name: 'editor_review',
@@ -31,9 +40,9 @@ const INITIAL_ACTIONS: AgentAction[] = [
     cost: 300,
     agentMode: AgentMode.HYBRID,
     preconditions: { hasOutline: true },
-    effects: { },
-    promptTemplate: '...'
-  }
+    effects: {},
+    promptTemplate: '...',
+  },
 ];
 
 export const useGoapEngine = (
@@ -46,15 +55,21 @@ export const useGoapEngine = (
   const [currentAction, setCurrentAction] = useState<AgentAction | null>(null);
   const [autoPilot, setAutoPilot] = useState(false);
 
-  const addLog = useCallback((agentName: string, message: string, type: LogEntry['type'] = 'info') => {
-    setLogs(prev => [...prev, {
-      id: Math.random().toString(36).substring(7),
-      timestamp: new Date(),
-      agentName,
-      message,
-      type
-    }]);
-  }, []);
+  const addLog = useCallback(
+    (agentName: string, message: string, type: LogEntry['type'] = 'info') => {
+      setLogs(prev => [
+        ...prev,
+        {
+          id: Math.random().toString(36).substring(7),
+          timestamp: new Date(),
+          agentName,
+          message,
+          type,
+        },
+      ]);
+    },
+    []
+  );
 
   const executeAction = async (action: AgentAction) => {
     if (project.isGenerating) return;
@@ -69,16 +84,22 @@ export const useGoapEngine = (
 
         const result = await generateOutline(project.idea, project.style);
 
-        addLog('Architect', `Outline generated with ${result.chapters.length} chapters.`, 'success');
+        addLog(
+          'Architect',
+          `Outline generated with ${result.chapters.length} chapters.`,
+          'success'
+        );
 
         // FIX: Unique Chapter IDs based on Project ID to prevent collisions in DB
-        const newChapters: Chapter[] = result.chapters.map((c: any) => createChapter({
-          id: `${project.id}_ch_${c.orderIndex}`,
-          orderIndex: c.orderIndex,
-          title: c.title,
-          summary: c.summary,
-          status: ChapterStatus.PENDING
-        }));
+        const newChapters: Chapter[] = result.chapters.map((c: any) =>
+          createChapter({
+            id: `${project.id}_ch_${c.orderIndex}`,
+            orderIndex: c.orderIndex,
+            title: c.title,
+            summary: c.summary,
+            status: ChapterStatus.PENDING,
+          })
+        );
 
         setProject(prev => ({
           ...prev,
@@ -87,11 +108,10 @@ export const useGoapEngine = (
           worldState: {
             ...prev.worldState,
             hasOutline: true,
-            chaptersCount: newChapters.length
-          }
+            chaptersCount: newChapters.length,
+          },
         }));
-      }
-      else if (action.name === 'write_chapter_parallel') {
+      } else if (action.name === 'write_chapter_parallel') {
         const pendingChapter = project.chapters.find(c => c.status === ChapterStatus.PENDING);
         if (!pendingChapter) {
           addLog('Planner', 'No pending chapters found.', 'warning');
@@ -100,39 +120,62 @@ export const useGoapEngine = (
           return;
         }
 
-        addLog('Planner', `Delegating Chapter ${pendingChapter.orderIndex} to Writer Agent.`, 'thought');
+        addLog(
+          'Planner',
+          `Delegating Chapter ${pendingChapter.orderIndex} to Writer Agent.`,
+          'thought'
+        );
         setProject(prev => ({
           ...prev,
-          chapters: prev.chapters.map(c => c.id === pendingChapter.id ? { ...c, status: ChapterStatus.DRAFTING } : c)
+          chapters: prev.chapters.map(c =>
+            c.id === pendingChapter.id ? { ...c, status: ChapterStatus.DRAFTING } : c
+          ),
         }));
         setSelectedChapterId(pendingChapter.id);
         addLog('Writer', `Drafting "${pendingChapter.title}"...`, 'info');
 
         const prevIndex = pendingChapter.orderIndex - 2;
         const prevSummary = prevIndex >= 0 ? project.chapters[prevIndex]?.summary : undefined;
-        const content = await writeChapterContent(pendingChapter.title, pendingChapter.summary, project.style, prevSummary);
+        const content = await writeChapterContent(
+          pendingChapter.title,
+          pendingChapter.summary,
+          project.style,
+          prevSummary
+        );
 
-        addLog('Writer', `Chapter ${pendingChapter.orderIndex} completed (${content.length} chars).`, 'success');
+        addLog(
+          'Writer',
+          `Chapter ${pendingChapter.orderIndex} completed (${content.length} chars).`,
+          'success'
+        );
         setProject(prev => ({
           ...prev,
-          chapters: prev.chapters.map(c => c.id === pendingChapter.id ? { ...c, content, status: ChapterStatus.COMPLETE } : c),
-          worldState: { ...prev.worldState, chaptersCompleted: prev.worldState.chaptersCompleted + 1 }
+          chapters: prev.chapters.map(c =>
+            c.id === pendingChapter.id ? { ...c, content, status: ChapterStatus.COMPLETE } : c
+          ),
+          worldState: {
+            ...prev.worldState,
+            chaptersCompleted: prev.worldState.chaptersCompleted + 1,
+          },
         }));
-      }
-      else if (action.name === 'editor_review') {
-         addLog('Planner', 'Selected Strategy: Editor (Consistency Check)', 'thought');
-         const analysis = await analyzeConsistency(project.chapters, project.style);
-         addLog('Editor', `Analysis Report:\n${analysis}`, 'success');
+      } else if (action.name === 'editor_review') {
+        addLog('Planner', 'Selected Strategy: Editor (Consistency Check)', 'thought');
+        const analysis = await analyzeConsistency(project.chapters, project.style);
+        addLog('Editor', `Analysis Report:\n${analysis}`, 'success');
       }
     } catch (err) {
-      addLog('System', `Action Failed: ${  (err as Error).message}`, 'error');
+      addLog('System', `Action Failed: ${(err as Error).message}`, 'error');
     } finally {
       setProject(p => ({ ...p, isGenerating: false }));
       setCurrentAction(null);
     }
   };
 
-  const handleRefineChapter = async (chapterId: string, options: RefineOptions, currentContent?: string) => {
+  const handleRefineChapter = async (
+    chapterId: string,
+    options: RefineOptions,
+    currentContent?: string
+  ) => {
     if (project.isGenerating) return;
     const chapter = project.chapters.find(c => c.id === chapterId);
     const contentToRefine = currentContent !== undefined ? currentContent : chapter?.content;
@@ -142,10 +185,17 @@ export const useGoapEngine = (
     addLog('Editor', `Starting refinement for "${chapter.title}"...`, 'info');
 
     try {
-      const refinedContent = await refineChapterContent(contentToRefine, chapter.summary, project.style, options);
+      const refinedContent = await refineChapterContent(
+        contentToRefine,
+        chapter.summary,
+        project.style,
+        options
+      );
       setProject(prev => ({
         ...prev,
-        chapters: prev.chapters.map(c => c.id === chapterId ? { ...c, content: refinedContent } : c)
+        chapters: prev.chapters.map(c =>
+          c.id === chapterId ? { ...c, content: refinedContent } : c
+        ),
       }));
       addLog('Editor', `Refinement complete.`, 'success');
     } catch (err) {
@@ -171,13 +221,21 @@ export const useGoapEngine = (
 
       setProject(prev => ({
         ...prev,
-        chapters: prev.chapters.map(c => c.id === chapterId ? {
-            ...c,
-            content: updatedContent,
-            status: ChapterStatus.DRAFTING
-        } : c)
+        chapters: prev.chapters.map(c =>
+          c.id === chapterId
+            ? {
+                ...c,
+                content: updatedContent,
+                status: ChapterStatus.DRAFTING,
+              }
+            : c
+        ),
       }));
-      addLog('Writer', `Added ${newContent.length} chars to Chapter ${chapter.orderIndex}.`, 'success');
+      addLog(
+        'Writer',
+        `Added ${newContent.length} chars to Chapter ${chapter.orderIndex}.`,
+        'success'
+      );
     } catch (err) {
       addLog('Writer', `Failed to continue chapter: ${(err as Error).message}`, 'error');
     } finally {
@@ -204,8 +262,17 @@ export const useGoapEngine = (
   }, [autoPilot, project.isGenerating, project.worldState, availableActions]);
 
   const isActionAvailable = (action: AgentAction) => {
-    if (action.preconditions.hasOutline !== undefined && action.preconditions.hasOutline !== project.worldState.hasOutline) return false;
-    if (action.name === 'write_chapter_parallel' && project.worldState.chaptersCompleted >= project.worldState.chaptersCount && project.worldState.chaptersCount > 0) return false;
+    if (
+      action.preconditions.hasOutline !== undefined &&
+      action.preconditions.hasOutline !== project.worldState.hasOutline
+    )
+      return false;
+    if (
+      action.name === 'write_chapter_parallel' &&
+      project.worldState.chaptersCompleted >= project.worldState.chaptersCount &&
+      project.worldState.chaptersCount > 0
+    )
+      return false;
     return true;
   };
 
@@ -219,6 +286,6 @@ export const useGoapEngine = (
     handleRefineChapter,
     handleContinueChapter,
     addLog,
-    isActionAvailable
+    isActionAvailable,
   };
 };

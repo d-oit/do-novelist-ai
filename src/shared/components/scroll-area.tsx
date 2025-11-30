@@ -6,11 +6,7 @@ interface ScrollAreaProps {
 }
 
 const ScrollArea: React.FC<ScrollAreaProps> = ({ className, children }) => {
-  return (
-    <div className={`overflow-auto ${className ?? ''}`}>
-      {children}
-    </div>
-  );
+  return <div className={`overflow-auto ${className ?? ''}`}>{children}</div>;
 };
 
 export default ScrollArea;

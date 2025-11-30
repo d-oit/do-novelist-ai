@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useSettings } from '../useSettings';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { settingsService } from '../../services/settingsService';
-import type { Settings, SettingsCategory } from '../../types';
+import { type Settings, type SettingsCategory } from '../../types';
 import { DEFAULT_SETTINGS } from '../../types';
+import { useSettings } from '../useSettings';
 
 // Mock the settings service
 vi.mock('../../services/settingsService');
@@ -23,17 +24,17 @@ describe('useSettings', () => {
       isLoading: false,
       isSaving: false,
       error: null,
-      activeCategory: 'appearance'
+      activeCategory: 'appearance',
     });
 
     // Setup DOM mocks
     Object.defineProperty(document, 'documentElement', {
       value: {
         classList: { toggle: mockClassListToggle },
-        style: { fontSize: '', setProperty: mockSetProperty }
+        style: { fontSize: '', setProperty: mockSetProperty },
       },
       writable: true,
-      configurable: true
+      configurable: true,
     });
 
     // Mock window.matchMedia
@@ -131,7 +132,7 @@ describe('useSettings', () => {
 
     const updates: Partial<Settings> = {
       fontSize: 18,
-      theme: 'dark'
+      theme: 'dark',
     };
 
     await act(async () => {
@@ -304,7 +305,7 @@ describe('useSettings', () => {
         fontFamily: 'serif',
         compactMode: true,
         // Keep other settings different
-        autoSave: false
+        autoSave: false,
       });
     });
 
@@ -330,7 +331,7 @@ describe('useSettings', () => {
       await result.current.update({
         aiModel: 'gpt-4',
         aiTemperature: 1.0,
-        enableAIAssistance: false
+        enableAIAssistance: false,
       });
     });
 
@@ -355,7 +356,7 @@ describe('useSettings', () => {
         autoSave: false,
         autoSaveInterval: 120,
         spellCheck: false,
-        wordWrap: false
+        wordWrap: false,
       });
     });
 
@@ -514,7 +515,7 @@ describe('useSettings', () => {
     const customSettings: Settings = {
       ...DEFAULT_SETTINGS,
       theme: 'dark',
-      fontSize: 18
+      fontSize: 18,
     };
 
     mockSettingsService.load.mockResolvedValue(customSettings);
@@ -549,7 +550,7 @@ describe('useSettings', () => {
       theme: 'dark',
       fontSize: 18,
       autoSave: false,
-      dailyWordGoal: 1000
+      dailyWordGoal: 1000,
     };
 
     await act(async () => {
@@ -586,7 +587,14 @@ describe('useSettings', () => {
       await result.current.init();
     });
 
-    const categories: SettingsCategory[] = ['appearance', 'ai', 'editor', 'goals', 'privacy', 'experimental'];
+    const categories: SettingsCategory[] = [
+      'appearance',
+      'ai',
+      'editor',
+      'goals',
+      'privacy',
+      'experimental',
+    ];
 
     for (const category of categories) {
       await act(async () => {

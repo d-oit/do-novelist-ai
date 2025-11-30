@@ -1,9 +1,8 @@
-
 import { test, expect } from '@playwright/test';
-import { setupGeminiMock } from '../utils/mock-gemini';
+
+import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
 test.describe('Feature: Dashboard & Tools', () => {
-
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
@@ -53,5 +52,4 @@ test.describe('Feature: Dashboard & Tools', () => {
     await expect(generateBtn).toHaveText('Generating...');
     await expect(generateBtn).toHaveText('Generate Artwork', { timeout: 10000 });
   });
-
 });

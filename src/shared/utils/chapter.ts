@@ -22,7 +22,9 @@ import { Chapter, ChapterStatus } from '../types';
  * });
  * ```
  */
-export function createChapter(partial: Partial<Chapter> & Pick<Chapter, 'id' | 'orderIndex' | 'title'>): Chapter {
+export function createChapter(
+  partial: Partial<Chapter> & Pick<Chapter, 'id' | 'orderIndex' | 'title'>
+): Chapter {
   const now = new Date();
 
   return {
@@ -45,8 +47,8 @@ export function createChapter(partial: Partial<Chapter> & Pick<Chapter, 'id' | '
     notes: partial.notes ?? '',
 
     // Timestamps
-    createdAt: (partial.createdAt ?? now) as Date,
-    updatedAt: (partial.updatedAt ?? now) as Date,
+    createdAt: partial.createdAt ?? now,
+    updatedAt: partial.updatedAt ?? now,
 
     // AI generation metadata (optional)
     generationPrompt: partial.generationPrompt,

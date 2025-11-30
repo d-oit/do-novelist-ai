@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useCharacters } from '../useCharacters';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { characterService } from '../../services/characterService';
-import type { Character, CharacterRole, CharacterArc } from '../../types';
+import { type Character, type CharacterRole, type CharacterArc } from '../../types';
+import { useCharacters } from '../useCharacters';
 
 // Mock the character service
 vi.mock('../../services/characterService');
@@ -26,13 +27,13 @@ const createMockCharacter = (overrides: Partial<Character> = {}): Character => (
       category: 'personality',
       name: 'Determined',
       description: 'Never gives up',
-      intensity: 8
-    }
+      intensity: 8,
+    },
   ],
   relationships: [],
   createdAt: Date.now(),
   updatedAt: Date.now(),
-  ...overrides
+  ...overrides,
 });
 
 describe('useCharacters', () => {
@@ -47,16 +48,16 @@ describe('useCharacters', () => {
         search: '',
         roles: [],
         arcs: [],
-        validationStatus: 'all'
+        validationStatus: 'all',
       },
       isLoading: false,
       isEditing: false,
-      error: null
+      error: null,
     });
 
     mockCharacterService.init.mockResolvedValue();
     mockCharacterService.getAll.mockResolvedValue([]);
-    mockCharacterService.create.mockImplementation(async (character) => character);
+    mockCharacterService.create.mockImplementation(async character => character);
     mockCharacterService.update.mockImplementation(async (id, data) => {
       const char = createMockCharacter({ id, ...data });
       return char;
@@ -98,7 +99,7 @@ describe('useCharacters', () => {
   it('loads characters for a project', async () => {
     const mockCharacters = [
       createMockCharacter({ name: 'Character 1' }),
-      createMockCharacter({ name: 'Character 2' })
+      createMockCharacter({ name: 'Character 2' }),
     ];
     mockCharacterService.getAll.mockResolvedValue(mockCharacters);
 
@@ -159,7 +160,7 @@ describe('useCharacters', () => {
       goal: 'Control the kingdom',
       conflict: 'Moral boundaries limit his ambition',
       traits: [],
-      relationships: []
+      relationships: [],
     };
 
     await act(async () => {
@@ -184,7 +185,7 @@ describe('useCharacters', () => {
       goal: 'Test goal',
       conflict: 'Test conflict',
       traits: [],
-      relationships: []
+      relationships: [],
     };
 
     await act(async () => {
@@ -209,7 +210,7 @@ describe('useCharacters', () => {
         goal: 'Test goal',
         conflict: 'Test conflict',
         traits: [],
-        relationships: []
+        relationships: [],
       });
     });
 
@@ -240,7 +241,7 @@ describe('useCharacters', () => {
         goal: 'Test goal',
         conflict: 'Test conflict',
         traits: [],
-        relationships: []
+        relationships: [],
       });
     });
 
@@ -266,7 +267,9 @@ describe('useCharacters', () => {
       await result.current.update(existingCharacter.id, { name: 'Updated Name' });
     });
 
-    expect(mockCharacterService.update).toHaveBeenCalledWith(existingCharacter.id, { name: 'Updated Name' });
+    expect(mockCharacterService.update).toHaveBeenCalledWith(existingCharacter.id, {
+      name: 'Updated Name',
+    });
     expect(result.current.characters[0]?.name).toBe('Updated Name');
     expect(result.current.isEditing).toBe(false);
   });
@@ -502,7 +505,7 @@ describe('useCharacters', () => {
         goal: 'Test goal',
         conflict: 'Test conflict',
         traits: [],
-        relationships: []
+        relationships: [],
       });
     });
 
@@ -543,7 +546,7 @@ describe('useCharacters', () => {
       search: '',
       roles: [],
       arcs: [],
-      validationStatus: 'all'
+      validationStatus: 'all',
     });
   });
 

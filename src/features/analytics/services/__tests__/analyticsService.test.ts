@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+
 import { analyticsService } from '../analyticsService';
 
 describe('AnalyticsService', () => {
@@ -67,7 +68,7 @@ describe('AnalyticsService', () => {
         startDate: new Date(),
         endDate: new Date('2025-12-31'),
         type: 'daily',
-        isActive: true
+        isActive: true,
       });
 
       expect(goal).toBeDefined();
@@ -89,12 +90,10 @@ describe('AnalyticsService', () => {
         target: { words: 500 },
         startDate: new Date(),
         type: 'daily',
-        isActive: true
+        isActive: true,
       });
 
-      await expect(
-        analyticsService.deleteGoal(goal.id)
-      ).resolves.toBeUndefined();
+      await expect(analyticsService.deleteGoal(goal.id)).resolves.toBeUndefined();
     });
   });
 

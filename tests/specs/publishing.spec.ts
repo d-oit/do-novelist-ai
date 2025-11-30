@@ -1,9 +1,8 @@
-
 import { test, expect } from '@playwright/test';
-import { setupGeminiMock } from '../utils/mock-gemini';
+
+import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
 test.describe('Feature: Publishing Panel', () => {
-  
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
@@ -44,10 +43,10 @@ test.describe('Feature: Publishing Panel', () => {
 
   test('Can toggle export options', async ({ page }) => {
     const dropCapsCheckbox = page.getByTestId('export-dropcaps-checkbox');
-    
+
     // Default is Checked
     await expect(dropCapsCheckbox).toBeChecked();
-    
+
     // Toggle Off
     await dropCapsCheckbox.click();
     await expect(dropCapsCheckbox).not.toBeChecked();
@@ -58,5 +57,4 @@ test.describe('Feature: Publishing Panel', () => {
     await expect(exportBtn).toBeVisible();
     await expect(exportBtn).toBeEnabled();
   });
-
 });

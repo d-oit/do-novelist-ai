@@ -24,8 +24,4 @@ export type {
   ProjectUpdateData,
 } from './types';
 
-export {
-  isValidWizardStep,
-  validateProjectCreation,
-  ProjectCreationSchema,
-} from './types';
+export { isValidWizardStep, validateProjectCreation, ProjectCreationSchema } from './types';

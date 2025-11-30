@@ -4,7 +4,11 @@
  */
 
 // import { db } from '../../../lib/db'; // Will be used when implementing actual DB queries
-import type { ContentAnalysis, WritingSuggestion, WritingAssistantConfig } from '../types';
+import {
+  type ContentAnalysis,
+  type WritingSuggestion,
+  type WritingAssistantConfig,
+} from '../types';
 
 // Database schema types for Writing Assistant
 export interface AnalysisHistory {
@@ -69,7 +73,7 @@ export interface WritingProgressMetrics {
 class WritingAssistantDb {
   private static instance: WritingAssistantDb;
   private userId: string | null = null;
-  private deviceId: string;
+  private readonly deviceId: string;
 
   private constructor() {
     this.deviceId = this.getOrCreateDeviceId();
@@ -109,8 +113,8 @@ class WritingAssistantDb {
   async saveAnalysisHistory(
     analysis: ContentAnalysis,
     projectId: string,
-    acceptedCount: number = 0,
-    dismissedCount: number = 0
+    acceptedCount = 0,
+    dismissedCount = 0
   ): Promise<void> {
     if (!this.userId) return;
 
@@ -130,15 +134,14 @@ class WritingAssistantDb {
         dismissedSuggestions: dismissedCount,
         analysisDepth: 'standard', // Would come from config
         contentWordCount: this.countWords(analysis.content),
-        timestamp: analysis.timestamp
+        timestamp: analysis.timestamp,
       };
 
       // Save to database (would be actual DB call)
       await this.insertAnalysisHistory(analysisRecord);
-      
+
       // Update daily progress metrics
       await this.updateDailyProgress(projectId, analysis);
-
     } catch (error) {
       console.error('Failed to save analysis history:', error);
       // Fail gracefully - don't break the user experience
@@ -170,7 +173,7 @@ class WritingAssistantDb {
         contextWordCount: suggestion.originalText?.split(/\s+/).length || 0,
         chapterId,
         projectId,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       await this.insertSuggestionFeedback(feedback);
@@ -193,7 +196,7 @@ class WritingAssistantDb {
         lastSyncedAt: new Date(),
         deviceId: this.deviceId,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       await this.upsertUserPreferences(preferences);
@@ -240,7 +243,7 @@ class WritingAssistantDb {
       return {
         progressMetrics: [],
         improvementTrends: { readabilityTrend: 0, engagementTrend: 0, productivityTrend: 0 },
-        suggestionInsights: { mostHelpfulCategories: [], acceptanceRate: 0, commonPatterns: [] }
+        suggestionInsights: { mostHelpfulCategories: [], acceptanceRate: 0, commonPatterns: [] },
       };
     }
 
@@ -248,7 +251,7 @@ class WritingAssistantDb {
       const [progressMetrics, analysisHistory, suggestionFeedback] = await Promise.all([
         this.getProgressMetrics(this.userId, projectId, timeRange),
         this.getAnalysisHistory(this.userId, projectId, timeRange),
-        this.getSuggestionFeedback(this.userId, projectId, timeRange)
+        this.getSuggestionFeedback(this.userId, projectId, timeRange),
       ]);
 
       // Calculate trends
@@ -258,14 +261,14 @@ class WritingAssistantDb {
       return {
         progressMetrics,
         improvementTrends,
-        suggestionInsights
+        suggestionInsights,
       };
     } catch (error) {
       console.error('Failed to get writing analytics:', error);
       return {
         progressMetrics: [],
         improvementTrends: { readabilityTrend: 0, engagementTrend: 0, productivityTrend: 0 },
-        suggestionInsights: { mostHelpfulCategories: [], acceptanceRate: 0, commonPatterns: [] }
+        suggestionInsights: { mostHelpfulCategories: [], acceptanceRate: 0, commonPatterns: [] },
       };
     }
   }
@@ -273,7 +276,7 @@ class WritingAssistantDb {
   /**
    * Clean up old data (privacy-friendly)
    */
-  async cleanupOldData(retentionDays: number = 365): Promise<void> {
+  async cleanupOldData(retentionDays = 365): Promise<void> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
@@ -281,7 +284,7 @@ class WritingAssistantDb {
       await Promise.all([
         this.deleteOldAnalysisHistory(cutoffDate),
         this.deleteOldSuggestionFeedback(cutoffDate),
-        this.deleteOldProgressMetrics(cutoffDate)
+        this.deleteOldProgressMetrics(cutoffDate),
       ]);
     } catch (error) {
       console.error('Failed to cleanup old data:', error);
@@ -290,7 +293,10 @@ class WritingAssistantDb {
 
   // Private helper methods
   private countWords(text: string): number {
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter(word => word.length > 0).length;
   }
 
   private calculateImprovementTrends(history: AnalysisHistory[]) {
@@ -298,7 +304,9 @@ class WritingAssistantDb {
       return { readabilityTrend: 0, engagementTrend: 0, productivityTrend: 0 };
     }
 
-    const sorted = history.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    const sorted = history.sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
 
@@ -309,7 +317,7 @@ class WritingAssistantDb {
     return {
       readabilityTrend: last.readabilityScore - first.readabilityScore,
       engagementTrend: last.engagementScore - first.engagementScore,
-      productivityTrend: (last.contentWordCount / sorted.length) - (first.contentWordCount)
+      productivityTrend: last.contentWordCount / sorted.length - first.contentWordCount,
     };
   }
 
@@ -322,12 +330,12 @@ class WritingAssistantDb {
     const acceptanceRate = accepted.length / feedback.length;
 
     // Find most helpful categories
-    const categoryStats = feedback.reduce((acc, f) => {
+    const categoryStats = feedback.reduce<Record<string, number>>((acc, f) => {
       if (f.action === 'accepted') {
         acc[f.suggestionCategory] = (acc[f.suggestionCategory] || 0) + 1;
       }
       return acc;
-    }, {} as Record<string, number>);
+    }, {});
 
     const mostHelpfulCategories = Object.entries(categoryStats)
       .sort(([, a], [, b]) => b - a)
@@ -337,7 +345,7 @@ class WritingAssistantDb {
     return {
       mostHelpfulCategories,
       acceptanceRate,
-      commonPatterns: [] // Would implement pattern detection
+      commonPatterns: [], // Would implement pattern detection
     };
   }
 
@@ -357,7 +365,9 @@ class WritingAssistantDb {
     console.log('Recording suggestion feedback:', record.suggestionType, record.action);
   }
 
-  private async upsertUserPreferences(record: Omit<UserWritingPreferences, 'createdAt' | 'updatedAt'>): Promise<void> {
+  private async upsertUserPreferences(
+    record: Omit<UserWritingPreferences, 'createdAt' | 'updatedAt'>
+  ): Promise<void> {
     // await db.insert(userPreferencesTable).values(record).onConflictDoUpdate(...);
     console.log('Syncing preferences for user:', record.userId);
   }
@@ -368,17 +378,29 @@ class WritingAssistantDb {
     return null;
   }
 
-  private async getProgressMetrics(userId: string, projectId: string, timeRange: string): Promise<WritingProgressMetrics[]> {
+  private async getProgressMetrics(
+    userId: string,
+    projectId: string,
+    timeRange: string
+  ): Promise<WritingProgressMetrics[]> {
     console.log('Loading progress metrics:', userId, projectId, timeRange);
     return [];
   }
 
-  private async getAnalysisHistory(userId: string, projectId: string, timeRange: string): Promise<AnalysisHistory[]> {
+  private async getAnalysisHistory(
+    userId: string,
+    projectId: string,
+    timeRange: string
+  ): Promise<AnalysisHistory[]> {
     console.log('Loading analysis history:', userId, projectId, timeRange);
     return [];
   }
 
-  private async getSuggestionFeedback(userId: string, projectId: string, timeRange: string): Promise<SuggestionFeedback[]> {
+  private async getSuggestionFeedback(
+    userId: string,
+    projectId: string,
+    timeRange: string
+  ): Promise<SuggestionFeedback[]> {
     console.log('Loading suggestion feedback:', userId, projectId, timeRange);
     return [];
   }
