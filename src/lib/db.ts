@@ -91,18 +91,18 @@ export const db = {
         // Attempt to add columns for existing tables (ignoring errors if they exist)
         try {
           await client.execute("ALTER TABLE projects ADD COLUMN status TEXT DEFAULT 'Draft'");
-        } catch (e) {}
+        } catch (_e) {}
         try {
           await client.execute("ALTER TABLE projects ADD COLUMN language TEXT DEFAULT 'en'");
-        } catch (e) {}
+        } catch (_e) {}
         try {
           await client.execute(
             'ALTER TABLE projects ADD COLUMN target_word_count INTEGER DEFAULT 50000'
           );
-        } catch (e) {}
+        } catch (_e) {}
         try {
           await client.execute('ALTER TABLE projects ADD COLUMN settings TEXT');
-        } catch (e) {}
+        } catch (_e) {}
 
         // Chapters Table
         await client.execute(`

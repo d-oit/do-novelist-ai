@@ -58,7 +58,7 @@ async function setupTestProject(page: Page) {
   try {
     await expect(page.getByTestId('chapter-sidebar')).toBeVisible({ timeout: 3000 });
     return; // Already in dashboard
-  } catch (e) {
+  } catch (_e) {
     // Sidebar not visible, proceed to check for wizard
   }
 
@@ -92,7 +92,7 @@ async function setupTestProject(page: Page) {
   const sidebar = page.getByTestId('chapter-sidebar');
   try {
     await expect(sidebar).toBeVisible({ timeout: 5000 });
-  } catch (e) {
+  } catch (_e) {
     // If sidebar isn't visible, we might need to wait for the wizard to fully close
     await page.waitForTimeout(2000);
     await expect(sidebar).toBeVisible({ timeout: 10000 });

@@ -51,7 +51,7 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch (_err) {
       alert('Failed to generate ePub.');
     } finally {
       setIsExporting(false);
@@ -80,7 +80,7 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
         }
       }
       alert('Translation complete!');
-    } catch (err) {
+    } catch (_err) {
       alert('Translation failed midway.');
     } finally {
       setIsTranslating(false);

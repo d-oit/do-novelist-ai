@@ -148,7 +148,7 @@ Return a JSON object with this structure:
     try {
       const parsed = JSON.parse(response.text);
       return parsed;
-    } catch (parseError) {
+    } catch (_parseError) {
       // If JSON parsing fails, try to extract JSON from the response
       const jsonMatch = /\{[\s\S]*\}/.exec(response.text);
       if (jsonMatch) {

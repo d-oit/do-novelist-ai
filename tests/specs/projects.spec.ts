@@ -15,7 +15,7 @@ test.describe('Feature: Project Management', () => {
         await cancelBtn.click();
         await expect(page.getByTestId('project-wizard-overlay')).toBeHidden();
       }
-    } catch (e) {
+    } catch (_e) {
       // Wizard might not have appeared
     }
   });

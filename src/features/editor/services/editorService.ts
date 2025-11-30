@@ -115,7 +115,7 @@ class EditorService {
     const draft = await this.loadDraft(chapterId);
     if (!draft) return null;
 
-    const { content, summary, ...metadata } = draft;
+    const { content: _content, summary: _summary, ...metadata } = draft;
     return metadata;
   }
 
@@ -179,7 +179,7 @@ class EditorService {
    */
   async getAllDraftMetadata(projectId: string): Promise<DraftMetadata[]> {
     const drafts = await this.getDraftsByProject(projectId);
-    return drafts.map(({ content, summary, ...metadata }) => metadata);
+    return drafts.map(({ content: _content, summary: _summary, ...metadata }) => metadata);
   }
 
   /**

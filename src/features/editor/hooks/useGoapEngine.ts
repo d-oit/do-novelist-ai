@@ -289,7 +289,7 @@ export const useGoapEngine = (
                 prevSummary
               );
               return { id: chapter.id, content, success: true };
-            } catch (e) {
+            } catch (_e) {
               addLog('Writer', `Failed to draft "${chapter.title}"`, 'error');
               return { id: chapter.id, content: '', success: false };
             }

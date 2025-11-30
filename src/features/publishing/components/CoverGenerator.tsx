@@ -23,7 +23,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
       } else {
         setError('Failed to generate image. Please try again.');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An error occurred during generation.');
     } finally {
       setIsGenerating(false);

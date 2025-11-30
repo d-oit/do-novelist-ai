@@ -64,7 +64,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch (_err) {
       alert('Failed to generate ePub.');
     } finally {
       setIsExporting(false);
@@ -93,7 +93,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
         }
       }
       alert('Translation complete!');
-    } catch (err) {
+    } catch (_err) {
       alert('Translation failed midway.');
     } finally {
       setIsTranslating(false);

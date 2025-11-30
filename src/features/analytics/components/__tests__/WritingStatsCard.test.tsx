@@ -9,11 +9,11 @@ vi.mock('framer-motion', () => ({
     div: ({
       children,
       className,
-      whileHover,
-      whileTap,
-      transition,
-      animate,
-      initial,
+      _whileHover,
+      _whileTap,
+      _transition,
+      _animate,
+      _initial,
       ...props
     }: any) => (
       <div className={className} {...props} data-testid='motion-div'>
