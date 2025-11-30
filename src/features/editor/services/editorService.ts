@@ -3,39 +3,117 @@
  *
  * Handles content persistence, auto-save, and draft management for the editor.
  * Uses IndexedDB for local storage with versioning support.
+ * Enhanced with comprehensive error handling (2024-2025 best practices)
  */
 
 import { type SavedDraft, type DraftMetadata } from '../types';
+
+// Import error handling system
+import { logger } from '../../../lib/errors/logging';
+import { createStorageError } from '../../../lib/errors/error-types';
 
 class EditorService {
   private readonly dbName = 'novelist-drafts';
   private readonly version = 1;
   private db: IDBDatabase | null = null;
 
+  // Create logger for EditorService
+  private readonly logger = logger.child({ service: 'EditorService' });
+
   /**
    * Initialize the IndexedDB database
    */
   async init(): Promise<void> {
+    this.logger.debug('Initializing IndexedDB', {
+      dbName: this.dbName,
+      version: this.version,
+    });
+
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        const error = createStorageError(
+          `Failed to open IndexedDB: ${request.error?.message || 'Unknown error'}`,
+          {
+            store: this.dbName,
+            operation: 'write',
+            cause: request.error || undefined,
+            context: {
+              dbName: this.dbName,
+              version: this.version,
+            },
+          }
+        );
+
+        this.logger.error('Failed to open IndexedDB', {
+          error: request.error?.message,
+          dbName: this.dbName,
+          version: this.version,
+        });
+
+        reject(error);
+      };
+
       request.onsuccess = () => {
         this.db = request.result;
+
+        // Log successful connection
+        this.logger.info('IndexedDB initialized successfully', {
+          dbName: this.dbName,
+          version: this.version,
+        });
+
+        // Log connection information
+        this.logger.debug('Database connection established', {
+          databaseName: this.db.name,
+          databaseVersion: this.db.version,
+          objectStores: Array.from(this.db.objectStoreNames),
+        });
+
         resolve();
       };
 
       request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
 
+        this.logger.info('Upgrading database schema', {
+          oldVersion: event.oldVersion,
+          newVersion: event.newVersion,
+          dbName: this.dbName,
+        });
+
         // Drafts store
         if (!db.objectStoreNames.contains('drafts')) {
           const store = db.createObjectStore('drafts', { keyPath: 'chapterId' });
           store.createIndex('projectId', 'projectId', { unique: false });
           store.createIndex('savedAt', 'savedAt', { unique: false });
+
+          this.logger.info('Created drafts object store', {
+            dbName: this.dbName,
+            version: this.version,
+            indexes: ['projectId', 'savedAt'],
+          });
         }
       };
     });
+  }
+
+  /**
+   * Check if database is initialized and healthy
+   */
+  async isHealthy(): Promise<boolean> {
+    if (!this.db) {
+      return false;
+    }
+
+    try {
+      // Try a simple operation to verify connection
+      await this.getDraftsByProject('_health_check_');
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**

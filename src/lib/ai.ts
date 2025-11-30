@@ -2,6 +2,7 @@
  * AI Service - Universal Multi-Provider Interface
  * Replaces gemini.ts with support for OpenAI, Anthropic, and Google
  * Uses Vercel AI SDK with Vercel AI Gateway for unified API across providers
+ * Enhanced with comprehensive error handling (2024-2025 best practices)
  */
 
 import { createAnthropic } from '@ai-sdk/anthropic';
@@ -14,24 +15,57 @@ import { Chapter, RefineOptions } from '../types/index';
 import { getAIConfig, getEnabledProviders, getModelForTask, type AIProvider } from './ai-config';
 import { withCache } from './cache';
 
+// Import error handling system
+import { logger } from './errors/logging';
+import { createAIError, createConfigurationError } from './errors/error-types';
+
 // Get configuration
 const config = getAIConfig();
 const enabledProviders = getEnabledProviders(config);
+
+// Create logger for AI module
+const aiLogger = logger.child({ module: 'ai-service' });
 
 /**
  * Get the appropriate model instance based on provider
  * Uses Vercel AI Gateway for routing
  */
-function getModel(provider: AIProvider, complexity: 'fast' | 'standard' | 'advanced' = 'standard') {
+function getModel(
+  provider: AIProvider,
+  complexity: 'fast' | 'standard' | 'advanced' = 'standard'
+): any {
   const modelName = getModelForTask(provider, complexity, config);
   const providerConfig = config.providers[provider];
 
   if (!providerConfig.enabled) {
-    throw new Error(`Provider ${provider} is not configured. Please set the AI Gateway API key.`);
+    const error = createConfigurationError(`Provider ${provider} is not configured`, {
+      configKey: `providers.${provider}.enabled`,
+      configValue: providerConfig,
+      context: {
+        provider,
+        modelName,
+        gatewayPath: providerConfig.gatewayPath,
+      },
+    });
+
+    aiLogger.error('Provider not configured', {
+      provider,
+      modelName,
+      gatewayPath: providerConfig.gatewayPath,
+    });
+
+    throw error;
   }
 
   // Vercel AI Gateway base URL
   const gatewayUrl = `https://gateway.vercel.ai/v1/${providerConfig.gatewayPath}`;
+
+  aiLogger.debug('Creating model instance', {
+    provider,
+    modelName,
+    gatewayUrl,
+    complexity,
+  });
 
   switch (provider) {
     case 'openai': {
@@ -59,13 +93,45 @@ function getModel(provider: AIProvider, complexity: 'fast' | 'standard' | 'advan
     }
 
     case 'mistral': {
-      throw new Error(
-        'Mistral SDK not installed. To enable Mistral, install @ai-sdk/mistral and uncomment the import.'
+      const error = createAIError(
+        'Mistral SDK not installed. To enable Mistral, install @ai-sdk/mistral and uncomment the import.',
+        {
+          provider: 'mistral',
+          model: modelName,
+          operation: 'getModel',
+          context: {
+            complexity,
+          },
+        }
       );
+
+      aiLogger.error('Mistral SDK not available', {
+        provider,
+        modelName,
+        complexity,
+      });
+
+      throw error;
     }
 
-    default:
-      throw new Error(`Unsupported provider: ${provider}`);
+    default: {
+      const error = createAIError(`Unsupported provider: ${provider}`, {
+        provider,
+        model: modelName,
+        operation: 'getModel',
+        context: {
+          complexity,
+        },
+      });
+
+      aiLogger.error('Unsupported provider', {
+        provider,
+        modelName,
+        complexity,
+      });
+
+      throw error;
+    }
   }
 }
 
@@ -79,24 +145,71 @@ async function executeWithFallback<T>(
   const providers = enabledProviders;
 
   if (providers.length === 0) {
-    throw new Error('No AI providers configured. Please set at least one API key.');
+    const error = createConfigurationError(
+      'No AI providers configured. Please set at least one API key.',
+      {
+        configKey: 'providers',
+        configValue: providers,
+        context: {
+          operationName,
+          enabledProviders: providers.length,
+        },
+      }
+    );
+
+    aiLogger.error('No AI providers configured', {
+      operationName,
+      enabledProviders: providers.length,
+    });
+
+    throw error;
   }
+
+  aiLogger.info('Starting operation with fallback', {
+    operationName,
+    providerCount: providers.length,
+    providers: providers.join(', '),
+    enableFallback: config.enableFallback,
+  });
 
   let lastError: Error | null = null;
 
   for (const provider of providers) {
     try {
-      console.log(`[AI] Attempting ${operationName} with provider: ${provider}`);
+      aiLogger.debug(`Attempting ${operationName} with provider: ${provider}`);
+
       const result = await operation(provider);
 
-      console.log(`[AI] Success with provider: ${provider}`);
+      aiLogger.info(`Success with provider: ${provider}`, {
+        operationName,
+        provider,
+      });
 
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
-      console.warn(`[AI] Provider ${provider} failed for ${operationName}:`, errorMessage);
-      lastError = error instanceof Error ? error : new Error(errorMessage);
+      // Convert to AI error with context
+      const aiError = createAIError(
+        `Provider ${provider} failed for ${operationName}: ${errorMessage}`,
+        {
+          provider,
+          operation: operationName,
+          cause: error instanceof Error ? error : undefined,
+          context: {
+            errorMessage,
+            attemptProvider: provider,
+          },
+        }
+      );
+
+      aiLogger.warn(`Provider ${provider} failed for ${operationName}`, {
+        operationName,
+        provider,
+        error: errorMessage,
+      });
+
+      lastError = aiError;
 
       // If fallback is disabled or this is the last provider, throw immediately
       if (!config.enableFallback || provider === providers[providers.length - 1]) {
@@ -108,6 +221,12 @@ async function executeWithFallback<T>(
     }
   }
 
+  aiLogger.error(`${operationName} failed with all providers`, {
+    operationName,
+    providers: providers.join(', '),
+    lastError: lastError?.message,
+  });
+
   throw lastError || new Error(`${operationName} failed with all providers`);
 }
 
@@ -118,6 +237,8 @@ const _generateOutline = async (
   idea: string,
   style: string
 ): Promise<{ title: string; chapters: Partial<Chapter>[] }> => {
+  const operationLogger = aiLogger.child({ operation: 'generateOutline', ideaLength: idea.length });
+
   return executeWithFallback(async provider => {
     const model = getModel(provider, 'standard');
 
@@ -125,6 +246,12 @@ const _generateOutline = async (
 Your goal is to take a vague book idea and structurize it into a compelling chapter outline.
 The style of the book is: ${style}.
 Adhere to the "Hero's Journey" or "Save the Cat" beat sheets if applicable to the genre.`;
+
+    operationLogger.debug('Generating outline', {
+      provider,
+      style,
+      ideaPreview: idea.substring(0, 100),
+    });
 
     const response = await generateText({
       model,
@@ -147,15 +274,53 @@ Return a JSON object with this structure:
 
     try {
       const parsed = JSON.parse(response.text);
+      operationLogger.info('Outline generated successfully', {
+        provider,
+        title: parsed.title,
+        chapterCount: parsed.chapters?.length || 0,
+      });
       return parsed;
-    } catch (_parseError) {
+    } catch (parseError) {
+      operationLogger.warn('JSON parsing failed, trying to extract from response', {
+        provider,
+        error: parseError instanceof Error ? parseError.message : String(parseError),
+        responsePreview: response.text.substring(0, 200),
+      });
+
       // If JSON parsing fails, try to extract JSON from the response
       const jsonMatch = /\{[\s\S]*\}/.exec(response.text);
       if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return parsed;
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          operationLogger.info('Successfully extracted JSON from response', {
+            provider,
+            title: parsed.title,
+            chapterCount: parsed.chapters?.length || 0,
+          });
+          return parsed;
+        } catch (secondParseError) {
+          operationLogger.error('Failed to parse extracted JSON', {
+            provider,
+            error:
+              secondParseError instanceof Error
+                ? secondParseError.message
+                : String(secondParseError),
+          });
+        }
       }
-      throw new Error('Failed to parse outline response as JSON');
+
+      const error = createAIError('Failed to parse outline response as JSON', {
+        provider,
+        operation: 'generateOutline',
+        cause: parseError instanceof Error ? parseError : undefined,
+        context: {
+          responsePreview: response.text.substring(0, 500),
+          idea: idea.substring(0, 100),
+          style,
+        },
+      });
+
+      throw error;
     }
   }, 'generateOutline');
 };
