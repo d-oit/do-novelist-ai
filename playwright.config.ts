@@ -20,12 +20,12 @@ export default defineConfig({
     url: 'http://localhost:3000',
     reuseExistingServer: true, // Reuse if already running
     env: {
-      VITE_OPENAI_API_KEY: 'test-key',
-      VITE_ANTHROPIC_API_KEY: 'test-key',
-      VITE_GOOGLE_API_KEY: 'test-key',
-      VITE_GEMINI_API_KEY: 'test-key',
-      VITE_DEFAULT_AI_PROVIDER: 'google',
-      VITE_DEFAULT_AI_MODEL: 'google:gemini-2.5-flash',
+      // Single Vercel AI Gateway API key for all providers
+      VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
+
+      // Other configuration
+      VITE_DEFAULT_AI_PROVIDER: 'mistral',
+      VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
       VITE_TURSO_DATABASE_URL: 'test-url',
       VITE_TURSO_AUTH_TOKEN: 'test-token',
     },
