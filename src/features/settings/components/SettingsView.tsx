@@ -9,12 +9,14 @@ import {
   CheckCircle,
   AlertTriangle,
   Settings as SettingsIcon,
+  Zap,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { getStoredConfig, saveStoredConfig, DbConfig, db } from '../../../lib/db';
 import { getUserId } from '../../../lib/utils';
 import { AISettingsPanel } from './AISettingsPanel';
+import { GamificationPanel } from '../../gamification';
 
 const SettingsView: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -186,6 +188,15 @@ const SettingsView: React.FC = () => {
           AI Provider Settings
         </h3>
         <AISettingsPanel userId={userId} />
+      </section>
+
+      {/* Gamification */}
+      <section className='space-y-4'>
+        <h3 className='flex items-center gap-2 text-lg font-medium'>
+          <Zap className='h-5 w-5' />
+          Writing Gamification
+        </h3>
+        <GamificationPanel userId={userId} wordsWritten={0} />
       </section>
 
       {/* API Configuration */}
