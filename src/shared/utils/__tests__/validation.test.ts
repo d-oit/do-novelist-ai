@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import {
   MAX_CHAPTER_SUMMARY_LENGTH,
   MAX_CONTENT_LENGTH,

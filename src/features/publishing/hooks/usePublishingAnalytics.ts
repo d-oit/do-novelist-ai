@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useMemo } from 'react';
+
 import { usePublishingStore } from '../../../lib/stores/publishingStore';
+import { Project } from '../../../types';
 import { publishingAnalyticsService } from '../services/publishingAnalyticsService';
 import {
-  Publication,
-  PlatformAnalytics,
-  ReaderFeedback,
   EngagementMetrics,
-  PublishingGoals,
-  ReaderInsights,
-  PublishingTrends,
+  PlatformAnalytics,
+  Publication,
   PublishingAlert,
-  PublishingPlatform
+  PublishingGoals,
+  PublishingPlatform,
+  PublishingTrends,
+  ReaderFeedback,
+  ReaderInsights,
 } from '../types';
-import { Project } from '../../../types';
 
 export interface UsePublishingAnalyticsReturn {
   // Publications
@@ -40,14 +41,18 @@ export interface UsePublishingAnalyticsReturn {
   connectedPlatforms: PublishingPlatform[];
 
   // Actions
-  publishProject: (project: Project, platforms: string[], metadata: any) => Promise<Publication>;
+  publishProject: (
+    project: Project,
+    platforms: string[],
+    metadata: Publication['metadata'],
+  ) => Promise<Publication>;
   loadPublicationData: (publicationId: string) => Promise<void>;
   createGoal: (goal: Omit<PublishingGoals, 'id' | 'current'>) => Promise<PublishingGoals>;
-  connectPlatform: (platformId: string, credentials: any) => Promise<boolean>;
+  connectPlatform: (platformId: string, credentials: Record<string, unknown>) => boolean;
 
   // Data Loading
   refreshAnalytics: (publicationId: string) => Promise<void>;
-  loadTrends: (publicationId: string, days?: number) => Promise<void>;
+  loadTrends: (publicationId: string, days?: number) => void;
   loadFeedback: (publicationId: string, limit?: number) => Promise<void>;
 
   // Export & Sharing
@@ -75,60 +80,69 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
   useEffect(() => {
     const controller = new AbortController();
 
-    store.init().catch(err => {
-      if (err.name === 'AbortError') return;
+    store.init().catch((err: unknown) => {
+      if (err instanceof Error && err.name === 'AbortError') return;
       console.error('Failed to initialize publishing analytics:', err);
     });
 
-    return () => {
+    const cleanup = (): void => {
       controller.abort();
     };
+    return cleanup;
   }, [store]);
 
   // Computed values
   const averageRating = useMemo(() => {
-    const rated = store.feedback.filter(f => f.rating);
-    return rated.length > 0
-      ? rated.reduce((sum, f) => sum + (f.rating || 0), 0) / rated.length
-      : 0;
+    const rated = store.feedback.filter(f => f.rating != null);
+    return rated.length > 0 ? rated.reduce((sum, f) => sum + (f.rating ?? 0), 0) / rated.length : 0;
   }, [store.feedback]);
 
-  const totalReviews = useMemo(() =>
-    store.feedback.filter(f => f.type === 'review').length,
-    [store.feedback]);
+  const totalReviews = useMemo(
+    () => store.feedback.filter(f => f.type === 'review').length,
+    [store.feedback],
+  );
 
-  const sentimentBreakdown = useMemo(() => ({
-    positive: store.feedback.filter(f => f.sentiment === 'positive').length,
-    neutral: store.feedback.filter(f => f.sentiment === 'neutral').length,
-    negative: store.feedback.filter(f => f.sentiment === 'negative').length,
-  }), [store.feedback]);
+  const sentimentBreakdown = useMemo(
+    () => ({
+      positive: store.feedback.filter(f => f.sentiment === 'positive').length,
+      neutral: store.feedback.filter(f => f.sentiment === 'neutral').length,
+      negative: store.feedback.filter(f => f.sentiment === 'negative').length,
+    }),
+    [store.feedback],
+  );
 
   // Helper Functions (Logic kept in hook)
-  const refreshAnalytics = useCallback(async (publicationId: string) => {
-    await store.loadPublicationData(publicationId);
-  }, [store]);
+  const refreshAnalytics = useCallback(
+    async (publicationId: string) => {
+      await store.loadPublicationData(publicationId);
+    },
+    [store],
+  );
 
-  const exportAnalytics = useCallback(async (publicationIds: string[], format: 'json' | 'csv' | 'xlsx'): Promise<string> => {
-    try {
-      return await publishingAnalyticsService.exportPublishingAnalytics(publicationIds, format);
-    } catch (err) {
-      // We might want to set error in store or throw
-      throw new Error(err instanceof Error ? err.message : 'Failed to export analytics');
-    }
-  }, []);
+  const exportAnalytics = useCallback(
+    async (publicationIds: string[], format: 'json' | 'csv' | 'xlsx'): Promise<string> => {
+      try {
+        return await publishingAnalyticsService.exportPublishingAnalytics(publicationIds, format);
+      } catch (err) {
+        // We might want to set error in store or throw
+        throw new Error(err instanceof Error ? err.message : 'Failed to export analytics');
+      }
+    },
+    [],
+  );
 
   const generateReport = useCallback(async (publicationId: string): Promise<string> => {
     try {
       // We can use store data if available, or fetch fresh
       // Fetching fresh ensures report is up to date
-      const [analyticsData, engagementData, insightsData] = await Promise.all([
+      const [analyticsData, insightsData] = await Promise.all([
         publishingAnalyticsService.getPublicationAnalytics(publicationId),
-        publishingAnalyticsService.getEngagementMetrics(publicationId, {
-          start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-          end: new Date(),
-        }),
         publishingAnalyticsService.getReaderInsights(publicationId),
       ]);
+      const engagementData = publishingAnalyticsService.getEngagementMetrics(publicationId, {
+        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        end: new Date(),
+      });
 
       const report = {
         publicationId,
@@ -153,22 +167,29 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
     }
   }, []);
 
-  const filterFeedback = useCallback((type?: string, sentiment?: string): ReaderFeedback[] => {
-    return store.feedback.filter(item => {
-      if (type && item.type !== type) return false;
-      if (sentiment && item.sentiment !== sentiment) return false;
-      return true;
-    });
-  }, [store.feedback]);
+  const filterFeedback = useCallback(
+    (type?: string, sentiment?: string): ReaderFeedback[] => {
+      return store.feedback.filter(item => {
+        if ((type ?? '') && item.type !== type) return false;
+        if ((sentiment ?? '') && item.sentiment !== sentiment) return false;
+        return true;
+      });
+    },
+    [store.feedback],
+  );
 
-  const searchFeedback = useCallback((query: string): ReaderFeedback[] => {
-    const lowercaseQuery = query.toLowerCase();
-    return store.feedback.filter(item =>
-      (item.content && item.content.toLowerCase().includes(lowercaseQuery)) ||
-      item.author.name.toLowerCase().includes(lowercaseQuery) ||
-      item.topics.some(topic => topic.toLowerCase().includes(lowercaseQuery))
-    );
-  }, [store.feedback]);
+  const searchFeedback = useCallback(
+    (query: string): ReaderFeedback[] => {
+      const lowercaseQuery = query.toLowerCase();
+      return store.feedback.filter(
+        item =>
+          item.content?.toLowerCase().includes(lowercaseQuery) === true ||
+          item.author.name.toLowerCase().includes(lowercaseQuery) ||
+          item.topics.some(topic => topic.toLowerCase().includes(lowercaseQuery)),
+      );
+    },
+    [store.feedback],
+  );
 
   // Performance Monitoring (Effect to generate alerts based on data)
   useEffect(() => {

@@ -48,3 +48,5 @@ test_*.txt
 
 
 
+.eslintcache
+.factory/config.json

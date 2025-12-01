@@ -1,5 +1,8 @@
 import React from 'react';
+
 import { useProjects } from '../hooks/useProjects';
+import { Project } from '@shared/types';
+
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
 export const ProjectDashboard: React.FC = () => {
@@ -7,15 +10,15 @@ export const ProjectDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card data-testid="card">
+      <Card data-testid='card'>
         <CardContent>Loading...</CardContent>
       </Card>
     );
   }
 
-  if (error) {
+  if (error != null) {
     return (
-      <Card data-testid="card">
+      <Card data-testid='card'>
         <CardContent>Error: {error}</CardContent>
       </Card>
     );
@@ -23,8 +26,8 @@ export const ProjectDashboard: React.FC = () => {
 
   return (
     <div>
-      {projects.map((project: any) => (
-        <Card key={project.id} data-testid="card">
+      {projects.map((project: Project) => (
+        <Card key={project.id} data-testid='card'>
           <CardHeader>
             <CardTitle>{project.title}</CardTitle>
           </CardHeader>
@@ -36,7 +39,7 @@ export const ProjectDashboard: React.FC = () => {
       ))}
 
       {projects.length === 0 && (
-        <Card data-testid="card">
+        <Card data-testid='card'>
           <CardContent>No projects found</CardContent>
         </Card>
       )}

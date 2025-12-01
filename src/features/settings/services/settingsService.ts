@@ -4,8 +4,8 @@
  * Handles localStorage persistence for application settings
  */
 
-import type { Settings } from '../types';
 import { DEFAULT_SETTINGS, validateSettings } from '../types';
+import { type Settings } from '../types';
 
 const STORAGE_KEY = 'novelist-settings';
 
@@ -13,15 +13,15 @@ class SettingsService {
   /**
    * Load settings from localStorage
    */
-  async load(): Promise<Settings> {
+  public load(): Settings {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
 
-      if (!stored) {
+      if (stored === null || stored.length === 0) {
         return DEFAULT_SETTINGS;
       }
 
-      const parsed = JSON.parse(stored);
+      const parsed: unknown = JSON.parse(stored);
       const validation = validateSettings(parsed);
 
       if (!validation.isValid || !validation.data) {
@@ -43,7 +43,7 @@ class SettingsService {
   /**
    * Save settings to localStorage
    */
-  async save(settings: Settings): Promise<void> {
+  public save(settings: Settings): void {
     try {
       const validation = validateSettings(settings);
 
@@ -61,7 +61,7 @@ class SettingsService {
   /**
    * Reset settings to defaults
    */
-  async reset(): Promise<Settings> {
+  public reset(): Settings {
     try {
       localStorage.removeItem(STORAGE_KEY);
       return DEFAULT_SETTINGS;
@@ -74,24 +74,24 @@ class SettingsService {
   /**
    * Export settings as JSON
    */
-  async export(): Promise<string> {
-    const settings = await this.load();
+  public export(): string {
+    const settings = this.load();
     return JSON.stringify(settings, null, 2);
   }
 
   /**
    * Import settings from JSON
    */
-  async import(json: string): Promise<Settings> {
+  public import(json: string): Settings {
     try {
-      const parsed = JSON.parse(json);
+      const parsed: unknown = JSON.parse(json);
       const validation = validateSettings(parsed);
 
       if (!validation.isValid || !validation.data) {
         throw new Error('Invalid settings JSON');
       }
 
-      await this.save(validation.data);
+      this.save(validation.data);
       return validation.data;
     } catch (error) {
       console.error('Failed to import settings:', error);
@@ -102,18 +102,18 @@ class SettingsService {
   /**
    * Get a specific setting value
    */
-  async get<K extends keyof Settings>(key: K): Promise<Settings[K]> {
-    const settings = await this.load();
+  public get<K extends keyof Settings>(key: K): Settings[K] {
+    const settings = this.load();
     return settings[key];
   }
 
   /**
    * Update a specific setting value
    */
-  async set<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {
-    const settings = await this.load();
+  public set<K extends keyof Settings>(key: K, value: Settings[K]): void {
+    const settings = this.load();
     const updated = { ...settings, [key]: value };
-    await this.save(updated);
+    this.save(updated);
   }
 }
 

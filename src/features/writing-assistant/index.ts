@@ -28,7 +28,7 @@ export type {
   DialogueAnalysis,
   StyleProfile,
   ToneAnalysis,
-  WordUsageAnalysis
+  WordUsageAnalysis,
 } from './types';
 
 export { DEFAULT_WRITING_ASSISTANT_CONFIG } from './types';

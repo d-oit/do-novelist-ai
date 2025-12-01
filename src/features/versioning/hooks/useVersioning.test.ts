@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useVersioning } from './useVersioning';
-import { versioningService } from '../services/versioningService';
-import { Chapter, ChapterStatus } from '../../../types';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { createChapter } from '../../../shared/utils';
+import { Chapter, ChapterStatus } from '../../../types';
+import { versioningService } from '../services/versioningService';
+
+import { useVersioning } from './useVersioning';
 
 // Mock the versioning service
 vi.mock('../services/versioningService');
@@ -15,7 +17,7 @@ const mockChapter: Chapter = createChapter({
   summary: 'A test chapter',
   content: 'This is test content.',
   status: ChapterStatus.DRAFTING,
-  orderIndex: 1
+  orderIndex: 1,
 });
 
 const mockVersion = {
@@ -65,11 +67,7 @@ describe('useVersioning', () => {
       expect(savedVersion).toEqual(mockVersion);
     });
 
-    expect(mockVersioningService.saveVersion).toHaveBeenCalledWith(
-      mockChapter,
-      'Test save',
-      'manual'
-    );
+    expect(mockVersioningService.saveVersion).toHaveBeenCalledWith(mockChapter, 'Test save', 'manual');
   });
 
   it('restores a version successfully', async () => {
@@ -102,7 +100,7 @@ describe('useVersioning', () => {
     });
 
     expect(mockVersioningService.deleteVersion).toHaveBeenCalledWith('version-1');
-    
+
     // Version should be removed from local state
     expect(result.current.versions).toHaveLength(0);
   });
@@ -116,7 +114,7 @@ describe('useVersioning', () => {
       deletionsCount: 0,
       modificationsCount: 0,
     };
-    
+
     mockVersioningService.compareVersions.mockResolvedValue(mockComparison);
 
     const { result } = renderHook(() => useVersioning('test-chapter'));
@@ -135,7 +133,7 @@ describe('useVersioning', () => {
       { ...mockVersion, id: 'v2', type: 'auto' as const, timestamp: new Date('2024-01-02') },
       { ...mockVersion, id: 'v3', type: 'manual' as const, timestamp: new Date('2024-01-03') },
     ];
-    
+
     mockVersioningService.getVersionHistory.mockResolvedValue(versions);
 
     const { result } = renderHook(() => useVersioning('test-chapter'));
@@ -162,7 +160,7 @@ describe('useVersioning', () => {
       { ...mockVersion, id: 'v2', message: 'Bug fix', content: 'Fixed the issue' },
       { ...mockVersion, id: 'v3', message: 'Feature update', content: 'Added new feature' },
     ];
-    
+
     mockVersioningService.getVersionHistory.mockResolvedValue(versions);
 
     const { result } = renderHook(() => useVersioning('test-chapter'));
@@ -207,6 +205,7 @@ describe('useVersioning', () => {
   it('creates a new branch successfully', async () => {
     const mockBranch = {
       id: 'branch-1',
+      chapterId: 'test-chapter',
       name: 'feature-branch',
       description: 'A new feature branch',
       parentVersionId: 'version-1',
@@ -214,24 +213,21 @@ describe('useVersioning', () => {
       isActive: false,
       color: '#3B82F6',
     };
-    
+
     mockVersioningService.createBranch.mockResolvedValue(mockBranch);
 
     const { result } = renderHook(() => useVersioning('test-chapter'));
 
     await act(async () => {
-      const branch = await result.current.createBranch(
-        'feature-branch',
-        'A new feature branch',
-        'version-1'
-      );
+      const branch = await result.current.createBranch('feature-branch', 'A new feature branch', 'version-1');
       expect(branch).toEqual(mockBranch);
     });
 
     expect(mockVersioningService.createBranch).toHaveBeenCalledWith(
+      'test-chapter',
       'feature-branch',
       'A new feature branch',
-      'version-1'
+      'version-1',
     );
   });
 });

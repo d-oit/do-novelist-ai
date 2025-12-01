@@ -1,8 +1,10 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp } from 'lucide-react';
-import { Card } from './Card';
+import React from 'react';
+
 import { cn } from '../../lib/utils';
+
+import { Card } from './Card';
 
 interface MetricCardProps {
   title: string;
@@ -31,7 +33,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   format = 'number',
   changeLabel = 'from last period',
   color = 'text-blue-500',
-  className
+  className,
 }) => {
   const formatValue = (val: string | number): string => {
     if (typeof val === 'string') return `${prefix}${val}${suffix}`;
@@ -54,7 +56,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     return `${prefix}${formatted}${suffix}`;
   };
 
-  const getVariantStyles = () => {
+  const getVariantStyles = (): string => {
     switch (variant) {
       case 'success':
         return 'from-green-500/5 via-card/90 to-green-500/10 border-green-500/20';
@@ -67,7 +69,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     }
   };
 
-  const getTrendColor = () => {
+  const getTrendColor = (): string => {
     if (trend === 'up') return 'text-green-600';
     if (trend === 'down') return 'text-red-600';
     if (change !== undefined) {
@@ -77,42 +79,32 @@ const MetricCard: React.FC<MetricCardProps> = ({
   };
 
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.2 }}
-      className={className}
-    >
-      <Card className={cn(
-        "p-6 relative overflow-hidden bg-gradient-to-br",
-        getVariantStyles()
-      )}>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
-            <p className="text-3xl font-bold font-serif">{formatValue(value)}</p>
+    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }} className={className}>
+      <Card className={cn('relative overflow-hidden bg-gradient-to-br p-6', getVariantStyles())}>
+        <div className='flex items-start justify-between'>
+          <div className='flex-1'>
+            <p className='mb-1 text-sm font-medium text-muted-foreground'>{title}</p>
+            <p className='font-serif text-3xl font-bold'>{formatValue(value)}</p>
 
             {change !== undefined && (
-              <div className={cn(
-                "flex items-center gap-1 mt-2 text-xs",
-                getTrendColor()
-              )}>
-                <TrendingUp className={cn(
-                  "w-3 h-3",
-                  (trend === 'down' || (trend === undefined && change < 0)) && "rotate-180"
-                )} />
+              <div className={cn('mt-2 flex items-center gap-1 text-xs', getTrendColor())}>
+                <TrendingUp
+                  className={cn(
+                    'h-3 w-3',
+                    (trend === 'down' || (trend === undefined && change < 0)) && 'rotate-180',
+                  )}
+                />
                 {Math.abs(change).toFixed(1)}% {changeLabel}
               </div>
             )}
           </div>
 
-          {icon && (
-            <div className={cn("p-3 rounded-xl bg-secondary/50", color)}>
-              {icon}
-            </div>
+          {icon !== undefined && (
+            <div className={cn('rounded-xl bg-secondary/50 p-3', color)}>{icon}</div>
           )}
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent pointer-events-none" />
+        <div className='pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent' />
       </Card>
     </motion.div>
   );

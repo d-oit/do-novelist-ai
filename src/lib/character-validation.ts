@@ -3,6 +3,21 @@
  * Business logic validation and management for character entities
  */
 
+import { z } from 'zod';
+
+import {
+  type ProjectId,
+  createCharacterId,
+  validateCharacterImportance,
+  validateCharacterArc,
+  validateRelationship,
+  validateUniqueCharacterNames,
+  validateCharacterGroup,
+  validateCharacterConflict,
+  hasCharacterArc,
+  isMainCharacter,
+  isProtagonist,
+} from '../types/character-guards';
 import {
   CharacterSchema,
   CharacterRelationshipSchema,
@@ -18,24 +33,7 @@ import {
   type CharacterRole,
   type PersonalityTrait,
 } from '../types/character-schemas';
-import {
-  type ProjectId,
-  createCharacterId,
-  validateCharacterImportance,
-  validateCharacterArc,
-  validateRelationship,
-  validateUniqueCharacterNames,
-  validateCharacterGroup,
-  validateCharacterConflict,
-  hasCharacterArc,
-  isMainCharacter,
-  isProtagonist,
-} from '../types/character-guards';
-import { z } from 'zod';
-import {
-  type ValidationResult,
-  validateData
-} from '../types/schemas';
+import { type ValidationResult, validateData } from '../types/schemas';
 
 // =============================================================================
 // CHARACTER VALIDATION SERVICE
@@ -47,9 +45,7 @@ export class CharacterValidationService {
   private constructor() {}
 
   public static getInstance(): CharacterValidationService {
-    if (!CharacterValidationService.instance) {
-      CharacterValidationService.instance = new CharacterValidationService();
-    }
+    CharacterValidationService.instance ??= new CharacterValidationService();
     return CharacterValidationService.instance;
   }
 
@@ -57,7 +53,12 @@ export class CharacterValidationService {
    * Validates a character and returns a simple validation result
    * Used by UI components for display
    */
-  public validate(character: Character): { isValid: boolean; score: number; issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }>; strengths: string[] } {
+  public validate(character: Character): {
+    isValid: boolean;
+    score: number;
+    issues: { path: (string | number)[]; message: string; code: 'custom' }[];
+    strengths: string[];
+  } {
     const result = this.validateCharacterIntegrity(character);
 
     if (!result.success) {
@@ -67,29 +68,29 @@ export class CharacterValidationService {
         issues: result.issues.map((err: z.ZodIssue) => ({
           path: err.path as (string | number)[],
           message: err.message,
-          code: 'custom' as const
+          code: 'custom' as const,
         })),
-        strengths: []
+        strengths: [],
       };
     }
 
     // Calculate a simple score based on character completeness
     let score = 50; // Base score
     const backgroundData = character.background as { backstory?: string } | undefined;
-    if (backgroundData?.backstory && backgroundData.backstory.length > 100) score += 15;
-    if (character.psychology?.desires && character.psychology.desires.length > 0) score += 15;
-    if (character.arc) score += 20;
+    if ((backgroundData?.backstory?.length ?? 0) > 100) score += 15;
+    if ((character.psychology?.desires?.length ?? 0) > 0) score += 15;
+    if (character.arc != null) score += 20;
 
     const strengths: string[] = [];
-    if (backgroundData?.backstory && backgroundData.backstory.length > 100) strengths.push('Well-developed backstory');
-    if (character.psychology?.desires && character.psychology.desires.length > 2) strengths.push('Clear motivations');
-    if (character.appearances && character.appearances.length > 2) strengths.push('Rich relationships');
+    if ((backgroundData?.backstory?.length ?? 0) > 100) strengths.push('Well-developed backstory');
+    if ((character.psychology?.desires?.length ?? 0) > 2) strengths.push('Clear motivations');
+    if ((character.appearances?.length ?? 0) > 2) strengths.push('Rich relationships');
 
     return {
       isValid: true,
       score: Math.min(100, score),
       issues: [],
-      strengths
+      strengths,
     };
   }
 
@@ -101,9 +102,9 @@ export class CharacterValidationService {
    * Validates and creates a new character from form data
    */
   public validateCreateCharacter(
-    data: unknown, 
+    data: unknown,
     projectId: ProjectId,
-    existingCharacters: Character[] = []
+    existingCharacters: Character[] = [],
   ): ValidationResult<Character> {
     try {
       // Validate create schema
@@ -116,17 +117,19 @@ export class CharacterValidationService {
 
       // Check for unique name
       const nameExists = existingCharacters.some(
-        char => char.name.toLowerCase() === createData.name.toLowerCase()
+        char => char.name.toLowerCase() === createData.name.toLowerCase(),
       );
       if (nameExists) {
         return {
           success: false,
           error: 'Character name already exists',
-          issues: [{
-            path: ['name'],
-            message: 'A character with this name already exists',
-            code: 'custom' as const
-          }]
+          issues: [
+            {
+              path: ['name'],
+              message: 'A character with this name already exists',
+              code: 'custom' as const,
+            },
+          ],
         };
       }
 
@@ -135,11 +138,13 @@ export class CharacterValidationService {
         return {
           success: false,
           error: 'Invalid importance level for character role',
-          issues: [{
-            path: ['importance'],
-            message: this.getImportanceRequirementMessage(createData.role),
-            code: 'custom' as const
-          }]
+          issues: [
+            {
+              path: ['importance'],
+              message: this.getImportanceRequirementMessage(createData.role),
+              code: 'custom' as const,
+            },
+          ],
         };
       }
 
@@ -159,12 +164,12 @@ export class CharacterValidationService {
         physicalTraits: {
           distinctiveFeatures: [],
           disabilities: [],
-          ...createData.physicalTraits
+          ...createData.physicalTraits,
         },
         background: {
           significantEvents: [],
           secrets: [],
-          ...(createData as any).background || {}
+          ...(('background' in createData && createData.background) ?? {}),
         },
         psychology: {
           coreBeliefs: [],
@@ -174,7 +179,7 @@ export class CharacterValidationService {
           flaws: [],
           strengths: [],
           personalityTraits: [],
-          ...createData.psychology
+          ...createData.psychology,
         },
         voice: {
           vocabulary: 'average',
@@ -185,8 +190,8 @@ export class CharacterValidationService {
             native: '',
             fluent: '',
             conversational: '',
-            basic: ''
-          }
+            basic: '',
+          },
         },
         appearances: [],
         mood_board: [],
@@ -196,7 +201,7 @@ export class CharacterValidationService {
         createdAt: now,
         updatedAt: now,
         version: 1,
-        generatedBy: 'user'
+        generatedBy: 'user',
       };
 
       // Validate the complete character
@@ -205,7 +210,7 @@ export class CharacterValidationService {
       return {
         success: false,
         error: `Character creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -215,7 +220,7 @@ export class CharacterValidationService {
    */
   public validateUpdateCharacter(
     data: unknown,
-    existingCharacters: Character[] = []
+    existingCharacters: Character[] = [],
   ): ValidationResult<UpdateCharacter> {
     try {
       const validation = validateData(UpdateCharacterSchema, data, 'update character');
@@ -226,20 +231,22 @@ export class CharacterValidationService {
       const updateData = validation.data;
 
       // Check for unique name if name is being updated
-      if (updateData.name) {
+      if (updateData.name != null && updateData.name.length > 0) {
+        const newName = updateData.name;
         const nameExists = existingCharacters.some(
-          char => char.id !== updateData.id && 
-          char.name.toLowerCase() === updateData.name!.toLowerCase()
+          char => char.id !== updateData.id && char.name.toLowerCase() === newName.toLowerCase(),
         );
         if (nameExists) {
           return {
             success: false,
             error: 'Character name already exists',
-            issues: [{
-              path: ['name'],
-              message: 'Another character already has this name',
-              code: 'custom' as const
-            }]
+            issues: [
+              {
+                path: ['name'],
+                message: 'Another character already has this name',
+                code: 'custom' as const,
+              },
+            ],
           };
         }
       }
@@ -250,11 +257,13 @@ export class CharacterValidationService {
           return {
             success: false,
             error: 'Invalid importance level for character role',
-            issues: [{
-              path: ['importance'],
-              message: this.getImportanceRequirementMessage(updateData.role),
-              code: 'custom' as const
-            }]
+            issues: [
+              {
+                path: ['importance'],
+                message: this.getImportanceRequirementMessage(updateData.role),
+                code: 'custom' as const,
+              },
+            ],
           };
         }
       }
@@ -264,7 +273,7 @@ export class CharacterValidationService {
       return {
         success: false,
         error: `Character update validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -281,14 +290,14 @@ export class CharacterValidationService {
       }
 
       const validatedCharacter = schemaValidation.data;
-      const issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }> = [];
+      const issues: { path: (string | number)[]; message: string; code: 'custom' }[] = [];
 
       // Business logic validation
       if (!validateCharacterImportance(validatedCharacter.role, validatedCharacter.importance)) {
         issues.push({
           path: ['importance'],
           message: this.getImportanceRequirementMessage(validatedCharacter.role),
-          code: 'custom' as const
+          code: 'custom' as const,
         });
       }
 
@@ -297,7 +306,7 @@ export class CharacterValidationService {
         issues.push({
           path: ['arc'],
           message: 'Characters with importance 7+ must have a character arc',
-          code: 'custom' as const
+          code: 'custom' as const,
         });
       }
 
@@ -307,27 +316,30 @@ export class CharacterValidationService {
         issues.push({
           path: ['appearances'],
           message: 'Character cannot appear multiple times in the same chapter',
-          code: 'custom' as const
+          code: 'custom' as const,
         });
       }
 
       // Validate physical trait consistency
-      if (validatedCharacter.physicalTraits?.age !== undefined && validatedCharacter.physicalTraits.age < 0) {
+      if (
+        validatedCharacter.physicalTraits?.age !== undefined &&
+        validatedCharacter.physicalTraits.age < 0
+      ) {
         issues.push({
           path: ['physicalTraits', 'age'],
           message: 'Age cannot be negative',
-          code: 'custom' as const
+          code: 'custom' as const,
         });
       }
 
       // Validate personality trait conflicts
-      const traits = validatedCharacter.psychology?.personalityTraits || [];
+      const traits = validatedCharacter.psychology?.personalityTraits ?? [];
       const conflicts = this.findPersonalityConflicts(traits);
       if (conflicts.length > 0) {
         issues.push({
           path: ['psychology', 'personalityTraits'],
           message: `Conflicting personality traits: ${conflicts.join(', ')}`,
-          code: 'custom' as const
+          code: 'custom' as const,
         });
       }
 
@@ -335,7 +347,7 @@ export class CharacterValidationService {
         return {
           success: false,
           error: `Character integrity validation failed: ${issues.length} issue(s) found`,
-          issues
+          issues,
         };
       }
 
@@ -344,7 +356,7 @@ export class CharacterValidationService {
       return {
         success: false,
         error: `Character integrity validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -358,7 +370,7 @@ export class CharacterValidationService {
    */
   public validateCharacterRelationship(
     data: unknown,
-    characters: Character[]
+    characters: Character[],
   ): ValidationResult<CharacterRelationship> {
     try {
       const validation = validateData(CharacterRelationshipSchema, data, 'character relationship');
@@ -367,14 +379,14 @@ export class CharacterValidationService {
       }
 
       const relationship = validation.data;
-      const issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }> = [];
+      const issues: { path: (string | number)[]; message: string; code: 'custom' }[] = [];
 
       // Validate relationship logic
       if (!validateRelationship(relationship)) {
         issues.push({
           path: ['characterAId', 'characterBId'],
           message: 'Invalid relationship configuration',
-          code: 'custom'
+          code: 'custom',
         });
       }
 
@@ -384,27 +396,31 @@ export class CharacterValidationService {
         issues.push({
           path: ['characterAId'],
           message: 'Character A does not exist',
-          code: 'custom'
+          code: 'custom',
         });
       }
       if (!characterIds.includes(relationship.characterBId)) {
         issues.push({
           path: ['characterBId'],
           message: 'Character B does not exist',
-          code: 'custom'
+          code: 'custom',
         });
       }
 
       // Validate relationship type appropriateness
       const charA = characters.find(c => c.id === relationship.characterAId);
       const charB = characters.find(c => c.id === relationship.characterBId);
-      
+
       if (charA && charB) {
-        const appropriatenessIssue = this.validateRelationshipAppropriateness(charA, charB, relationship);
+        const appropriatenessIssue = this.validateRelationshipAppropriateness(
+          charA,
+          charB,
+          relationship,
+        );
         if (appropriatenessIssue) {
           issues.push({
             ...appropriatenessIssue,
-            code: 'custom' as const
+            code: 'custom' as const,
           });
         }
       }
@@ -413,7 +429,7 @@ export class CharacterValidationService {
         return {
           success: false,
           error: `Relationship validation failed: ${issues.length} issue(s) found`,
-          issues
+          issues,
         };
       }
 
@@ -422,7 +438,7 @@ export class CharacterValidationService {
       return {
         success: false,
         error: `Relationship validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -436,7 +452,7 @@ export class CharacterValidationService {
    */
   public validateCharacterGroup(
     data: unknown,
-    characters: Character[]
+    characters: Character[],
   ): ValidationResult<CharacterGroup> {
     try {
       const validation = validateData(CharacterGroupSchema, data, 'character group');
@@ -450,11 +466,13 @@ export class CharacterValidationService {
         return {
           success: false,
           error: 'Invalid character group configuration',
-          issues: [{
-            path: ['characterIds'],
-            message: 'Group must contain at least 2 existing characters',
-            code: 'custom' as const
-          }]
+          issues: [
+            {
+              path: ['characterIds'],
+              message: 'Group must contain at least 2 existing characters',
+              code: 'custom' as const,
+            },
+          ],
         };
       }
 
@@ -463,7 +481,7 @@ export class CharacterValidationService {
       return {
         success: false,
         error: `Group validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -473,7 +491,7 @@ export class CharacterValidationService {
    */
   public validateCharacterConflict(
     data: unknown,
-    characters: Character[]
+    characters: Character[],
   ): ValidationResult<CharacterConflict> {
     try {
       const validation = validateData(CharacterConflictSchema, data, 'character conflict');
@@ -487,11 +505,13 @@ export class CharacterValidationService {
         return {
           success: false,
           error: 'Invalid character conflict configuration',
-          issues: [{
-            path: ['participants'],
-            message: 'Conflict must involve at least 2 existing characters',
-            code: 'custom' as const
-          }]
+          issues: [
+            {
+              path: ['participants'],
+              message: 'Conflict must involve at least 2 existing characters',
+              code: 'custom' as const,
+            },
+          ],
         };
       }
 
@@ -500,7 +520,7 @@ export class CharacterValidationService {
       return {
         success: false,
         error: `Conflict validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -516,7 +536,7 @@ export class CharacterValidationService {
     characters: Character[],
     relationships: CharacterRelationship[] = [],
     groups: CharacterGroup[] = [],
-    conflicts: CharacterConflict[] = []
+    conflicts: CharacterConflict[] = [],
   ): ValidationResult<{
     characters: Character[];
     relationships: CharacterRelationship[];
@@ -524,14 +544,14 @@ export class CharacterValidationService {
     conflicts: CharacterConflict[];
   }> {
     try {
-      const issues: Array<{ path: (string | number)[]; message: string; code: 'custom' }> = [];
+      const issues: { path: (string | number)[]; message: string; code: 'custom' }[] = [];
 
       // Validate unique character names
       if (!validateUniqueCharacterNames(characters)) {
         issues.push({
           path: ['characters'],
           message: 'Character names must be unique within the project',
-          code: 'custom'
+          code: 'custom',
         });
       }
 
@@ -541,13 +561,13 @@ export class CharacterValidationService {
         issues.push({
           path: ['characters'],
           message: 'Project must have at least one protagonist',
-          code: 'custom'
+          code: 'custom',
         });
       } else if (protagonists.length > 3) {
         issues.push({
           path: ['characters'],
           message: 'Project should not have more than 3 protagonists',
-          code: 'custom'
+          code: 'custom',
         });
       }
 
@@ -558,7 +578,7 @@ export class CharacterValidationService {
         issues.push({
           path: ['characters'],
           message: `Main characters missing character arcs: ${mainWithoutArcs.map(c => c.name).join(', ')}`,
-          code: 'custom'
+          code: 'custom',
         });
       }
 
@@ -569,7 +589,7 @@ export class CharacterValidationService {
           issues.push({
             path: ['relationships', index],
             message: `Relationship references non-existent character(s)`,
-            code: 'custom'
+            code: 'custom',
           });
         }
       });
@@ -581,7 +601,7 @@ export class CharacterValidationService {
           issues.push({
             path: ['groups', index],
             message: `Group references non-existent character(s): ${invalidRefs.join(', ')}`,
-            code: 'custom'
+            code: 'custom',
           });
         }
       });
@@ -593,7 +613,7 @@ export class CharacterValidationService {
           issues.push({
             path: ['conflicts', index],
             message: `Conflict references non-existent character(s): ${invalidRefs.join(', ')}`,
-            code: 'custom'
+            code: 'custom',
           });
         }
       });
@@ -602,19 +622,19 @@ export class CharacterValidationService {
         return {
           success: false,
           error: `Project character validation failed: ${issues.length} issue(s) found`,
-          issues
+          issues,
         };
       }
 
       return {
         success: true,
-        data: { characters, relationships, groups, conflicts }
+        data: { characters, relationships, groups, conflicts },
       };
     } catch (error) {
       return {
         success: false,
         error: `Project validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        issues: []
+        issues: [],
       };
     }
   }
@@ -645,41 +665,41 @@ export class CharacterValidationService {
 
   private findPersonalityConflicts(traits: PersonalityTrait[]): string[] {
     const conflicts: Record<PersonalityTrait, PersonalityTrait[]> = {
-      'brave': ['cowardly'],
-      'cowardly': ['brave'],
-      'intelligent': ['foolish'],
-      'foolish': ['intelligent'],
-      'kind': ['cruel'],
-      'cruel': ['kind'],
-      'honest': ['deceptive'],
-      'deceptive': ['honest'],
-      'loyal': ['treacherous'],
-      'treacherous': ['loyal'],
-      'optimistic': ['pessimistic'],
-      'pessimistic': ['optimistic'],
-      'confident': ['insecure'],
-      'insecure': ['confident'],
-      'patient': ['impatient'],
-      'impatient': ['patient'],
-      'humble': ['arrogant'],
-      'arrogant': ['humble'],
-      'generous': ['selfish'],
-      'selfish': ['generous'],
-      'creative': ['conventional'],
-      'conventional': ['creative'],
-      'ambitious': ['content'],
-      'content': ['ambitious'],
-      'curious': ['indifferent'],
-      'indifferent': ['curious'],
-      'disciplined': ['impulsive'],
-      'impulsive': ['disciplined'],
-      'empathetic': ['callous'],
-      'callous': ['empathetic']
+      brave: ['cowardly'],
+      cowardly: ['brave'],
+      intelligent: ['foolish'],
+      foolish: ['intelligent'],
+      kind: ['cruel'],
+      cruel: ['kind'],
+      honest: ['deceptive'],
+      deceptive: ['honest'],
+      loyal: ['treacherous'],
+      treacherous: ['loyal'],
+      optimistic: ['pessimistic'],
+      pessimistic: ['optimistic'],
+      confident: ['insecure'],
+      insecure: ['confident'],
+      patient: ['impatient'],
+      impatient: ['patient'],
+      humble: ['arrogant'],
+      arrogant: ['humble'],
+      generous: ['selfish'],
+      selfish: ['generous'],
+      creative: ['conventional'],
+      conventional: ['creative'],
+      ambitious: ['content'],
+      content: ['ambitious'],
+      curious: ['indifferent'],
+      indifferent: ['curious'],
+      disciplined: ['impulsive'],
+      impulsive: ['disciplined'],
+      empathetic: ['callous'],
+      callous: ['empathetic'],
     };
 
     const foundConflicts: string[] = [];
     traits.forEach(trait => {
-      const conflictingTraits = conflicts[trait] || [];
+      const conflictingTraits = conflicts[trait] ?? [];
       conflictingTraits.forEach(conflictTrait => {
         if (traits.includes(conflictTrait)) {
           foundConflicts.push(`${trait} vs ${conflictTrait}`);
@@ -693,7 +713,7 @@ export class CharacterValidationService {
   private validateRelationshipAppropriateness(
     charA: Character,
     charB: Character,
-    relationship: CharacterRelationship
+    relationship: CharacterRelationship,
   ): { path: (string | number)[]; message: string; code: string } | null {
     // Age-appropriate relationships
     if (relationship.type === 'romantic') {
@@ -705,7 +725,7 @@ export class CharacterValidationService {
           return {
             path: ['type'],
             message: 'Large age gap in romantic relationship with young character',
-            code: 'custom'
+            code: 'custom',
           };
         }
       }
@@ -716,7 +736,7 @@ export class CharacterValidationService {
       return {
         path: ['intensity'],
         message: 'Family relationships should have higher intensity (3+)',
-        code: 'custom'
+        code: 'custom',
       };
     }
 
@@ -725,7 +745,7 @@ export class CharacterValidationService {
       return {
         path: ['description'],
         message: 'Enemy relationships must have a description',
-        code: 'custom'
+        code: 'custom',
       };
     }
 
@@ -737,42 +757,45 @@ export class CharacterValidationService {
    */
   public generateCharacterSuggestions(
     existingCharacters: Character[],
-    projectGenre: string[] = []
-  ): Array<{ role: CharacterRole; reason: string; importance: number }> {
-    const suggestions: Array<{ role: CharacterRole; reason: string; importance: number }> = [];
-    
+    projectGenre: string[] = [],
+  ): { role: CharacterRole; reason: string; importance: number }[] {
+    const suggestions: { role: CharacterRole; reason: string; importance: number }[] = [];
+
     const roles = existingCharacters.map(c => c.role);
     const protagonistCount = roles.filter(r => r === 'protagonist').length;
     const antagonistCount = roles.filter(r => r === 'antagonist').length;
     const mentorCount = roles.filter(r => r === 'mentor').length;
-    
+
     // Suggest protagonist if missing
     if (protagonistCount === 0) {
       suggestions.push({
         role: 'protagonist',
         reason: 'Every story needs a protagonist',
-        importance: 9
+        importance: 9,
       });
     }
-    
+
     // Suggest antagonist if missing
     if (antagonistCount === 0) {
       suggestions.push({
         role: 'antagonist',
         reason: 'A compelling antagonist creates conflict and tension',
-        importance: 8
+        importance: 8,
       });
     }
-    
+
     // Suggest mentor for genres that typically have them
-    if (mentorCount === 0 && (projectGenre.includes('fantasy') || projectGenre.includes('young_adult'))) {
+    if (
+      mentorCount === 0 &&
+      (projectGenre.includes('fantasy') || projectGenre.includes('young_adult'))
+    ) {
       suggestions.push({
         role: 'mentor',
         reason: 'Fantasy and YA stories often benefit from mentor characters',
-        importance: 6
+        importance: 6,
       });
     }
-    
+
     return suggestions;
   }
 }
@@ -788,18 +811,37 @@ export const characterValidationService = CharacterValidationService.getInstance
 // =============================================================================
 
 export const validateCharacter = {
-  create: (data: unknown, projectId: ProjectId, existing: Character[] = []) => 
+  create: (
+    data: unknown,
+    projectId: ProjectId,
+    existing: Character[] = [],
+  ): ValidationResult<Character> =>
     characterValidationService.validateCreateCharacter(data, projectId, existing),
-  update: (data: unknown, existing: Character[] = []) => 
+  update: (data: unknown, existing: Character[] = []): ValidationResult<UpdateCharacter> =>
     characterValidationService.validateUpdateCharacter(data, existing),
-  integrity: (character: Character) => 
+  integrity: (character: Character): ValidationResult<Character> =>
     characterValidationService.validateCharacterIntegrity(character),
-  relationship: (data: unknown, characters: Character[]) => 
+  relationship: (data: unknown, characters: Character[]): ValidationResult<CharacterRelationship> =>
     characterValidationService.validateCharacterRelationship(data, characters),
-  group: (data: unknown, characters: Character[]) => 
+  group: (data: unknown, characters: Character[]): ValidationResult<CharacterGroup> =>
     characterValidationService.validateCharacterGroup(data, characters),
-  conflict: (data: unknown, characters: Character[]) => 
+  conflict: (data: unknown, characters: Character[]): ValidationResult<CharacterConflict> =>
     characterValidationService.validateCharacterConflict(data, characters),
-  project: (characters: Character[], relationships?: CharacterRelationship[], groups?: CharacterGroup[], conflicts?: CharacterConflict[]) => 
-    characterValidationService.validateProjectCharacters(characters, relationships, groups, conflicts)
+  project: (
+    characters: Character[],
+    relationships?: CharacterRelationship[],
+    groups?: CharacterGroup[],
+    conflicts?: CharacterConflict[],
+  ): ValidationResult<{
+    characters: Character[];
+    relationships: CharacterRelationship[];
+    groups: CharacterGroup[];
+    conflicts: CharacterConflict[];
+  }> =>
+    characterValidationService.validateProjectCharacters(
+      characters,
+      relationships,
+      groups,
+      conflicts,
+    ),
 };

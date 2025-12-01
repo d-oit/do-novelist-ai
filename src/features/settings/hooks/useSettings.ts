@@ -6,9 +6,10 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+
 import { settingsService } from '../services/settingsService';
-import type { Settings, SettingsCategory } from '../types';
 import { DEFAULT_SETTINGS, validateSettings } from '../types';
+import { type Settings, type SettingsCategory } from '../types';
 
 interface SettingsState {
   // Data
@@ -21,10 +22,10 @@ interface SettingsState {
   activeCategory: SettingsCategory;
 
   // Actions
-  init: () => Promise<void>;
-  update: (updates: Partial<Settings>) => Promise<void>;
-  reset: () => Promise<void>;
-  resetCategory: (category: SettingsCategory) => Promise<void>;
+  init: () => void;
+  update: (updates: Partial<Settings>) => void;
+  reset: () => void;
+  resetCategory: (category: SettingsCategory) => void;
   setActiveCategory: (category: SettingsCategory) => void;
   clearError: () => void;
 }
@@ -41,10 +42,10 @@ export const useSettings = create<SettingsState>()(
         activeCategory: 'appearance',
 
         // Initialize
-        init: async () => {
+        init: (): void => {
           set({ isLoading: true, error: null });
           try {
-            const settings = await settingsService.load();
+            const settings = settingsService.load();
             set({ settings, isLoading: false });
 
             // Apply theme immediately
@@ -58,7 +59,7 @@ export const useSettings = create<SettingsState>()(
         },
 
         // Update settings
-        update: async (updates: Partial<Settings>) => {
+        update: (updates: Partial<Settings>): void => {
           set({ isSaving: true, error: null });
           try {
             const current = get().settings;
@@ -70,7 +71,7 @@ export const useSettings = create<SettingsState>()(
               throw new Error('Invalid settings data');
             }
 
-            await settingsService.save(newSettings);
+            settingsService.save(newSettings);
             set({ settings: newSettings, isSaving: false });
 
             // Apply theme if changed
@@ -79,7 +80,7 @@ export const useSettings = create<SettingsState>()(
             }
 
             // Apply font size if changed
-            if (updates.fontSize) {
+            if (updates.fontSize != null && !isNaN(updates.fontSize) && updates.fontSize > 0) {
               applyFontSize(updates.fontSize);
             }
           } catch (error) {
@@ -87,15 +88,14 @@ export const useSettings = create<SettingsState>()(
               error: error instanceof Error ? error.message : 'Failed to save settings',
               isSaving: false,
             });
-            throw error;
           }
         },
 
         // Reset all settings to defaults
-        reset: async () => {
+        reset: (): void => {
           set({ isSaving: true, error: null });
           try {
-            await settingsService.save(DEFAULT_SETTINGS);
+            settingsService.save(DEFAULT_SETTINGS);
             set({ settings: DEFAULT_SETTINGS, isSaving: false });
 
             // Reapply defaults
@@ -111,36 +111,36 @@ export const useSettings = create<SettingsState>()(
         },
 
         // Reset specific category
-        resetCategory: async (category: SettingsCategory) => {
+        resetCategory: (category: SettingsCategory): void => {
           const categoryDefaults = getCategoryDefaults(category);
-          await get().update(categoryDefaults);
+          get().update(categoryDefaults);
         },
 
         // Set active category for UI
-        setActiveCategory: (category: SettingsCategory) => {
+        setActiveCategory: (category: SettingsCategory): void => {
           set({ activeCategory: category });
         },
 
         // Clear error
-        clearError: () => {
+        clearError: (): void => {
           set({ error: null });
         },
       }),
       {
         name: 'settings-storage',
-        partialize: (state) => ({
+        partialize: state => ({
           settings: state.settings,
         }),
-      }
+      },
     ),
-    { name: 'SettingsStore' }
-  )
+    { name: 'SettingsStore' },
+  ),
 );
 
 /**
  * Apply theme to document
  */
-function applyTheme(theme: Settings['theme']) {
+function applyTheme(theme: Settings['theme']): void {
   if (theme === 'system') {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.classList.toggle('dark', prefersDark);
@@ -152,7 +152,7 @@ function applyTheme(theme: Settings['theme']) {
 /**
  * Apply font size to document
  */
-function applyFontSize(fontSize: number) {
+function applyFontSize(fontSize: number): void {
   document.documentElement.style.fontSize = `${fontSize}px`;
 }
 
@@ -212,7 +212,7 @@ function getCategoryDefaults(category: SettingsCategory): Partial<Settings> {
  */
 export const selectCategorySettings = (
   _state: SettingsState,
-  category: SettingsCategory
+  category: SettingsCategory,
 ): Partial<Settings> => {
   return getCategoryDefaults(category);
 };

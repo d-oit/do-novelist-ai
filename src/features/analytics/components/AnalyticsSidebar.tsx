@@ -3,12 +3,12 @@
  * Handles analytics navigation and quick stats
  */
 
-import React from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, TrendingUp, Target, Clock } from 'lucide-react';
-import { Project, ChapterStatus } from '../../../types';
+import React from 'react';
 
 import { cn } from '../../../lib/utils';
+import { Project, ChapterStatus } from '../../../shared/types';
 
 interface AnalyticsSidebarProps {
   project: Project;
@@ -21,52 +21,57 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
   project,
   activeView,
   onViewChange,
-  className
+  className,
 }) => {
   const navigationItems = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'productivity', label: 'Productivity', icon: TrendingUp },
     { id: 'goals', label: 'Goals', icon: Target },
-    { id: 'timeline', label: 'Timeline', icon: Clock }
+    { id: 'timeline', label: 'Timeline', icon: Clock },
   ];
 
   // Calculate quick stats
   const totalWords = project.chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0);
-  const completedChapters = project.chapters.filter(ch => ch.status === ChapterStatus.COMPLETE).length;
+  const completedChapters = project.chapters.filter(
+    ch => ch.status === ChapterStatus.COMPLETE,
+  ).length;
 
-  const progressPercentage = project.chapters.length > 0 
-    ? Math.round((completedChapters / project.chapters.length) * 100)
-    : 0;
+  const progressPercentage =
+    project.chapters.length > 0
+      ? Math.round((completedChapters / project.chapters.length) * 100)
+      : 0;
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn('space-y-6', className)}>
       {/* Quick Stats */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Quick Stats</h3>
-        <div className="space-y-2">
-          <div className="flex justify-between items-center p-2 bg-card/50 rounded-lg">
-            <span className="text-sm text-muted-foreground">Total Words</span>
-            <span className="font-medium text-foreground">{totalWords.toLocaleString()}</span>
+      <div className='space-y-3'>
+        <h3 className='text-sm font-semibold text-foreground'>Quick Stats</h3>
+        <div className='space-y-2'>
+          <div className='flex items-center justify-between rounded-lg bg-card/50 p-2'>
+            <span className='text-sm text-muted-foreground'>Total Words</span>
+            <span className='font-medium text-foreground'>{totalWords.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between items-center p-2 bg-card/50 rounded-lg">
-            <span className="text-sm text-muted-foreground">Chapters</span>
-            <span className="font-medium text-foreground">{completedChapters}/{project.chapters.length}</span>
+          <div className='flex items-center justify-between rounded-lg bg-card/50 p-2'>
+            <span className='text-sm text-muted-foreground'>Chapters</span>
+            <span className='font-medium text-foreground'>
+              {completedChapters}/{project.chapters.length}
+            </span>
           </div>
-          <div className="flex justify-between items-center p-2 bg-card/50 rounded-lg">
-            <span className="text-sm text-muted-foreground">Progress</span>
-            <span className="font-medium text-foreground">{progressPercentage}%</span>
+          <div className='flex items-center justify-between rounded-lg bg-card/50 p-2'>
+            <span className='text-sm text-muted-foreground'>Progress</span>
+            <span className='font-medium text-foreground'>{progressPercentage}%</span>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-foreground">Views</h3>
-        <div className="space-y-1">
+      <div className='space-y-2'>
+        <h3 className='text-sm font-semibold text-foreground'>Views</h3>
+        <div className='space-y-1'>
           {navigationItems.map(item => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
-            
+
             return (
               <motion.button
                 key={item.id}
@@ -74,18 +79,16 @@ const AnalyticsSidebar: React.FC<AnalyticsSidebarProps> = ({
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onViewChange(item.id)}
                 className={cn(
-                  "w-full text-left p-3 rounded-lg transition-all",
-                  "border border-border/50 hover:border-primary/50",
-                  isActive 
-                    ? "bg-primary/10 border-primary shadow-md shadow-primary/10" 
-                    : "bg-card/50 hover:bg-card"
+                  'w-full rounded-lg p-3 text-left transition-all',
+                  'border border-border/50 hover:border-primary/50',
+                  isActive
+                    ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
+                    : 'bg-card/50 hover:bg-card',
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className="w-4 h-4 text-primary" />
-                  <span className="font-medium text-sm text-foreground">
-                    {item.label}
-                  </span>
+                <div className='flex items-center gap-3'>
+                  <Icon className='h-4 w-4 text-primary' />
+                  <span className='text-sm font-medium text-foreground'>{item.label}</span>
                 </div>
               </motion.button>
             );

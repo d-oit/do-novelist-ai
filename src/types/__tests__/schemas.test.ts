@@ -4,15 +4,19 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
+import { ChapterStatus, PublishStatus } from '../../shared/types';
+
 import {
   ProjectSchema,
   ChapterSchema,
   CreateProjectSchema,
   WorldStateSchema,
   validateData,
+  ProjectSettingsSchema,
+  RefineOptionsSchema,
+  isValidData,
+  type Project,
 } from '../schemas';
-import { ProjectSettingsSchema, RefineOptionsSchema, isValidData } from '../schemas';
-
 
 describe('Schema Validation Tests', () => {
   describe('WorldStateSchema', () => {
@@ -28,7 +32,7 @@ describe('Schema Validation Tests', () => {
         hasWorldBuilding: false,
         hasThemes: true,
         plotStructureDefined: false,
-        targetAudienceDefined: true
+        targetAudienceDefined: true,
       };
 
       const result = validateData(WorldStateSchema, validWorldState);
@@ -46,7 +50,7 @@ describe('Schema Validation Tests', () => {
         chaptersCount: 0,
         chaptersCompleted: 0,
         styleDefined: true,
-        isPublished: false
+        isPublished: false,
       };
 
       const result = validateData(WorldStateSchema, minimalWorldState);
@@ -65,7 +69,7 @@ describe('Schema Validation Tests', () => {
         chaptersCount: 5,
         chaptersCompleted: 10, // More completed than total
         styleDefined: true,
-        isPublished: false
+        isPublished: false,
       };
 
       const result = validateData(WorldStateSchema, invalidWorldState);
@@ -81,14 +85,14 @@ describe('Schema Validation Tests', () => {
         title: 'Chapter 1: The Beginning',
         summary: 'Our hero starts their journey.',
         content: 'Once upon a time, in a land far, far away...',
-        status: 'complete',
+        status: ChapterStatus.COMPLETE,
         wordCount: 2500,
         characterCount: 12500,
         estimatedReadingTime: 10,
         tags: ['adventure', 'beginning'],
         notes: 'This chapter sets the tone for the entire story.',
         createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-02')
+        updatedAt: new Date('2024-01-02'),
       };
 
       const result = validateData(ChapterSchema, validChapter);
@@ -107,7 +111,7 @@ describe('Schema Validation Tests', () => {
         title: 'Chapter 1',
         summary: 'A chapter',
         content: 'Some content here',
-        status: 'pending'
+        status: 'pending',
       };
 
       const result = validateData(ChapterSchema, minimalChapter);
@@ -129,7 +133,7 @@ describe('Schema Validation Tests', () => {
         title: 'Chapter 1',
         summary: 'A chapter',
         content: 'Some content',
-        status: 'pending'
+        status: 'pending',
       };
 
       const result = validateData(ChapterSchema, invalidChapter);
@@ -145,7 +149,7 @@ describe('Schema Validation Tests', () => {
         title: 'Chapter 1',
         summary: 'A chapter',
         content: longContent,
-        status: 'pending'
+        status: 'pending',
       };
 
       const result = validateData(ChapterSchema, invalidChapter);
@@ -164,7 +168,7 @@ describe('Schema Validation Tests', () => {
         darkMode: true,
         fontSize: 'large',
         lineHeight: 'relaxed',
-        editorTheme: 'typewriter'
+        editorTheme: 'typewriter',
       };
 
       const result = validateData(ProjectSettingsSchema, validSettings);
@@ -191,7 +195,7 @@ describe('Schema Validation Tests', () => {
 
     it('should reject invalid auto-save intervals', () => {
       const invalidSettings = {
-        autoSaveInterval: 10 // Too short (minimum is 30)
+        autoSaveInterval: 10, // Too short (minimum is 30)
       };
 
       const result = validateData(ProjectSettingsSchema, invalidSettings);
@@ -208,7 +212,7 @@ describe('Schema Validation Tests', () => {
         targetWordCount: 75000,
         language: 'en',
         genre: ['science_fiction', 'adventure'],
-        targetAudience: 'adult'
+        targetAudience: 'adult',
       };
 
       const result = validateData(CreateProjectSchema, validCreateData);
@@ -225,7 +229,7 @@ describe('Schema Validation Tests', () => {
         title: 'Test Novel',
         style: 'General Fiction',
         idea: 'A simple story about life.',
-        genre: ['fiction']
+        genre: ['fiction'],
       };
 
       const result = validateData(CreateProjectSchema, minimalCreateData);
@@ -242,7 +246,7 @@ describe('Schema Validation Tests', () => {
         title: 'a'.repeat(201), // Exceeds 200 character limit
         style: 'General Fiction',
         idea: 'A story',
-        genre: ['fiction']
+        genre: ['fiction'],
       };
 
       const result = validateData(CreateProjectSchema, invalidCreateData);
@@ -254,7 +258,7 @@ describe('Schema Validation Tests', () => {
         title: 'Test Novel',
         style: 'General Fiction',
         idea: 'A story',
-        genre: [] // Empty genre array
+        genre: [], // Empty genre array
       };
 
       const result = validateData(CreateProjectSchema, invalidCreateData);
@@ -271,7 +275,7 @@ describe('Schema Validation Tests', () => {
         topP: 0.9,
         focusAreas: ['grammar', 'style', 'pacing'],
         preserveLength: true,
-        targetTone: 'dramatic'
+        targetTone: 'dramatic',
       };
 
       const result = validateData(RefineOptionsSchema, validOptions);
@@ -285,7 +289,7 @@ describe('Schema Validation Tests', () => {
 
     it('should apply defaults for optional fields', () => {
       const minimalOptions = {
-        model: 'gemini-1.5-pro'
+        model: 'gemini-1.5-pro',
       };
 
       const result = validateData(RefineOptionsSchema, minimalOptions);
@@ -302,7 +306,7 @@ describe('Schema Validation Tests', () => {
     it('should reject invalid temperature values', () => {
       const invalidOptions = {
         model: 'gemini-1.5-pro',
-        temperature: 3.0 // Exceeds maximum of 2.0
+        temperature: 3.0, // Exceeds maximum of 2.0
       };
 
       const result = validateData(RefineOptionsSchema, invalidOptions);
@@ -311,7 +315,7 @@ describe('Schema Validation Tests', () => {
 
     it('should reject invalid models', () => {
       const invalidOptions = {
-        model: 'gpt-4' // Not in allowed enum
+        model: 'gpt-4', // Not in allowed enum
       };
 
       const result = validateData(RefineOptionsSchema, invalidOptions);
@@ -320,7 +324,7 @@ describe('Schema Validation Tests', () => {
   });
 
   describe('ProjectSchema', () => {
-    let validProject: any;
+    let validProject: Project;
 
     beforeEach(() => {
       validProject = {
@@ -340,10 +344,10 @@ describe('Schema Validation Tests', () => {
           hasWorldBuilding: false,
           hasThemes: false,
           plotStructureDefined: false,
-          targetAudienceDefined: true
+          targetAudienceDefined: true,
         },
         isGenerating: false,
-        status: 'Draft',
+        status: PublishStatus.DRAFT,
         language: 'en',
         targetWordCount: 50000,
         settings: {
@@ -355,7 +359,7 @@ describe('Schema Validation Tests', () => {
           darkMode: false,
           fontSize: 'medium',
           lineHeight: 'normal',
-          editorTheme: 'default'
+          editorTheme: 'default',
         },
         genre: ['fiction'],
         targetAudience: 'adult',
@@ -370,10 +374,10 @@ describe('Schema Validation Tests', () => {
           averageChapterLength: 0,
           estimatedReadingTime: 0,
           generationCost: 0,
-          editingRounds: 0
+          editingRounds: 0,
         },
         version: '1.0.0',
-        changeLog: []
+        changeLog: [],
       };
     });
 
@@ -390,15 +394,15 @@ describe('Schema Validation Tests', () => {
           title: 'Chapter 1',
           summary: 'First chapter',
           content: 'Content here',
-          status: 'complete',
+          status: ChapterStatus.COMPLETE,
           wordCount: 1000,
           characterCount: 5000,
           estimatedReadingTime: 4,
           tags: [],
           notes: '',
           createdAt: new Date(),
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       ];
       validProject.worldState.chaptersCount = 2; // Inconsistent with actual chapters
 
@@ -414,15 +418,15 @@ describe('Schema Validation Tests', () => {
           title: 'Chapter 1',
           summary: 'First chapter',
           content: 'Content here',
-          status: 'complete',
+          status: ChapterStatus.COMPLETE,
           wordCount: 1000,
           characterCount: 5000,
           estimatedReadingTime: 4,
           tags: [],
           notes: '',
           createdAt: new Date(),
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       ];
       validProject.worldState.chaptersCount = 1;
       validProject.worldState.chaptersCompleted = 0; // Should be 1
@@ -450,7 +454,7 @@ describe('Schema Validation Tests', () => {
     it('should return true for valid data', () => {
       const validSettings = {
         enableDropCaps: true,
-        autoSave: true
+        autoSave: true,
       };
 
       expect(isValidData(ProjectSettingsSchema, validSettings)).toBe(true);
@@ -458,7 +462,7 @@ describe('Schema Validation Tests', () => {
 
     it('should return false for invalid data', () => {
       const invalidSettings = {
-        enableDropCaps: 'yes' // Should be boolean
+        enableDropCaps: 'yes', // Should be boolean
       };
 
       expect(isValidData(ProjectSettingsSchema, invalidSettings)).toBe(false);
@@ -478,7 +482,7 @@ describe('Edge Cases and Error Handling', () => {
     const malformedData = {
       id: 123, // Wrong type
       title: null, // Wrong type
-      chapters: 'not an array' // Wrong type
+      chapters: 'not an array', // Wrong type
     };
 
     const result = validateData(ProjectSchema, malformedData);
@@ -488,8 +492,7 @@ describe('Edge Cases and Error Handling', () => {
       throw new Error('Expected validation failure for malformed project data');
     }
 
-    expect(result.error).toContain('Validation failed');
-
+    expect((result as { success: false; error: string; issues: any[] }).error).toContain('Validation failed');
   });
 
   it('should provide detailed error messages', () => {
@@ -499,7 +502,7 @@ describe('Edge Cases and Error Handling', () => {
       title: '', // Empty string
       summary: 'A'.repeat(1001), // Too long
       content: 'Content',
-      status: 'invalid_status' // Invalid enum
+      status: 'invalid_status', // Invalid enum
     };
 
     const result = validateData(ChapterSchema, invalidChapter);
@@ -509,7 +512,6 @@ describe('Edge Cases and Error Handling', () => {
       throw new Error('Expected validation failure for invalid chapter data');
     }
 
-    expect(result.issues.length).toBeGreaterThan(0);
-
+    expect((result as { success: false; error: string; issues: any[] }).issues.length).toBeGreaterThan(0);
   });
 });

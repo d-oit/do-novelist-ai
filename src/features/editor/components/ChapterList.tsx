@@ -3,13 +3,14 @@
  * Handles chapter navigation and overview display
  */
 
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus, FileText, Eye } from 'lucide-react';
-import { Project, Chapter, ChapterStatus } from '../../../types';
+import React from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
+import { Project, Chapter } from '../../../types';
+import { ChapterStatus } from '../../../shared/types';
 
 interface ChapterListProps {
   project: Project;
@@ -24,9 +25,9 @@ const ChapterList: React.FC<ChapterListProps> = ({
   selectedChapterId,
   onSelectChapter,
   onAddChapter,
-  className
+  className,
 }) => {
-  const getStatusColor = (status: Chapter['status']) => {
+  const getStatusColor = (status: Chapter['status']): string => {
     switch (status) {
       case ChapterStatus.COMPLETE:
         return 'bg-green-500/20 text-green-400 ring-green-500/30';
@@ -39,7 +40,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
     }
   };
 
-  const getStatusText = (status: Chapter['status']) => {
+  const getStatusText = (status: Chapter['status']): string => {
     switch (status) {
       case ChapterStatus.PENDING:
         return 'Pending';
@@ -54,47 +55,39 @@ const ChapterList: React.FC<ChapterListProps> = ({
     }
   };
 
-
   return (
-    <div className={cn("space-y-3", className)}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">Chapters</h3>
-        <Button
-          onClick={onAddChapter}
-          size="sm"
-          variant="outline"
-          className="h-7 gap-1.5 text-xs"
-        >
-          <Plus className="w-3 h-3" />
+    <div className={cn('space-y-3', className)}>
+      <div className='flex items-center justify-between'>
+        <h3 className='text-sm font-semibold text-foreground'>Chapters</h3>
+        <Button onClick={onAddChapter} size='sm' variant='outline' className='h-7 gap-1.5 text-xs'>
+          <Plus className='h-3 w-3' />
           Add Chapter
         </Button>
       </div>
 
-      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+      <div className='max-h-[400px] space-y-2 overflow-y-auto'>
         {/* Overview Item */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => onSelectChapter('overview')}
           className={cn(
-            "w-full text-left p-3 rounded-lg transition-all",
-            "border border-border/50 hover:border-primary/50",
-            selectedChapterId === 'overview' 
-              ? "bg-primary/10 border-primary shadow-md shadow-primary/10" 
-              : "bg-card/50 hover:bg-card"
+            'w-full rounded-lg p-3 text-left transition-all',
+            'border border-border/50 hover:border-primary/50',
+            selectedChapterId === 'overview'
+              ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
+              : 'bg-card/50 hover:bg-card',
           )}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Eye className="w-4 h-4 text-primary" />
+          <div className='flex items-center gap-3'>
+            <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20'>
+              <Eye className='h-4 w-4 text-primary' />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-sm text-foreground">Project Overview</span>
+            <div className='min-w-0 flex-1'>
+              <div className='flex items-center gap-2'>
+                <span className='text-sm font-medium text-foreground'>Project Overview</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Project details and settings
-              </p>
+              <p className='mt-0.5 text-xs text-muted-foreground'>Project details and settings</p>
             </div>
           </div>
         </motion.button>
@@ -109,37 +102,39 @@ const ChapterList: React.FC<ChapterListProps> = ({
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelectChapter(chapter.id)}
               className={cn(
-                "w-full text-left p-3 rounded-lg transition-all",
-                "border border-border/50 hover:border-primary/50",
-                selectedChapterId === chapter.id 
-                  ? "bg-primary/10 border-primary shadow-md shadow-primary/10" 
-                  : "bg-card/50 hover:bg-card"
+                'w-full rounded-lg p-3 text-left transition-all',
+                'border border-border/50 hover:border-primary/50',
+                selectedChapterId === chapter.id
+                  ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
+                  : 'bg-card/50 hover:bg-card',
               )}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-card flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-muted-foreground" />
+              <div className='flex items-center gap-3'>
+                <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-card'>
+                  <FileText className='h-4 w-4 text-muted-foreground' />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm text-foreground">
-                      {index + 1}. {chapter.title || 'Untitled Chapter'}
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-center gap-2'>
+                    <span className='text-sm font-medium text-foreground'>
+                      {index + 1}. {chapter.title ?? 'Untitled Chapter'}
                     </span>
-                    <span className={cn(
-                      "px-1.5 py-0.5 rounded text-xs font-medium ring-1",
-                      getStatusColor(chapter.status)
-                    )}>
+                    <span
+                      className={cn(
+                        'rounded px-1.5 py-0.5 text-xs font-medium ring-1',
+                        getStatusColor(chapter.status),
+                      )}
+                    >
                       {getStatusText(chapter.status)}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                    {chapter.summary || chapter.content 
-                      ? (chapter.summary || chapter.content.substring(0, 60) + '...')
+                  <p className='mt-0.5 truncate text-xs text-muted-foreground'>
+                    {(chapter.summary ?? chapter.content)
+                      ? (chapter.summary ?? chapter.content.substring(0, 60) + '...')
                       : 'No content yet'}
                   </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-muted-foreground">
-                      {chapter.wordCount || 0} words
+                  <div className='mt-1 flex items-center gap-2'>
+                    <span className='text-xs text-muted-foreground'>
+                      {chapter.wordCount ?? 0} words
                     </span>
                   </div>
                 </div>

@@ -1,5 +1,6 @@
 {
     "$schema": "https://opencode.ai/config.json",
+    "model": "chutes/MiniMaxAI/MiniMax-M2",
     "provider": {
         "perplexity": {
             "npm": "@ai-sdk/perplexity",

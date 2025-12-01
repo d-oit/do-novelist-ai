@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { versioningService } from '../versioningService';
-import { Chapter, ChapterStatus } from '../../../../types';
+
 import { createChapter } from '../../../../shared/utils';
+import { Chapter, ChapterStatus } from '../../../../types';
+import { Version } from '../../types';
+import { versioningService } from '../versioningService';
 
 // Mock indexedDB
 const mockOpenDB = vi.fn();
@@ -79,8 +81,8 @@ describe('VersioningService', () => {
     });
 
     // Setup add operation
-    mockAdd.mockImplementation((data) => {
-      if (data && data.id && data.chapterId) {
+    mockAdd.mockImplementation(data => {
+      if (data?.id && data.chapterId) {
         storage.versions.push(data);
       }
       const request = createRequest(data);
@@ -89,18 +91,18 @@ describe('VersioningService', () => {
     });
 
     // Setup get operation
-    mockGet.mockImplementation((id) => {
-      const _version = storage.versions.find((v) => v.id === id);
-      const request = createRequest(_version || null);
+    mockGet.mockImplementation(id => {
+      const _version = storage.versions.find(v => v.id === id);
+      const request = createRequest(_version ?? null);
       setTimeout(() => request.onsuccess?.({ target: request }), 0);
       return request;
     });
 
     // Setup getAll operation
-    mockGetAll.mockImplementation((chapterId) => {
+    mockGetAll.mockImplementation(chapterId => {
       let results = storage.versions;
       if (chapterId) {
-        results = storage.versions.filter((v) => v.chapterId === chapterId);
+        results = storage.versions.filter(v => v.chapterId === chapterId);
       }
       const request = createRequest(results);
       setTimeout(() => request.onsuccess?.({ target: request }), 0);
@@ -108,9 +110,9 @@ describe('VersioningService', () => {
     });
 
     // Setup put operation
-    mockPut.mockImplementation((data) => {
-      if (data && data.id && data.chapterId) {
-        const index = storage.versions.findIndex((v) => v.id === data.id);
+    mockPut.mockImplementation(data => {
+      if (data?.id && data.chapterId) {
+        const index = storage.versions.findIndex(v => v.id === data.id);
         if (index >= 0) {
           storage.versions[index] = data;
         } else {
@@ -123,8 +125,8 @@ describe('VersioningService', () => {
     });
 
     // Setup delete operation
-    mockDelete.mockImplementation((id) => {
-      const index = storage.versions.findIndex((v) => v.id === id);
+    mockDelete.mockImplementation(id => {
+      const index = storage.versions.findIndex(v => v.id === id);
       if (index >= 0) {
         storage.versions.splice(index, 1);
       }
@@ -370,9 +372,9 @@ describe('VersioningService', () => {
     });
 
     it('should throw error when comparing non-existent versions', async () => {
-      await expect(
-        versioningService.compareVersions('invalid1', 'invalid2')
-      ).rejects.toThrow('One or both versions not found');
+      await expect(versioningService.compareVersions('invalid1', 'invalid2')).rejects.toThrow(
+        'One or both versions not found',
+      );
     });
 
     it('should detect additions, deletions, and modifications', async () => {
@@ -393,9 +395,10 @@ describe('VersioningService', () => {
     it('should create a new branch', async () => {
       const _version = await versioningService.saveVersion(testChapter);
       const branch = await versioningService.createBranch(
+        testChapter.id,
         'Alternative Ending',
         'Exploring a different story direction',
-        _version.id
+        _version.id,
       );
 
       expect(branch).toBeDefined();
@@ -408,7 +411,7 @@ describe('VersioningService', () => {
 
     it('should assign a color to new branch', async () => {
       const _version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch('Branch', 'Description', _version.id);
+      const branch = await versioningService.createBranch(testChapter.id, 'Branch', 'Description', _version.id);
 
       expect(branch.color).toBeDefined();
       expect(branch.color).toMatch(/^#[0-9A-F]{6}$/i);
@@ -416,15 +419,15 @@ describe('VersioningService', () => {
 
     it('should set createdAt timestamp for new branch', async () => {
       const _version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch('Branch', 'Description', _version.id);
+      const branch = await versioningService.createBranch(testChapter.id, 'Branch', 'Description', _version.id);
 
       expect(branch.createdAt).toBeInstanceOf(Date);
     });
 
     it('should retrieve branches for a chapter', async () => {
       const _version = await versioningService.saveVersion(testChapter);
-      await versioningService.createBranch('Branch 1', 'Description 1', _version.id);
-      await versioningService.createBranch('Branch 2', 'Description 2', _version.id);
+      await versioningService.createBranch(testChapter.id, 'Branch 1', 'Description 1', _version.id);
+      await versioningService.createBranch(testChapter.id, 'Branch 2', 'Description 2', _version.id);
 
       const branches = await versioningService.getBranches(testChapter.id);
 
@@ -433,7 +436,7 @@ describe('VersioningService', () => {
 
     it('should delete a branch', async () => {
       const _version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch('Branch', 'Description', _version.id);
+      const branch = await versioningService.createBranch(testChapter.id, 'Branch', 'Description', _version.id);
 
       const result = await versioningService.deleteBranch(branch.id);
 
@@ -442,19 +445,19 @@ describe('VersioningService', () => {
 
     it('should switch to a branch', async () => {
       const _version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch('Branch', 'Description', _version.id);
+      const branch = await versioningService.createBranch(testChapter.id, 'Branch', 'Description', _version.id);
 
-      const result = await versioningService.switchBranch(branch.id);
+      const result = versioningService.switchBranch(branch.id);
 
       expect(result).toBe(true);
     });
 
     it('should merge branches', async () => {
       const _version = await versioningService.saveVersion(testChapter);
-      const branch1 = await versioningService.createBranch('Branch 1', 'Description', _version.id);
-      const branch2 = await versioningService.createBranch('Branch 2', 'Description', _version.id);
+      const branch1 = await versioningService.createBranch(testChapter.id, 'Branch 1', 'Description', _version.id);
+      const branch2 = await versioningService.createBranch(testChapter.id, 'Branch 2', 'Description', _version.id);
 
-      const result = await versioningService.mergeBranch(branch1.id, branch2.id);
+      const result = versioningService.mergeBranch(branch1.id, branch2.id);
 
       expect(result).toBe(true);
     });
@@ -487,12 +490,12 @@ describe('VersioningService', () => {
     it('should include all _version data in JSON export', async () => {
       const _version = await versioningService.saveVersion(testChapter, 'Test Version');
       const exported = await versioningService.exportVersionHistory(testChapter.id, 'json');
-      const parsed = JSON.parse(exported);
+      const parsed: Version[] = JSON.parse(exported);
 
-      const exportedVersion = parsed.find((v: any) => v.id === _version.id);
+      const exportedVersion = parsed.find((v: Version) => v.id === _version.id);
       expect(exportedVersion).toBeDefined();
-      expect(exportedVersion.message).toBe('Test Version');
-      expect(exportedVersion.wordCount).toBe(_version.wordCount);
+      expect(exportedVersion!.message).toBe('Test Version');
+      expect(exportedVersion!.wordCount).toBe(_version.wordCount);
     });
   });
 

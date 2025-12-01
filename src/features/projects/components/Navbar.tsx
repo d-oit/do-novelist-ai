@@ -1,14 +1,5 @@
-
+import { Menu, X, Database, Plus, LayoutDashboard, Folder, Settings } from 'lucide-react';
 import React, { useState } from 'react';
-import { 
-  Menu, 
-  X, 
-  Database, 
-  Plus, 
-  LayoutDashboard, 
-  Folder, 
-  Settings
-} from 'lucide-react';
 
 interface NavbarProps {
   projectTitle: string;
@@ -17,92 +8,106 @@ interface NavbarProps {
   onNavigate: (view: 'dashboard' | 'projects' | 'settings') => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({
-  projectTitle,
-  onNewProject,
-  currentView,
-  onNavigate
-}) => {
+const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView, onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleNav = (view: 'dashboard' | 'projects' | 'settings') => {
+  const handleNav = (view: 'dashboard' | 'projects' | 'settings'): void => {
     onNavigate(view);
     setIsMenuOpen(false);
   };
 
-  const NavLink = ({ view, icon: Icon, label }: { view: 'dashboard' | 'projects' | 'settings'; icon: React.ElementType; label: string; }) => (
-    <button
-      onClick={() => handleNav(view)}
-      className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentView === view ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
-      data-testid={`nav-${view}`}
-    >
-      <Icon className="w-4 h-4" /> {label}
-    </button>
-  );
+  const NavLink = ({
+    view,
+    icon: Icon,
+    label,
+  }: {
+    view: 'dashboard' | 'projects' | 'settings';
+    icon: React.ElementType;
+    label: string;
+  }): React.ReactElement => {
+    return (
+      <button
+        onClick={() => handleNav(view)}
+        className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${currentView === view ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+        data-testid={`nav-${view}`}
+      >
+        <Icon className='h-4 w-4' /> {label}
+      </button>
+    );
+  };
 
   return (
-    <nav className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-40 w-full">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNav('dashboard')}>
-          <div className="bg-primary/10 p-2 rounded-lg">
-            <Database className="w-5 h-5 text-primary" />
+    <nav className='sticky top-0 z-40 w-full border-b border-border bg-card/50 backdrop-blur-md'>
+      <div className='mx-auto flex h-16 max-w-7xl items-center justify-between px-4'>
+        <div
+          className='flex cursor-pointer items-center gap-3'
+          onClick={() => handleNav('dashboard')}
+        >
+          <div className='rounded-lg bg-primary/10 p-2'>
+            <Database className='h-5 w-5 text-primary' />
           </div>
-          <div className="hidden md:block">
-            <h1 className="font-bold text-lg leading-none">Novelist.ai</h1>
-            <span className="text-xs text-muted-foreground font-mono">GOAP Engine v0.5.0</span>
+          <div className='hidden md:block'>
+            <h1 className='text-lg font-bold leading-none'>Novelist.ai</h1>
+            <span className='font-mono text-xs text-muted-foreground'>GOAP Engine v0.5.0</span>
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-1">
-          <NavLink view="dashboard" icon={LayoutDashboard} label="Dashboard" />
-          <NavLink view="projects" icon={Folder} label="Projects" />
-          <NavLink view="settings" icon={Settings} label="Settings" />
+        <div className='hidden items-center gap-1 md:flex'>
+          <NavLink view='dashboard' icon={LayoutDashboard} label='Dashboard' />
+          <NavLink view='projects' icon={Folder} label='Projects' />
+          <NavLink view='settings' icon={Settings} label='Settings' />
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
-          <div className="flex flex-col text-right mr-2 border-r border-border pr-4">
-            <span className="text-[10px] font-bold uppercase text-muted-foreground">Current Project</span>
-            <span className="text-xs font-medium max-w-[150px] truncate">{projectTitle}</span>
+        <div className='hidden items-center gap-3 md:flex'>
+          <div className='mr-2 flex flex-col border-r border-border pr-4 text-right'>
+            <span className='text-[10px] font-bold uppercase text-muted-foreground'>
+              Current Project
+            </span>
+            <span className='max-w-[150px] truncate text-xs font-medium'>{projectTitle}</span>
           </div>
 
-          <button 
+          <button
             onClick={onNewProject}
-            className="flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
-            data-testid="nav-new-project"
+            className='flex items-center gap-2 rounded-md bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80'
+            data-testid='nav-new-project'
           >
-            <Plus className="w-4 h-4" /> New
+            <Plus className='h-4 w-4' /> New
           </button>
         </div>
 
-        <button 
-          className="md:hidden p-2 text-muted-foreground hover:text-foreground"
+        <button
+          className='p-2 text-muted-foreground hover:text-foreground md:hidden'
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          data-testid="mobile-menu-toggle"
+          data-testid='mobile-menu-toggle'
         >
-          {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isMenuOpen ? <X className='h-6 w-6' /> : <Menu className='h-6 w-6' />}
         </button>
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden border-t border-border bg-card animate-in slide-in-from-top-5 absolute w-full shadow-lg">
-          <div className="p-4 space-y-4">
-            <div className="flex flex-col gap-2">
-              <NavLink view="dashboard" icon={LayoutDashboard} label="Dashboard" />
-              <NavLink view="projects" icon={Folder} label="Projects" />
-              <NavLink view="settings" icon={Settings} label="Settings" />
+        <div className='animate-in slide-in-from-top-5 absolute w-full border-t border-border bg-card shadow-lg md:hidden'>
+          <div className='space-y-4 p-4'>
+            <div className='flex flex-col gap-2'>
+              <NavLink view='dashboard' icon={LayoutDashboard} label='Dashboard' />
+              <NavLink view='projects' icon={Folder} label='Projects' />
+              <NavLink view='settings' icon={Settings} label='Settings' />
             </div>
-            <div className="h-px bg-border w-full my-2"></div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold uppercase text-muted-foreground">Active Project</span>
-                <span className="text-xs font-medium truncate max-w-[200px]">{projectTitle}</span>
+            <div className='my-2 h-px w-full bg-border' />
+            <div className='space-y-3'>
+              <div className='flex items-center justify-between'>
+                <span className='text-xs font-bold uppercase text-muted-foreground'>
+                  Active Project
+                </span>
+                <span className='max-w-[200px] truncate text-xs font-medium'>{projectTitle}</span>
               </div>
-              <button 
-                onClick={() => { onNewProject(); setIsMenuOpen(false); }}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
+              <button
+                onClick={() => {
+                  onNewProject();
+                  setIsMenuOpen(false);
+                }}
+                className='flex w-full items-center justify-center gap-2 rounded-md bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80'
               >
-                <Plus className="w-4 h-4" /> New Project
+                <Plus className='h-4 w-4' /> New Project
               </button>
             </div>
           </div>

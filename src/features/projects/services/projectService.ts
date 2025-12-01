@@ -1,83 +1,54 @@
 /**
  * Project Service
  *
- * Handles IndexedDB persistence for projects
+ * Handles project persistence using the database abstraction layer
  */
 
-import type { Project, Language } from '../../../types';
 import { PublishStatus } from '../../../types';
-import type { ProjectCreationData, ProjectUpdateData } from '../types';
+import { type Project, type Language } from '../../../types';
+import { type ProjectCreationData, type ProjectUpdateData } from '../types';
+import { db } from '../../../lib/db';
 
 class ProjectService {
-  private dbName = 'novelist-projects';
-  private version = 1;
-  private storeName = 'projects';
-  private db: IDBDatabase | null = null;
-
   /**
-   * Initialize IndexedDB
+   * Initialize database
    */
-  async init(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.version);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        this.db = request.result;
-        resolve();
-      };
-
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-
-        // Create projects store
-        if (!db.objectStoreNames.contains(this.storeName)) {
-          const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
-          store.createIndex('createdAt', 'createdAt', { unique: false });
-          store.createIndex('updatedAt', 'updatedAt', { unique: false });
-          store.createIndex('status', 'status', { unique: false });
-        }
-      };
-    });
+  public async init(): Promise<void> {
+    await db.init();
   }
 
   /**
    * Get all projects
    */
-  async getAll(): Promise<Project[]> {
-    if (!this.db) await this.init();
+  public async getAll(): Promise<Project[]> {
+    await this.init();
+    const summaries = await db.getAllProjects();
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readonly');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.getAll();
+    // Load full project data for each summary
+    const projects: Project[] = [];
+    for (const summary of summaries) {
+      const project = await db.loadProject(summary.id);
+      if (project) {
+        projects.push(project);
+      }
+    }
 
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
-    });
+    return projects;
   }
 
   /**
    * Get project by ID
    */
-  async getById(id: string): Promise<Project | null> {
-    if (!this.db) await this.init();
-
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readonly');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.get(id);
-
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
-    });
+  public async getById(id: string): Promise<Project | null> {
+    await this.init();
+    return await db.loadProject(id);
   }
 
   /**
    * Create new project
    */
-  async create(data: ProjectCreationData): Promise<Project> {
-    if (!this.db) await this.init();
+  public async create(data: ProjectCreationData): Promise<Project> {
+    await this.init();
 
     const now = Date.now();
     const project: Project = {
@@ -101,16 +72,20 @@ class ProjectService {
         hasWorldBuilding: false,
         hasThemes: false,
         plotStructureDefined: false,
-        targetAudienceDefined: false
+        targetAudienceDefined: false,
       },
       isGenerating: false,
-      language: (data.language || 'en') as Language,
-      targetWordCount: data.targetWordCount || 50000,
+      language: (data.language ?? 'en') as Language,
+      targetWordCount: data.targetWordCount ?? 50000,
       settings: {
-        enableDropCaps: true
+        enableDropCaps: true,
       },
-      genre: data.genre || [],
-      targetAudience: (data.targetAudience || 'adult') as 'children' | 'young_adult' | 'adult' | 'all_ages',
+      genre: data.genre ?? [],
+      targetAudience: (data.targetAudience ?? 'adult') as
+        | 'children'
+        | 'young_adult'
+        | 'adult'
+        | 'all_ages',
       contentWarnings: [],
       keywords: [],
       synopsis: '',
@@ -120,27 +95,21 @@ class ProjectService {
         averageChapterLength: 0,
         estimatedReadingTime: 0,
         generationCost: 0,
-        editingRounds: 0
+        editingRounds: 0,
       },
       version: '1.0.0',
-      changeLog: []
+      changeLog: [],
     };
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.add(project);
-
-      request.onsuccess = () => resolve(project);
-      request.onerror = () => reject(request.error);
-    });
+    await db.saveProject(project);
+    return project;
   }
 
   /**
    * Update project
    */
-  async update(id: string, data: ProjectUpdateData): Promise<void> {
-    if (!this.db) await this.init();
+  public async update(id: string, data: ProjectUpdateData): Promise<void> {
+    await this.init();
 
     const project = await this.getById(id);
     if (!project) {
@@ -153,68 +122,37 @@ class ProjectService {
       updatedAt: new Date(),
     };
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.put(updated);
-
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
+    await db.saveProject(updated);
   }
 
   /**
    * Delete project
    */
-  async delete(id: string): Promise<void> {
-    if (!this.db) await this.init();
-
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.delete(id);
-
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
+  public async delete(id: string): Promise<void> {
+    await this.init();
+    await db.deleteProject(id);
   }
 
   /**
    * Get projects by status
    */
-  async getByStatus(status: string): Promise<Project[]> {
-    if (!this.db) await this.init();
-
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readonly');
-      const store = transaction.objectStore(this.storeName);
-      const index = store.index('status');
-      const request = index.getAll(status);
-
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
-    });
+  public async getByStatus(status: PublishStatus): Promise<Project[]> {
+    const allProjects = await this.getAll();
+    return allProjects.filter(project => (project.status as PublishStatus) === status);
   }
 
   /**
    * Save project (full update)
    */
-  async save(project: Project): Promise<void> {
-    if (!this.db) await this.init();
+  public async save(project: Project): Promise<void> {
+    await this.init();
 
     const updated = {
       ...project,
-      updatedAt: Date.now(),
+      updatedAt: new Date(),
     };
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.put(updated);
-
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
+    await db.saveProject(updated);
   }
 }
 

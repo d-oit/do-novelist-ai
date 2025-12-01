@@ -1,14 +1,17 @@
-
+import { Loader2 } from 'lucide-react';
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+
 import { Project, Chapter, ChapterStatus, PublishStatus } from './types/index';
 import { MainLayout, Header } from './components/layout';
-import { Loader2 } from 'lucide-react';
 import { db } from './lib/db';
 
 const ProjectDashboard = lazy(() => import('./components/ProjectDashboardOptimized'));
 const ProjectWizard = lazy(() => import('./features/projects/components/ProjectWizard'));
 const ProjectsView = lazy(() => import('./features/projects/components/ProjectsView'));
 const SettingsView = lazy(() => import('./features/settings/components/SettingsView'));
+const WorldBuildingDashboard = lazy(
+  () => import('./features/world-building/components/WorldBuildingDashboard'),
+);
 
 import { useGoapEngine } from './features/editor/hooks/useGoapEngine';
 
@@ -29,7 +32,7 @@ const INITIAL_PROJECT: Project = {
     hasWorldBuilding: false,
     hasThemes: false,
     plotStructureDefined: false,
-    targetAudienceDefined: false
+    targetAudienceDefined: false,
   },
   isGenerating: false,
   status: PublishStatus.DRAFT,
@@ -44,7 +47,7 @@ const INITIAL_PROJECT: Project = {
     darkMode: false,
     fontSize: 'medium',
     lineHeight: 'normal',
-    editorTheme: 'default'
+    editorTheme: 'default',
   },
   genre: [],
   targetAudience: 'adult',
@@ -59,25 +62,25 @@ const INITIAL_PROJECT: Project = {
     averageChapterLength: 0,
     estimatedReadingTime: 0,
     generationCost: 0,
-    editingRounds: 0
+    editingRounds: 0,
   },
   version: '1.0.0',
-  changeLog: []
+  changeLog: [],
 };
 
-type ViewMode = 'dashboard' | 'projects' | 'settings';
+type ViewMode = 'dashboard' | 'projects' | 'settings' | 'world-building';
 
 const App: React.FC = () => {
   const [project, setProject] = useState<Project>(INITIAL_PROJECT);
-  const [selectedChapterId, setSelectedChapterId] = useState<string | null>('overview'); 
-   const [showWizard, setShowWizard] = useState(false);
-  const [currentView, setCurrentView] = useState<ViewMode>('projects'); 
+  const [selectedChapterId, setSelectedChapterId] = useState<string | null>('overview');
+  const [showWizard, setShowWizard] = useState(false);
+  const [currentView, setCurrentView] = useState<ViewMode>('projects');
   const [isLoading, setIsLoading] = useState(true);
 
   const engine = useGoapEngine(project, setProject, setSelectedChapterId);
 
   useEffect(() => {
-    const initApp = async () => {
+    const initApp = async (): Promise<void> => {
       try {
         await db.init();
         setIsLoading(false);
@@ -86,28 +89,33 @@ const App: React.FC = () => {
         setIsLoading(false);
       }
     };
-    initApp();
+    void initApp();
   }, []);
 
-  useEffect(() => {
+  useEffect((): (() => void) | undefined => {
     if (project.id !== 'new_session' && !isLoading) {
-       const saveTimer = setTimeout(() => {
-         db.saveProject(project);
-       }, 2000);
-       return () => clearTimeout(saveTimer);
+      const saveTimer = setTimeout(() => {
+        void db.saveProject(project);
+      }, 2000);
+      return () => clearTimeout(saveTimer);
     }
     return undefined;
   }, [project, isLoading]);
 
-  const handleCreateProject = (title: string, style: string, idea: string, targetWordCount: number) => {
+  const handleCreateProject = (
+    title: string,
+    style: string,
+    idea: string,
+    targetWordCount: number,
+  ): void => {
     const newId = `proj_${Date.now()}`;
     const newProject: Project = {
       ...INITIAL_PROJECT,
       id: newId,
       title,
-      style: style as any,
+      style: style as Project['style'],
       idea,
-      targetWordCount: targetWordCount || 50000,
+      targetWordCount: targetWordCount ?? 50000,
       genre: [],
       targetAudience: 'adult',
       createdAt: new Date(),
@@ -120,115 +128,151 @@ const App: React.FC = () => {
         hasWorldBuilding: false,
         hasThemes: false,
         plotStructureDefined: false,
-        targetAudienceDefined: false
-      }
+        targetAudienceDefined: false,
+      },
     };
-    
+
     setProject(newProject);
-    db.saveProject(newProject);
+    void db.saveProject(newProject);
     engine.addLog('System', 'Project Initialized.', 'info');
     setShowWizard(false);
     setCurrentView('dashboard');
     setSelectedChapterId('overview');
   };
 
-  const handleLoadProject = async (id: string) => {
+  const handleLoadProject = async (id: string): Promise<void> => {
     setIsLoading(true);
     try {
       const loaded = await db.loadProject(id);
-      if (loaded) {
+      if (loaded !== null && loaded !== undefined) {
         setProject({
           ...INITIAL_PROJECT,
           ...loaded,
-          settings: { ...INITIAL_PROJECT.settings, ...(loaded.settings || {}) }
+          settings: { ...INITIAL_PROJECT.settings, ...loaded.settings },
         });
         setCurrentView('dashboard');
         setSelectedChapterId('overview');
-        engine.addLog('System', `Loaded project: ${loaded.title}`, 'info');
+        engine.addLog('System', `Loaded project: ${loaded.title ?? 'Unknown'}`, 'info');
       } else {
-        alert("Failed to load project.");
+        alert('Failed to load project.');
       }
     } catch (error) {
       console.error('Failed to load project:', error);
-      alert("Failed to load project.");
+      alert('Failed to load project.');
     }
     setIsLoading(false);
   };
 
-  const handleUpdateChapter = (chapterId: string, updates: Partial<Chapter>) => {
+  const handleUpdateChapter = (chapterId: string, updates: Partial<Chapter>): void => {
     setProject(prev => ({
       ...prev,
-      chapters: prev.chapters.map(c => c.id === chapterId ? { ...c, ...updates } : c)
+      chapters: prev.chapters.map(c => (c.id === chapterId ? { ...c, ...updates } : c)),
     }));
   };
 
-  const handleUpdateProject = (updates: Partial<Project>) => {
+  const handleUpdateProject = (updates: Partial<Project>): void => {
     setProject(prev => ({ ...prev, ...updates }));
   };
 
-  const handleAddChapter = () => {
+  const handleAddChapter = (): void => {
     setProject(prev => {
-        const nextIndex = prev.chapters.length > 0 
-            ? Math.max(...prev.chapters.map(c => c.orderIndex)) + 1 
-            : 1;
-        const newChapter: Chapter = {
-            id: `${prev.id}_ch_manual_${Date.now()}`,
-            orderIndex: nextIndex,
-            title: `Chapter ${nextIndex}`,
-            summary: '',
-            content: '',
-            status: ChapterStatus.PENDING,
-            wordCount: 0,
-            characterCount: 0,
-            estimatedReadingTime: 0,
-            tags: [],
-            notes: '',
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
-        return {
-            ...prev,
-            chapters: [...prev.chapters, newChapter],
-            worldState: { ...prev.worldState, chaptersCount: prev.chapters.length + 1 }
-        };
+      const nextIndex =
+        prev.chapters.length > 0 ? Math.max(...prev.chapters.map(c => c.orderIndex)) + 1 : 1;
+      const newChapter: Chapter = {
+        id: `${prev.id}_ch_manual_${Date.now()}`,
+        orderIndex: nextIndex,
+        title: `Chapter ${nextIndex}`,
+        summary: '',
+        content: '',
+        status: ChapterStatus.PENDING,
+        wordCount: 0,
+        characterCount: 0,
+        estimatedReadingTime: 0,
+        tags: [],
+        notes: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      return {
+        ...prev,
+        chapters: [...prev.chapters, newChapter],
+        worldState: { ...prev.worldState, chaptersCount: prev.chapters.length + 1 },
+      };
     });
     engine.addLog('System', 'New chapter added manually.', 'info');
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-background text-foreground">
-        <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
-        <h2 className="text-xl font-serif font-bold">Initializing GOAP Engine...</h2>
+      <div className='flex min-h-[100dvh] flex-col items-center justify-center bg-background text-foreground'>
+        <Loader2 className='mb-4 h-12 w-12 animate-spin text-primary' />
+        <h2 className='font-serif text-xl font-bold'>Initializing GOAP Engine...</h2>
       </div>
     );
   }
 
   return (
     <MainLayout>
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
-        <ProjectWizard isOpen={showWizard} onCreate={handleCreateProject} onCancel={() => setShowWizard(false)} />
+      <Suspense
+        fallback={
+          <div className='flex min-h-screen items-center justify-center'>
+            <Loader2 className='h-8 w-8 animate-spin' />
+          </div>
+        }
+      >
+        <ProjectWizard
+          isOpen={showWizard}
+          onCreate={handleCreateProject}
+          onCancel={() => setShowWizard(false)}
+        />
       </Suspense>
-      
-      <Header 
-        projectTitle={project.title} 
-        onNewProject={() => setShowWizard(true)} 
-        currentView={currentView} 
-        onNavigate={setCurrentView} 
+
+      <Header
+        projectTitle={project.title}
+        onNewProject={() => setShowWizard(true)}
+        currentView={currentView}
+        onNavigate={setCurrentView}
       />
-      
-      <main className="flex-1 relative pt-0">
-        <Suspense fallback={<div className="flex items-center justify-center p-8"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+
+      <main className='relative flex-1 pt-0'>
+        <Suspense
+          fallback={
+            <div className='flex items-center justify-center p-8'>
+              <Loader2 className='h-8 w-8 animate-spin' />
+            </div>
+          }
+        >
           {currentView === 'dashboard' && (
-            <ProjectDashboard project={project} engine={engine} selectedChapterId={selectedChapterId} onSelectChapter={setSelectedChapterId} onUpdateChapter={handleUpdateChapter} onUpdateProject={handleUpdateProject} onAddChapter={handleAddChapter} onSettingsClick={() => setCurrentView('settings')} />
+            <ProjectDashboard
+              project={project}
+              engine={engine}
+              selectedChapterId={selectedChapterId}
+              onSelectChapter={setSelectedChapterId}
+              onUpdateChapter={handleUpdateChapter}
+              onUpdateProject={handleUpdateProject}
+              onAddChapter={handleAddChapter}
+              onSettingsClick={() => setCurrentView('settings')}
+            />
           )}
           {currentView === 'projects' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <ProjectsView currentProject={project} onNewProject={() => setShowWizard(true)} onLoadProject={handleLoadProject} onNavigate={setCurrentView} />
+            <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+              <ProjectsView
+                currentProject={project}
+                onNewProject={() => setShowWizard(true)}
+                onLoadProject={(id: string): void => {
+                  void handleLoadProject(id);
+                }}
+                onNavigate={setCurrentView}
+              />
+            </div>
+          )}
+          {currentView === 'world-building' && (
+            <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+              <WorldBuildingDashboard projectId={project.id} />
             </div>
           )}
           {currentView === 'settings' && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
               <SettingsView />
             </div>
           )}

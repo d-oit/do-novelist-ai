@@ -1,23 +1,22 @@
-
 export enum AgentMode {
   SINGLE = 'SINGLE',
   PARALLEL = 'PARALLEL',
   HYBRID = 'HYBRID',
-  SWARM = 'SWARM'
+  SWARM = 'SWARM',
 }
 
 export enum ChapterStatus {
   PENDING = 'pending',
   DRAFTING = 'drafting',
   REVIEW = 'review',
-  COMPLETE = 'complete'
+  COMPLETE = 'complete',
 }
 
 export enum PublishStatus {
   DRAFT = 'Draft',
   EDITING = 'Editing',
   REVIEW = 'Review',
-  PUBLISHED = 'Published'
+  PUBLISHED = 'Published',
 }
 
 export interface Chapter {
@@ -104,12 +103,12 @@ export interface Project {
   publishedAt?: Date;
 
   // Collaboration
-  authors: Array<{
+  authors: {
     id: string;
     name: string;
     email: string;
     role: 'owner' | 'collaborator' | 'editor' | 'viewer';
-  }>;
+  }[];
 
   // Analytics
   analytics: {
@@ -122,11 +121,11 @@ export interface Project {
 
   // Version control
   version: string;
-  changeLog: Array<{
+  changeLog: {
     version: string;
     changes: string[];
     timestamp: Date;
-  }>;
+  }[];
 }
 
 export interface AgentAction {

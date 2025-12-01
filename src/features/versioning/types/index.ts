@@ -22,14 +22,16 @@ export interface ChapterVersion extends Version {
   status: import('../../../types/index').ChapterStatus;
 }
 
+import { WorldState, ProjectSettings } from '../../../types/schemas';
+
 export interface ProjectVersion extends Version {
   projectId: string;
   title: string;
   idea: string;
   style: string;
   chapterIds: string[];
-  worldState: any;
-  settings: any;
+  worldState: WorldState;
+  settings: ProjectSettings;
 }
 
 export interface VersionDiff {
@@ -42,6 +44,7 @@ export interface VersionDiff {
 
 export interface Branch {
   id: string;
+  chapterId: string;
   name: string;
   description: string;
   parentVersionId: string;

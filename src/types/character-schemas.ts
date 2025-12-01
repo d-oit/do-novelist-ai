@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+
 import { ProjectIdSchema, Base64ImageSchema } from './schemas';
 
 // =============================================================================
@@ -12,7 +13,7 @@ import { ProjectIdSchema, Base64ImageSchema } from './schemas';
 
 export const CharacterRoleSchema = z.enum([
   'protagonist',
-  'antagonist', 
+  'antagonist',
   'deuteragonist',
   'tritagonist',
   'love_interest',
@@ -21,7 +22,7 @@ export const CharacterRoleSchema = z.enum([
   'foil',
   'supporting',
   'minor',
-  'background'
+  'background',
 ]);
 
 export const CharacterArcTypeSchema = z.enum([
@@ -33,37 +34,85 @@ export const CharacterArcTypeSchema = z.enum([
   'growth',
   'fall',
   'disillusion',
-  'testing'
+  'testing',
 ]);
 
 export const PersonalityTraitSchema = z.enum([
-  'brave', 'cowardly', 'intelligent', 'foolish', 'kind', 'cruel',
-  'honest', 'deceptive', 'loyal', 'treacherous', 'optimistic', 'pessimistic',
-  'confident', 'insecure', 'patient', 'impatient', 'humble', 'arrogant',
-  'generous', 'selfish', 'creative', 'conventional', 'ambitious', 'content',
-  'curious', 'indifferent', 'disciplined', 'impulsive', 'empathetic', 'callous'
+  'brave',
+  'cowardly',
+  'intelligent',
+  'foolish',
+  'kind',
+  'cruel',
+  'honest',
+  'deceptive',
+  'loyal',
+  'treacherous',
+  'optimistic',
+  'pessimistic',
+  'confident',
+  'insecure',
+  'patient',
+  'impatient',
+  'humble',
+  'arrogant',
+  'generous',
+  'selfish',
+  'creative',
+  'conventional',
+  'ambitious',
+  'content',
+  'curious',
+  'indifferent',
+  'disciplined',
+  'impulsive',
+  'empathetic',
+  'callous',
 ]);
 
 export const RelationshipTypeSchema = z.enum([
-  'family', 'romantic', 'friendship', 'mentor_student', 'rivalry',
-  'enemy', 'ally', 'professional', 'acquaintance', 'stranger'
+  'family',
+  'romantic',
+  'friendship',
+  'mentor_student',
+  'rivalry',
+  'enemy',
+  'ally',
+  'professional',
+  'acquaintance',
+  'stranger',
 ]);
 
 export const EmotionalStateSchema = z.enum([
-  'happy', 'sad', 'angry', 'fearful', 'disgusted', 'surprised',
-  'contempt', 'pride', 'shame', 'guilt', 'envy', 'gratitude',
-  'hope', 'despair', 'love', 'hate', 'confusion', 'clarity',
-  'anxiety', 'calm', 'excitement', 'boredom'
+  'happy',
+  'sad',
+  'angry',
+  'fearful',
+  'disgusted',
+  'surprised',
+  'contempt',
+  'pride',
+  'shame',
+  'guilt',
+  'envy',
+  'gratitude',
+  'hope',
+  'despair',
+  'love',
+  'hate',
+  'confusion',
+  'clarity',
+  'anxiety',
+  'calm',
+  'excitement',
+  'boredom',
 ]);
 
 // =============================================================================
 // CORE CHARACTER SCHEMAS
 // =============================================================================
 
-export const CharacterIdSchema = z.string().regex(
-  /^char_\w+_\d+$/,
-  'Invalid character ID format'
-);
+export const CharacterIdSchema = z.string().regex(/^char_\w+_\d+$/, 'Invalid character ID format');
 
 const CharacterPhysicalTraitsBaseSchema = z.object({
   age: z.number().int().min(0).max(200).optional(),
@@ -74,12 +123,12 @@ const CharacterPhysicalTraitsBaseSchema = z.object({
   eyeColor: z.string().max(50).optional(),
   skinTone: z.string().max(50).optional(),
   distinctiveFeatures: z.array(z.string().max(100)).default([]),
-  disabilities: z.array(z.string().max(100)).default([])
+  disabilities: z.array(z.string().max(100)).default([]),
 });
 
 export const CharacterPhysicalTraitsSchema = CharacterPhysicalTraitsBaseSchema.default(() => ({
   distinctiveFeatures: [],
-  disabilities: []
+  disabilities: [],
 }));
 
 const CharacterBackgroundBaseSchema = z.object({
@@ -88,17 +137,21 @@ const CharacterBackgroundBaseSchema = z.object({
   occupation: z.string().max(100).optional(),
   socialClass: z.enum(['lower', 'working', 'middle', 'upper_middle', 'upper']).optional(),
   family: z.string().max(500).optional(),
-  significantEvents: z.array(z.object({
-    event: z.string().max(200),
-    age: z.number().int().min(0).max(200).optional(),
-    impact: z.enum(['minor', 'moderate', 'major', 'life_changing'])
-  })).default([]),
-  secrets: z.array(z.string().max(200)).default([])
+  significantEvents: z
+    .array(
+      z.object({
+        event: z.string().max(200),
+        age: z.number().int().min(0).max(200).optional(),
+        impact: z.enum(['minor', 'moderate', 'major', 'life_changing']),
+      })
+    )
+    .default([]),
+  secrets: z.array(z.string().max(200)).default([]),
 });
 
 export const CharacterBackgroundSchema = CharacterBackgroundBaseSchema.default(() => ({
   significantEvents: [],
-  secrets: []
+  secrets: [],
 }));
 
 const CharacterPsychologyBaseSchema = z.object({
@@ -111,7 +164,7 @@ const CharacterPsychologyBaseSchema = z.object({
   personalityTraits: z.array(PersonalityTraitSchema).default([]),
   mentalHealth: z.string().max(500).optional(),
   cognitiveStyle: z.enum(['analytical', 'intuitive', 'practical', 'creative']).optional(),
-  communicationStyle: z.enum(['direct', 'diplomatic', 'passive', 'aggressive']).optional()
+  communicationStyle: z.enum(['direct', 'diplomatic', 'passive', 'aggressive']).optional(),
 });
 
 export const CharacterPsychologySchema = CharacterPsychologyBaseSchema.default(() => ({
@@ -121,7 +174,7 @@ export const CharacterPsychologySchema = CharacterPsychologyBaseSchema.default((
   desires: [],
   flaws: [],
   strengths: [],
-  personalityTraits: []
+  personalityTraits: [],
 }));
 
 export const CharacterArcSchema = z.object({
@@ -131,28 +184,38 @@ export const CharacterArcSchema = z.object({
   endingState: z.string().max(500),
   catalystEvent: z.string().max(500).optional(),
   obstacles: z.array(z.string().max(200)).default([]),
-  milestones: z.array(z.object({
-    chapter: z.string().max(100),
-    description: z.string().max(300),
-    emotionalState: EmotionalStateSchema.optional()
-  })).default([]),
-  lessonLearned: z.string().max(300).optional()
+  milestones: z
+    .array(
+      z.object({
+        chapter: z.string().max(100),
+        description: z.string().max(300),
+        emotionalState: EmotionalStateSchema.optional(),
+      })
+    )
+    .default([]),
+  lessonLearned: z.string().max(300).optional(),
 });
 
 const CharacterVoiceBaseSchema = z.object({
-  vocabulary: z.enum(['simple', 'average', 'sophisticated', 'technical', 'archaic']).default('average'),
-  tone: z.enum(['formal', 'casual', 'humorous', 'serious', 'sarcastic', 'warm', 'cold']).default('casual'),
+  vocabulary: z
+    .enum(['simple', 'average', 'sophisticated', 'technical', 'archaic'])
+    .default('average'),
+  tone: z
+    .enum(['formal', 'casual', 'humorous', 'serious', 'sarcastic', 'warm', 'cold'])
+    .default('casual'),
   speechPatterns: z.array(z.string().max(100)).default([]),
   catchphrases: z.array(z.string().max(100)).default([]),
   accentDialect: z.string().max(100).optional(),
-  languageProficiency: z.record(z.enum(['native', 'fluent', 'conversational', 'basic']), z.string()).optional()
+  languageProficiency: z
+    .record(z.enum(['native', 'fluent', 'conversational', 'basic']), z.string())
+    .optional(),
 });
 
 export const CharacterVoiceSchema = CharacterVoiceBaseSchema.default(() => ({
   vocabulary: 'average' as const,
   tone: 'casual' as const,
   speechPatterns: [] as string[],
-  catchphrases: [] as string[]
+  catchphrases: [] as string[],
 }));
 
 export const CharacterRelationshipSchema = z.object({
@@ -166,7 +229,7 @@ export const CharacterRelationshipSchema = z.object({
   history: z.string().max(1000).optional(),
   conflicts: z.array(z.string().max(200)).default([]),
   sharedExperiences: z.array(z.string().max(200)).default([]),
-  dynamicNotes: z.string().max(500).optional()
+  dynamicNotes: z.string().max(500).optional(),
 });
 
 export const CharacterAppearanceEventSchema = z.object({
@@ -176,65 +239,62 @@ export const CharacterAppearanceEventSchema = z.object({
   description: z.string().max(500).optional(),
   emotionalState: EmotionalStateSchema.optional(),
   keyDialogue: z.array(z.string().max(200)).default([]),
-  notes: z.string().max(300).optional()
+  notes: z.string().max(300).optional(),
 });
 
 // =============================================================================
 // MAIN CHARACTER SCHEMA
 // =============================================================================
 
-export const CharacterSchema = z.object({
-  id: CharacterIdSchema,
-  projectId: ProjectIdSchema,
-  name: z.string().min(1).max(100),
-  aliases: z.array(z.string().max(100)).default([]),
-  role: CharacterRoleSchema,
-  importance: z.number().min(0).max(10).default(5), // 0 = background, 10 = main protagonist
-  
-  // Core character information
-  summary: z.string().max(500).default(''),
-  physicalTraits: CharacterPhysicalTraitsSchema.optional(),
-  background: CharacterBackgroundSchema.optional(),
-  psychology: CharacterPsychologySchema.optional(),
-  voice: CharacterVoiceSchema.optional(),
-  arc: CharacterArcSchema.optional(),
-  
-  // Visual representation
-  portrait: Base64ImageSchema,
-  mood_board: z.array(Base64ImageSchema).default([]),
-  
-  // Story integration
-  firstAppearance: z.string().max(100).optional(), // Chapter reference
-  lastAppearance: z.string().max(100).optional(),
-  appearances: z.array(CharacterAppearanceEventSchema).default([]),
-  
-  // Metadata
-  tags: z.array(z.string().max(50)).default([]),
-  notes: z.string().max(2000).default(''),
-  inspirations: z.array(z.string().max(200)).default([]), // Real people, fictional characters, etc.
-  
-  // System fields
-  createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date()),
-  version: z.number().int().min(1).default(1),
-  
-  // AI generation metadata
-  generatedBy: z.enum(['user', 'ai_suggestion', 'ai_full']).default('user'),
-  generationPrompt: z.string().max(1000).optional(),
-  aiModel: z.string().optional()
-}).refine(
-  (data) => data.importance >= 7 ? !!data.arc : true,
-  {
-    message: "Characters with importance 7+ must have a character arc defined",
-    path: ["arc"]
-  }
-).refine(
-  (data) => data.role === 'protagonist' ? data.importance >= 8 : true,
-  {
-    message: "Protagonist must have importance level 8 or higher",
-    path: ["importance"]
-  }
-);
+export const CharacterSchema = z
+  .object({
+    id: CharacterIdSchema,
+    projectId: ProjectIdSchema,
+    name: z.string().min(1).max(100),
+    aliases: z.array(z.string().max(100)).default([]),
+    role: CharacterRoleSchema,
+    importance: z.number().min(0).max(10).default(5), // 0 = background, 10 = main protagonist
+
+    // Core character information
+    summary: z.string().max(500).default(''),
+    physicalTraits: CharacterPhysicalTraitsSchema.optional(),
+    background: CharacterBackgroundSchema.optional(),
+    psychology: CharacterPsychologySchema.optional(),
+    voice: CharacterVoiceSchema.optional(),
+    arc: CharacterArcSchema.optional(),
+
+    // Visual representation
+    portrait: Base64ImageSchema,
+    mood_board: z.array(Base64ImageSchema).default([]),
+
+    // Story integration
+    firstAppearance: z.string().max(100).optional(), // Chapter reference
+    lastAppearance: z.string().max(100).optional(),
+    appearances: z.array(CharacterAppearanceEventSchema).default([]),
+
+    // Metadata
+    tags: z.array(z.string().max(50)).default([]),
+    notes: z.string().max(2000).default(''),
+    inspirations: z.array(z.string().max(200)).default([]), // Real people, fictional characters, etc.
+
+    // System fields
+    createdAt: z.date().default(() => new Date()),
+    updatedAt: z.date().default(() => new Date()),
+    version: z.number().int().min(1).default(1),
+
+    // AI generation metadata
+    generatedBy: z.enum(['user', 'ai_suggestion', 'ai_full']).default('user'),
+    generationPrompt: z.string().max(1000).optional(),
+    aiModel: z.string().optional(),
+  })
+  .refine(data => (data.importance >= 7 ? !!data.arc : true), {
+    message: 'Characters with importance 7+ must have a character arc defined',
+    path: ['arc'],
+  })
+  .refine(data => (data.role === 'protagonist' ? data.importance >= 8 : true), {
+    message: 'Protagonist must have importance level 8 or higher',
+    path: ['importance'],
+  });
 
 // =============================================================================
 // CHARACTER COLLECTION SCHEMAS
@@ -250,7 +310,7 @@ export const CharacterGroupSchema = z.object({
   purpose: z.string().max(300).optional(),
   tags: z.array(z.string().max(50)).default([]),
   createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date())
+  updatedAt: z.date().default(() => new Date()),
 });
 
 export const CharacterConflictSchema = z.object({
@@ -267,7 +327,7 @@ export const CharacterConflictSchema = z.object({
   resolution: z.string().max(500).optional(),
   chaptersInvolved: z.array(z.string()).default([]),
   createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date())
+  updatedAt: z.date().default(() => new Date()),
 });
 
 // =============================================================================
@@ -281,24 +341,26 @@ export const CreateCharacterSchema = z.object({
   summary: z.string().max(500).default(''),
   physicalTraits: CharacterPhysicalTraitsBaseSchema.partial(),
   psychology: CharacterPsychologyBaseSchema.partial(),
-  tags: z.array(z.string().max(50)).default([])
+  tags: z.array(z.string().max(50)).default([]),
 });
 
 export const UpdateCharacterSchema = CharacterSchema.partial().extend({
-  id: CharacterIdSchema
+  id: CharacterIdSchema,
 });
 
 export const CharacterSearchSchema = z.object({
   query: z.string().optional(),
   role: CharacterRoleSchema.optional(),
-  importance: z.object({
-    min: z.number().min(0).max(10).optional(),
-    max: z.number().min(0).max(10).optional()
-  }).optional(),
+  importance: z
+    .object({
+      min: z.number().min(0).max(10).optional(),
+      max: z.number().min(0).max(10).optional(),
+    })
+    .optional(),
   tags: z.array(z.string()).optional(),
   hasArc: z.boolean().optional(),
   sortBy: z.enum(['name', 'importance', 'role', 'created', 'updated']).default('name'),
-  sortOrder: z.enum(['asc', 'desc']).default('asc')
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
 });
 
 // =============================================================================

@@ -4,9 +4,11 @@
  */
 
 import React from 'react';
-import { Project, Chapter } from '../../../types';
-import ChapterList from './ChapterList';
+
+import { Project, Chapter, RefineOptions } from '../../../types';
+
 import ChapterEditor from './ChapterEditor';
+import ChapterList from './ChapterList';
 import ProjectOverview from './ProjectOverview';
 
 interface BookViewerProps {
@@ -16,7 +18,7 @@ interface BookViewerProps {
   onUpdateChapter: (chapterId: string, updates: Partial<Chapter>) => void;
   onUpdateProject: (updates: Partial<Project>) => void;
   onAddChapter: () => void;
-  onRefineChapter?: (chapterId: string, options: any) => void;
+  onRefineChapter?: (chapterId: string, options: RefineOptions) => void;
   onContinueChapter?: (chapterId: string) => void;
 }
 
@@ -28,12 +30,12 @@ const BookViewerRefactored: React.FC<BookViewerProps> = ({
   onUpdateProject,
   onAddChapter,
   onRefineChapter,
-  onContinueChapter
+  onContinueChapter,
 }) => {
   return (
-    <div className="h-full flex bg-background/50 rounded-lg border border-border/50 overflow-hidden">
+    <div className='flex h-full overflow-hidden rounded-lg border border-border/50 bg-background/50'>
       {/* Left Sidebar - Chapter List */}
-      <div className="w-80 border-r border-border/50 bg-card/30 p-4 overflow-y-auto">
+      <div className='w-80 overflow-y-auto border-r border-border/50 bg-card/30 p-4'>
         <ChapterList
           project={project}
           selectedChapterId={selectedChapterId}
@@ -43,13 +45,10 @@ const BookViewerRefactored: React.FC<BookViewerProps> = ({
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-6 max-w-4xl mx-auto">
+      <div className='flex-1 overflow-y-auto'>
+        <div className='mx-auto max-w-4xl p-6'>
           {selectedChapterId === 'overview' ? (
-            <ProjectOverview
-              project={project}
-              onUpdateProject={onUpdateProject}
-            />
+            <ProjectOverview project={project} onUpdateProject={onUpdateProject} />
           ) : (
             <ChapterEditor
               project={project}

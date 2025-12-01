@@ -8,6 +8,7 @@
  */
 
 import { z } from 'zod';
+import { ChapterStatus, PublishStatus } from '../../types';
 
 // Maximum input lengths (OWASP recommendations)
 export const MAX_TITLE_LENGTH = 200;
@@ -57,10 +58,10 @@ export type ProjectWizardFormData = z.infer<typeof projectWizardSchema>;
 
 // Validation error types
 export class ValidationError extends Error {
-  constructor(
+  public constructor(
     message: string,
     public field?: string,
-    public code?: string
+    public code?: string,
   ) {
     super(message);
     this.name = 'ValidationError';
@@ -79,7 +80,7 @@ export function validateChapterTitle(title: string): string {
     throw new ValidationError(
       `Title too long (max ${MAX_TITLE_LENGTH} characters)`,
       'title',
-      'TITLE_TOO_LONG'
+      'TITLE_TOO_LONG',
     );
   }
 
@@ -102,7 +103,7 @@ export function validateProjectTitle(title: string): string {
     throw new ValidationError(
       `Title too long (max ${MAX_TITLE_LENGTH} characters)`,
       'title',
-      'TITLE_TOO_LONG'
+      'TITLE_TOO_LONG',
     );
   }
 
@@ -123,7 +124,7 @@ export function validateStyle(style: string): string {
     throw new ValidationError(
       `Style too long (max ${MAX_STYLE_LENGTH} characters)`,
       'style',
-      'STYLE_TOO_LONG'
+      'STYLE_TOO_LONG',
     );
   }
 
@@ -152,7 +153,7 @@ export function validateIdea(idea: string): string {
     throw new ValidationError(
       `Idea too long (max ${MAX_IDEA_LENGTH} characters)`,
       'idea',
-      'IDEA_TOO_LONG'
+      'IDEA_TOO_LONG',
     );
   }
 
@@ -171,7 +172,7 @@ export function validateChapterSummary(summary: string): string {
     throw new ValidationError(
       `Summary too long (max ${MAX_CHAPTER_SUMMARY_LENGTH} characters)`,
       'summary',
-      'SUMMARY_TOO_LONG'
+      'SUMMARY_TOO_LONG',
     );
   }
 
@@ -188,7 +189,7 @@ export function validateChapterContent(content: string): string {
     throw new ValidationError(
       `Content too long (max ${MAX_CONTENT_LENGTH} characters)`,
       'content',
-      'CONTENT_TOO_LONG'
+      'CONTENT_TOO_LONG',
     );
   }
 
@@ -210,7 +211,7 @@ export function validateWordCount(count: number): number {
     throw new ValidationError(
       'Word count must be at least 1,000',
       'wordCount',
-      'WORD_COUNT_TOO_LOW'
+      'WORD_COUNT_TOO_LOW',
     );
   }
 
@@ -218,7 +219,7 @@ export function validateWordCount(count: number): number {
     throw new ValidationError(
       'Word count cannot exceed 500,000',
       'wordCount',
-      'WORD_COUNT_TOO_HIGH'
+      'WORD_COUNT_TOO_HIGH',
     );
   }
 
@@ -287,7 +288,11 @@ function checkPattern(value: string, pattern: RegExp | undefined, errorMessage: 
   }
 }
 
-function checkCustomValidator(value: string, customValidator: ((value: string) => boolean) | undefined, errorMessage: string): void {
+function checkCustomValidator(
+  value: string,
+  customValidator: ((value: string) => boolean) | undefined,
+  errorMessage: string,
+): void {
   if (customValidator && !customValidator(value)) {
     throw new ValidationError(errorMessage, undefined, 'CUSTOM_VALIDATION_FAILED');
   }
@@ -362,4 +367,54 @@ export function validateBatch(validators: { field: string; validate: () => strin
     errors,
     values,
   };
+}
+
+/**
+ * Enum Validation Utilities
+ *
+ * Provides type-safe enum validation and conversion functions
+ */
+
+/**
+ * Safely converts a string to ChapterStatus enum value
+ * Returns a default value if the string is not a valid enum value
+ */
+export function parseChapterStatus(
+  value: string,
+  defaultValue: ChapterStatus = ChapterStatus.PENDING,
+): ChapterStatus {
+  const validValues = Object.values(ChapterStatus) as string[];
+  if (validValues.includes(value)) {
+    return value as ChapterStatus;
+  }
+  return defaultValue;
+}
+
+/**
+ * Safely converts a string to PublishStatus enum value
+ * Returns a default value if the string is not a valid enum value
+ */
+export function parsePublishStatus(
+  value: string,
+  defaultValue: PublishStatus = PublishStatus.DRAFT,
+): PublishStatus {
+  const validValues = Object.values(PublishStatus) as string[];
+  if (validValues.includes(value)) {
+    return value as PublishStatus;
+  }
+  return defaultValue;
+}
+
+/**
+ * Type guard to check if a value is a valid ChapterStatus
+ */
+export function isChapterStatus(value: unknown): value is ChapterStatus {
+  return typeof value === 'string' && Object.values(ChapterStatus).includes(value as ChapterStatus);
+}
+
+/**
+ * Type guard to check if a value is a valid PublishStatus
+ */
+export function isPublishStatus(value: unknown): value is PublishStatus {
+  return typeof value === 'string' && Object.values(PublishStatus).includes(value as PublishStatus);
 }

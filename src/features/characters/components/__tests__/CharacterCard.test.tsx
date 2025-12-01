@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import { type Character, type CharacterRole, type CharacterArc } from '../../types';
 import { CharacterCard } from '../CharacterCard';
-import type { Character, CharacterRole, CharacterArc } from '../../types';
 
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
@@ -21,16 +22,16 @@ vi.mock('framer-motion', () => ({
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
-  Crown: ({ className }: any) => <div className={className} data-testid="crown-icon" />,
-  Sword: ({ className }: any) => <div className={className} data-testid="sword-icon" />,
-  Heart: ({ className }: any) => <div className={className} data-testid="heart-icon" />,
-  BookOpen: ({ className }: any) => <div className={className} data-testid="bookopen-icon" />,
-  Users: ({ className }: any) => <div className={className} data-testid="users-icon" />,
-  Zap: ({ className }: any) => <div className={className} data-testid="zap-icon" />,
-  Target: ({ className }: any) => <div className={className} data-testid="target-icon" />,
-  Edit3: ({ className }: any) => <div className={className} data-testid="edit3-icon" />,
-  Trash2: ({ className }: any) => <div className={className} data-testid="trash2-icon" />,
-  CheckCircle2: ({ className }: any) => <div className={className} data-testid="checkcircle2-icon" />,
+  Crown: ({ className }: any) => <div className={className} data-testid='crown-icon' />,
+  Sword: ({ className }: any) => <div className={className} data-testid='sword-icon' />,
+  Heart: ({ className }: any) => <div className={className} data-testid='heart-icon' />,
+  BookOpen: ({ className }: any) => <div className={className} data-testid='bookopen-icon' />,
+  Users: ({ className }: any) => <div className={className} data-testid='users-icon' />,
+  Zap: ({ className }: any) => <div className={className} data-testid='zap-icon' />,
+  Target: ({ className }: any) => <div className={className} data-testid='target-icon' />,
+  Edit3: ({ className }: any) => <div className={className} data-testid='edit3-icon' />,
+  Trash2: ({ className }: any) => <div className={className} data-testid='trash2-icon' />,
+  CheckCircle2: ({ className }: any) => <div className={className} data-testid='checkcircle2-icon' />,
 }));
 
 const createMockCharacter = (overrides?: Partial<Character>): Character => ({
@@ -78,7 +79,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -96,7 +97,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByText('antagonist')).toBeInTheDocument();
@@ -113,7 +114,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       const image = screen.getByAltText('John Doe');
@@ -131,7 +132,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByTestId('crown-icon')).toBeInTheDocument();
@@ -147,7 +148,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByText('redemption arc')).toBeInTheDocument();
@@ -163,7 +164,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByText('main')).toBeInTheDocument();
@@ -179,7 +180,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       const supportingElements = screen.getAllByText('supporting');
@@ -196,7 +197,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByText('minor')).toBeInTheDocument();
@@ -212,7 +213,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByTestId('checkcircle2-icon')).toBeInTheDocument();
@@ -228,7 +229,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.queryByTestId('checkcircle2-icon')).not.toBeInTheDocument();
@@ -246,7 +247,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       const card = screen.getByText('John Doe').closest('div');
@@ -266,7 +267,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       const checkbox = screen.getByRole('button', { name: '' });
@@ -284,7 +285,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       const editButton = screen.getByLabelText('Edit character');
@@ -302,7 +303,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       const deleteButton = screen.getByLabelText('Delete character');
@@ -320,7 +321,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       const editButton = screen.getByLabelText('Edit character');
@@ -339,7 +340,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       const deleteButton = screen.getByLabelText('Delete character');
@@ -360,7 +361,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -378,7 +379,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByText('A Very Long Character Name That Should Be Truncated')).toBeInTheDocument();
@@ -394,7 +395,7 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByText('love interest')).toBeInTheDocument();
@@ -410,15 +411,31 @@ describe('CharacterCard', () => {
           onToggleSelection={mockOnToggleSelection}
           onEdit={mockOnEdit}
           onDelete={mockOnDelete}
-        />
+        />,
       );
 
       expect(screen.getByText('comic relief')).toBeInTheDocument();
     });
 
     it('renders all role icons correctly', () => {
-      const roles: CharacterRole[] = ['protagonist', 'antagonist', 'supporting', 'mentor', 'foil', 'love-interest', 'comic-relief'];
-      const expectedIcons = ['crown-icon', 'sword-icon', 'target-icon', 'bookopen-icon', 'zap-icon', 'heart-icon', 'users-icon'];
+      const roles: CharacterRole[] = [
+        'protagonist',
+        'antagonist',
+        'supporting',
+        'mentor',
+        'foil',
+        'love-interest',
+        'comic-relief',
+      ];
+      const expectedIcons: readonly string[] = [
+        'crown-icon',
+        'sword-icon',
+        'target-icon',
+        'bookopen-icon',
+        'zap-icon',
+        'heart-icon',
+        'users-icon',
+      ];
 
       roles.forEach((role, index) => {
         const { unmount } = render(
@@ -429,10 +446,10 @@ describe('CharacterCard', () => {
             onToggleSelection={mockOnToggleSelection}
             onEdit={mockOnEdit}
             onDelete={mockOnDelete}
-          />
+          />,
         );
 
-        expect(screen.getByTestId(expectedIcons[index] as string)).toBeInTheDocument();
+        expect(screen.getByTestId(expectedIcons[index]!)).toBeInTheDocument();
         unmount();
       });
     });

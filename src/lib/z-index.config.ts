@@ -11,21 +11,21 @@ export const Z_INDEX = {
 
   // Content layers
   CONTENT_DECORATIVE: 'z-10', // Decorative overlays, gradients
-  CONTENT_ELEVATED: 'z-20',   // Elevated cards, dropdowns
+  CONTENT_ELEVATED: 'z-20', // Elevated cards, dropdowns
 
   // Sticky elements
-  STICKY_NAV: 'z-40',         // Sticky headers, navigation
-  STICKY_SIDEBAR: 'z-40',     // Sticky sidebars
+  STICKY_NAV: 'z-40', // Sticky headers, navigation
+  STICKY_SIDEBAR: 'z-40', // Sticky sidebars
 
   // Modals and overlays
-  MODAL_BACKDROP: 'z-50',     // Modal backdrop layers
-  MODAL: 'z-50',              // Modal content
-  DRAWER: 'z-50',             // Drawer panels
-  DROPDOWN: 'z-50',           // Dropdown menus
+  MODAL_BACKDROP: 'z-50', // Modal backdrop layers
+  MODAL: 'z-50', // Modal content
+  DRAWER: 'z-50', // Drawer panels
+  DROPDOWN: 'z-50', // Dropdown menus
 
   // Notifications
-  TOAST: 'z-[100]',           // Toast notifications
-  TOOLTIP: 'z-[100]',         // Tooltips
+  TOAST: 'z-[100]', // Toast notifications
+  TOOLTIP: 'z-[100]', // Tooltips
 } as const;
 
 export type ZIndexKey = keyof typeof Z_INDEX;

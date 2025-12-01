@@ -1,3 +1,4 @@
+import { Project } from '../../../types';
 import {
   Publication,
   PublishedInstance,
@@ -6,20 +7,20 @@ import {
   EngagementMetrics,
   PublishingGoals,
   ReaderInsights,
+  PublishingInsights,
   PublishingTrends,
   PublishingAlert,
-  PublishingPlatform
+  PublishingPlatform,
 } from '../types';
-import { Project } from '../../../types';
 
 class PublishingAnalyticsService {
-  private static instance: PublishingAnalyticsService;
-  private dbName = 'novelist-publishing';
-  private dbVersion = 1;
+  private static instance: PublishingAnalyticsService | null = null;
+  private readonly dbName = 'novelist-publishing';
+  private readonly dbVersion = 1;
   private db: IDBDatabase | null = null;
-  
+
   // Mock data for platforms (in real app, this would come from API integrations)
-  private mockPlatforms: PublishingPlatform[] = [
+  private readonly mockPlatforms: PublishingPlatform[] = [
     {
       id: 'wattpad',
       name: 'Wattpad',
@@ -50,26 +51,25 @@ class PublishingAnalyticsService {
     },
   ];
 
-  static getInstance(): PublishingAnalyticsService {
-    if (!PublishingAnalyticsService.instance) {
-      PublishingAnalyticsService.instance = new PublishingAnalyticsService();
-    }
+  public static getInstance(): PublishingAnalyticsService {
+    PublishingAnalyticsService.instance ??= new PublishingAnalyticsService();
     return PublishingAnalyticsService.instance;
   }
 
-  async init(): Promise<void> {
+  public async init(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
-      
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
+
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
+      request.onsuccess = (): void => {
         this.db = request.result;
         resolve();
       };
-      
-      request.onupgradeneeded = (event) => {
+
+      request.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
         const db = (event.target as IDBOpenDBRequest).result;
-        
+
         // Publications store
         if (!db.objectStoreNames.contains('publications')) {
           const pubStore = db.createObjectStore('publications', { keyPath: 'id' });
@@ -77,7 +77,7 @@ class PublishingAnalyticsService {
           pubStore.createIndex('status', 'status');
           pubStore.createIndex('publishedAt', 'publishedAt');
         }
-        
+
         // Feedback store
         if (!db.objectStoreNames.contains('feedback')) {
           const feedbackStore = db.createObjectStore('feedback', { keyPath: 'id' });
@@ -85,14 +85,14 @@ class PublishingAnalyticsService {
           feedbackStore.createIndex('type', 'type');
           feedbackStore.createIndex('timestamp', 'timestamp');
         }
-        
+
         // Goals store
         if (!db.objectStoreNames.contains('publishingGoals')) {
           const goalsStore = db.createObjectStore('publishingGoals', { keyPath: 'id' });
           goalsStore.createIndex('publicationId', 'publicationId');
           goalsStore.createIndex('type', 'type');
         }
-        
+
         // Alerts store
         if (!db.objectStoreNames.contains('alerts')) {
           const alertsStore = db.createObjectStore('alerts', { keyPath: 'id' });
@@ -105,7 +105,11 @@ class PublishingAnalyticsService {
   }
 
   // Publication Management
-  async publishProject(project: Project, platforms: string[], metadata: any): Promise<Publication> {
+  public async publishProject(
+    project: Project,
+    platforms: string[],
+    metadata: Publication['metadata'],
+  ): Promise<Publication> {
     if (!this.db) await this.init();
 
     const publication: Publication = {
@@ -117,30 +121,30 @@ class PublishingAnalyticsService {
       platforms: platforms.map(platformId => this.createPublishedInstance(platformId, project)),
       status: 'published',
       metadata: {
-        genre: ['Fiction'], // Would be extracted from project
-        tags: this.extractTags(project),
-        language: 'en',
-        mature: false,
-        wordCount: this.calculateWordCount(project),
-        chapterCount: project.chapters.length,
         ...metadata,
+        genre: metadata.genre ?? ['Fiction'], // Would be extracted from project
+        tags: metadata.tags ?? this.extractTags(project),
+        language: metadata.language ?? 'en',
+        mature: metadata.mature ?? false,
+        wordCount: metadata.wordCount ?? this.calculateWordCount(project),
+        chapterCount: metadata.chapterCount ?? project.chapters.length,
       },
     };
 
     await this.savePublication(publication);
     await this.generateMockAnalyticsData(publication.id);
-    
+
     return publication;
   }
 
   private createPublishedInstance(platformId: string, project: Project): PublishedInstance {
     const platform = this.mockPlatforms.find(p => p.id === platformId);
     const baseUrl = this.generatePublicationUrl(platformId, project.title);
-    
+
     return {
       id: `inst_${Date.now()}_${platformId}`,
       platformId,
-      platformName: platform?.name || 'Unknown Platform',
+      platformName: platform?.name ?? 'Unknown Platform',
       publicationUrl: baseUrl,
       publishedAt: new Date(),
       lastUpdated: new Date(),
@@ -150,8 +154,11 @@ class PublishingAnalyticsService {
   }
 
   private generatePublicationUrl(platformId: string, title: string): string {
-    const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    
+    const slug = title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+
     switch (platformId) {
       case 'wattpad':
         return `https://www.wattpad.com/story/${slug}`;
@@ -188,7 +195,7 @@ class PublishingAnalyticsService {
   }
 
   // Analytics Data Retrieval
-  async getPublicationAnalytics(publicationId: string): Promise<PlatformAnalytics> {
+  public async getPublicationAnalytics(publicationId: string): Promise<PlatformAnalytics> {
     const publication = await this.getPublication(publicationId);
     if (!publication) throw new Error('Publication not found');
 
@@ -221,10 +228,11 @@ class PublishingAnalyticsService {
       aggregatedAnalytics.bookmarks += analytics.bookmarks;
       aggregatedAnalytics.shares += analytics.shares;
       aggregatedAnalytics.rating.count += analytics.rating.count;
-      
+
       // Merge geographic data
       Object.entries(analytics.geographics).forEach(([country, count]) => {
-        aggregatedAnalytics.geographics[country] = (aggregatedAnalytics.geographics[country] || 0) + count;
+        aggregatedAnalytics.geographics[country] =
+          (aggregatedAnalytics.geographics[country] ?? 0) + count;
       });
     });
 
@@ -240,7 +248,10 @@ class PublishingAnalyticsService {
     return aggregatedAnalytics;
   }
 
-  async getEngagementMetrics(publicationId: string, timeframe: { start: Date; end: Date }): Promise<EngagementMetrics> {
+  public getEngagementMetrics(
+    publicationId: string,
+    timeframe: { start: Date; end: Date },
+  ): EngagementMetrics {
     // In real implementation, this would fetch from various platform APIs
     const mockMetrics: EngagementMetrics = {
       publicationId,
@@ -267,38 +278,41 @@ class PublishingAnalyticsService {
     return mockMetrics;
   }
 
-  async getReaderFeedback(publicationId: string, limit: number = 50): Promise<ReaderFeedback[]> {
+  public async getReaderFeedback(publicationId: string, limit = 50): Promise<ReaderFeedback[]> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['feedback'], 'readonly');
+      const transaction = db.transaction(['feedback'], 'readonly');
       const store = transaction.objectStore('feedback');
       const index = store.index('publicationId');
       const request = index.getAll(publicationId);
-      
-      request.onsuccess = () => {
-        const feedback = request.result
+
+      request.onsuccess = (): void => {
+        const feedback = (request.result as ReaderFeedback[])
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
           .slice(0, limit);
         resolve(feedback);
       };
-      request.onerror = () => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
-  async getReaderInsights(publicationId: string): Promise<ReaderInsights> {
+  public async getReaderInsights(publicationId: string): Promise<ReaderInsights> {
     const analytics = await this.getPublicationAnalytics(publicationId);
-    const engagement = await this.getEngagementMetrics(publicationId, {
+    const engagement = this.getEngagementMetrics(publicationId, {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
       end: new Date(),
     });
-    
+
     const insights: ReaderInsights = {
       publicationId,
       audienceProfile: {
         primaryDemographic: this.determinePrimaryDemographic(analytics),
         topCountries: Object.entries(analytics.geographics)
-          .sort(([,a], [,b]) => b - a)
+          .sort(([, a], [, b]) => b - a)
           .slice(0, 5)
           .map(([country]) => country),
         peakReadingTimes: this.formatPeakTimes(engagement.peakReadingTimes),
@@ -328,7 +342,9 @@ class PublishingAnalyticsService {
   }
 
   // Goal Management
-  async createPublishingGoal(goal: Omit<PublishingGoals, 'id' | 'current'>): Promise<PublishingGoals> {
+  public async createPublishingGoal(
+    goal: Omit<PublishingGoals, 'id' | 'current'>,
+  ): Promise<PublishingGoals> {
     const newGoal: PublishingGoals = {
       ...goal,
       id: `goal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -336,33 +352,39 @@ class PublishingAnalyticsService {
     };
 
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['publishingGoals'], 'readwrite');
+      const transaction = db.transaction(['publishingGoals'], 'readwrite');
       const store = transaction.objectStore('publishingGoals');
       const request = store.add(newGoal);
-      
-      request.onsuccess = () => resolve(newGoal);
-      request.onerror = () => reject(request.error);
+
+      request.onsuccess = (): void => resolve(newGoal);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
-  async getPublishingGoals(publicationId: string): Promise<PublishingGoals[]> {
+  public async getPublishingGoals(publicationId: string): Promise<PublishingGoals[]> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['publishingGoals'], 'readonly');
+      const transaction = db.transaction(['publishingGoals'], 'readonly');
       const store = transaction.objectStore('publishingGoals');
       const index = store.index('publicationId');
       const request = index.getAll(publicationId);
-      
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+
+      request.onsuccess = (): void => resolve(request.result);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
   // Trends and Predictions
-  async getPublishingTrends(_publicationId: string, days: number = 30): Promise<PublishingTrends> {
+  public getPublishingTrends(_publicationId: string, days = 30): PublishingTrends {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - days);
@@ -396,27 +418,33 @@ class PublishingAnalyticsService {
   }
 
   // Alerts and Notifications
-  async getPublishingAlerts(limit: number = 20): Promise<PublishingAlert[]> {
+  public async getPublishingAlerts(limit = 20): Promise<PublishingAlert[]> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['alerts'], 'readonly');
+      const transaction = db.transaction(['alerts'], 'readonly');
       const store = transaction.objectStore('alerts');
       const index = store.index('timestamp');
       const request = index.getAll();
-      
-      request.onsuccess = () => {
-        const alerts = request.result
+
+      request.onsuccess = (): void => {
+        const alerts = (request.result as PublishingAlert[])
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
           .slice(0, limit);
         resolve(alerts);
       };
-      request.onerror = () => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
   // Data Export
-  async exportPublishingAnalytics(publicationIds: string[], format: 'json' | 'csv' | 'xlsx'): Promise<string> {
+  public async exportPublishingAnalytics(
+    publicationIds: string[],
+    format: 'json' | 'csv' | 'xlsx',
+  ): Promise<string> {
     const exportData: {
       publications: Publication[];
       analytics: PlatformAnalytics[];
@@ -433,7 +461,7 @@ class PublishingAnalyticsService {
       const publication = await this.getPublication(id);
       const analytics = await this.getPublicationAnalytics(id);
       const feedback = await this.getReaderFeedback(id);
-      
+
       if (publication) {
         exportData.publications.push(publication);
         exportData.analytics.push(analytics);
@@ -451,49 +479,58 @@ class PublishingAnalyticsService {
   }
 
   // Platform Integration
-  async connectPlatform(platformId: string, credentials: any): Promise<boolean> {
+  public connectPlatform(
+    platformId: string,
+    credentials: PublishingPlatform['credentials'],
+  ): boolean {
     const platform = this.mockPlatforms.find(p => p.id === platformId);
     if (!platform) return false;
-    
+
     // In real implementation, this would test API connection
     platform.isConnected = true;
     platform.credentials = credentials;
-    
+
     return true;
   }
 
-  async getConnectedPlatforms(): Promise<PublishingPlatform[]> {
+  public getConnectedPlatforms(): PublishingPlatform[] {
     return this.mockPlatforms.filter(p => p.isConnected);
   }
 
-  async getAllPlatforms(): Promise<PublishingPlatform[]> {
+  public getAllPlatforms(): PublishingPlatform[] {
     return [...this.mockPlatforms];
   }
 
   // Private helper methods
   private async savePublication(publication: Publication): Promise<void> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['publications'], 'readwrite');
+      const transaction = db.transaction(['publications'], 'readwrite');
       const store = transaction.objectStore('publications');
       const request = store.put(publication);
-      
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
   private async getPublication(publicationId: string): Promise<Publication | null> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['publications'], 'readonly');
+      const transaction = db.transaction(['publications'], 'readonly');
       const store = transaction.objectStore('publications');
       const request = store.get(publicationId);
-      
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
+
+      request.onsuccess = (): void => resolve((request.result as Publication) ?? null);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -505,7 +542,7 @@ class PublishingAnalyticsService {
         publicationId,
         platformId: 'wattpad',
         type: 'review',
-        content: 'Amazing story! Couldn\'t put it down. The character development is incredible.',
+        content: "Amazing story! Couldn't put it down. The character development is incredible.",
         rating: 5,
         author: {
           id: 'reader_1',
@@ -531,26 +568,29 @@ class PublishingAnalyticsService {
 
   private async saveFeedback(feedback: ReaderFeedback): Promise<void> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['feedback'], 'readwrite');
+      const transaction = db.transaction(['feedback'], 'readwrite');
       const store = transaction.objectStore('feedback');
       const request = store.put(feedback);
-      
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
   private extractTags(project: Project): string[] {
     // Extract tags from project content and style
     const tags = [project.style.toLowerCase()];
-    
+
     // Add more sophisticated tag extraction based on content analysis
     if (project.idea.toLowerCase().includes('magic')) tags.push('magic');
     if (project.idea.toLowerCase().includes('romance')) tags.push('romance');
     if (project.idea.toLowerCase().includes('adventure')) tags.push('adventure');
-    
+
     return tags;
   }
 
@@ -560,7 +600,7 @@ class PublishingAnalyticsService {
     }, 0);
   }
 
-  private generateDropOffPoints(): Array<{ chapterIndex: number; dropOffRate: number }> {
+  private generateDropOffPoints(): { chapterIndex: number; dropOffRate: number }[] {
     const points = [];
     for (let i = 0; i < 10; i++) {
       points.push({
@@ -571,7 +611,7 @@ class PublishingAnalyticsService {
     return points;
   }
 
-  private generatePeakReadingTimes(): Array<{ hour: number; dayOfWeek: number; activityLevel: number }> {
+  private generatePeakReadingTimes(): { hour: number; dayOfWeek: number; activityLevel: number }[] {
     const times = [];
     for (let day = 0; day < 7; day++) {
       for (let hour = 0; hour < 24; hour++) {
@@ -588,20 +628,23 @@ class PublishingAnalyticsService {
   private determinePrimaryDemographic(analytics: PlatformAnalytics): string {
     // Simple logic - in real app this would be more sophisticated
     const demographics = analytics.demographics.ageGroups;
-    const topAge = Object.entries(demographics)
-      .sort(([,a], [,b]) => b - a)[0];
-    
+    const topAge = Object.entries(demographics).sort(([, a], [, b]) => b - a)[0];
+
     return topAge ? `${topAge[0]} age group` : '18-24 age group';
   }
 
-  private formatPeakTimes(peakTimes: Array<{ hour: number; dayOfWeek: number; activityLevel: number }>): string[] {
+  private formatPeakTimes(
+    peakTimes: { hour: number; dayOfWeek: number; activityLevel: number }[],
+  ): string[] {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return peakTimes.slice(0, 3).map(time => 
-      `${days[time.dayOfWeek]} at ${time.hour}:00`
-    );
+    return peakTimes.slice(0, 3).map(time => `${days[time.dayOfWeek]} at ${time.hour}:00`);
   }
 
-  private generatePopularChapters(): Array<{ chapterIndex: number; title: string; engagementScore: number }> {
+  private generatePopularChapters(): {
+    chapterIndex: number;
+    title: string;
+    engagementScore: number;
+  }[] {
     return [
       { chapterIndex: 0, title: 'Chapter 1: The Beginning', engagementScore: 95 },
       { chapterIndex: 5, title: 'Chapter 6: The Plot Twist', engagementScore: 92 },
@@ -609,7 +652,7 @@ class PublishingAnalyticsService {
     ];
   }
 
-  private generateSentimentTrends(): Array<{ chapter: number; sentiment: number; topics: string[] }> {
+  private generateSentimentTrends(): { chapter: number; sentiment: number; topics: string[] }[] {
     return [
       { chapter: 1, sentiment: 0.8, topics: ['introduction', 'world building'] },
       { chapter: 2, sentiment: 0.7, topics: ['character development', 'plot'] },
@@ -626,7 +669,12 @@ class PublishingAnalyticsService {
     ];
   }
 
-  private generateCompetitorComparison(): Array<{ title: string; rating: number; views: number; similarityScore: number }> {
+  private generateCompetitorComparison(): {
+    title: string;
+    rating: number;
+    views: number;
+    similarityScore: number;
+  }[] {
     return [
       { title: 'Similar Fantasy Epic', rating: 4.3, views: 15000, similarityScore: 0.85 },
       { title: 'Magic Academy Adventures', rating: 4.1, views: 12000, similarityScore: 0.72 },
@@ -634,14 +682,28 @@ class PublishingAnalyticsService {
     ];
   }
 
-  private generateRecommendations(analytics: PlatformAnalytics, engagement: EngagementMetrics): Array<{ type: 'content' | 'marketing' | 'pricing' | 'timing'; priority: 'high' | 'medium' | 'low'; suggestion: string; expectedImpact: string }> {
-    const recommendations: Array<{ type: 'content' | 'marketing' | 'pricing' | 'timing'; priority: 'high' | 'medium' | 'low'; suggestion: string; expectedImpact: string }> = [];
+  private generateRecommendations(
+    analytics: PlatformAnalytics,
+    engagement: EngagementMetrics,
+  ): {
+    type: 'content' | 'marketing' | 'pricing' | 'timing';
+    priority: 'high' | 'medium' | 'low';
+    suggestion: string;
+    expectedImpact: string;
+  }[] {
+    const recommendations: {
+      type: 'content' | 'marketing' | 'pricing' | 'timing';
+      priority: 'high' | 'medium' | 'low';
+      suggestion: string;
+      expectedImpact: string;
+    }[] = [];
 
     if (engagement.completionRate < 0.5) {
       recommendations.push({
         type: 'content',
         priority: 'high',
-        suggestion: 'Consider shorter chapters or stronger chapter endings to improve completion rates',
+        suggestion:
+          'Consider shorter chapters or stronger chapter endings to improve completion rates',
         expectedImpact: 'Could increase completion rate by 15-25%',
       });
     }
@@ -658,14 +720,16 @@ class PublishingAnalyticsService {
     return recommendations;
   }
 
-  private generateTrendMetrics(days: number): Array<{ date: string; views: number; engagement: number; rating: number }> {
-    const metrics: Array<{ date: string; views: number; engagement: number; rating: number }> = [];
+  private generateTrendMetrics(
+    days: number,
+  ): { date: string; views: number; engagement: number; rating: number }[] {
+    const metrics: { date: string; views: number; engagement: number; rating: number }[] = [];
     for (let i = 0; i < days; i++) {
       const date = new Date();
       date.setDate(date.getDate() - i);
 
       metrics.push({
-        date: date.toISOString().split('T')[0]!,
+        date: date.toISOString().split('T')[0] ?? '',
         views: Math.floor(Math.random() * 200) + 50,
         engagement: Math.random() * 100,
         rating: 3.5 + Math.random() * 1.5,
@@ -674,7 +738,7 @@ class PublishingAnalyticsService {
     return metrics.reverse();
   }
 
-  private convertToCSV(data: any): string {
+  private convertToCSV(data: Record<string, unknown>): string {
     // Simple CSV conversion - would be more sophisticated in real implementation
     return Object.entries(data)
       .map(([key, value]) => `${key},${JSON.stringify(value)}`)
@@ -684,12 +748,15 @@ class PublishingAnalyticsService {
   /**
    * Track campaign performance data
    */
-  public async trackCampaignPerformance(campaignId: string, metrics: {
-    impressions: number;
-    clicks: number;
-    conversions: number;
-    spend: number;
-  }): Promise<void> {
+  public trackCampaignPerformance(
+    campaignId: string,
+    metrics: {
+      impressions: number;
+      clicks: number;
+      conversions: number;
+      spend: number;
+    },
+  ): void {
     try {
       console.log(`Tracking campaign ${campaignId}:`, metrics);
       // Store metrics data - implementation would go here
@@ -702,15 +769,25 @@ class PublishingAnalyticsService {
   /**
    * Generate publishing insights
    */
-  public async generateInsights(_publicationId: string): Promise<any[]> {
+  public generateInsights(publicationId: string): PublishingInsights[] {
     try {
       return [
         {
-          type: 'content',
-          priority: 'high', 
-          suggestion: 'Consider updating chapter titles for better engagement',
-          expectedImpact: 'Increase reader engagement by 15%'
-        }
+          publicationId,
+          overallSentiment: 'positive' as const,
+          engagementLevel: 'high' as const,
+          readabilityScore: 85,
+          recommendationRate: 75,
+          trendingTopics: ['fantasy', 'adventure'],
+          insights: ['Consider updating chapter titles for better engagement'],
+          audienceProfile: {
+            primaryDemographic: 'young adult',
+            topCountries: ['US', 'UK', 'CA'],
+            peakReadingTimes: ['evening'],
+            averageSessionDuration: 45,
+          },
+          lastAnalyzed: new Date(),
+        },
       ];
     } catch (error) {
       console.error('Failed to generate insights:', error);
@@ -724,15 +801,18 @@ class PublishingAnalyticsService {
   public async getPublications(projectId: string): Promise<Publication[]> {
     try {
       if (!this.db) await this.init();
+      if (!this.db) throw new Error('Database not initialized');
 
+      const db = this.db;
       return new Promise((resolve, reject) => {
-        const transaction = this.db!.transaction(['publications'], 'readonly');
+        const transaction = db.transaction(['publications'], 'readonly');
         const store = transaction.objectStore('publications');
         const index = store.index('projectId');
         const request = index.getAll(projectId);
 
-        request.onsuccess = () => resolve(request.result as Publication[]);
-        request.onerror = () => reject(request.error);
+        request.onsuccess = (): void => resolve(request.result as Publication[]);
+        request.onerror = (): void =>
+          reject(new Error(request.error?.message ?? 'Database operation failed'));
       });
     } catch (error) {
       console.error('Failed to get publications:', error);

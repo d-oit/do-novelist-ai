@@ -1,2 +1,16 @@
-// Barrel export for generation services
-export * from './geminiService';
+// Barrel export for generation services - migrated to AI Gateway
+export {
+  generateOutline,
+  writeChapterContent,
+  refineChapterContent,
+  analyzeConsistency,
+  continueWriting,
+  brainstormProject,
+  translateContent,
+  generateCoverImage,
+  generateChapterIllustration,
+  developCharacters,
+  buildWorld,
+  enhancePlot,
+  polishDialogue,
+} from '@/lib/ai';

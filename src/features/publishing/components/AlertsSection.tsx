@@ -1,10 +1,11 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, X, Award, Zap, Activity, CheckCircle2 } from 'lucide-react';
-import { Card } from '../../../components/ui/Card';
+import React from 'react';
+
 import { Button } from '../../../components/ui/Button';
+import { Card } from '../../../components/ui/Card';
 import { cn } from '../../../lib/utils';
-import type { PublishingAlert } from '../types';
+import { type PublishingAlert } from '../types';
 
 interface AlertsSectionProps {
   alerts: PublishingAlert[];
@@ -19,21 +20,29 @@ const AlertCard: React.FC<{
   onMarkAsRead: () => void;
   onDismiss: () => void;
 }> = ({ alert, onMarkAsRead, onDismiss }) => {
-  const getAlertIcon = (type: string) => {
+  const getAlertIcon = (type: string): React.ComponentType<{ className?: string }> => {
     switch (type) {
-      case 'milestone': return Award;
-      case 'opportunity': return Zap;
-      case 'issue': return AlertTriangle;
-      default: return Activity;
+      case 'milestone':
+        return Award;
+      case 'opportunity':
+        return Zap;
+      case 'issue':
+        return AlertTriangle;
+      default:
+        return Activity;
     }
   };
 
-  const getAlertColor = (priority: string) => {
+  const getAlertColor = (priority: string): string => {
     switch (priority) {
-      case 'urgent': return 'border-red-500 bg-red-500/5';
-      case 'high': return 'border-orange-500 bg-orange-500/5';
-      case 'medium': return 'border-blue-500 bg-blue-500/5';
-      default: return 'border-gray-500 bg-gray-500/5';
+      case 'urgent':
+        return 'border-red-500 bg-red-500/5';
+      case 'high':
+        return 'border-orange-500 bg-orange-500/5';
+      case 'medium':
+        return 'border-blue-500 bg-blue-500/5';
+      default:
+        return 'border-gray-500 bg-gray-500/5';
     }
   };
 
@@ -46,25 +55,29 @@ const AlertCard: React.FC<{
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className={cn(
-        "p-4 border-l-4 relative",
-        getAlertColor(alert.priority),
-        !alert.isRead && "ring-1 ring-primary/20"
-      )}>
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <Icon className="w-5 h-5 mt-1 text-primary" />
-            <div className="flex-1">
-              <h4 className="font-medium text-sm">{alert.title}</h4>
-              <p className="text-sm text-muted-foreground mt-1">{alert.message}</p>
+      <Card
+        className={cn(
+          'relative border-l-4 p-4',
+          getAlertColor(alert.priority),
+          !alert.isRead && 'ring-1 ring-primary/20',
+        )}
+      >
+        <div className='flex items-start justify-between'>
+          <div className='flex items-start gap-3'>
+            <Icon className='mt-1 h-5 w-5 text-primary' />
+            <div className='flex-1'>
+              <h4 className='text-sm font-medium'>{alert.title}</h4>
+              <p className='mt-1 text-sm text-muted-foreground'>{alert.message}</p>
 
               {alert.suggestedActions && alert.suggestedActions.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Suggested Actions:</p>
-                  <ul className="text-xs text-muted-foreground space-y-1">
+                <div className='mt-2'>
+                  <p className='mb-1 text-xs font-medium text-muted-foreground'>
+                    Suggested Actions:
+                  </p>
+                  <ul className='space-y-1 text-xs text-muted-foreground'>
                     {alert.suggestedActions.map((action, index) => (
-                      <li key={index} className="flex items-center gap-1">
-                        <span className="w-1 h-1 bg-current rounded-full" />
+                      <li key={index} className='flex items-center gap-1'>
+                        <span className='h-1 w-1 rounded-full bg-current' />
                         {action}
                       </li>
                     ))}
@@ -74,24 +87,24 @@ const AlertCard: React.FC<{
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className='flex items-center gap-1'>
             {!alert.isRead && (
               <Button
-                variant="ghost"
-                size="sm"
+                variant='ghost'
+                size='sm'
                 onClick={onMarkAsRead}
-                className="h-8 w-8 p-0 text-xs"
+                className='h-8 w-8 p-0 text-xs'
               >
-                <CheckCircle2 className="w-3 h-3" />
+                <CheckCircle2 className='h-3 w-3' />
               </Button>
             )}
             <Button
-              variant="ghost"
-              size="sm"
+              variant='ghost'
+              size='sm'
               onClick={onDismiss}
-              className="h-8 w-8 p-0 text-xs text-red-600 hover:text-red-700"
+              className='h-8 w-8 p-0 text-xs text-red-600 hover:text-red-700'
             >
-              <X className="w-3 h-3" />
+              <X className='h-3 w-3' />
             </Button>
           </div>
         </div>
@@ -105,7 +118,7 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({
   onMarkAsRead,
   onDismiss,
   onClose,
-  showAlerts
+  showAlerts,
 }) => {
   const unreadAlerts = alerts.filter(alert => !alert.isRead);
 
@@ -117,25 +130,20 @@ export const AlertsSection: React.FC<AlertsSectionProps> = ({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="space-y-3"
+        className='space-y-3'
       >
-        <div className="flex items-center justify-between">
-          <h3 className="font-serif font-semibold text-lg flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-orange-500" />
+        <div className='flex items-center justify-between'>
+          <h3 className='flex items-center gap-2 font-serif text-lg font-semibold'>
+            <AlertTriangle className='h-5 w-5 text-orange-500' />
             Alerts ({unreadAlerts.length})
           </h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-xs"
-          >
-            <X className="w-3 h-3" />
+          <Button variant='ghost' size='sm' onClick={onClose} className='text-xs'>
+            <X className='h-3 w-3' />
           </Button>
         </div>
 
-        <div className="space-y-2">
-          {unreadAlerts.slice(0, 3).map((alert) => (
+        <div className='space-y-2'>
+          {unreadAlerts.slice(0, 3).map(alert => (
             <AlertCard
               key={alert.id}
               alert={alert}

@@ -4,38 +4,38 @@
  */
 
 import {
-  ProjectSchema,
-  ChapterSchema,
-  WorldStateSchema,
-  ProjectSettingsSchema,
   AgentActionSchema,
-  LogEntrySchema,
-  RefineOptionsSchema,
+  ChapterSchema,
   CreateProjectSchema,
+  LANGUAGES,
+  LogEntrySchema,
+  ProjectFilterSchema,
+  ProjectSchema,
+  ProjectSettingsSchema,
+  RefineOptionsSchema,
   UpdateChapterSchema,
   UpdateProjectSchema,
-  ProjectFilterSchema,
-  type Project,
-  type Chapter,
-  type WorldState,
-  type ProjectSettings,
+  WorldStateSchema,
+  WRITING_STYLES,
   type AgentAction,
-  type LogEntry,
-  type RefineOptions,
+  type Base64Image,
+  type Chapter,
+  type ChapterId,
   type CreateProject,
-  type UpdateChapter,
-  type UpdateProject,
+  type Language,
+  type LogEntry,
+  type LogId,
+  type Project,
   type ProjectFilter,
   type ProjectId,
-  type ChapterId,
-  type LogId,
-  type Base64Image,
-  type WordCount,
+  type ProjectSettings,
+  type RefineOptions,
   type Temperature,
-  WRITING_STYLES,
-  LANGUAGES,
+  type UpdateChapter,
+  type UpdateProject,
+  type WordCount,
+  type WorldState,
   type WritingStyle,
-  type Language
 } from './schemas';
 
 // =============================================================================
@@ -131,7 +131,7 @@ export function isProjectId(value: unknown): value is ProjectId {
 }
 
 export function createProjectId(timestamp = Date.now()): ProjectId {
-  return `proj_${timestamp}` as ProjectId;
+  return `proj_${timestamp}`;
 }
 
 /**
@@ -141,15 +141,22 @@ export function isChapterId(value: unknown): value is ChapterId {
   return typeof value === 'string' && /^.+_ch_.+_\d+$/.test(value);
 }
 
-export function createChapterId(projectId: ProjectId, type = 'manual', timestamp = Date.now()): ChapterId {
-  return `${projectId}_ch_${type}_${timestamp}` as ChapterId;
+export function createChapterId(
+  projectId: ProjectId,
+  type = 'manual',
+  timestamp = Date.now()
+): ChapterId {
+  return `${projectId}_ch_${type}_${timestamp}`;
 }
 
 /**
  * Type guard and creator for LogId
  */
 export function isLogId(value: unknown): value is LogId {
-  return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+  return (
+    typeof value === 'string' &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
+  );
 }
 
 export function createLogId(): LogId {
@@ -172,7 +179,7 @@ export function isWordCount(value: unknown): value is WordCount {
 
 export function createWordCount(value: number): WordCount | null {
   if (isWordCount(value)) {
-    return value as WordCount;
+    return value;
   }
   return null;
 }
@@ -186,7 +193,7 @@ export function isTemperature(value: unknown): value is Temperature {
 
 export function createTemperature(value: number): Temperature | null {
   if (isTemperature(value)) {
-    return value as Temperature;
+    return value;
   }
   return null;
 }
@@ -330,7 +337,7 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 /**
  * Type guard for functions
  */
-export function isFunction(value: unknown): value is Function {
+export function isFunction(value: unknown): value is (...args: unknown[]) => unknown {
   return typeof value === 'function';
 }
 
@@ -344,20 +351,17 @@ export function isFunction(value: unknown): value is Function {
 export function assertType<T>(
   value: unknown,
   guard: (value: unknown) => value is T,
-  errorMessage?: string
+  errorMessage: string = `Value does not match expected type`
 ): asserts value is T {
   if (!guard(value)) {
-    throw new TypeError(errorMessage || `Value does not match expected type`);
+    throw new TypeError(errorMessage);
   }
 }
 
 /**
  * Safely casts a value to the expected type, returns null if invalid
  */
-export function safeCast<T>(
-  value: unknown,
-  guard: (value: unknown) => value is T
-): T | null {
+export function safeCast<T>(value: unknown, guard: (value: unknown) => value is T): T | null {
   return guard(value) ? value : null;
 }
 
@@ -386,20 +390,14 @@ export function hasAnyKey<T extends Record<string, unknown>>(
 /**
  * Validates all values in an array match a type guard
  */
-export function allMatch<T>(
-  array: unknown[],
-  guard: (value: unknown) => value is T
-): array is T[] {
+export function allMatch<T>(array: unknown[], guard: (value: unknown) => value is T): array is T[] {
   return array.every(guard);
 }
 
 /**
  * Validates at least one value in an array matches a type guard
  */
-export function someMatch<T>(
-  array: unknown[],
-  guard: (value: unknown) => value is T
-): boolean {
+export function someMatch<T>(array: unknown[], guard: (value: unknown) => value is T): boolean {
   return array.some(guard);
 }
 

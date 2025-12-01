@@ -1,9 +1,28 @@
-
+import { Project, Chapter, ChapterStatus } from '@shared/types';
+import {
+  BookOpen,
+  CheckCircle2,
+  Wand2,
+  Loader2,
+  Menu,
+  X,
+  Maximize2,
+  Minimize2,
+  AlignLeft,
+  Type,
+  UploadCloud,
+  RefreshCw,
+  Clock,
+  Edit3,
+  Plus,
+  Sparkles,
+} from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
-import { Project, Chapter, ChapterStatus, RefineOptions } from '@shared/types';
-import { BookOpen, CheckCircle2, Wand2, Loader2, Menu, X, Maximize2, Minimize2, AlignLeft, Type, UploadCloud, RefreshCw, Clock, Edit3, Plus, Sparkles } from 'lucide-react';
+
 import CoverGenerator from '../../publishing/components/CoverGenerator';
 import PublishPanel from '../../publishing/components/PublishPanel';
+
+import { type RefineOptions } from '@/types';
 
 interface BookViewerProps {
   project: Project;
@@ -16,27 +35,30 @@ interface BookViewerProps {
   onContinueChapter?: (chapterId: string) => void;
 }
 
-const BookViewer: React.FC<BookViewerProps> = ({ 
-  project, 
-  selectedChapterId, 
-  onSelectChapter, 
+const BookViewer: React.FC<BookViewerProps> = ({
+  project,
+  selectedChapterId,
+  onSelectChapter,
   onRefineChapter,
   onUpdateChapter,
   onUpdateProject,
   onAddChapter,
-  onContinueChapter
+  onContinueChapter,
 }) => {
-  
   const selectedChapter = project.chapters.find(c => c.id === selectedChapterId);
   const [refineSettings, setRefineSettings] = useState<RefineOptions>({
     model: 'gemini-2.5-flash',
-    temperature: 0.3
+    temperature: 0.7,
+    maxTokens: 2000,
+    topP: 0.95,
+    focusAreas: ['grammar', 'style'],
+    preserveLength: false,
   });
 
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
 
@@ -46,16 +68,22 @@ const BookViewer: React.FC<BookViewerProps> = ({
   const currentContentRef = useRef('');
   const currentChapterIdRef = useRef(selectedChapterId);
 
-  useEffect(() => { currentSummaryRef.current = summary; }, [summary]);
-  useEffect(() => { currentContentRef.current = content; }, [content]);
-  useEffect(() => { currentChapterIdRef.current = selectedChapterId; }, [selectedChapterId]);
+  useEffect(() => {
+    currentSummaryRef.current = summary;
+  }, [summary]);
+  useEffect(() => {
+    currentContentRef.current = content;
+  }, [content]);
+  useEffect(() => {
+    currentChapterIdRef.current = selectedChapterId;
+  }, [selectedChapterId]);
 
   useEffect(() => {
     if (selectedChapter) {
-      setSummary(selectedChapter.summary || '');
-      setContent(selectedChapter.content || '');
-      lastSavedSummary.current = selectedChapter.summary || '';
-      lastSavedContent.current = selectedChapter.content || '';
+      setSummary(selectedChapter.summary ?? '');
+      setContent(selectedChapter.content ?? '');
+      lastSavedSummary.current = selectedChapter.summary ?? '';
+      lastSavedContent.current = selectedChapter.content ?? '';
       setHasUnsavedChanges(false);
     } else {
       setSummary('');
@@ -70,20 +98,32 @@ const BookViewer: React.FC<BookViewerProps> = ({
   // But we do need to catch AI generation updates.
   useEffect(() => {
     if (selectedChapter) {
-      if (selectedChapter.summary !== lastSavedSummary.current && selectedChapter.summary !== summary) {
-        setSummary(selectedChapter.summary || '');
-        lastSavedSummary.current = selectedChapter.summary || '';
+      if (
+        selectedChapter.summary !== lastSavedSummary.current &&
+        selectedChapter.summary !== summary
+      ) {
+        setSummary(selectedChapter.summary ?? '');
+        lastSavedSummary.current = selectedChapter.summary ?? '';
       }
-      if (selectedChapter.content !== lastSavedContent.current && selectedChapter.content !== content) {
-        setContent(selectedChapter.content || '');
-        lastSavedContent.current = selectedChapter.content || '';
+      if (
+        selectedChapter.content !== lastSavedContent.current &&
+        selectedChapter.content !== content
+      ) {
+        setContent(selectedChapter.content ?? '');
+        lastSavedContent.current = selectedChapter.content ?? '';
       }
     }
   }, [selectedChapter?.summary, selectedChapter?.content]);
 
-  useEffect(() => {
-    if (!selectedChapterId || !onUpdateChapter || selectedChapterId === 'overview' || selectedChapterId === 'publish') return;
-    const timer = setTimeout(() => {
+  useEffect((): (() => void) => {
+    if (
+      selectedChapterId == null ||
+      onUpdateChapter == null ||
+      selectedChapterId === 'overview' ||
+      selectedChapterId === 'publish'
+    )
+      return () => {};
+    const timer = setTimeout((): void => {
       const needsSaveSummary = summary !== lastSavedSummary.current;
       const needsSaveContent = content !== lastSavedContent.current;
       if (needsSaveSummary || needsSaveContent) {
@@ -96,10 +136,16 @@ const BookViewer: React.FC<BookViewerProps> = ({
     return () => clearTimeout(timer);
   }, [summary, content, selectedChapterId, onUpdateChapter]);
 
-  useEffect(() => {
+  useEffect((): (() => void) => {
     return () => {
       const chapterId = currentChapterIdRef.current;
-      if (!chapterId || !onUpdateChapter || chapterId === 'overview' || chapterId === 'publish') return;
+      if (
+        chapterId == null ||
+        onUpdateChapter == null ||
+        chapterId === 'overview' ||
+        chapterId === 'publish'
+      )
+        return;
       const finalSummary = currentSummaryRef.current;
       const finalContent = currentContentRef.current;
       // Force save on unmount/change
@@ -109,264 +155,385 @@ const BookViewer: React.FC<BookViewerProps> = ({
     };
   }, [selectedChapterId]);
 
-  const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     setSummary(e.target.value);
     setHasUnsavedChanges(true);
   };
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     setContent(e.target.value);
     setHasUnsavedChanges(true);
   };
 
-  const getWordCount = (text: string) => text.trim().split(/\s+/).filter(w => w.length > 0).length;
+  const getWordCount = (text: string): number =>
+    text
+      .trim()
+      .split(/\s+/)
+      .filter(w => w.length > 0).length;
   const currentWordCount = getWordCount(content);
 
-  const getStatusIcon = (status: ChapterStatus) => {
+  const getStatusIcon = (status: ChapterStatus): React.ReactElement => {
     switch (status) {
-      case ChapterStatus.COMPLETE: return <CheckCircle2 className="w-3 h-3 text-green-500" />;
-      case ChapterStatus.DRAFTING: return <Edit3 className="w-3 h-3 text-blue-500" />;
-      case ChapterStatus.REVIEW: return <RefreshCw className="w-3 h-3 text-yellow-500" />;
-      default: return <Clock className="w-3 h-3 text-muted-foreground" />;
+      case ChapterStatus.COMPLETE:
+        return <CheckCircle2 className='h-3 w-3 text-green-500' />;
+      case ChapterStatus.DRAFTING:
+        return <Edit3 className='h-3 w-3 text-blue-500' />;
+      case ChapterStatus.REVIEW:
+        return <RefreshCw className='h-3 w-3 text-yellow-500' />;
+      default:
+        return <Clock className='h-3 w-3 text-muted-foreground' />;
     }
   };
 
   return (
-    <div className={`flex flex-col md:flex-row h-full border border-border rounded-lg overflow-hidden bg-card relative transition-all duration-500 ${isFocusMode ? 'fixed inset-0 z-50 m-0 rounded-none border-none' : ''}`}>
-      
+    <div
+      className={`relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 md:flex-row ${isFocusMode ? 'fixed inset-0 z-50 m-0 rounded-none border-none' : ''}`}
+    >
       {/* Mobile Header */}
-      <div className={`md:hidden flex items-center justify-between p-4 border-b border-border bg-secondary/10 ${isFocusMode ? 'hidden' : ''}`}>
-        <div className="flex items-center gap-2 font-semibold text-sm">
-          <BookOpen className="w-4 h-4 text-primary" />
+      <div
+        className={`flex items-center justify-between border-b border-border bg-secondary/10 p-4 md:hidden ${isFocusMode ? 'hidden' : ''}`}
+      >
+        <div className='flex items-center gap-2 text-sm font-semibold'>
+          <BookOpen className='h-4 w-4 text-primary' />
           <span>
-            {selectedChapterId === 'overview' ? 'Project Overview' : 
-             selectedChapterId === 'publish' ? 'Publish & Export' :
-             selectedChapter ? `Ch. ${selectedChapter.orderIndex}` : 'Select Chapter'}
+            {selectedChapterId === 'overview'
+              ? 'Project Overview'
+              : selectedChapterId === 'publish'
+                ? 'Publish & Export'
+                : selectedChapter
+                  ? `Ch. ${selectedChapter.orderIndex}`
+                  : 'Select Chapter'}
           </span>
         </div>
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-1 text-muted-foreground hover:text-foreground">
-          {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className='p-1 text-muted-foreground hover:text-foreground'
+        >
+          {isSidebarOpen ? <X className='h-5 w-5' /> : <Menu className='h-5 w-5' />}
         </button>
       </div>
 
       {/* Sidebar */}
-      <div className={`
-        absolute md:relative z-20 inset-y-0 left-0 w-64 bg-card md:bg-secondary/10 border-r border-border flex flex-col transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-        ${isFocusMode ? 'md:-translate-x-full md:w-0 md:border-none' : ''}
-      `} data-testid="chapter-sidebar">
-        <div className="p-4 border-b border-border bg-secondary/10 hidden md:block">
-          <h3 className="font-semibold text-sm text-foreground flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-primary" />
+      <div
+        className={`absolute inset-y-0 left-0 z-20 flex w-64 flex-col border-r border-border bg-card shadow-2xl transition-all duration-300 ease-in-out md:relative md:bg-secondary/10 md:shadow-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${isFocusMode ? 'md:w-0 md:-translate-x-full md:border-none' : ''} `}
+        data-testid='chapter-sidebar'
+      >
+        <div className='hidden border-b border-border bg-secondary/10 p-4 md:block'>
+          <h3 className='flex items-center gap-2 text-sm font-semibold text-foreground'>
+            <BookOpen className='h-4 w-4 text-primary' />
             Structure
           </h3>
         </div>
-        <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar flex flex-col">
-          
+        <div className='custom-scrollbar flex flex-1 flex-col space-y-1 overflow-y-auto p-2'>
           {/* Management Section */}
-          <div className="mb-2 space-y-1 shrink-0">
+          <div className='mb-2 shrink-0 space-y-1'>
             <button
               onClick={() => onSelectChapter('overview')}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs transition-colors flex items-center gap-2 font-bold uppercase tracking-wider ${selectedChapterId === 'overview' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
-              data-testid="chapter-item-overview"
+              className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors ${selectedChapterId === 'overview' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+              data-testid='chapter-item-overview'
             >
-              <AlignLeft className="w-3 h-3 shrink-0" /> Project Overview
+              <AlignLeft className='h-3 w-3 shrink-0' /> Project Overview
             </button>
             <button
               onClick={() => onSelectChapter('publish')}
-              className={`w-full text-left px-3 py-2 rounded-md text-xs transition-colors flex items-center gap-2 font-bold uppercase tracking-wider ${selectedChapterId === 'publish' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
-              data-testid="chapter-item-publish"
+              className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors ${selectedChapterId === 'publish' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+              data-testid='chapter-item-publish'
             >
-              <UploadCloud className="w-3 h-3 shrink-0" /> Publish & Export
+              <UploadCloud className='h-3 w-3 shrink-0' /> Publish & Export
             </button>
           </div>
 
-          <div className="h-px bg-border/50 my-2 mx-1 shrink-0"></div>
-          
+          <div className='mx-1 my-2 h-px shrink-0 bg-border/50' />
+
           {/* Chapters List */}
-          <div className="flex-1 overflow-y-auto space-y-1">
+          <div className='flex-1 space-y-1 overflow-y-auto'>
             {project.chapters.length === 0 && (
-              <div className="p-4 text-xs text-muted-foreground text-center italic opacity-70">Waiting for Outline...</div>
+              <div className='p-4 text-center text-xs italic text-muted-foreground opacity-70'>
+                Waiting for Outline...
+              </div>
             )}
-            {project.chapters.map((chapter) => (
+            {project.chapters.map(chapter => (
               <button
                 key={chapter.id}
                 onClick={() => onSelectChapter(chapter.id)}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs transition-colors flex items-center gap-2 ${selectedChapterId === chapter.id ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+                className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs transition-colors ${selectedChapterId === chapter.id ? 'bg-primary/10 font-medium text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
                 data-testid={`chapter-item-${chapter.id}`}
               >
                 {getStatusIcon(chapter.status)}
-                <span className="truncate flex-1">{chapter.orderIndex}. {chapter.title}</span>
-                <span className="text-[9px] text-muted-foreground opacity-60">{getWordCount(chapter.content)}w</span>
+                <span className='flex-1 truncate'>
+                  {chapter.orderIndex}. {chapter.title}
+                </span>
+                <span className='text-[9px] text-muted-foreground opacity-60'>
+                  {getWordCount(chapter.content)}w
+                </span>
               </button>
             ))}
           </div>
-          
+
           {/* Add Chapter Button */}
           {onAddChapter && (
-             <div className="mt-2 pt-2 border-t border-border/50 shrink-0">
-                <button 
-                    onClick={onAddChapter}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md text-xs font-medium border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-secondary/50 transition-all"
-                    title="Manually add a new empty chapter"
-                    data-testid="add-chapter-btn"
-                >
-                    <Plus className="w-3 h-3" /> Add Chapter
-                </button>
-             </div>
+            <div className='mt-2 shrink-0 border-t border-border/50 pt-2'>
+              <button
+                onClick={onAddChapter}
+                className='flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:border-primary/50 hover:bg-secondary/50 hover:text-primary'
+                title='Manually add a new empty chapter'
+                data-testid='add-chapter-btn'
+              >
+                <Plus className='h-3 w-3' /> Add Chapter
+              </button>
+            </div>
           )}
         </div>
       </div>
 
       {/* Overlay for Mobile Sidebar */}
-      {isSidebarOpen && <div className="md:hidden fixed inset-0 bg-black/50 z-10" onClick={() => setIsSidebarOpen(false)}></div>}
+      {isSidebarOpen && (
+        <div
+          className='fixed inset-0 z-10 bg-black/50 md:hidden'
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       {/* Content Area */}
-      <div className="flex-1 bg-background overflow-y-auto relative custom-scrollbar h-[calc(100vh-10rem)] md:h-auto flex flex-col">
-        
+      <div className='custom-scrollbar relative flex h-[calc(100vh-10rem)] flex-1 flex-col overflow-y-auto bg-background md:h-auto'>
         {/* Focus Mode Toggle (Absolute) */}
-        <div className="absolute top-4 right-6 z-30 flex gap-2">
-           {isFocusMode && (
-              <div className="px-3 py-1 bg-secondary/80 backdrop-blur rounded-full text-xs font-mono text-muted-foreground border border-border animate-in fade-in">
-                 {currentWordCount} words
-              </div>
-           )}
-           <button 
-             onClick={() => setIsFocusMode(!isFocusMode)}
-             className="p-2 bg-card/50 hover:bg-card backdrop-blur border border-border rounded-full text-muted-foreground hover:text-foreground transition-all shadow-sm"
-             title={isFocusMode ? "Exit Focus Mode" : "Enter Focus Mode"}
-           >
-             {isFocusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-           </button>
+        <div className='absolute right-6 top-4 z-30 flex gap-2'>
+          {isFocusMode && (
+            <div className='animate-in fade-in rounded-full border border-border bg-secondary/80 px-3 py-1 font-mono text-xs text-muted-foreground backdrop-blur'>
+              {currentWordCount} words
+            </div>
+          )}
+          <button
+            onClick={() => setIsFocusMode(!isFocusMode)}
+            className='rounded-full border border-border bg-card/50 p-2 text-muted-foreground shadow-sm backdrop-blur transition-all hover:bg-card hover:text-foreground'
+            title={isFocusMode ? 'Exit Focus Mode' : 'Enter Focus Mode'}
+          >
+            {isFocusMode ? <Minimize2 className='h-4 w-4' /> : <Maximize2 className='h-4 w-4' />}
+          </button>
         </div>
 
         {/* View Routing */}
-        {selectedChapterId === 'overview' && onUpdateProject ? (
-          <div className="max-w-3xl mx-auto p-6 md:p-8 min-h-full w-full" data-testid="overview-panel">
-             <div className="mb-8 border-b border-border pb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-               <div>
-                 <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">{project.title}</h1>
-                 <p className="text-muted-foreground mt-1 text-sm">{project.style}</p>
-               </div>
-             </div>
-             <div className="space-y-8">
-               <CoverGenerator project={project} onUpdateProject={onUpdateProject} />
-               <section className="mt-8 p-4 bg-secondary/10 rounded-lg border border-border">
-                 <h4 className="text-xs font-bold uppercase text-muted-foreground mb-2">Core Idea</h4>
-                 <p className="text-sm text-foreground font-mono whitespace-pre-wrap">{project.idea}</p>
-               </section>
-             </div>
+        {selectedChapterId === 'overview' && onUpdateProject != null ? (
+          <div
+            className='mx-auto min-h-full w-full max-w-3xl p-6 md:p-8'
+            data-testid='overview-panel'
+          >
+            <div className='mb-8 flex flex-col items-start justify-between gap-4 border-b border-border pb-4 md:flex-row md:items-center'>
+              <div>
+                <h1 className='font-serif text-2xl font-bold text-foreground md:text-3xl'>
+                  {project.title}
+                </h1>
+                <p className='mt-1 text-sm text-muted-foreground'>{project.style}</p>
+              </div>
+            </div>
+            <div className='space-y-8'>
+              <CoverGenerator project={project} onUpdateProject={onUpdateProject} />
+              <section className='mt-8 rounded-lg border border-border bg-secondary/10 p-4'>
+                <h4 className='mb-2 text-xs font-bold uppercase text-muted-foreground'>
+                  Core Idea
+                </h4>
+                <p className='whitespace-pre-wrap font-mono text-sm text-foreground'>
+                  {project.idea}
+                </p>
+              </section>
+            </div>
           </div>
         ) : selectedChapterId === 'publish' && onUpdateProject && onUpdateChapter ? (
-           <PublishPanel project={project} onUpdateProject={onUpdateProject} onUpdateChapter={onUpdateChapter} />
+          <PublishPanel
+            project={project}
+            onUpdateProject={onUpdateProject}
+            onUpdateChapter={onUpdateChapter}
+          />
         ) : selectedChapter ? (
-          <div className={`mx-auto p-6 md:p-12 min-h-full w-full flex flex-col transition-all duration-500 ${isFocusMode ? 'max-w-4xl pt-20' : 'max-w-3xl'}`} data-testid="chapter-editor">
-            
-            <div className={`mb-6 flex flex-col gap-2 ${isFocusMode ? 'opacity-50 hover:opacity-100 transition-opacity' : ''}`}>
-               <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                    Chapter {selectedChapter.orderIndex}
-                    
-                    {onUpdateChapter && (
-                      <div className="relative inline-block">
-                        <select
-                          value={selectedChapter.status}
-                          onChange={(e) => onUpdateChapter(selectedChapter.id, { status: e.target.value as ChapterStatus })}
-                          className={`appearance-none bg-transparent font-bold uppercase text-[10px] pl-2 pr-4 py-0.5 rounded cursor-pointer focus:outline-none ${
-                            selectedChapter.status === ChapterStatus.COMPLETE ? 'text-green-500' :
-                            selectedChapter.status === ChapterStatus.DRAFTING ? 'text-blue-500' :
-                            selectedChapter.status === ChapterStatus.REVIEW ? 'text-yellow-500' :
-                            'text-muted-foreground'
-                          }`}
-                        >
-                          {Object.values(ChapterStatus).map(s => (
-                            <option key={s} value={s}>{s}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
+          <div
+            className={`mx-auto flex min-h-full w-full flex-col p-6 transition-all duration-500 md:p-12 ${isFocusMode ? 'max-w-4xl pt-20' : 'max-w-3xl'}`}
+            data-testid='chapter-editor'
+          >
+            <div
+              className={`mb-6 flex flex-col gap-2 ${isFocusMode ? 'opacity-50 transition-opacity hover:opacity-100' : ''}`}
+            >
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground'>
+                  Chapter {selectedChapter.orderIndex}
+                  {onUpdateChapter && (
+                    <div className='relative inline-block'>
+                      <select
+                        value={selectedChapter.status}
+                        onChange={e =>
+                          onUpdateChapter(selectedChapter.id, {
+                            status: e.target.value as ChapterStatus,
+                          })
+                        }
+                        className={`cursor-pointer appearance-none rounded bg-transparent py-0.5 pl-2 pr-4 text-[10px] font-bold uppercase focus:outline-none ${
+                          selectedChapter.status === ChapterStatus.COMPLETE
+                            ? 'text-green-500'
+                            : selectedChapter.status === ChapterStatus.DRAFTING
+                              ? 'text-blue-500'
+                              : selectedChapter.status === ChapterStatus.REVIEW
+                                ? 'text-yellow-500'
+                                : 'text-muted-foreground'
+                        }`}
+                      >
+                        {Object.values(ChapterStatus).map(s => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div className='flex items-center gap-3 text-xs text-muted-foreground'>
+                  <span className='flex items-center gap-1.5 rounded-md bg-secondary/50 px-2 py-0.5 font-mono'>
+                    <Type className='h-3 w-3' /> {currentWordCount} words
+                  </span>
+                  <div
+                    className='flex items-center gap-1.5'
+                    title={hasUnsavedChanges ? 'Unsaved changes' : 'All changes saved'}
+                    data-testid='save-status-indicator'
+                  >
+                    <div
+                      className={`h-1.5 w-1.5 rounded-full transition-colors ${hasUnsavedChanges ? 'animate-pulse bg-yellow-500' : 'bg-green-500/50'}`}
+                    />
+                    <span className='hidden text-[10px] uppercase tracking-wider opacity-70 md:inline'>
+                      {hasUnsavedChanges ? 'Saving' : 'Saved'}
+                    </span>
                   </div>
-                  
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                     <span className="font-mono flex items-center gap-1.5 bg-secondary/50 px-2 py-0.5 rounded-md">
-                        <Type className="w-3 h-3" /> {currentWordCount} words
-                     </span>
-                     <div className="flex items-center gap-1.5" title={hasUnsavedChanges ? "Unsaved changes" : "All changes saved"} data-testid="save-status-indicator">
-                        <div className={`w-1.5 h-1.5 rounded-full transition-colors ${hasUnsavedChanges ? 'bg-yellow-500 animate-pulse' : 'bg-green-500/50'}`}></div>
-                        <span className="hidden md:inline uppercase tracking-wider opacity-70 text-[10px]">{hasUnsavedChanges ? 'Saving' : 'Saved'}</span>
-                     </div>
-                  </div>
-               </div>
-               <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground pb-4 border-b border-border">{selectedChapter.title}</h1>
+                </div>
+              </div>
+              <h1 className='border-b border-border pb-4 font-serif text-2xl font-bold text-foreground md:text-3xl'>
+                {selectedChapter.title}
+              </h1>
             </div>
-            
-            <div className="flex flex-col gap-6 flex-1">
-              <div className={`group transition-all duration-500 ${isFocusMode ? 'hidden' : 'block'}`}>
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block opacity-70">Summary / Goal</label>
-                  <textarea 
-                    className="w-full p-3 text-sm text-muted-foreground italic bg-secondary/5 rounded-md border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background focus:text-foreground resize-y min-h-[80px] transition-colors"
-                    value={summary}
-                    onChange={handleSummaryChange}
-                    data-testid="chapter-summary-input"
-                  />
+
+            <div className='flex flex-1 flex-col gap-6'>
+              <div
+                className={`group transition-all duration-500 ${isFocusMode ? 'hidden' : 'block'}`}
+              >
+                <label className='mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground opacity-70'>
+                  Summary / Goal
+                </label>
+                <textarea
+                  className='min-h-[80px] w-full resize-y rounded-md border border-border/50 bg-secondary/5 p-3 text-sm italic text-muted-foreground transition-colors focus:bg-background focus:text-foreground focus:outline-none focus:ring-1 focus:ring-primary'
+                  value={summary}
+                  onChange={handleSummaryChange}
+                  data-testid='chapter-summary-input'
+                />
               </div>
 
               {onRefineChapter && !isFocusMode && (
-                <div className="bg-secondary/5 p-4 rounded-lg border border-border/40">
-                  <div className="flex items-center gap-2 mb-4">
-                     <Wand2 className="w-4 h-4 text-primary" />
-                     <h4 className="text-sm font-semibold text-foreground">AI Tools</h4>
+                <div className='rounded-lg border border-border/40 bg-secondary/5 p-4'>
+                  <div className='mb-4 flex items-center gap-2'>
+                    <Wand2 className='h-4 w-4 text-primary' />
+                    <h4 className='text-sm font-semibold text-foreground'>AI Tools</h4>
                   </div>
-                  <div className="flex flex-col xl:flex-row gap-4 items-end">
-                    <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-[10px] uppercase font-bold text-muted-foreground">Model</label>
-                        <select className="w-full bg-background text-xs px-3 py-2 rounded border border-border focus:outline-none focus:border-primary" value={refineSettings.model} onChange={(e) => setRefineSettings(prev => ({ ...prev, model: e.target.value }))} disabled={project.isGenerating}>
-                          <option value="gemini-2.5-flash">Flash 2.5 (Fast)</option>
-                          <option value="gemini-3-pro-preview">Pro 3.0 (Quality)</option>
+                  <div className='flex flex-col items-end gap-4 xl:flex-row'>
+                    <div className='grid w-full flex-1 grid-cols-1 gap-4 md:grid-cols-2'>
+                      <div className='space-y-1'>
+                        <label className='text-[10px] font-bold uppercase text-muted-foreground'>
+                          Model
+                        </label>
+                        <select
+                          className='w-full rounded border border-border bg-background px-3 py-2 text-xs focus:border-primary focus:outline-none'
+                          value={refineSettings.model}
+                          onChange={e =>
+                            setRefineSettings(prev => ({
+                              ...prev,
+                              model: e.target.value as RefineOptions['model'],
+                            }))
+                          }
+                          disabled={project.isGenerating}
+                        >
+                          <option value='gemini-2.5-flash'>Flash 2.5 (Fast)</option>
+                          <option value='gemini-3-pro-preview'>Pro 3.0 (Quality)</option>
                         </select>
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] uppercase font-bold text-muted-foreground">Temp: {refineSettings.temperature}</label>
-                        <input type="range" min="0" max="1" step="0.1" value={refineSettings.temperature} onChange={(e) => setRefineSettings(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))} className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:bg-primary" disabled={project.isGenerating} />
-                        <div className="flex justify-between text-[9px] text-muted-foreground px-0.5"><span>Focused</span><span>Creative</span></div>
+                      <div className='space-y-1.5'>
+                        <label className='text-[10px] font-bold uppercase text-muted-foreground'>
+                          Temp: {refineSettings.temperature}
+                        </label>
+                        <input
+                          type='range'
+                          min='0'
+                          max='1'
+                          step='0.1'
+                          value={refineSettings.temperature}
+                          onChange={e =>
+                            setRefineSettings(prev => ({
+                              ...prev,
+                              temperature: parseFloat(e.target.value),
+                            }))
+                          }
+                          className='h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-secondary [&::-webkit-slider-thumb]:bg-primary'
+                          disabled={project.isGenerating}
+                        />
+                        <div className='flex justify-between px-0.5 text-[9px] text-muted-foreground'>
+                          <span>Focused</span>
+                          <span>Creative</span>
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="flex gap-2 w-full xl:w-auto">
-                        {/* Refine Button */}
-                        <button onClick={() => onRefineChapter(selectedChapter.id, refineSettings, content)} disabled={project.isGenerating || !content} className="flex-1 xl:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-md transition-all disabled:opacity-50 shadow-sm h-[34px]" data-testid="refine-chapter-btn">
-                        {project.isGenerating && selectedChapterId === selectedChapter.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />} Refine
+
+                    <div className='flex w-full gap-2 xl:w-auto'>
+                      {/* Refine Button */}
+                      <button
+                        onClick={() => onRefineChapter(selectedChapter.id, refineSettings, content)}
+                        disabled={project.isGenerating || !content}
+                        className='flex h-[34px] flex-1 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 disabled:opacity-50 xl:flex-none'
+                        data-testid='refine-chapter-btn'
+                      >
+                        {project.isGenerating && selectedChapterId === selectedChapter.id ? (
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                        ) : (
+                          <Wand2 className='h-4 w-4' />
+                        )}{' '}
+                        Refine
+                      </button>
+
+                      {/* Continue Button */}
+                      {onContinueChapter && (
+                        <button
+                          onClick={() => onContinueChapter(selectedChapter.id)}
+                          disabled={project.isGenerating}
+                          className='flex h-[34px] flex-1 items-center justify-center gap-2 rounded-md border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-all hover:bg-secondary/80 disabled:opacity-50 xl:flex-none'
+                          data-testid='continue-chapter-btn'
+                          title='Continue writing from current content'
+                        >
+                          {project.isGenerating && selectedChapterId === selectedChapter.id ? (
+                            <Loader2 className='h-4 w-4 animate-spin' />
+                          ) : (
+                            <Sparkles className='h-4 w-4 text-primary' />
+                          )}{' '}
+                          Continue
                         </button>
-                        
-                        {/* Continue Button */}
-                        {onContinueChapter && (
-                           <button onClick={() => onContinueChapter(selectedChapter.id)} disabled={project.isGenerating} className="flex-1 xl:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border rounded-md transition-all disabled:opacity-50 shadow-sm h-[34px]" data-testid="continue-chapter-btn" title="Continue writing from current content">
-                           {project.isGenerating && selectedChapterId === selectedChapter.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-primary" />} Continue
-                           </button>
-                        )}
+                      )}
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="flex-1 flex flex-col relative">
-                {!isFocusMode && <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block opacity-70">Chapter Content</label>}
+              <div className='relative flex flex-1 flex-col'>
+                {!isFocusMode && (
+                  <label className='mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground opacity-70'>
+                    Chapter Content
+                  </label>
+                )}
                 <textarea
-                  className={`flex-1 w-full p-4 bg-transparent rounded-md focus:outline-none font-serif text-lg leading-relaxed text-foreground resize-y transition-all ${isFocusMode ? 'border-none ring-0 shadow-none min-h-[80vh] text-xl' : 'border border-border/50 hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 shadow-inner min-h-[400px]'}`}
+                  className={`w-full flex-1 resize-y rounded-md bg-transparent p-4 font-serif text-lg leading-relaxed text-foreground transition-all focus:outline-none ${isFocusMode ? 'min-h-[80vh] border-none text-xl shadow-none ring-0' : 'min-h-[400px] border border-border/50 shadow-inner hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20'}`}
                   value={content}
                   onChange={handleContentChange}
-                  placeholder="Start writing or wait for the AI..."
-                  data-testid="chapter-content-input"
+                  placeholder='Start writing or wait for the AI...'
+                  data-testid='chapter-content-input'
                 />
               </div>
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground min-h-[300px]">
-            <div className="text-center">
-               <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-20" />
-               <p>Select a chapter or Project Overview.</p>
+          <div className='flex h-full min-h-[300px] items-center justify-center text-muted-foreground'>
+            <div className='text-center'>
+              <BookOpen className='mx-auto mb-4 h-12 w-12 opacity-20' />
+              <p>Select a chapter or Project Overview.</p>
             </div>
           </div>
         )}

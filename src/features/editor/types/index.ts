@@ -16,21 +16,26 @@ export const RefineOptionsSchema = z.object({
   temperature: z.number().min(0).max(2).default(0.7),
   maxTokens: z.number().int().min(100).max(8000).default(2000),
   topP: z.number().min(0).max(1).default(0.95),
-  focusAreas: z.array(z.enum([
-    'grammar',
-    'style',
-    'pacing',
-    'character_development',
-    'dialogue',
-    'description',
-    'plot_consistency',
-    'tone'
-  ])).default(['grammar', 'style']),
+  focusAreas: z
+    .array(
+      z.enum([
+        'grammar',
+        'style',
+        'pacing',
+        'character_development',
+        'dialogue',
+        'description',
+        'plot_consistency',
+        'tone',
+      ]),
+    )
+    .default(['grammar', 'style']),
   preserveLength: z.boolean().default(false),
-  targetTone: z.enum(['formal', 'casual', 'dramatic', 'humorous', 'mysterious']).optional()
+  targetTone: z.enum(['formal', 'casual', 'dramatic', 'humorous', 'mysterious']).optional(),
 });
 
 export type RefineOptions = z.infer<typeof RefineOptionsSchema>;
+export type AIModel = z.infer<typeof RefineOptionsSchema.shape.model>;
 
 // ============================================================================
 // Editor Content State
@@ -65,7 +70,7 @@ export interface EditorState extends EditorContent, EditorUIState {
   hasUnsavedChanges: boolean;
   lastSavedSummary: string;
   lastSavedContent: string;
-  comparisonVersions: [any, any] | null;
+  comparisonVersions: [EditorContent, EditorContent] | null;
   refineSettings: RefineOptions;
 }
 
@@ -73,7 +78,14 @@ export interface EditorState extends EditorContent, EditorUIState {
 // Image Generation
 // ============================================================================
 
-export const ImageStyleSchema = z.enum(['realistic', 'illustration', 'anime', 'sketch', 'watercolor', 'oil-painting']);
+export const ImageStyleSchema = z.enum([
+  'realistic',
+  'illustration',
+  'anime',
+  'sketch',
+  'watercolor',
+  'oil-painting',
+]);
 export const AspectRatioSchema = z.enum(['16:9', '4:3', '1:1', '9:16', '3:4']);
 
 export const ImageGenerationOptionsSchema = z.object({
@@ -81,7 +93,7 @@ export const ImageGenerationOptionsSchema = z.object({
   style: ImageStyleSchema.default('illustration'),
   aspectRatio: AspectRatioSchema.default('16:9'),
   negativePrompt: z.string().max(500).optional(),
-  seed: z.number().int().optional()
+  seed: z.number().int().optional(),
 });
 
 export type ImageGenerationOptions = z.infer<typeof ImageGenerationOptionsSchema>;
@@ -109,7 +121,7 @@ export type EditorAction =
   | { type: 'SET_GENERATING_IMAGE'; payload: boolean }
   | { type: 'TOGGLE_VERSION_HISTORY'; payload: boolean }
   | { type: 'TOGGLE_ANALYTICS'; payload: boolean }
-  | { type: 'SHOW_COMPARISON'; payload: [any, any] }
+  | { type: 'SHOW_COMPARISON'; payload: [EditorContent, EditorContent] }
   | { type: 'CLOSE_COMPARISON' }
   | { type: 'UPDATE_REFINE_SETTINGS'; payload: Partial<RefineOptions> }
   | { type: 'RESET' };
@@ -129,6 +141,21 @@ export interface DraftMetadata {
 export interface SavedDraft extends DraftMetadata {
   content: string;
   summary: string;
+}
+
+// ============================================================================
+// AI Generation Results
+// ============================================================================
+
+export interface OutlineChapter {
+  orderIndex: number;
+  title: string;
+  summary: string;
+}
+
+export interface OutlineResult {
+  title: string;
+  chapters: OutlineChapter[];
 }
 
 // ============================================================================

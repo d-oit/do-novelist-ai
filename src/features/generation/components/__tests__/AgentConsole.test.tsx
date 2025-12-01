@@ -123,4 +123,3 @@ describe('AgentConsole', () => {
     expect(result.isVisible).toBe(false);
   });
 });
-

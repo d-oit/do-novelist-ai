@@ -1,37 +1,52 @@
 import { useMemo } from 'react';
+
 import { characterValidationService } from '../../../lib/character-validation';
-import type { Character } from '../../../types/character-schemas';
-import type { CharacterValidationResult } from '../types';
+import { type Character } from '../../../types/character-schemas';
+import { type CharacterValidationResult } from '../types';
 
-export function useCharacterValidation(character: Character | null) {
-    const validationResult = useMemo<CharacterValidationResult | null>(() => {
-        if (!character) return null;
+export function useCharacterValidation(character: Character | null): CharacterValidationResult & {
+  validate: (character: Character) => CharacterValidationResult;
+} {
+  const validationResult = useMemo<CharacterValidationResult>(() => {
+    if (!character) {
+      return {
+        isValid: false,
+        score: 0,
+        issues: [],
+        strengths: [],
+      };
+    }
 
-        const result = characterValidationService.validate(character);
-
-        return {
-            isValid: result.isValid,
-            score: result.score,
-            strengths: result.strengths,
-            issues: result.issues.map(issue => ({
-                field: issue.path.join('.'),
-                message: issue.message,
-                severity: 'warning', // Default to warning as service doesn't provide severity
-                suggestion: undefined
-            }))
-        };
-    }, [character]);
-
-    const isValid = validationResult?.isValid ?? false;
-    const score = validationResult?.score ?? 0;
-    const issues = validationResult?.issues ?? [];
-    const strengths = validationResult?.strengths ?? [];
+    const result = characterValidationService.validate(character);
 
     return {
-        isValid,
-        score,
-        issues,
-        strengths,
-        validate: characterValidationService.validate.bind(characterValidationService)
+      isValid: result.isValid,
+      score: result.score,
+      strengths: result.strengths,
+      issues: result.issues.map(issue => ({
+        field: Array.isArray(issue.path) ? issue.path.join('.') : String(issue.path || ''),
+        message: issue.message,
+        severity: 'error' as const, // Zod validation errors are typically errors
+        suggestion: undefined,
+      })),
     };
+  }, [character]);
+
+  return {
+    ...validationResult,
+    validate: (character: Character): CharacterValidationResult => {
+      const result = characterValidationService.validate(character);
+      return {
+        isValid: result.isValid,
+        score: result.score,
+        strengths: result.strengths,
+        issues: result.issues.map(issue => ({
+          field: Array.isArray(issue.path) ? issue.path.join('.') : String(issue.path || ''),
+          message: issue.message,
+          severity: 'error' as const,
+          suggestion: undefined,
+        })),
+      };
+    },
+  };
 }
