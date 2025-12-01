@@ -311,7 +311,6 @@ export default tseslint.config(
         ...globals.es2022,
         ...globals.vitest,
         // Additional test globals
-        vi: 'readonly',
         describe: 'readonly',
         it: 'readonly',
         test: 'readonly',
