@@ -19,7 +19,6 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
-  errorInfo: ErrorInfo | null;
 }
 
 /**
@@ -34,7 +33,6 @@ export class ErrorBoundary extends Component<Props, State> {
     this.state = {
       hasError: false,
       error: null,
-      errorInfo: null,
     };
   }
 
@@ -42,12 +40,10 @@ export class ErrorBoundary extends Component<Props, State> {
     return {
       hasError: true,
       error,
-      errorInfo: null,
     };
   }
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    this.setState({ errorInfo });
 
     // Log error using error handler
     errorHandler.handle(error, {
@@ -91,7 +87,6 @@ export class ErrorBoundary extends Component<Props, State> {
       this.setState({
         hasError: false,
         error: null,
-        errorInfo: null,
       });
     } else {
       logger.error('Max retries exceeded', {
