@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
+import { ChapterStatus, PublishStatus } from '../../shared/types';
 
 import {
   ProjectSchema,
@@ -14,6 +15,7 @@ import {
   ProjectSettingsSchema,
   RefineOptionsSchema,
   isValidData,
+  type Project,
 } from '../schemas';
 
 describe('Schema Validation Tests', () => {
@@ -83,7 +85,7 @@ describe('Schema Validation Tests', () => {
         title: 'Chapter 1: The Beginning',
         summary: 'Our hero starts their journey.',
         content: 'Once upon a time, in a land far, far away...',
-        status: 'complete',
+        status: ChapterStatus.COMPLETE,
         wordCount: 2500,
         characterCount: 12500,
         estimatedReadingTime: 10,
@@ -322,7 +324,7 @@ describe('Schema Validation Tests', () => {
   });
 
   describe('ProjectSchema', () => {
-    let validProject: unknown;
+    let validProject: Project;
 
     beforeEach(() => {
       validProject = {
@@ -345,7 +347,7 @@ describe('Schema Validation Tests', () => {
           targetAudienceDefined: true,
         },
         isGenerating: false,
-        status: 'Draft',
+        status: PublishStatus.DRAFT,
         language: 'en',
         targetWordCount: 50000,
         settings: {
@@ -392,7 +394,7 @@ describe('Schema Validation Tests', () => {
           title: 'Chapter 1',
           summary: 'First chapter',
           content: 'Content here',
-          status: 'complete',
+          status: ChapterStatus.COMPLETE,
           wordCount: 1000,
           characterCount: 5000,
           estimatedReadingTime: 4,
@@ -416,7 +418,7 @@ describe('Schema Validation Tests', () => {
           title: 'Chapter 1',
           summary: 'First chapter',
           content: 'Content here',
-          status: 'complete',
+          status: ChapterStatus.COMPLETE,
           wordCount: 1000,
           characterCount: 5000,
           estimatedReadingTime: 4,
@@ -490,7 +492,7 @@ describe('Edge Cases and Error Handling', () => {
       throw new Error('Expected validation failure for malformed project data');
     }
 
-    expect(result.error).toContain('Validation failed');
+    expect((result as { success: false; error: string; issues: any[] }).error).toContain('Validation failed');
   });
 
   it('should provide detailed error messages', () => {
@@ -510,6 +512,6 @@ describe('Edge Cases and Error Handling', () => {
       throw new Error('Expected validation failure for invalid chapter data');
     }
 
-    expect(result.issues.length).toBeGreaterThan(0);
+    expect((result as { success: false; error: string; issues: any[] }).issues.length).toBeGreaterThan(0);
   });
 });

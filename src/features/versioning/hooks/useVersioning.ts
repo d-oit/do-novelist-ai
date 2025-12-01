@@ -24,8 +24,8 @@ export interface UseVersioningReturn {
 
   // Branch management
   createBranch: (name: string, description: string, parentVersionId: string) => Promise<Branch>;
-  switchBranch: (branchId: string) => Promise<boolean>;
-  mergeBranch: (sourceBranchId: string, targetBranchId: string) => Promise<boolean>;
+  switchBranch: (branchId: string) => boolean;
+  mergeBranch: (sourceBranchId: string, targetBranchId: string) => boolean;
   deleteBranch: (branchId: string) => Promise<boolean>;
 
   // Filtering & sorting

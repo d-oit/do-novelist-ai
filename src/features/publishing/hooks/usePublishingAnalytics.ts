@@ -48,11 +48,11 @@ export interface UsePublishingAnalyticsReturn {
   ) => Promise<Publication>;
   loadPublicationData: (publicationId: string) => Promise<void>;
   createGoal: (goal: Omit<PublishingGoals, 'id' | 'current'>) => Promise<PublishingGoals>;
-  connectPlatform: (platformId: string, credentials: Record<string, unknown>) => Promise<boolean>;
+  connectPlatform: (platformId: string, credentials: Record<string, unknown>) => boolean;
 
   // Data Loading
   refreshAnalytics: (publicationId: string) => Promise<void>;
-  loadTrends: (publicationId: string, days?: number) => Promise<void>;
+  loadTrends: (publicationId: string, days?: number) => void;
   loadFeedback: (publicationId: string, limit?: number) => Promise<void>;
 
   // Export & Sharing

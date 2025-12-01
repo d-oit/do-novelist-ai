@@ -12,12 +12,8 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react({
-        // Enable Fast Refresh for development
-        fastRefresh: true,
         // Configure JSX runtime for React 17+
         jsxRuntime: 'automatic',
-        // Enable HMR for CSS and other assets
-        devTarget: 'es2020',
       }),
     ],
     define: {

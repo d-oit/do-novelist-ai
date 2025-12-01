@@ -44,7 +44,8 @@ export function createCharacterId(
   name?: string,
   timestamp = Date.now(),
 ): CharacterId {
-  const safeName = (name?.length ?? 0) > 0 ? name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'char';
+  const safeName =
+    name != null && name.length > 0 ? name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'char';
   return `char_${safeName}_${timestamp}` as CharacterId;
 }
 

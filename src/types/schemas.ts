@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 
-import { ChapterStatus, PublishStatus } from '../shared/types';
+import { ChapterStatus, PublishStatus, AgentMode } from '../shared/types';
 
 // Re-export enums for convenience
 export { ChapterStatus, PublishStatus };
@@ -414,7 +414,7 @@ export function transformAndValidate<TInput, TOutput>(
 ): { success: true; data: TOutput } | { success: false; error: string; issues: z.ZodIssue[] } {
   const inputValidation = validateData(inputSchema, data, 'input');
   if (!inputValidation.success) {
-    return inputValidation;
+    return inputValidation as { success: false; error: string; issues: z.ZodIssue[] };
   }
 
   try {

@@ -52,7 +52,7 @@ export const storage = {
     if (!isClient) return defaultValue;
     try {
       const item = localStorage.getItem(key);
-      return (item?.length ?? 0) > 0 ? JSON.parse(item) : defaultValue;
+      return item !== null && item.length > 0 ? JSON.parse(item) : defaultValue;
     } catch {
       return defaultValue;
     }

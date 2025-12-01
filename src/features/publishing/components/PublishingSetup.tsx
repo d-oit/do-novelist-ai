@@ -321,16 +321,14 @@ const PublishingSetup: React.FC<PublishingSetupProps> = ({
 
               <div className='mt-6 flex gap-2'>
                 <Button
-                  onClick={() =>
-                    void (async (): Promise<void> => {
-                      // Mock connection - in real app this would test actual credentials
-                      await analytics.connectPlatform(configuringPlatform.id, {
-                        apiKey: 'mock-key',
-                        username: 'mock-user',
-                      });
-                      setConfiguringPlatform(null);
-                    })()
-                  }
+                  onClick={() => {
+                    // Mock connection - in real app this would test actual credentials
+                    analytics.connectPlatform(configuringPlatform.id, {
+                      apiKey: 'mock-key',
+                      username: 'mock-user',
+                    });
+                    setConfiguringPlatform(null);
+                  }}
                   className='flex-1'
                 >
                   Connect Platform

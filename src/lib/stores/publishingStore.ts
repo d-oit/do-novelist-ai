@@ -40,13 +40,13 @@ interface PublishingState {
   publishProject: (
     project: Project,
     platformIds: string[],
-    metadata: Record<string, unknown>,
+    metadata: Publication['metadata'],
   ) => Promise<Publication>;
   loadPublicationData: (publicationId: string) => Promise<void>;
-  loadTrends: (publicationId: string, days?: number) => Promise<void>;
+  loadTrends: (publicationId: string, days?: number) => void;
   loadFeedback: (publicationId: string, limit?: number) => Promise<void>;
   createGoal: (goalData: Omit<PublishingGoals, 'id' | 'current'>) => Promise<PublishingGoals>;
-  connectPlatform: (platformId: string, credentials: Record<string, unknown>) => Promise<boolean>;
+  connectPlatform: (platformId: string, credentials: Record<string, unknown>) => boolean;
 
   // Alert Management
   addAlert: (alert: PublishingAlert) => void;
@@ -250,20 +250,24 @@ export const usePublishingStore = create<PublishingState>()(
         },
 
         // Alert Management
-        addAlert: (alert): void => set(state => ({ alerts: [alert, ...state.alerts] })),
+        addAlert: (alert: PublishingAlert): void => {
+          set(state => ({ alerts: [alert, ...state.alerts] }));
+        },
 
-        markAlertAsRead: (alertId): void =>
+        markAlertAsRead: (alertId: string): void => {
           set(state => ({
             alerts: state.alerts.map(a => (a.id === alertId ? { ...a, isRead: true } : a)),
-          })),
+          }));
+        },
 
-        dismissAlert: (alertId): void =>
+        dismissAlert: (alertId: string): void => {
           set(state => ({
             alerts: state.alerts.filter(a => a.id !== alertId),
-          })),
+          }));
+        },
 
         // Reset
-        reset: (): void =>
+        reset: (): void => {
           set({
             publications: [],
             currentPublication: null,
@@ -279,7 +283,8 @@ export const usePublishingStore = create<PublishingState>()(
             isLoading: false,
             isPublishing: false,
             error: null,
-          }),
+          });
+        },
       }),
       {
         name: 'publishing-store',
