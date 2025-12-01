@@ -16,7 +16,7 @@ export function cn(...inputs: ClassValue[]): string {
 export function getUserId(): string {
   const userId = localStorage.getItem('novelist_user_id');
   if (userId == null || userId === '') {
-    const newUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newUserId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     localStorage.setItem('novelist_user_id', newUserId);
     return newUserId;
   }
