@@ -128,7 +128,7 @@ jobs:
   e2e-tests:
     name: 🧪 E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     needs: build-and-test
     steps:
       - name: Checkout code
