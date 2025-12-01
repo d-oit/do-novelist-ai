@@ -13,7 +13,7 @@ concurrency:
 
 env:
   FORCE_COLOR: 1
-  NODE_OPTIONS: '--max-old-space-size=4096'
+  NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
   # Security: Dependency Review (GitHub Official)
@@ -74,8 +74,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Cache pnpm dependencies
         uses: actions/cache@v4
@@ -142,8 +142,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -168,10 +168,18 @@ jobs:
       - name: Run Playwright tests
         run: |
           if grep -q "playwright" package.json; then
-            pnpm exec playwright test
+            # Set test environment variables and run tests
+            CI=true pnpm exec playwright test
           else
             echo "Playwright not configured, skipping E2E tests"
           fi
+        env:
+          # Use test values for E2E tests
+          VITE_AI_GATEWAY_API_KEY: "test-gateway-key"
+          VITE_DEFAULT_AI_PROVIDER: "mistral"
+          VITE_DEFAULT_AI_MODEL: "mistral:mistral-medium-latest"
+          VITE_TURSO_DATABASE_URL: "test-url"
+          VITE_TURSO_AUTH_TOKEN: "test-token"
 
       - name: Upload Playwright report
         if: always()
