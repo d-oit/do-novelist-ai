@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { Project, ChapterStatus, PublishStatus } from '../../../types';
@@ -13,7 +13,9 @@ const mockUseAnalytics = vi.mocked(useAnalytics);
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    div: ({ children, whileHover, initial, animate, exit, transition, ...props }: any) => (
+      <div {...props}>{children}</div>
+    ),
     circle: ({ children, ...props }: any) => <circle {...props}>{children}</circle>,
     button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
   },
@@ -41,7 +43,7 @@ const createChapter = (
   id: string,
   title: string,
   status: (typeof ChapterStatus)[keyof typeof ChapterStatus],
-  orderIndex: number
+  orderIndex: number,
 ) => ({
   id,
   orderIndex,
@@ -242,8 +244,13 @@ describe('AnalyticsDashboard', () => {
     expect(screen.getByText('Loading analytics dashboard...')).toBeInTheDocument();
   });
 
-  it('loads analytics data on mount', () => {
+  it('loads analytics data on mount', async () => {
     render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+
+    // Wait for async operations to complete
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
 
     expect(mockAnalyticsHook.loadProjectAnalytics).toHaveBeenCalledWith(mockProject);
     expect(mockAnalyticsHook.loadWeeklyStats).toHaveBeenCalled();
@@ -266,11 +273,16 @@ describe('AnalyticsDashboard', () => {
     expect(screen.getByText("This Week's Performance")).toBeInTheDocument();
   });
 
-  it('can refresh analytics data', () => {
+  it('can refresh analytics data', async () => {
     render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     const refreshButton = screen.getByText('Refresh');
-    fireEvent.click(refreshButton);
+
+    await act(async () => {
+      fireEvent.click(refreshButton);
+      // Wait for the async refreshData function to complete
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
 
     // Should call all load functions again
     expect(mockAnalyticsHook.loadProjectAnalytics).toHaveBeenCalledTimes(2);
@@ -302,7 +314,12 @@ describe('AnalyticsDashboard', () => {
     render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     const exportButton = screen.getByText('Export');
-    fireEvent.click(exportButton);
+
+    await act(async () => {
+      fireEvent.click(exportButton);
+      // Wait for the async exportData function to complete
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
 
     expect(mockAnalyticsHook.exportAnalytics).toHaveBeenCalledWith('json');
 

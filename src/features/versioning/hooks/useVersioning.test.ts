@@ -224,6 +224,7 @@ describe('useVersioning', () => {
     });
 
     expect(mockVersioningService.createBranch).toHaveBeenCalledWith(
+      'test-chapter',
       'feature-branch',
       'A new feature branch',
       'version-1',

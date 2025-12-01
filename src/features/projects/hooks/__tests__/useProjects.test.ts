@@ -308,6 +308,7 @@ describe('useProjects', () => {
 
     await act(async () => {
       await result.current.loadAll();
+      result.current.select(existingProject.id);
       result.current.loadStats();
     });
 

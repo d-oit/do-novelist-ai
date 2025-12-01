@@ -17,8 +17,8 @@ import {
   Filter,
 } from 'lucide-react';
 import { useWorldBuilding } from '../hooks/useWorldBuilding';
-import { Card } from '@/shared/components/card';
-import { Button } from '@/shared/components/button';
+import { Card } from '@shared/components/card';
+import { Button } from '@shared/components/button';
 
 interface WorldBuildingDashboardProps {
   projectId: string;

@@ -8,8 +8,8 @@ import { Plus, MapPin, Edit } from 'lucide-react';
 import { useWorldBuilding } from '../hooks/useWorldBuilding';
 import { WorldElementEditor } from './WorldElementEditor';
 import type { Location } from '../types';
-import { Button } from '@/shared/components/button';
-import { Card } from '@/shared/components/card';
+import { Button } from '@shared/components/button';
+import { Card } from '@shared/components/card';
 
 interface LocationManagerProps {
   projectId: string;
