@@ -50,8 +50,11 @@ class PublishingAnalyticsService {
     },
   ];
 
-  static getInstance(): PublishingAnalyticsService {
-    if (!PublishingAnalyticsService.instance) {
+  public static getInstance(): PublishingAnalyticsService {
+    if (
+      PublishingAnalyticsService.instance === null ||
+      PublishingAnalyticsService.instance === undefined
+    ) {
       PublishingAnalyticsService.instance = new PublishingAnalyticsService();
     }
     return PublishingAnalyticsService.instance;
@@ -61,13 +64,14 @@ class PublishingAnalyticsService {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
+      request.onsuccess = (): void => {
         this.db = request.result;
         resolve();
       };
 
-      request.onupgradeneeded = event => {
+      request.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Publications store
@@ -108,7 +112,7 @@ class PublishingAnalyticsService {
   public async publishProject(
     project: Project,
     platforms: string[],
-    metadata: any,
+    metadata: Publication['metadata'],
   ): Promise<Publication> {
     if (!this.db) await this.init();
 
@@ -248,10 +252,10 @@ class PublishingAnalyticsService {
     return aggregatedAnalytics;
   }
 
-  public async getEngagementMetrics(
+  public getEngagementMetrics(
     publicationId: string,
     timeframe: { start: Date; end: Date },
-  ): Promise<EngagementMetrics> {
+  ): EngagementMetrics {
     // In real implementation, this would fetch from various platform APIs
     const mockMetrics: EngagementMetrics = {
       publicationId,
@@ -280,26 +284,28 @@ class PublishingAnalyticsService {
 
   public async getReaderFeedback(publicationId: string, limit = 50): Promise<ReaderFeedback[]> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['feedback'], 'readonly');
+      const transaction = this.db.transaction(['feedback'], 'readonly');
       const store = transaction.objectStore('feedback');
       const index = store.index('publicationId');
       const request = index.getAll(publicationId);
 
-      request.onsuccess = () => {
-        const feedback = request.result
+      request.onsuccess = (): void => {
+        const feedback = (request.result as ReaderFeedback[])
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
           .slice(0, limit);
         resolve(feedback);
       };
-      request.onerror = () => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
   public async getReaderInsights(publicationId: string): Promise<ReaderInsights> {
     const analytics = await this.getPublicationAnalytics(publicationId);
-    const engagement = await this.getEngagementMetrics(publicationId, {
+    const engagement = this.getEngagementMetrics(publicationId, {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
       end: new Date(),
     });
@@ -349,33 +355,37 @@ class PublishingAnalyticsService {
     };
 
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['publishingGoals'], 'readwrite');
+      const transaction = this.db.transaction(['publishingGoals'], 'readwrite');
       const store = transaction.objectStore('publishingGoals');
       const request = store.add(newGoal);
 
-      request.onsuccess = () => resolve(newGoal);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve(newGoal);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
   public async getPublishingGoals(publicationId: string): Promise<PublishingGoals[]> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['publishingGoals'], 'readonly');
+      const transaction = this.db.transaction(['publishingGoals'], 'readonly');
       const store = transaction.objectStore('publishingGoals');
       const index = store.index('publicationId');
       const request = index.getAll(publicationId);
 
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve(request.result);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
   // Trends and Predictions
-  public async getPublishingTrends(_publicationId: string, days = 30): Promise<PublishingTrends> {
+  public getPublishingTrends(_publicationId: string, days = 30): PublishingTrends {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - days);
@@ -411,20 +421,22 @@ class PublishingAnalyticsService {
   // Alerts and Notifications
   public async getPublishingAlerts(limit = 20): Promise<PublishingAlert[]> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['alerts'], 'readonly');
+      const transaction = this.db.transaction(['alerts'], 'readonly');
       const store = transaction.objectStore('alerts');
       const index = store.index('timestamp');
       const request = index.getAll();
 
-      request.onsuccess = () => {
-        const alerts = request.result
+      request.onsuccess = (): void => {
+        const alerts = (request.result as PublishingAlert[])
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
           .slice(0, limit);
         resolve(alerts);
       };
-      request.onerror = () => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -467,7 +479,10 @@ class PublishingAnalyticsService {
   }
 
   // Platform Integration
-  public async connectPlatform(platformId: string, credentials: any): Promise<boolean> {
+  public connectPlatform(
+    platformId: string,
+    credentials: PublishingPlatform['credentials'],
+  ): boolean {
     const platform = this.mockPlatforms.find(p => p.id === platformId);
     if (!platform) return false;
 
@@ -478,38 +493,42 @@ class PublishingAnalyticsService {
     return true;
   }
 
-  public async getConnectedPlatforms(): Promise<PublishingPlatform[]> {
+  public getConnectedPlatforms(): PublishingPlatform[] {
     return this.mockPlatforms.filter(p => p.isConnected);
   }
 
-  public async getAllPlatforms(): Promise<PublishingPlatform[]> {
+  public getAllPlatforms(): PublishingPlatform[] {
     return [...this.mockPlatforms];
   }
 
   // Private helper methods
   private async savePublication(publication: Publication): Promise<void> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['publications'], 'readwrite');
+      const transaction = this.db.transaction(['publications'], 'readwrite');
       const store = transaction.objectStore('publications');
       const request = store.put(publication);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
   private async getPublication(publicationId: string): Promise<Publication | null> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['publications'], 'readonly');
+      const transaction = this.db.transaction(['publications'], 'readonly');
       const store = transaction.objectStore('publications');
       const request = store.get(publicationId);
 
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve((request.result as Publication) ?? null);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -547,14 +566,16 @@ class PublishingAnalyticsService {
 
   private async saveFeedback(feedback: ReaderFeedback): Promise<void> {
     if (!this.db) await this.init();
+    if (!this.db) throw new Error('Database not initialized');
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction(['feedback'], 'readwrite');
+      const transaction = this.db.transaction(['feedback'], 'readwrite');
       const store = transaction.objectStore('feedback');
       const request = store.put(feedback);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -705,7 +726,7 @@ class PublishingAnalyticsService {
       date.setDate(date.getDate() - i);
 
       metrics.push({
-        date: date.toISOString().split('T')[0]!,
+        date: date.toISOString().split('T')[0],
         views: Math.floor(Math.random() * 200) + 50,
         engagement: Math.random() * 100,
         rating: 3.5 + Math.random() * 1.5,
@@ -714,7 +735,7 @@ class PublishingAnalyticsService {
     return metrics.reverse();
   }
 
-  private convertToCSV(data: any): string {
+  private convertToCSV(data: Record<string, unknown>): string {
     // Simple CSV conversion - would be more sophisticated in real implementation
     return Object.entries(data)
       .map(([key, value]) => `${key},${JSON.stringify(value)}`)
@@ -724,7 +745,7 @@ class PublishingAnalyticsService {
   /**
    * Track campaign performance data
    */
-  public async trackCampaignPerformance(
+  public trackCampaignPerformance(
     campaignId: string,
     metrics: {
       impressions: number;
@@ -732,7 +753,7 @@ class PublishingAnalyticsService {
       conversions: number;
       spend: number;
     },
-  ): Promise<void> {
+  ): void {
     try {
       console.log(`Tracking campaign ${campaignId}:`, metrics);
       // Store metrics data - implementation would go here
@@ -745,7 +766,7 @@ class PublishingAnalyticsService {
   /**
    * Generate publishing insights
    */
-  public async generateInsights(_publicationId: string): Promise<any[]> {
+  public generateInsights(_publicationId: string): PublishingInsights[] {
     try {
       return [
         {
@@ -767,15 +788,17 @@ class PublishingAnalyticsService {
   public async getPublications(projectId: string): Promise<Publication[]> {
     try {
       if (!this.db) await this.init();
+      if (!this.db) throw new Error('Database not initialized');
 
       return new Promise((resolve, reject) => {
-        const transaction = this.db!.transaction(['publications'], 'readonly');
+        const transaction = this.db.transaction(['publications'], 'readonly');
         const store = transaction.objectStore('publications');
         const index = store.index('projectId');
         const request = index.getAll(projectId);
 
-        request.onsuccess = () => resolve(request.result as Publication[]);
-        request.onerror = () => reject(request.error);
+        request.onsuccess = (): void => resolve(request.result as Publication[]);
+        request.onerror = (): void =>
+          reject(new Error(request.error?.message ?? 'Database operation failed'));
       });
     } catch (error) {
       console.error('Failed to get publications:', error);

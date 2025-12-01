@@ -48,13 +48,13 @@ const PublishingSetup: React.FC<PublishingSetupProps> = ({
     setSelectedPlatforms(connected);
   }, [analytics.connectedPlatforms]);
 
-  const togglePlatform = (platformId: string) => {
+  const togglePlatform = (platformId: string): void => {
     setSelectedPlatforms(prev =>
-      prev.includes(platformId) ? prev.filter(id => id !== platformId) : [...prev, platformId]
+      prev.includes(platformId) ? prev.filter(id => id !== platformId) : [...prev, platformId],
     );
   };
 
-  const handlePublish = async (metadata: any) => {
+  const handlePublish = async (metadata: Publication['metadata']): Promise<void> => {
     if (selectedPlatforms.length === 0) {
       alert('Please select at least one platform to publish to.');
       return;
@@ -71,18 +71,18 @@ const PublishingSetup: React.FC<PublishingSetupProps> = ({
   };
 
   const selectedConnectedPlatforms = selectedPlatforms.filter(id =>
-    analytics.connectedPlatforms.some(p => p.id === id)
+    analytics.connectedPlatforms.some(p => p.id === id),
   );
 
   const selectedUnconnectedPlatforms = selectedPlatforms.filter(
-    id => !analytics.connectedPlatforms.some(p => p.id === id)
+    id => !analytics.connectedPlatforms.some(p => p.id === id),
   );
 
   return (
     <motion.div
       className={cn(
         'flex h-full flex-col overflow-hidden rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm',
-        className
+        className,
       )}
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -143,7 +143,11 @@ const PublishingSetup: React.FC<PublishingSetupProps> = ({
                   <div className='flex items-center gap-2'>
                     <CheckCircle2 className='h-4 w-4 text-green-500' />
                     <span>
-                      {project.chapters.filter(ch => ch.status === ChapterStatus.COMPLETE).length}{' '}
+                      {
+                        project.chapters.filter(
+                          ch => (ch.status as ChapterStatus) === ChapterStatus.COMPLETE,
+                        ).length
+                      }{' '}
                       complete
                     </span>
                   </div>
@@ -243,7 +247,7 @@ const PublishingSetup: React.FC<PublishingSetupProps> = ({
       <AnimatePresence>
         {showMetadataForm && (
           <PublishingMetadataForm
-            onSubmit={handlePublish}
+            onSubmit={metadata => void handlePublish(metadata)}
             onCancel={() => setShowMetadataForm(false)}
             isSubmitting={analytics.isPublishing}
           />
@@ -295,14 +299,16 @@ const PublishingSetup: React.FC<PublishingSetupProps> = ({
 
               <div className='mt-6 flex gap-2'>
                 <Button
-                  onClick={async () => {
-                    // Mock connection - in real app this would test actual credentials
-                    await analytics.connectPlatform(configuringPlatform.id, {
-                      apiKey: 'mock-key',
-                      username: 'mock-user',
-                    });
-                    setConfiguringPlatform(null);
-                  }}
+                  onClick={() =>
+                    void (async () => {
+                      // Mock connection - in real app this would test actual credentials
+                      await analytics.connectPlatform(configuringPlatform.id, {
+                        apiKey: 'mock-key',
+                        username: 'mock-user',
+                      });
+                      setConfiguringPlatform(null);
+                    })()
+                  }
                   className='flex-1'
                 >
                   Connect Platform

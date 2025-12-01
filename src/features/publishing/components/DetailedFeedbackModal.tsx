@@ -19,7 +19,7 @@ export const DetailedFeedbackModal: React.FC<DetailedFeedbackModalProps> = ({
 }) => {
   if (!feedback) return null;
 
-  const getSentimentIcon = (sentiment: string) => {
+  const getSentimentIcon = (sentiment: string): JSX.Element => {
     switch (sentiment.toLowerCase()) {
       case 'positive':
         return <ThumbsUp className='h-5 w-5 text-green-600' />;
@@ -30,7 +30,7 @@ export const DetailedFeedbackModal: React.FC<DetailedFeedbackModalProps> = ({
     }
   };
 
-  const getSentimentColor = (sentiment: string) => {
+  const getSentimentColor = (sentiment: string): string => {
     switch (sentiment.toLowerCase()) {
       case 'positive':
         return 'border-green-500/20 bg-green-500/5';
@@ -109,7 +109,7 @@ export const DetailedFeedbackModal: React.FC<DetailedFeedbackModalProps> = ({
                   </div>
 
                   {/* Topics as Tags */}
-                  {feedback.topics && feedback.topics.length > 0 && (
+                  {feedback.topics.length > 0 && (
                     <div>
                       <h4 className='mb-2 font-medium'>Topics</h4>
                       <div className='flex flex-wrap gap-2'>
@@ -131,28 +131,30 @@ export const DetailedFeedbackModal: React.FC<DetailedFeedbackModalProps> = ({
                     <div className='text-sm text-gray-600 dark:text-gray-400'>
                       <div>Platform: {feedback.platformId}</div>
                       <div>Type: {feedback.type}</div>
-                      {feedback.chapterReference && <div>Chapter: {feedback.chapterReference}</div>}
+                      {(feedback.chapterReference?.length ?? 0) > 0 && (
+                        <div>Chapter: {feedback.chapterReference}</div>
+                      )}
                     </div>
                   </div>
 
                   {/* Additional Metadata */}
-                  {feedback.author.isVerified && (
-                    <div>
-                      <h4 className='mb-2 font-medium'>Status</h4>
-                      <div className='text-sm text-green-600 dark:text-green-400'>
-                        ✓ Verified Reader
+                  {feedback.author.isVerified !== null &&
+                    feedback.author.isVerified !== undefined &&
+                    feedback.author.isVerified && (
+                      <div>
+                        <h4 className='mb-2 font-medium'>Status</h4>
+                        <div className='text-sm text-green-600 dark:text-green-400'>
+                          ✓ Verified Reader
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* Engagement Info */}
                   <div>
                     <h4 className='mb-2 font-medium'>Engagement</h4>
                     <div className='text-sm text-gray-600 dark:text-gray-400'>
                       <div>Likes: {feedback.likes}</div>
-                      {feedback.replies && feedback.replies.length > 0 && (
-                        <div>Replies: {feedback.replies.length}</div>
-                      )}
+                      {feedback.replies.length > 0 && <div>Replies: {feedback.replies.length}</div>}
                       <div>Visibility: {feedback.isPublic ? 'Public' : 'Private'}</div>
                     </div>
                   </div>

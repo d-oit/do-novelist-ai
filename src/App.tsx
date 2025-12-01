@@ -9,6 +9,9 @@ const ProjectDashboard = lazy(() => import('./components/ProjectDashboardOptimiz
 const ProjectWizard = lazy(() => import('./features/projects/components/ProjectWizard'));
 const ProjectsView = lazy(() => import('./features/projects/components/ProjectsView'));
 const SettingsView = lazy(() => import('./features/settings/components/SettingsView'));
+const WorldBuildingDashboard = lazy(
+  () => import('./features/world-building/components/WorldBuildingDashboard'),
+);
 
 import { useGoapEngine } from './features/editor/hooks/useGoapEngine';
 
@@ -65,7 +68,7 @@ const INITIAL_PROJECT: Project = {
   changeLog: [],
 };
 
-type ViewMode = 'dashboard' | 'projects' | 'settings';
+type ViewMode = 'dashboard' | 'projects' | 'settings' | 'world-building';
 
 const App: React.FC = () => {
   const [project, setProject] = useState<Project>(INITIAL_PROJECT);
@@ -112,7 +115,7 @@ const App: React.FC = () => {
       title,
       style: style as Project['style'],
       idea,
-      targetWordCount: targetWordCount || 50000,
+      targetWordCount: targetWordCount ?? 50000,
       genre: [],
       targetAudience: 'adult',
       createdAt: new Date(),
@@ -261,6 +264,11 @@ const App: React.FC = () => {
                 }}
                 onNavigate={setCurrentView}
               />
+            </div>
+          )}
+          {currentView === 'world-building' && (
+            <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+              <WorldBuildingDashboard projectId={project.id} />
             </div>
           )}
           {currentView === 'settings' && (

@@ -322,9 +322,9 @@ export interface WritingAssistantState {
 export interface WritingAssistantActions {
   toggleAssistant: () => void;
   analyzeContent: (content: string, chapterId: string) => Promise<void>;
-  applySuggestion: (suggestionId: string) => void;
-  dismissSuggestion: (suggestionId: string) => void;
-  updateConfig: (config: Partial<WritingAssistantConfig>) => void;
+  applySuggestion: (suggestionId: string) => Promise<void>;
+  dismissSuggestion: (suggestionId: string) => Promise<void>;
+  updateConfig: (config: Partial<WritingAssistantConfig>) => Promise<void>;
 
   // UI Actions
   selectSuggestion: (suggestionId: string) => void;

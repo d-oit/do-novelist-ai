@@ -23,7 +23,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { cn } from '../../../lib/utils';
-import { writingAssistantDb } from '../services/writingAssistantDb';
+import { writingAssistantDb, type WritingProgressMetrics } from '../services/writingAssistantDb';
 
 interface WritingAnalyticsDashboardProps {
   projectId: string;
@@ -32,7 +32,7 @@ interface WritingAnalyticsDashboardProps {
 }
 
 interface AnalyticsData {
-  progressMetrics: any[];
+  progressMetrics: WritingProgressMetrics[];
   improvementTrends: {
     readabilityTrend: number;
     engagementTrend: number;
@@ -72,7 +72,7 @@ const MetricCard: React.FC<{
           <div
             className={cn(
               'flex items-center gap-1 text-sm',
-              change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : 'text-gray-600'
+              change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : 'text-gray-600',
             )}
           >
             {change > 0 ? (
@@ -86,7 +86,9 @@ const MetricCard: React.FC<{
         )}
       </div>
       <div className='mb-1 text-2xl font-bold text-gray-900 dark:text-gray-100'>{value}</div>
-      {description && <p className='text-sm text-gray-600 dark:text-gray-400'>{description}</p>}
+      {(description?.length ?? 0) > 0 && (
+        <p className='text-sm text-gray-600 dark:text-gray-400'>{description}</p>
+      )}
     </Card>
   );
 };
@@ -124,7 +126,7 @@ const TrendChart: React.FC<{
                 ? 'text-green-600'
                 : item.change < 0
                   ? 'text-red-600'
-                  : 'text-gray-600'
+                  : 'text-gray-600',
             )}
           >
             {item.change > 0 ? (
@@ -180,10 +182,10 @@ export const WritingAnalyticsDashboard: React.FC<WritingAnalyticsDashboardProps>
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
   useEffect(() => {
-    const loadAnalytics = async () => {
+    const loadAnalytics = () => {
       setLoading(true);
       try {
-        const data = await writingAssistantDb.getWritingAnalytics(projectId, timeRange);
+        const data = writingAssistantDb.getWritingAnalytics(projectId, timeRange);
         setAnalyticsData(data);
       } catch (error) {
         console.error('Failed to load analytics:', error);
@@ -207,7 +209,7 @@ export const WritingAnalyticsDashboard: React.FC<WritingAnalyticsDashboardProps>
     };
 
     if (projectId) {
-      loadAnalytics();
+      void loadAnalytics();
     }
   }, [projectId, timeRange]);
 
@@ -337,7 +339,7 @@ export const WritingAnalyticsDashboard: React.FC<WritingAnalyticsDashboardProps>
             analyticsData.suggestionInsights.mostHelpfulCategories.length > 0
               ? analyticsData.suggestionInsights.mostHelpfulCategories.map(
                   cat =>
-                    `${cat.charAt(0).toUpperCase() + cat.slice(1)} suggestions are frequently accepted`
+                    `${cat.charAt(0).toUpperCase() + cat.slice(1)} suggestions are frequently accepted`,
                 )
               : ['Keep using the assistant to see patterns']
           }

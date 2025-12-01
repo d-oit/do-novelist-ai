@@ -18,9 +18,9 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
   const [targetLang, setTargetLang] = useState('Spanish');
 
   // Settings Helpers
-  const settings = project.settings || { enableDropCaps: true };
+  const settings = project.settings ?? { enableDropCaps: true };
 
-  const handleUpdateSettings = (newSettings: Partial<typeof settings>) => {
+  const handleUpdateSettings = (newSettings: Partial<typeof settings>): void => {
     onUpdateProject({
       settings: { ...settings, ...newSettings },
     });
@@ -33,13 +33,13 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
       (ch.content
         .trim()
         .split(/\s+/)
-        .filter(w => w.length > 0).length || 0),
-    0
+        .filter(w => w.length > 0).length ?? 0),
+    0,
   );
-  const targetWords = project.targetWordCount || 50000;
+  const targetWords = project.targetWordCount ?? 50000;
   const progress = Math.min(100, Math.round((totalWords / targetWords) * 100));
 
-  const handleDownloadEpub = async () => {
+  const handleDownloadEpub = async (): Promise<void> => {
     setIsExporting(true);
     try {
       const blob = await generateEpub(project, settings.enableDropCaps);
@@ -58,10 +58,10 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
     }
   };
 
-  const handleTranslate = async () => {
+  const handleTranslate = async (): Promise<void> => {
     if (
       !confirm(
-        `This will overwrite the content of your chapters with a ${targetLang} translation. It is recommended to duplicate your project first (Not implemented). Proceed?`
+        `This will overwrite the content of your chapters with a ${targetLang} translation. It is recommended to duplicate your project first (Not implemented). Proceed?`,
       )
     )
       return;
@@ -149,7 +149,7 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
                   className='mt-1 w-full rounded border border-border bg-secondary/20 px-3 py-2 text-sm focus:border-primary focus:outline-none'
                   value={targetWords}
                   onChange={e =>
-                    onUpdateProject({ targetWordCount: parseInt(e.target.value) || 0 })
+                    onUpdateProject({ targetWordCount: parseInt(e.target.value) ?? 0 })
                   }
                 />
               </div>
@@ -208,7 +208,7 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
               </div>
 
               <button
-                onClick={handleTranslate}
+                onClick={() => void handleTranslate()}
                 disabled={isTranslating}
                 className='flex w-full items-center justify-center gap-2 rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80'
               >
@@ -251,7 +251,7 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
               </div>
 
               <button
-                onClick={handleDownloadEpub}
+                onClick={() => void handleDownloadEpub()}
                 disabled={isExporting}
                 className='flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-md transition-colors hover:opacity-90'
               >

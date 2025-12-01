@@ -58,7 +58,7 @@ export const PublishingMetadataForm: React.FC<PublishingMetadataFormProps> = ({
     visibility: 'public',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     onSubmit({
       ...formData,
@@ -70,7 +70,7 @@ export const PublishingMetadataForm: React.FC<PublishingMetadataFormProps> = ({
     });
   };
 
-  const toggleGenre = (genre: string) => {
+  const toggleGenre = (genre: string): void => {
     setFormData(prev => ({
       ...prev,
       genres: prev.genres.includes(genre)
@@ -132,7 +132,7 @@ export const PublishingMetadataForm: React.FC<PublishingMetadataFormProps> = ({
                       'rounded border p-2 text-sm transition-colors disabled:opacity-50',
                       formData.genres.includes(genre)
                         ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border bg-background hover:bg-secondary'
+                        : 'border-border bg-background hover:bg-secondary',
                     )}
                   >
                     {genre}

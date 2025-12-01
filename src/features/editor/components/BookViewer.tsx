@@ -181,7 +181,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
 
         // Auto-save version if there's substantial content change
         if (selectedChapter && content && content !== lastSavedContent && content.length > 50) {
-          saveVersion('auto');
+          void saveVersion('auto');
         }
       }
     }, 3000);
@@ -274,7 +274,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
     });
 
     // Save a restore version
-    saveVersion('restore', `Restored version: ${restoredChapter.title}`);
+    void saveVersion('restore', `Restored version: ${restoredChapter.title}`);
   };
 
   return (
@@ -495,7 +495,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                 </div>
 
                 <button
-                  onClick={handleGenerateIllustration}
+                  onClick={() => void handleGenerateIllustration()}
                   disabled={state.isGeneratingImage || project.isGenerating}
                   className='absolute right-3 top-3 rounded-lg border border-white/10 bg-black/40 p-2 text-white opacity-0 backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-black/60 disabled:opacity-0 group-hover:opacity-100'
                   title='Regenerate Illustration'
@@ -691,7 +691,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                         </button>
                       )}
                       <button
-                        onClick={handleGenerateIllustration}
+                        onClick={() => void handleGenerateIllustration()}
                         disabled={state.isGeneratingImage || project.isGenerating}
                         className='flex h-[36px] flex-1 items-center justify-center gap-2 rounded-md border border-violet-500/20 bg-violet-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-violet-500 shadow-sm transition-all hover:bg-violet-500/20 disabled:opacity-50 xl:flex-none'
                         title='Generate Scene Illustration'
@@ -705,7 +705,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                       </button>
 
                       <button
-                        onClick={() => saveVersion('manual')}
+                        onClick={() => void saveVersion('manual')}
                         disabled={project.isGenerating || !state.content}
                         className='flex h-[36px] flex-1 items-center justify-center gap-2 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-emerald-600 shadow-sm transition-all hover:bg-emerald-500/20 disabled:opacity-50 xl:flex-none'
                         title='Save Version Checkpoint'

@@ -14,7 +14,7 @@ export function cn(...inputs: ClassValue[]): string {
  */
 export function debounce<T extends (...args: Array<unknown>) => unknown>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
 
@@ -52,7 +52,7 @@ export const storage = {
     if (!isClient) return defaultValue;
     try {
       const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
+      return (item?.length ?? 0) > 0 ? JSON.parse(item) : defaultValue;
     } catch {
       return defaultValue;
     }
@@ -95,5 +95,5 @@ export const iconButtonTarget = (className?: string): string =>
     'min-h-[44px] min-w-[44px]',
     'flex items-center justify-center',
     'md:min-h-auto md:min-w-auto',
-    className
+    className,
   );

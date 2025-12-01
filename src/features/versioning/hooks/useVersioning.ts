@@ -16,7 +16,7 @@ export interface UseVersioningReturn {
   saveVersion: (
     chapter: Chapter,
     message?: string,
-    type?: ChapterVersion['type']
+    type?: ChapterVersion['type'],
   ) => Promise<ChapterVersion>;
   restoreVersion: (versionId: string) => Promise<Chapter | null>;
   deleteVersion: (versionId: string) => Promise<boolean>;
@@ -48,7 +48,7 @@ export const useVersioning = (chapterId?: string): UseVersioningReturn => {
   useEffect(() => {
     const controller = new AbortController();
 
-    if (chapterId) {
+    if ((chapterId?.length ?? 0) > 0) {
       Promise.all([loadVersionHistory(chapterId), loadBranches(chapterId)]).catch(err => {
         if (err.name === 'AbortError') return;
         console.error('Failed to load versioning data:', err);

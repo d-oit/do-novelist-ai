@@ -26,13 +26,14 @@ import { Card } from '../../../components/ui/Card';
 import { cn } from '../../../lib/utils';
 import useWritingAssistant from '../hooks/useWritingAssistant';
 import { type WritingSuggestion, type WritingSuggestionCategory } from '../types';
+import { type Character } from '../../characters/types';
 
 interface WritingAssistantPanelProps {
   content: string;
   chapterId?: string;
   projectId?: string;
   className?: string;
-  characterContext?: any[];
+  characterContext?: Character[];
   plotContext?: string;
 }
 
@@ -86,9 +87,9 @@ const SuggestionCard: React.FC<{
       exit={{ opacity: 0, y: -10 }}
       className={cn(
         'cursor-pointer rounded-lg border p-4 transition-all hover:shadow-md',
-        isSelected
+        isSelected === true
           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-          : 'border-gray-200 dark:border-gray-700'
+          : 'border-gray-200 dark:border-gray-700',
       )}
       onClick={onSelect}
     >
@@ -142,7 +143,7 @@ const SuggestionCard: React.FC<{
 
           <div className='mt-3 flex items-center justify-between'>
             <div className='flex gap-2'>
-              {suggestion.suggestedText && (
+              {(suggestion.suggestedText?.length ?? 0) > 0 && (
                 <Button
                   size='sm'
                   variant='default'
@@ -323,7 +324,7 @@ export const WritingAssistantPanel: React.FC<WritingAssistantPanelProps> = ({
                       value={assistant.filterBy}
                       onChange={e =>
                         assistant.filterSuggestions(
-                          e.target.value as WritingSuggestionCategory | 'all'
+                          e.target.value as WritingSuggestionCategory | 'all',
                         )
                       }
                       className='w-full rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800'
@@ -378,7 +379,7 @@ export const WritingAssistantPanel: React.FC<WritingAssistantPanelProps> = ({
             </Card>
           )}
 
-          {assistant.analysisError && (
+          {(assistant.analysisError?.length ?? 0) > 0 && (
             <Card className='mb-4 border-red-200 bg-red-50 p-4 dark:bg-red-900/20'>
               <div className='flex items-center gap-2'>
                 <AlertTriangle className='h-4 w-4 text-red-500' />
@@ -409,8 +410,8 @@ export const WritingAssistantPanel: React.FC<WritingAssistantPanelProps> = ({
                   suggestion={suggestion}
                   isSelected={assistant.selectedSuggestion === suggestion.id}
                   onSelect={() => assistant.selectSuggestion(suggestion.id)}
-                  onApply={() => assistant.applySuggestion(suggestion.id)}
-                  onDismiss={() => assistant.dismissSuggestion(suggestion.id)}
+                  onApply={() => void assistant.applySuggestion(suggestion.id)}
+                  onDismiss={() => void assistant.dismissSuggestion(suggestion.id)}
                 />
               ))}
             </AnimatePresence>
@@ -420,7 +421,7 @@ export const WritingAssistantPanel: React.FC<WritingAssistantPanelProps> = ({
           <div className='mt-6 text-center'>
             <Button
               variant='outline'
-              onClick={() => assistant.analyzeContent(content, chapterId || '')}
+              onClick={() => void assistant.analyzeContent(content, chapterId ?? '')}
               disabled={assistant.isAnalyzing}
             >
               <BarChart3 className='mr-2 h-4 w-4' />

@@ -56,7 +56,7 @@ interface AnalyticsState {
 
   // Chart Loaders
   loadWordCountChart: (projectId: string, days?: number) => Promise<void>;
-  loadProductivityChart: (days?: number) => Promise<void>;
+  loadProductivityChart: (days?: number) => void;
 
   // Goal Management
   createGoal: (goal: Omit<WritingGoals, 'id' | 'current'>) => Promise<WritingGoals>;
@@ -152,7 +152,11 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         },
 
         // Track Progress
-        trackProgress: async (_projectId: string, wordsWritten: number, chapterIds: string[]): Promise<void> => {
+        trackProgress: async (
+          _projectId: string,
+          wordsWritten: number,
+          chapterIds: string[],
+        ): Promise<void> => {
           const { currentSession } = get();
           if (!currentSession) return;
 
@@ -172,10 +176,10 @@ export const useAnalyticsStore = create<AnalyticsState>()(
             set(state => ({
               currentSession: state.currentSession
                 ? {
-                  ...state.currentSession,
-                  wordsAdded: state.currentSession.wordsAdded + wordsWritten,
-                  netWordCount: state.currentSession.netWordCount + wordsWritten,
-                }
+                    ...state.currentSession,
+                    wordsAdded: state.currentSession.wordsAdded + wordsWritten,
+                    netWordCount: state.currentSession.netWordCount + wordsWritten,
+                  }
                 : null,
             }));
           } catch (err) {
@@ -225,7 +229,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
                   end: new Date(),
                 },
                 granularity: 'day',
-              }
+              },
             );
             set({ insights, isLoading: false });
           } catch (err) {
@@ -260,7 +264,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
           }
         },
 
-        async loadProductivityChart(days = 30): Promise<void> {
+        loadProductivityChart(days = 30): void {
           // Placeholder as per original hook
           const data: ChartDataPoint[] = [];
           const end = new Date();
@@ -348,20 +352,24 @@ export const useAnalyticsStore = create<AnalyticsState>()(
           insights: state.insights,
           weeklyStats: state.weeklyStats,
         }),
-      }
+      },
     ),
-    { name: 'AnalyticsStore' }
-  )
+    { name: 'AnalyticsStore' },
+  ),
 );
 
 // Selectors
-export const selectCurrentSession = (state: AnalyticsState): WritingSession | null => state.currentSession;
+export const selectCurrentSession = (state: AnalyticsState): WritingSession | null =>
+  state.currentSession;
 export const selectIsTracking = (state: AnalyticsState): boolean => state.isTracking;
-export const selectProjectAnalytics = (state: AnalyticsState): ProjectAnalytics | null => state.projectAnalytics;
+export const selectProjectAnalytics = (state: AnalyticsState): ProjectAnalytics | null =>
+  state.projectAnalytics;
 export const selectGoals = (state: AnalyticsState): WritingGoals[] => state.goals;
 export const selectInsights = (state: AnalyticsState): WritingInsights | null => state.insights;
 export const selectWeeklyStats = (state: AnalyticsState): WeeklyStats | null => state.weeklyStats;
-export const selectCharts = (state: AnalyticsState): {
+export const selectCharts = (
+  state: AnalyticsState,
+): {
   wordCount: ChartDataPoint[];
   productivity: ChartDataPoint[];
   streak: ChartDataPoint[];

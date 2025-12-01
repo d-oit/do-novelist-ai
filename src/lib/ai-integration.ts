@@ -15,7 +15,7 @@ export function initializeAIMonitoring(userId: string = 'system'): void {
   console.log('[AI Integration] Initializing AI monitoring services...');
 
   startHealthMonitoring(userId);
-  healthMonitorStopper = () => {
+  healthMonitorStopper = (): void => {
     // No-op: health monitoring runs automatically
   };
 

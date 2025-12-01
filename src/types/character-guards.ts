@@ -42,9 +42,9 @@ export function isCharacterId(value: unknown): value is CharacterId {
 export function createCharacterId(
   _projectId: ProjectId,
   name?: string,
-  timestamp = Date.now()
+  timestamp = Date.now(),
 ): CharacterId {
-  const safeName = name ? name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'char';
+  const safeName = (name?.length ?? 0) > 0 ? name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'char';
   return `char_${safeName}_${timestamp}` as CharacterId;
 }
 
@@ -269,7 +269,7 @@ export function hasAppearances(character: Character): boolean {
  * Check if a character has a portrait
  */
 export function hasPortrait(character: Character): boolean {
-  return !!character.portrait;
+  return (character.portrait?.length ?? 0) > 0;
 }
 
 /**
@@ -279,13 +279,13 @@ export function hasRelationship(
   character1: Character,
   character2: Character,
   relationships: CharacterRelationship[],
-  type?: RelationshipType
+  type?: RelationshipType,
 ): boolean {
   return relationships.some(
     rel =>
       ((rel.characterAId === character1.id && rel.characterBId === character2.id) ||
         (rel.characterAId === character2.id && rel.characterBId === character1.id)) &&
-      (type ? rel.type === type : true)
+      (type ? rel.type === type : true),
   );
 }
 
@@ -301,7 +301,7 @@ export function appearsInChapter(character: Character, chapterId: string): boole
  */
 export function isInvolvedInConflict(
   character: Character,
-  conflicts: CharacterConflict[]
+  conflicts: CharacterConflict[],
 ): boolean {
   return conflicts.some(conflict => conflict.participants.includes(character.id as CharacterId));
 }
@@ -402,7 +402,7 @@ export function validateCharacterGroup(group: CharacterGroup, characters: Charac
  */
 export function validateCharacterConflict(
   conflict: CharacterConflict,
-  characters: Character[]
+  characters: Character[],
 ): boolean {
   // Conflict must have at least 2 participants
   if (conflict.participants.length < 2) {
@@ -422,7 +422,7 @@ export function validateCharacterConflict(
  * Get character importance tier
  */
 export function getCharacterTier(
-  importance: number
+  importance: number,
 ): 'main' | 'supporting' | 'minor' | 'background' {
   if (importance >= 7) return 'main';
   if (importance >= 4) return 'supporting';
@@ -434,7 +434,7 @@ export function getCharacterTier(
  * Calculate relationship strength between two characters
  */
 export function calculateRelationshipStrength(
-  relationship: CharacterRelationship
+  relationship: CharacterRelationship,
 ): 'weak' | 'moderate' | 'strong' | 'very_strong' {
   if (relationship.intensity >= 8) return 'very_strong';
   if (relationship.intensity >= 6) return 'strong';
@@ -475,7 +475,7 @@ export function analyzeCharacterDevelopment(character: Character): {
 export function findPotentialRelationships(
   character: Character,
   allCharacters: Character[],
-  existingRelationships: CharacterRelationship[]
+  existingRelationships: CharacterRelationship[],
 ): Character[] {
   const existingRelatedIds = existingRelationships
     .filter(rel => rel.characterAId === character.id || rel.characterBId === character.id)
@@ -485,7 +485,7 @@ export function findPotentialRelationships(
     otherChar =>
       otherChar.id !== character.id &&
       !existingRelatedIds.includes(otherChar.id as CharacterId) &&
-      otherChar.importance >= 3 // Only suggest relationships with somewhat important characters
+      otherChar.importance >= 3, // Only suggest relationships with somewhat important characters
   );
 }
 
@@ -501,6 +501,10 @@ export function safeCastToCharacter(data: unknown): Character | null {
  */
 export function assertCharacter(data: unknown, context?: string): asserts data is Character {
   if (!isCharacter(data)) {
-    throw new Error(context ? `Invalid character data in ${context}` : 'Invalid character data');
+    throw new Error(
+      (context?.length ?? 0) > 0
+        ? `Invalid character data in ${context}`
+        : 'Invalid character data',
+    );
   }
 }

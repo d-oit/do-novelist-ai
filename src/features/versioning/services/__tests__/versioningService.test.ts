@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { createChapter } from '../../../../shared/utils';
 import { Chapter, ChapterStatus } from '../../../../types';
+import { Version } from '../../types';
 import { versioningService } from '../versioningService';
 
 // Mock indexedDB
@@ -92,7 +93,7 @@ describe('VersioningService', () => {
     // Setup get operation
     mockGet.mockImplementation(id => {
       const _version = storage.versions.find(v => v.id === id);
-      const request = createRequest(_version || null);
+      const request = createRequest(_version ?? null);
       setTimeout(() => request.onsuccess?.({ target: request }), 0);
       return request;
     });
@@ -372,15 +373,14 @@ describe('VersioningService', () => {
 
     it('should throw error when comparing non-existent versions', async () => {
       await expect(versioningService.compareVersions('invalid1', 'invalid2')).rejects.toThrow(
-        'One or both versions not found'
+        'One or both versions not found',
       );
     });
 
     it('should detect additions, deletions, and modifications', async () => {
       const version1 = await versioningService.saveVersion(testChapter);
 
-      testChapter.content =
-        'This is completely different content.\nWith multiple lines.\nAnd more changes.';
+      testChapter.content = 'This is completely different content.\nWith multiple lines.\nAnd more changes.';
       const version2 = await versioningService.saveVersion(testChapter);
 
       const comparison = await versioningService.compareVersions(version1.id, version2.id);
@@ -397,7 +397,7 @@ describe('VersioningService', () => {
       const branch = await versioningService.createBranch(
         'Alternative Ending',
         'Exploring a different story direction',
-        _version.id
+        _version.id,
       );
 
       expect(branch).toBeDefined();
@@ -489,9 +489,9 @@ describe('VersioningService', () => {
     it('should include all _version data in JSON export', async () => {
       const _version = await versioningService.saveVersion(testChapter, 'Test Version');
       const exported = await versioningService.exportVersionHistory(testChapter.id, 'json');
-      const parsed = JSON.parse(exported);
+      const parsed: Version[] = JSON.parse(exported);
 
-      const exportedVersion = parsed.find((v: any) => v.id === _version.id);
+      const exportedVersion = parsed.find((v: Version) => v.id === _version.id);
       expect(exportedVersion).toBeDefined();
       expect(exportedVersion.message).toBe('Test Version');
       expect(exportedVersion.wordCount).toBe(_version.wordCount);

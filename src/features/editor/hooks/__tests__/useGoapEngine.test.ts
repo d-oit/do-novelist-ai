@@ -172,7 +172,8 @@ describe('useGoapEngine Hook', () => {
 
       vi.mocked(ai.writeChapterContent).mockResolvedValue('# Content');
 
-      const action = result.current.availableActions.find(a => a.name === 'write_chapter_parallel')!;
+      const action = result.current.availableActions.find(a => a.name === 'write_chapter_parallel');
+      if (!action) throw new Error('Action not found');
 
       await act(async () => {
         await result.current.executeAction(action);

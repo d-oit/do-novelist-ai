@@ -322,7 +322,7 @@ describe('Schema Validation Tests', () => {
   });
 
   describe('ProjectSchema', () => {
-    let validProject: any;
+    let validProject: unknown;
 
     beforeEach(() => {
       validProject = {

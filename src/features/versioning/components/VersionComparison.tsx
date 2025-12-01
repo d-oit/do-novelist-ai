@@ -53,14 +53,14 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
       }
     };
 
-    loadComparison();
+    void loadComparison();
   }, [version1.id, version2.id, compareVersions]);
 
-  const formatTimestamp = (timestamp: Date) => {
+  const formatTimestamp = (timestamp: Date): string => {
     return new Date(timestamp).toLocaleString();
   };
 
-  const exportComparison = () => {
+  const exportComparison = (): void => {
     if (!comparison) return;
 
     const exportData = {
@@ -99,7 +99,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const renderUnifiedDiff = () => {
+  const renderUnifiedDiff = (): JSX.Element | null => {
     if (!comparison) return null;
 
     return (
@@ -114,7 +114,8 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
               'rounded-lg border-l-4 p-3 font-mono text-sm',
               diff.type === 'addition' && 'border-green-400 bg-green-50 dark:bg-green-950/20',
               diff.type === 'deletion' && 'border-red-400 bg-red-50 dark:bg-red-950/20',
-              diff.type === 'modification' && 'border-yellow-400 bg-yellow-50 dark:bg-yellow-950/20'
+              diff.type === 'modification' &&
+                'border-yellow-400 bg-yellow-50 dark:bg-yellow-950/20',
             )}
           >
             <div className='mb-2 flex items-center gap-2 text-xs'>
@@ -125,20 +126,20 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
               <span className='text-muted-foreground'>Line {diff.lineNumber}</span>
             </div>
 
-            {diff.type === 'deletion' && diff.oldContent && (
+            {diff.type === 'deletion' && (diff.oldContent?.length ?? 0) > 0 && (
               <div className='text-red-700 dark:text-red-300'>- {diff.oldContent}</div>
             )}
 
-            {diff.type === 'addition' && diff.newContent && (
+            {diff.type === 'addition' && (diff.newContent?.length ?? 0) > 0 && (
               <div className='text-green-700 dark:text-green-300'>+ {diff.newContent}</div>
             )}
 
             {diff.type === 'modification' && (
               <div className='space-y-1'>
-                {diff.oldContent && (
+                {(diff.oldContent?.length ?? 0) > 0 && (
                   <div className='text-red-700 dark:text-red-300'>- {diff.oldContent}</div>
                 )}
-                {diff.newContent && (
+                {(diff.newContent?.length ?? 0) > 0 && (
                   <div className='text-green-700 dark:text-green-300'>+ {diff.newContent}</div>
                 )}
               </div>
@@ -149,7 +150,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
     );
   };
 
-  const renderSideBySide = () => {
+  const renderSideBySide = (): JSX.Element => {
     const lines1 = version1.content.split('\n');
     const lines2 = version2.content.split('\n');
     return (
@@ -204,7 +205,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
     <motion.div
       className={cn(
         'flex h-full flex-col overflow-hidden rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm',
-        className
+        className,
       )}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -239,7 +240,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
                 'px-3 py-1 text-xs transition-colors',
                 viewMode === 'unified'
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                  : 'bg-secondary/50 text-muted-foreground hover:text-foreground',
               )}
             >
               Unified
@@ -250,7 +251,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
                 'px-3 py-1 text-xs transition-colors',
                 viewMode === 'side-by-side'
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                  : 'bg-secondary/50 text-muted-foreground hover:text-foreground',
               )}
             >
               Side by Side
@@ -350,7 +351,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
                 <div
                   className={cn(
                     'text-2xl font-bold',
-                    comparison.wordCountChange >= 0 ? 'text-green-600' : 'text-red-600'
+                    comparison.wordCountChange >= 0 ? 'text-green-600' : 'text-red-600',
                   )}
                 >
                   {comparison.wordCountChange >= 0 ? '+' : ''}
@@ -362,7 +363,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
                 <div
                   className={cn(
                     'text-2xl font-bold',
-                    comparison.charCountChange >= 0 ? 'text-green-600' : 'text-red-600'
+                    comparison.charCountChange >= 0 ? 'text-green-600' : 'text-red-600',
                   )}
                 >
                   {comparison.charCountChange >= 0 ? '+' : ''}

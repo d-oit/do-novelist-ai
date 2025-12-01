@@ -1,12 +1,15 @@
-import { createClient, Client } from '@libsql/client/web';
+import { Client, createClient } from '@libsql/client/web';
 import {
-  Project,
-  PublishStatus,
-  WritingStyle,
-  WorldState,
+  ChapterStatus,
   Language,
+  Project,
   ProjectSettings,
+  PublishStatus,
+  WorldState,
+  WritingStyle,
 } from '@shared/types';
+import { parseChapterStatus, parsePublishStatus } from '../../../shared/utils/validation';
+import { ProjectSchema } from '../../../types/schemas';
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';
@@ -226,14 +229,17 @@ export const db = {
           id: pRow.id,
           title: pRow.title,
           idea: pRow.idea,
-          style: JSON.parse(pRow.style) as WritingStyle,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          style: JSON.parse(pRow.style || '{}') as WritingStyle,
           coverImage: pRow.cover_image,
-          worldState: JSON.parse(pRow.world_state) as WorldState,
+           
+          worldState: JSON.parse(pRow.world_state || '{}') as WorldState,
           isGenerating: false,
-          status: (pRow.status as PublishStatus) ?? PublishStatus.DRAFT,
+          status: parsePublishStatus(pRow.status, PublishStatus.DRAFT),
           language: pRow.language as Language,
           targetWordCount: pRow.target_word_count,
-          settings: JSON.parse(pRow.settings) as ProjectSettings,
+           
+          settings: JSON.parse(pRow.settings || '{}') as ProjectSettings,
           genre: [],
           targetAudience: 'adult',
           contentWarnings: [],
@@ -257,7 +263,7 @@ export const db = {
             title: r.title,
             summary: r.summary,
             content: r.content,
-            status: r.status as ChapterStatus,
+            status: parseChapterStatus(r.status, ChapterStatus.PENDING),
             wordCount: 0,
             characterCount: 0,
             estimatedReadingTime: 0,
@@ -268,26 +274,39 @@ export const db = {
             illustration: undefined,
           })),
         };
-        console.log(`[DB] Cloud load success: ${loadedProject.title}`);
-        return loadedProject;
+        // Validate the loaded project data
+        const validationResult = ProjectSchema.safeParse(loadedProject);
+        if (validationResult.success) {
+          console.log(`[DB] Cloud load success: ${loadedProject.title}`);
+          return validationResult.data;
+        } else {
+          console.error('Failed to validate loaded project:', validationResult.error);
+          return null;
+        }
       } catch (e) {
         console.error('Failed to load from Cloud', e);
         return null;
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
+        string,
+        Partial<Project>
+      >;
       const p = projects[projectId];
       if (!p) return null;
       console.log(`[DB] Local load success: ${p.title}`);
       // Ensure structure matches Project type (handling legacy data if any)
-      return {
+      const loadedProject = {
         status: PublishStatus.DRAFT,
         language: 'en',
         targetWordCount: 50000,
-        settings: {}, // default fallback
+        settings: {} as ProjectSettings, // default fallback
         ...p,
         isGenerating: false,
       };
+      // Validate the loaded project data
+      const validationResult = ProjectSchema.safeParse(loadedProject);
+      return validationResult.success ? validationResult.data : null;
     }
   },
 
@@ -312,20 +331,23 @@ export const db = {
         return [];
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
+        string,
+        Record<string, unknown>
+      >;
       return Object.values(projects)
-        .map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          style: p.style,
-          updatedAt: p.updatedAt ?? new Date().toISOString(),
-          coverImage: p.coverImage,
+        .map((p: Record<string, unknown>) => ({
+          id: p.id as string,
+          title: p.title as string,
+          style: p.style as string,
+          updatedAt: (p.updatedAt as string) ?? new Date().toISOString(),
+          coverImage: p.coverImage as string | undefined,
         }))
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
     }
   },
 
-  deleteProject: async (projectId: string) => {
+  deleteProject: async (projectId: string): Promise<void> => {
     console.log(`[DB] Deleting project: ${projectId}`);
     const client = getClient();
     if (client) {
@@ -341,7 +363,10 @@ export const db = {
         console.error('Failed to delete from Cloud', e);
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
+        string,
+        unknown
+      >;
       delete projects[projectId];
       localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
     }

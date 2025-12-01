@@ -80,10 +80,10 @@ const BookViewer: React.FC<BookViewerProps> = ({
 
   useEffect(() => {
     if (selectedChapter) {
-      setSummary(selectedChapter.summary || '');
-      setContent(selectedChapter.content || '');
-      lastSavedSummary.current = selectedChapter.summary || '';
-      lastSavedContent.current = selectedChapter.content || '';
+      setSummary(selectedChapter.summary ?? '');
+      setContent(selectedChapter.content ?? '');
+      lastSavedSummary.current = selectedChapter.summary ?? '';
+      lastSavedContent.current = selectedChapter.content ?? '';
       setHasUnsavedChanges(false);
     } else {
       setSummary('');

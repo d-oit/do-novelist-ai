@@ -90,7 +90,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
     return result;
   }, [versions, searchQuery, selectedFilter, selectedSort, searchVersions, getFilteredVersions]);
 
-  const handleRestoreVersion = async (version: ChapterVersion) => {
+  const handleRestoreVersion = async (version: ChapterVersion): Promise<void> => {
     try {
       const restoredChapter = await restoreVersion(version.id);
       if (restoredChapter) {
@@ -102,7 +102,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
     }
   };
 
-  const handleDeleteVersion = async (versionId: string) => {
+  const handleDeleteVersion = async (versionId: string): Promise<void> => {
     if (
       window.confirm('Are you sure you want to delete this version? This action cannot be undone.')
     ) {
@@ -110,7 +110,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
     }
   };
 
-  const handleExportHistory = async (format: 'json' | 'csv') => {
+  const handleExportHistory = async (format: 'json' | 'csv'): Promise<void> => {
     try {
       const data = await exportVersionHistory(chapter.id, format);
       const blob = new Blob([data], {
@@ -127,7 +127,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
     }
   };
 
-  const formatTimestamp = (timestamp: Date) => {
+  const formatTimestamp = (timestamp: Date): string => {
     const date = new Date(timestamp);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
@@ -152,7 +152,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
     );
   }
 
-  if (error) {
+  if ((error?.length ?? 0) > 0) {
     return (
       <div className='p-4 text-center'>
         <p className='text-destructive'>{error}</p>
@@ -164,7 +164,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
     <motion.div
       className={cn(
         'flex h-full flex-col overflow-hidden rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm',
-        className
+        className,
       )}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -185,7 +185,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
           <Button
             variant='outline'
             size='sm'
-            onClick={() => handleExportHistory('json')}
+            onClick={() => void handleExportHistory('json')}
             className='text-xs'
           >
             <Download className='mr-1 h-3 w-3' />
@@ -295,7 +295,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                   <Card
                     className={cn(
                       'group relative cursor-pointer p-4 transition-all hover:shadow-md',
-                      isSelected && 'bg-primary/5 ring-2 ring-primary/50'
+                      isSelected && 'bg-primary/5 ring-2 ring-primary/50',
                     )}
                     onClick={() => setSelectedVersion(isSelected ? null : version)}
                   >
@@ -349,7 +349,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                           size='sm'
                           onClick={e => {
                             e.stopPropagation();
-                            handleRestoreVersion(version);
+                            void handleRestoreVersion(version);
                           }}
                           className='h-8 w-8 p-0 text-green-600 hover:text-green-700'
                         >
@@ -360,7 +360,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                           size='sm'
                           onClick={e => {
                             e.stopPropagation();
-                            handleDeleteVersion(version.id);
+                            void handleDeleteVersion(version.id);
                           }}
                           className='h-8 w-8 p-0 text-red-600 hover:text-red-700'
                         >
@@ -412,7 +412,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
                               </div>
 
                               <Button
-                                onClick={() => handleRestoreVersion(version)}
+                                onClick={() => void handleRestoreVersion(version)}
                                 size='sm'
                                 className='text-xs'
                               >

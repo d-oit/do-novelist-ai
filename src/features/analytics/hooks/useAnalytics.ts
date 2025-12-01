@@ -39,7 +39,7 @@ export interface UseAnalyticsReturn {
 
   // Chart Data Loaders
   loadWordCountChart: (projectId: string, days?: number) => Promise<void>;
-  loadProductivityChart: (days?: number) => Promise<void>;
+  loadProductivityChart: (days?: number) => void;
 
   // Export
   exportAnalytics: (format: 'json' | 'csv' | 'pdf') => Promise<string>;

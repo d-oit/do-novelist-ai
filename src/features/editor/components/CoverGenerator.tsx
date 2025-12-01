@@ -88,7 +88,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
       {/* Controls */}
       <div className='flex w-full max-w-xs flex-col gap-4'>
         <button
-          onClick={handleGenerate}
+          onClick={() => void handleGenerate()}
           disabled={isGenerating}
           className='flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:shadow-primary/40 disabled:scale-100 disabled:cursor-not-allowed disabled:opacity-50'
           data-testid='generate-cover-btn'

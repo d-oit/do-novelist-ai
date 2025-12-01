@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Database, Plus, LayoutDashboard, Folder, Settings, Sparkles } from 'lucide-react';
+import { Menu, X, Database, Plus, LayoutDashboard, Folder, Settings, Sparkles, Map } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import { useScrollLock } from '../../lib/hooks/useScrollLock';
@@ -9,8 +9,8 @@ import { zIndex } from '../../lib/z-index.config';
 interface HeaderProps {
   projectTitle: string;
   onNewProject: () => void;
-  currentView: 'dashboard' | 'projects' | 'settings';
-  onNavigate: (view: 'dashboard' | 'projects' | 'settings') => void;
+  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building';
+  onNavigate: (view: 'dashboard' | 'projects' | 'settings' | 'world-building') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView, onNavigate }) => {
@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
   // Lock body scroll when mobile menu is open
   useScrollLock(isMenuOpen);
 
-  const handleNav = (view: 'dashboard' | 'projects' | 'settings'): void => {
+  const handleNav = (view: 'dashboard' | 'projects' | 'settings' | 'world-building'): void => {
     onNavigate(view);
     setIsMenuOpen(false);
   };
@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
     icon: Icon,
     label,
   }: {
-    view: 'dashboard' | 'projects' | 'settings';
+    view: 'dashboard' | 'projects' | 'settings' | 'world-building';
     icon: React.ElementType;
     label: string;
   }): React.ReactElement => {
@@ -145,6 +145,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
           >
             <NavLink view='dashboard' icon={LayoutDashboard} label='Dashboard' />
             <NavLink view='projects' icon={Folder} label='Projects' />
+            <NavLink view='world-building' icon={Map} label='World Building' />
             <NavLink view='settings' icon={Settings} label='Settings' />
           </motion.div>
 
@@ -239,6 +240,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                 <div className='flex flex-col gap-3' role='group' aria-label='Navigation links'>
                   <NavLink view='dashboard' icon={LayoutDashboard} label='Dashboard' />
                   <NavLink view='projects' icon={Folder} label='Projects' />
+                  <NavLink view='world-building' icon={Map} label='World Building' />
                   <NavLink view='settings' icon={Settings} label='Settings' />
                 </div>
 

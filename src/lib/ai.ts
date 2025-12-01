@@ -32,8 +32,8 @@ const aiLogger = logger.child({ module: 'ai-service' });
  */
 function getModel(
   provider: AIProvider,
-  complexity: 'fast' | 'standard' | 'advanced' = 'standard'
-): any {
+  complexity: 'fast' | 'standard' | 'advanced' = 'standard',
+): ReturnType<typeof createOpenAI | typeof createAnthropic | typeof createGoogleGenerativeAI> {
   const modelName = getModelForTask(provider, complexity, config);
   const providerConfig = config.providers[provider];
 
@@ -102,7 +102,7 @@ function getModel(
           context: {
             complexity,
           },
-        }
+        },
       );
 
       aiLogger.error('Mistral SDK not available', {
@@ -140,7 +140,7 @@ function getModel(
  */
 async function executeWithFallback<T>(
   operation: (provider: AIProvider) => Promise<T>,
-  operationName: string
+  operationName: string,
 ): Promise<T> {
   const providers = enabledProviders;
 
@@ -154,7 +154,7 @@ async function executeWithFallback<T>(
           operationName,
           enabledProviders: providers.length,
         },
-      }
+      },
     );
 
     aiLogger.error('No AI providers configured', {
@@ -200,7 +200,7 @@ async function executeWithFallback<T>(
             errorMessage,
             attemptProvider: provider,
           },
-        }
+        },
       );
 
       aiLogger.warn(`Provider ${provider} failed for ${operationName}`, {
@@ -227,7 +227,7 @@ async function executeWithFallback<T>(
     lastError: lastError?.message,
   });
 
-  throw lastError || new Error(`${operationName} failed with all providers`);
+  throw lastError ?? new Error(`${operationName} failed with all providers`);
 }
 
 /**
@@ -235,7 +235,7 @@ async function executeWithFallback<T>(
  */
 const _generateOutline = async (
   idea: string,
-  style: string
+  style: string,
 ): Promise<{ title: string; chapters: Partial<Chapter>[] }> => {
   const operationLogger = aiLogger.child({ operation: 'generateOutline', ideaLength: idea.length });
 
@@ -277,7 +277,7 @@ Return a JSON object with this structure:
       operationLogger.info('Outline generated successfully', {
         provider,
         title: parsed.title,
-        chapterCount: parsed.chapters?.length || 0,
+        chapterCount: parsed.chapters?.length ?? 0,
       });
       return parsed;
     } catch (parseError) {
@@ -295,7 +295,7 @@ Return a JSON object with this structure:
           operationLogger.info('Successfully extracted JSON from response', {
             provider,
             title: parsed.title,
-            chapterCount: parsed.chapters?.length || 0,
+            chapterCount: parsed.chapters?.length ?? 0,
           });
           return parsed;
         } catch (secondParseError) {
@@ -334,7 +334,7 @@ export const writeChapterContent = async (
   chapterTitle: string,
   chapterSummary: string,
   style: string,
-  previousChapterSummary?: string
+  previousChapterSummary?: string,
 ): Promise<string> => {
   return executeWithFallback(async provider => {
     const model = getModel(provider, 'standard');
@@ -353,7 +353,7 @@ Output only the chapter content.`;
       temperature: 0.7,
     });
 
-    return response.text || '';
+    return response.text ?? '';
   }, 'writeChapterContent');
 };
 
@@ -363,7 +363,7 @@ Output only the chapter content.`;
 export const continueWriting = async (
   currentContent: string,
   chapterSummary: string,
-  style: string
+  style: string,
 ): Promise<string> => {
   return executeWithFallback(async provider => {
     const model = getModel(provider, 'standard');
@@ -382,7 +382,7 @@ Context: ...${context}`;
       temperature: 0.75,
     });
 
-    return response.text || '';
+    return response.text ?? '';
   }, 'continueWriting');
 };
 
@@ -393,7 +393,7 @@ export const refineChapterContent = async (
   content: string,
   chapterSummary: string,
   style: string,
-  options: RefineOptions
+  options: RefineOptions,
 ): Promise<string> => {
   return executeWithFallback(async provider => {
     const complexity =
@@ -415,7 +415,7 @@ Content: ${content}`;
       temperature: options.temperature,
     });
 
-    return response.text || content;
+    return response.text ?? content;
   }, 'refineChapterContent');
 };
 
@@ -441,7 +441,7 @@ INSTRUCTIONS: Identify up to 3 issues. For EACH, provide a "SUGGESTED FIX".`;
       temperature: 0.3,
     });
 
-    return response.text || 'No issues found.';
+    return response.text ?? 'No issues found.';
   }, 'analyzeConsistency');
 };
 
@@ -450,7 +450,7 @@ INSTRUCTIONS: Identify up to 3 issues. For EACH, provide a "SUGGESTED FIX".`;
  */
 export const brainstormProject = async (
   context: string,
-  field: 'title' | 'style' | 'idea'
+  field: 'title' | 'style' | 'idea',
 ): Promise<string> => {
   return executeWithFallback(async provider => {
     const model = getModel(provider, 'fast');
@@ -470,23 +470,23 @@ export const brainstormProject = async (
       temperature: 0.8,
     });
 
-    return response.text?.trim().replace(/^"|"$/g, '') || '';
+    return response.text?.trim().replace(/^"|"$/g, '') ?? '';
   }, 'brainstormProject');
 };
 
 /**
  * Generate cover image (Google only - has Imagen support)
  */
-export const generateCoverImage = async (
+export const generateCoverImage = (
   _title: string,
   _style: string,
-  _idea: string
-): Promise<string | null> => {
+  _idea: string,
+): string | null => {
   try {
     // This requires Google's Imagen API which is separate from the AI SDK
     // For now, return null and keep the original implementation
     console.warn(
-      'Cover image generation requires Google Imagen API - keeping original implementation'
+      'Cover image generation requires Google Imagen API - keeping original implementation',
     );
     return null;
   } catch (error) {
@@ -498,16 +498,16 @@ export const generateCoverImage = async (
 /**
  * Generate chapter illustration (Google only - has Imagen support)
  */
-export const generateChapterIllustration = async (
+export const generateChapterIllustration = (
   _title: string,
   _summary: string,
-  _style: string
-): Promise<string | null> => {
+  _style: string,
+): string | null => {
   try {
     // This requires Google's Imagen API which is separate from the AI SDK
     // For now, return null and keep the original implementation
     console.warn(
-      'Chapter illustration requires Google Imagen API - keeping original implementation'
+      'Chapter illustration requires Google Imagen API - keeping original implementation',
     );
     return null;
   } catch (error) {
@@ -521,7 +521,7 @@ export const generateChapterIllustration = async (
  */
 export const translateContent = async (
   content: string,
-  targetLanguage: string
+  targetLanguage: string,
 ): Promise<string> => {
   return executeWithFallback(async provider => {
     const model = getModel(provider, 'fast');
@@ -534,7 +534,7 @@ export const translateContent = async (
       temperature: 0.3,
     });
 
-    return response.text || '';
+    return response.text ?? '';
   }, 'translateContent');
 };
 
@@ -553,7 +553,7 @@ export const developCharacters = async (idea: string, style: string): Promise<st
       temperature: 0.8,
     });
 
-    return response.text || '';
+    return response.text ?? '';
   }, 'developCharacters');
 };
 
@@ -572,7 +572,7 @@ export const buildWorld = async (idea: string, style: string): Promise<string> =
       temperature: 0.85,
     });
 
-    return response.text || '';
+    return response.text ?? '';
   }, 'buildWorld');
 };
 
@@ -591,7 +591,7 @@ export const enhancePlot = async (idea: string, style: string): Promise<string> 
       temperature: 0.7,
     });
 
-    return response.text || '';
+    return response.text ?? '';
   }, 'enhancePlot');
 };
 
@@ -610,6 +610,6 @@ export const polishDialogue = async (content: string, style: string): Promise<st
       temperature: 0.6,
     });
 
-    return response.text || '';
+    return response.text ?? '';
   }, 'polishDialogue');
 };

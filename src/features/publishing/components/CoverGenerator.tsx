@@ -13,12 +13,12 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (): Promise<void> => {
     setIsGenerating(true);
     setError('');
     try {
       const base64Cover = await generateCoverImage(project.title, project.style, project.idea);
-      if (base64Cover) {
+      if ((base64Cover?.length ?? 0) > 0) {
         onUpdateProject({ coverImage: base64Cover });
       } else {
         setError('Failed to generate image. Please try again.');
@@ -46,9 +46,9 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
       {/* Cover Preview Area */}
       <div className='group relative'>
         <div
-          className={`relative flex h-[400px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-card shadow-2xl transition-all ${!project.coverImage ? 'hover:border-primary/50' : 'border-transparent'} `}
+          className={`relative flex h-[400px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-card shadow-2xl transition-all ${(project.coverImage?.length ?? 0) === 0 ? 'hover:border-primary/50' : 'border-transparent'} `}
         >
-          {project.coverImage ? (
+          {(project.coverImage?.length ?? 0) > 0 ? (
             <img
               src={project.coverImage}
               alt='Generated Book Cover'
@@ -73,7 +73,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
         </div>
 
         {/* Download Action (Only if image exists) */}
-        {project.coverImage && !isGenerating && (
+        {(project.coverImage?.length ?? 0) > 0 && !isGenerating && (
           <a
             href={project.coverImage}
             download={`cover-${project.title.replace(/\s+/g, '-').toLowerCase()}.png`}
@@ -88,14 +88,14 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
       {/* Controls */}
       <div className='flex w-full max-w-xs flex-col gap-4'>
         <button
-          onClick={handleGenerate}
+          onClick={() => void handleGenerate()}
           disabled={isGenerating}
           className='flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] hover:shadow-primary/40 disabled:scale-100 disabled:cursor-not-allowed disabled:opacity-50'
           data-testid='generate-cover-btn'
         >
           {isGenerating ? (
             <>Generating...</>
-          ) : project.coverImage ? (
+          ) : (project.coverImage?.length ?? 0) > 0 ? (
             <>
               <RefreshCcw className='h-4 w-4' /> Regenerate Cover
             </>

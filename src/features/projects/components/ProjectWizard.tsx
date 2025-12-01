@@ -207,7 +207,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
             <label className='flex items-center justify-between text-xs font-bold uppercase text-muted-foreground'>
               <span>1. Core Idea / Source Material</span>
               <button
-                onClick={() => handleBrainstorm('idea')}
+                onClick={() => void handleBrainstorm('idea')}
                 disabled={(!idea && !tone && !audience) || brainstorming.idea}
                 className='flex items-center gap-1.5 rounded border border-border bg-secondary px-2 py-1 text-[10px] text-primary transition-all hover:bg-secondary/80 disabled:opacity-50'
                 data-testid='wizard-brainstorm-idea'
@@ -257,7 +257,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                       ref={fileInputRef}
                       className='hidden'
                       accept='.txt,.md,.json'
-                      onChange={handleFileChange}
+                      onChange={e => void handleFileChange(e)}
                     />
                     <div className='mb-3 rounded-full bg-secondary/50 p-3 transition-transform group-hover:scale-110'>
                       <Upload className='h-6 w-6 text-muted-foreground group-hover:text-primary' />
@@ -309,7 +309,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                   data-testid='wizard-title-input'
                 />
                 <button
-                  onClick={() => handleBrainstorm('title')}
+                  onClick={() => void handleBrainstorm('title')}
                   disabled={!idea || brainstorming.title}
                   className='flex items-center justify-center rounded-md border border-border bg-secondary px-3 text-primary transition-colors hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-50'
                   title='Generate Title from Idea'
@@ -337,7 +337,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                   data-testid='wizard-style-input'
                 />
                 <button
-                  onClick={() => handleBrainstorm('style')}
+                  onClick={() => void handleBrainstorm('style')}
                   disabled={!idea || brainstorming.style}
                   className='flex items-center justify-center rounded-md border border-border bg-secondary px-3 text-primary transition-colors hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-50'
                   title='Suggest Style from Idea'
@@ -457,7 +457,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                       className='w-full rounded-md border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary'
                       placeholder='e.g. 50000'
                       value={targetWordCount}
-                      onChange={e => setTargetWordCount(parseInt(e.target.value) || 0)}
+                      onChange={e => setTargetWordCount(parseInt(e.target.value) ?? 0)}
                     />
                   </div>
                 </div>

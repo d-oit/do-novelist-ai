@@ -1,6 +1,7 @@
 import { useReducer, useCallback } from 'react';
 
 import { RefineOptions } from '../../../types';
+import { ChapterVersion } from '../../versioning/types';
 
 // State Interface
 interface EditorState {
@@ -19,7 +20,7 @@ interface EditorState {
   // Feature State
   showVersionHistory: boolean;
   showVersionComparison: boolean;
-  comparisonVersions: [EditorContent, EditorContent] | null;
+  comparisonVersions: [ChapterVersion, ChapterVersion] | null;
   showAnalytics: boolean;
 
   // Settings
@@ -37,7 +38,7 @@ type EditorAction =
   | { type: 'SET_GENERATING_IMAGE'; payload: boolean }
   | { type: 'TOGGLE_VERSION_HISTORY'; payload: boolean }
   | { type: 'TOGGLE_ANALYTICS'; payload: boolean }
-  | { type: 'SHOW_COMPARISON'; payload: [EditorContent, EditorContent] }
+  | { type: 'SHOW_COMPARISON'; payload: [ChapterVersion, ChapterVersion] }
   | { type: 'CLOSE_COMPARISON' }
   | { type: 'UPDATE_REFINE_SETTINGS'; payload: Partial<RefineOptions> }
   | { type: 'RESET' };
@@ -144,7 +145,7 @@ export function useEditorState(): {
     setGeneratingImage: (generating: boolean) => void;
     setShowVersionHistory: (show: boolean) => void;
     setShowAnalytics: (show: boolean) => void;
-    showComparison: (v1: EditorContent, v2: EditorContent) => void;
+    showComparison: (v1: ChapterVersion, v2: ChapterVersion) => void;
     closeComparison: () => void;
     updateRefineSettings: (settings: Partial<RefineOptions>) => void;
     reset: () => void;
@@ -191,7 +192,7 @@ export function useEditorState(): {
     ),
 
     showComparison: useCallback(
-      (v1: EditorContent, v2: EditorContent) =>
+      (v1: ChapterVersion, v2: ChapterVersion) =>
         dispatch({ type: 'SHOW_COMPARISON', payload: [v1, v2] }),
       [],
     ),

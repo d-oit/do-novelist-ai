@@ -16,13 +16,14 @@ import {
   type WritingSuggestionCategory,
 } from '../types';
 import { DEFAULT_WRITING_ASSISTANT_CONFIG } from '../types';
+import { type Character } from '../../characters/types';
 
 interface UseWritingAssistantOptions {
   autoAnalyze?: boolean;
   analysisDelay?: number;
   chapterId?: string;
   projectId?: string;
-  characterContext?: any[];
+  characterContext?: Character[];
   plotContext?: string;
   enablePersistence?: boolean; // Whether to save analysis to database
 }
@@ -55,7 +56,7 @@ interface UseWritingAssistantReturn extends WritingAssistantState, WritingAssist
 
 export function useWritingAssistant(
   content = '',
-  options: UseWritingAssistantOptions = {}
+  options: UseWritingAssistantOptions = {},
 ): UseWritingAssistantReturn {
   const {
     autoAnalyze = true,
@@ -98,7 +99,7 @@ export function useWritingAssistant(
    * Load configuration with hybrid approach: localStorage first, then DB fallback
    */
   useEffect(() => {
-    const loadConfiguration = async () => {
+    const loadConfiguration = () => {
       try {
         // Fast path: Load from localStorage first for immediate UI response
         const localConfig = localStorage.getItem('novelist_writing_assistant_config');
@@ -118,7 +119,7 @@ export function useWritingAssistant(
         // Background: Attempt to load from database for cross-device sync
         if (enablePersistence) {
           try {
-            const dbConfig = await writingAssistantDb.loadPreferences();
+            const dbConfig = writingAssistantDb.loadPreferences();
             if (dbConfig && !localConfig) {
               // Only use DB config if we don't have local config
               setState(prev => ({
@@ -144,14 +145,14 @@ export function useWritingAssistant(
       }
     };
 
-    loadConfiguration();
+    void loadConfiguration();
   }, [enablePersistence]);
 
   /**
    * Save configuration with hybrid approach: localStorage + optional DB sync
    */
   const saveConfig = useCallback(
-    async (config: WritingAssistantConfig) => {
+    (config: WritingAssistantConfig) => {
       try {
         // Immediate save to localStorage for instant UI response
         localStorage.setItem('novelist_writing_assistant_config', JSON.stringify(config));
@@ -159,7 +160,7 @@ export function useWritingAssistant(
         // Background sync to database for cross-device persistence
         if (enablePersistence) {
           try {
-            await writingAssistantDb.syncPreferences(config);
+            writingAssistantDb.syncPreferences(config);
           } catch (error) {
             console.warn('Failed to sync preferences to database:', error);
             // Continue gracefully - localStorage save still worked
@@ -169,7 +170,7 @@ export function useWritingAssistant(
         console.error('Failed to save writing assistant config:', error);
       }
     },
-    [enablePersistence]
+    [enablePersistence],
   );
 
   /**
@@ -200,7 +201,7 @@ export function useWritingAssistant(
           targetChapterId,
           state.config,
           characterContext,
-          plotContext
+          plotContext,
         );
 
         // Immediately update UI state
@@ -218,11 +219,11 @@ export function useWritingAssistant(
             const acceptedCount = appliedSuggestions.current.size;
             const dismissedCount = dismissedSuggestions.current.size;
 
-            await writingAssistantDb.saveAnalysisHistory(
+            writingAssistantDb.saveAnalysisHistory(
               analysis,
               projectId,
               acceptedCount,
-              dismissedCount
+              dismissedCount,
             );
           } catch (error) {
             console.warn('Failed to save analysis history:', error);
@@ -252,7 +253,7 @@ export function useWritingAssistant(
       plotContext,
       enablePersistence,
       projectId,
-    ]
+    ],
   );
 
   /**
@@ -266,12 +267,12 @@ export function useWritingAssistant(
 
       analysisTimeoutRef.current = setTimeout(() => {
         if (contentToAnalyze !== lastContentRef.current && state.config.enableRealTimeAnalysis) {
-          analyzeContent(contentToAnalyze);
+          void analyzeContent(contentToAnalyze);
           lastContentRef.current = contentToAnalyze;
         }
       }, state.config.analysisDelay);
     },
-    [analyzeContent, state.config.enableRealTimeAnalysis, state.config.analysisDelay]
+    [analyzeContent, state.config.enableRealTimeAnalysis, state.config.analysisDelay],
   );
 
   /**
@@ -292,7 +293,7 @@ export function useWritingAssistant(
    * Apply a suggestion with feedback tracking
    */
   const applySuggestion = useCallback(
-    async (suggestionId: string) => {
+    (suggestionId: string) => {
       const suggestion = state.suggestions.find(s => s.id === suggestionId);
       if (!suggestion) return;
 
@@ -312,12 +313,12 @@ export function useWritingAssistant(
       // Background: Record feedback for machine learning
       if (enablePersistence && projectId && chapterId) {
         try {
-          await writingAssistantDb.recordSuggestionFeedback(
+          writingAssistantDb.recordSuggestionFeedback(
             suggestion,
             'accepted',
             chapterId,
             projectId,
-            suggestion.suggestedText // The text that was applied
+            suggestion.suggestedText, // The text that was applied
           );
         } catch (error) {
           console.warn('Failed to record suggestion feedback:', error);
@@ -328,14 +329,14 @@ export function useWritingAssistant(
       // TODO: Integrate with editor to actually apply the text change
       // This would depend on the editor implementation
     },
-    [state.suggestions, enablePersistence, projectId, chapterId]
+    [state.suggestions, enablePersistence, projectId, chapterId],
   );
 
   /**
    * Dismiss a suggestion with feedback tracking
    */
   const dismissSuggestion = useCallback(
-    async (suggestionId: string) => {
+    (suggestionId: string) => {
       const suggestion = state.suggestions.find(s => s.id === suggestionId);
       if (!suggestion) return;
 
@@ -355,11 +356,11 @@ export function useWritingAssistant(
       // Background: Record feedback for machine learning
       if (enablePersistence && projectId && chapterId) {
         try {
-          await writingAssistantDb.recordSuggestionFeedback(
+          writingAssistantDb.recordSuggestionFeedback(
             suggestion,
             'dismissed',
             chapterId,
-            projectId
+            projectId,
           );
         } catch (error) {
           console.warn('Failed to record suggestion feedback:', error);
@@ -367,14 +368,14 @@ export function useWritingAssistant(
         }
       }
     },
-    [state.suggestions, enablePersistence, projectId, chapterId]
+    [state.suggestions, enablePersistence, projectId, chapterId],
   );
 
   /**
    * Update configuration with immediate UI response + background persistence
    */
   const updateConfig = useCallback(
-    async (configUpdate: Partial<WritingAssistantConfig>) => {
+    (configUpdate: Partial<WritingAssistantConfig>) => {
       setState(prev => {
         const newConfig = { ...prev.config, ...configUpdate };
 
@@ -386,7 +387,7 @@ export function useWritingAssistant(
         return { ...prev, config: newConfig };
       });
     },
-    [saveConfig]
+    [saveConfig],
   );
 
   /**
@@ -421,7 +422,7 @@ export function useWritingAssistant(
    * Get writing analytics and insights
    */
   const getWritingAnalytics = useCallback(
-    async (timeRange: 'week' | 'month' | 'year' = 'month') => {
+    (timeRange: 'week' | 'month' | 'year' = 'month') => {
       if (!enablePersistence || !projectId) {
         return {
           progressMetrics: [],
@@ -431,7 +432,7 @@ export function useWritingAssistant(
       }
 
       try {
-        return await writingAssistantDb.getWritingAnalytics(projectId, timeRange);
+        return writingAssistantDb.getWritingAnalytics(projectId, timeRange);
       } catch (error) {
         console.error('Failed to get writing analytics:', error);
         return {
@@ -441,7 +442,7 @@ export function useWritingAssistant(
         };
       }
     },
-    [enablePersistence, projectId]
+    [enablePersistence, projectId],
   );
 
   // Compute derived state
@@ -456,11 +457,11 @@ export function useWritingAssistant(
 
       return acc;
     },
-    {} as Record<WritingSuggestionCategory | 'all', WritingSuggestion[]>
+    {} as Record<WritingSuggestionCategory | 'all', WritingSuggestion[]>,
   );
 
   const filteredSuggestions =
-    state.filterBy === 'all' ? state.suggestions : suggestionsByCategory[state.filterBy] || [];
+    state.filterBy === 'all' ? state.suggestions : (suggestionsByCategory[state.filterBy] ?? []);
 
   // Sort filtered suggestions
   const sortedSuggestions = [...filteredSuggestions].sort((a, b) => {
@@ -487,7 +488,7 @@ export function useWritingAssistant(
   const analysisStats = {
     totalSuggestions: state.suggestions.length,
     highPrioritySuggestions: state.suggestions.filter(
-      s => s.severity === 'error' || s.severity === 'warning'
+      s => s.severity === 'error' || s.severity === 'warning',
     ).length,
     avgConfidence:
       state.suggestions.length > 0
@@ -515,20 +516,20 @@ export function useWritingAssistant(
         .filter(([_, interaction]) => interaction.action === 'applied')
         .map(([suggestionId, _]) => {
           const suggestion = state.suggestions.find(s => s.id === suggestionId);
-          return suggestion?.category || 'unknown';
+          return suggestion?.category ?? 'unknown';
         })
         .reduce<Record<string, number>>((acc, category) => {
-          acc[category] = (acc[category] || 0) + 1;
+          acc[category] = (acc[category] ?? 0) + 1;
           return acc;
-        }, {})
+        }, {}),
     )
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([category, _]) => category),
 
     improvementTrends: {
-      readability: currentAnalysis?.readabilityScore || 0,
-      engagement: currentAnalysis?.engagementScore || 0,
+      readability: currentAnalysis?.readabilityScore ?? 0,
+      engagement: currentAnalysis?.engagementScore ?? 0,
       suggestionAcceptance: suggestionAcceptanceRate,
     },
 

@@ -75,7 +75,7 @@ describe('ValidationService', () => {
   });
 
   describe('Project Integrity Validation', () => {
-    let validProject: any;
+    let validProject: unknown;
 
     beforeEach(() => {
       const createResult = validationService.validateCreateProject({
@@ -126,9 +126,7 @@ describe('ValidationService', () => {
         // (1 chapter in array but worldState says 2)
         const hasChapterCountIssue = result.issues?.some(
           (issue: z.ZodIssue) =>
-            issue.code === 'custom' ||
-            issue.message?.includes('chapter') ||
-            issue.message?.includes('count')
+            issue.code === 'custom' || issue.message?.includes('chapter') || issue.message?.includes('count'),
         );
         expect(hasChapterCountIssue).toBe(true);
       }
@@ -163,9 +161,7 @@ describe('ValidationService', () => {
         // (1 complete chapter but worldState says 0 completed)
         const hasCompletedIssue = result.issues?.some(
           (issue: z.ZodIssue) =>
-            issue.code === 'custom' ||
-            issue.message?.includes('completed') ||
-            issue.message?.includes('complete')
+            issue.code === 'custom' || issue.message?.includes('completed') || issue.message?.includes('complete'),
         );
         expect(hasCompletedIssue).toBe(true);
       }
@@ -281,7 +277,7 @@ describe('ValidationService', () => {
         'Chapter 1: The Adventure Begins',
         1,
         'This is the beginning of our tale. The hero awakens in a strange land.',
-        'Hero awakens in strange land'
+        'Hero awakens in strange land',
       );
 
       expect(result.success).toBe(true);

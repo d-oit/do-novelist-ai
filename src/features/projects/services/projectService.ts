@@ -7,6 +7,7 @@
 import { PublishStatus } from '../../../types';
 import { type Project, type Language } from '../../../types';
 import { type ProjectCreationData, type ProjectUpdateData } from '../types';
+import { ProjectSchema } from '../../../types/schemas';
 
 class ProjectService {
   private readonly dbName = 'novelist-projects';
@@ -17,18 +18,19 @@ class ProjectService {
   /**
    * Initialize IndexedDB
    */
-  public async init(): Promise<IDBDatabase> {
+  public async init(): Promise<void> {
     if (this.db) {
-      return this.db;
+      return;
     }
 
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onerror = (): void => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
       request.onsuccess = (): void => {
         this.db = request.result;
-        resolve(this.db);
+        resolve();
       };
 
       request.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
@@ -49,15 +51,27 @@ class ProjectService {
    * Get all projects
    */
   public async getAll(): Promise<Project[]> {
-    const db = await this.init();
+    await this.init();
+    const db = this.db!;
 
     return new Promise<Project[]>((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readonly');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.getAll();
+      const transaction: IDBTransaction = db.transaction([this.storeName], 'readonly');
+      const store: IDBObjectStore = transaction.objectStore(this.storeName);
+      const request: IDBRequest = store.getAll();
 
-      request.onsuccess = (): void => resolve(request.result ?? []);
-      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => {
+        const rawData = (request.result as Project[]) ?? [];
+        // Validate and parse the data to ensure type safety
+        const validatedProjects = rawData
+          .map(item => {
+            const result = ProjectSchema.safeParse(item);
+            return result.success ? result.data : null;
+          })
+          .filter((project): project is Project => project !== null);
+        resolve(validatedProjects);
+      };
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -65,15 +79,25 @@ class ProjectService {
    * Get project by ID
    */
   public async getById(id: string): Promise<Project | null> {
-    const db = await this.init();
+    await this.init();
+    const db = this.db!;
 
     return new Promise<Project | null>((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readonly');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.get(id);
+      const transaction: IDBTransaction = db.transaction([this.storeName], 'readonly');
+      const store: IDBObjectStore = transaction.objectStore(this.storeName);
+      const request: IDBRequest = store.get(id);
 
-      request.onsuccess = (): void => resolve(request.result ?? null);
-      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => {
+        const rawData = request.result as Project | undefined;
+        if (!rawData) {
+          resolve(null);
+          return;
+        }
+        const result = ProjectSchema.safeParse(rawData);
+        resolve(result.success ? result.data : null);
+      };
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -81,7 +105,8 @@ class ProjectService {
    * Create new project
    */
   public async create(data: ProjectCreationData): Promise<Project> {
-    const db = await this.init();
+    await this.init();
+    const db = this.db!;
 
     const now = Date.now();
     const project: Project = {
@@ -135,12 +160,13 @@ class ProjectService {
     };
 
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readwrite');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.add(project);
+      const transaction: IDBTransaction = db.transaction([this.storeName], 'readwrite');
+      const store: IDBObjectStore = transaction.objectStore(this.storeName);
+      const request: IDBRequest = store.put(updated);
 
-      request.onsuccess = (): void => resolve(project);
-      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -148,7 +174,8 @@ class ProjectService {
    * Update project
    */
   public async update(id: string, data: ProjectUpdateData): Promise<void> {
-    const db = await this.init();
+    await this.init();
+    const db = this.db!;
 
     const project = await this.getById(id);
     if (!project) {
@@ -166,8 +193,9 @@ class ProjectService {
       const store = transaction.objectStore(this.storeName);
       const request = store.put(updated);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      request.onsuccess = (): void => resolve();
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -175,15 +203,17 @@ class ProjectService {
    * Delete project
    */
   public async delete(id: string): Promise<void> {
-    const db = await this.init();
+    await this.init();
+    const db = this.db!;
 
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readwrite');
-      const store = transaction.objectStore(this.storeName);
-      const request = store.delete(id);
+      const transaction: IDBTransaction = db.transaction([this.storeName], 'readwrite');
+      const store: IDBObjectStore = transaction.objectStore(this.storeName);
+      const request: IDBRequest = store.delete(id);
 
       request.onsuccess = (): void => resolve();
-      request.onerror = (): void => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -199,8 +229,9 @@ class ProjectService {
       const index = store.index('status');
       const request = index.getAll(status);
 
-      request.onsuccess = (): void => resolve(request.result || []);
-      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => resolve(request.result ?? []);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -208,7 +239,8 @@ class ProjectService {
    * Save project (full update)
    */
   public async save(project: Project): Promise<void> {
-    const db = await this.init();
+    await this.init();
+    const db = this.db!;
 
     const updated = {
       ...project,
@@ -221,7 +253,8 @@ class ProjectService {
       const request = store.put(updated);
 
       request.onsuccess = (): void => resolve();
-      request.onerror = (): void => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 }

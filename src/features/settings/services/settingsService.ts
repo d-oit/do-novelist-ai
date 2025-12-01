@@ -13,11 +13,11 @@ class SettingsService {
   /**
    * Load settings from localStorage
    */
-  public async load(): Promise<Settings> {
+  public load(): Settings {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
 
-      if (!stored) {
+      if ((stored?.length ?? 0) === 0) {
         return DEFAULT_SETTINGS;
       }
 
@@ -43,7 +43,7 @@ class SettingsService {
   /**
    * Save settings to localStorage
    */
-  public async save(settings: Settings): Promise<void> {
+  public save(settings: Settings): void {
     try {
       const validation = validateSettings(settings);
 
@@ -61,7 +61,7 @@ class SettingsService {
   /**
    * Reset settings to defaults
    */
-  public async reset(): Promise<Settings> {
+  public reset(): Settings {
     try {
       localStorage.removeItem(STORAGE_KEY);
       return DEFAULT_SETTINGS;
@@ -74,15 +74,15 @@ class SettingsService {
   /**
    * Export settings as JSON
    */
-  public async export(): Promise<string> {
-    const settings = await this.load();
+  public export(): string {
+    const settings = this.load();
     return JSON.stringify(settings, null, 2);
   }
 
   /**
    * Import settings from JSON
    */
-  public async import(json: string): Promise<Settings> {
+  public import(json: string): Settings {
     try {
       const parsed = JSON.parse(json);
       const validation = validateSettings(parsed);
@@ -91,7 +91,7 @@ class SettingsService {
         throw new Error('Invalid settings JSON');
       }
 
-      await this.save(validation.data);
+      this.save(validation.data);
       return validation.data;
     } catch (error) {
       console.error('Failed to import settings:', error);
@@ -102,18 +102,18 @@ class SettingsService {
   /**
    * Get a specific setting value
    */
-  public async get<K extends keyof Settings>(key: K): Promise<Settings[K]> {
-    const settings = await this.load();
+  public get<K extends keyof Settings>(key: K): Settings[K] {
+    const settings = this.load();
     return settings[key];
   }
 
   /**
    * Update a specific setting value
    */
-  public async set<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {
-    const settings = await this.load();
+  public set<K extends keyof Settings>(key: K, value: Settings[K]): void {
+    const settings = this.load();
     const updated = { ...settings, [key]: value };
-    await this.save(updated);
+    this.save(updated);
   }
 }
 

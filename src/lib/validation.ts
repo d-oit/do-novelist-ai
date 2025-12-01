@@ -25,10 +25,10 @@ import {
 export class ValidationService {
   private static instance: ValidationService;
 
-  private constructor() { }
+  private constructor() {}
 
   public static getInstance(): ValidationService {
-    if (!ValidationService.instance) {
+    if (ValidationService.instance === null || ValidationService.instance === undefined) {
       ValidationService.instance = new ValidationService();
     }
     return ValidationService.instance;
@@ -184,7 +184,7 @@ export class ValidationService {
 
       // Check completed chapters consistency
       const actualCompletedCount = validatedProject.chapters.filter(
-        c => c.status === ChapterStatus.COMPLETE
+        c => c.status === ChapterStatus.COMPLETE,
       ).length;
 
       const worldStateCompletedCount = validatedProject.worldState.chaptersCompleted;
@@ -257,7 +257,7 @@ export class ValidationService {
       const chapter = validation.data;
 
       // Additional business logic validation
-      if ((projectId != null) && !chapter.id.startsWith(projectId)) {
+      if (projectId != null && !chapter.id.startsWith(projectId)) {
         return {
           success: false,
           error: 'Chapter ID must start with project ID',
@@ -390,7 +390,7 @@ export class ValidationService {
     title: string,
     orderIndex: number,
     content = '',
-    summary = ''
+    summary = '',
   ): ValidationResult {
     try {
       if (!isProjectId(projectId)) {
@@ -438,7 +438,7 @@ export class ValidationService {
   public validateType<T>(
     data: unknown,
     guard: (value: unknown) => value is T,
-    typeName: string
+    typeName: string,
   ): ValidationResult {
     if (guard(data)) {
       return { success: true, data };
@@ -515,14 +515,16 @@ export const validationService = ValidationService.getInstance();
  * Quick validation functions for common use cases
  */
 export const validate = {
-  project: (data: unknown): ValidationResult => validationService.validateProjectIntegrity(data as Project),
+  project: (data: unknown): ValidationResult =>
+    validationService.validateProjectIntegrity(data as Project),
   chapter: (data: unknown, projectId?: string): ValidationResult =>
     validationService.validateChapter(data, projectId),
   createProject: (data: unknown): ValidationResult => validationService.validateCreateProject(data),
   updateProject: (data: unknown): ValidationResult => validationService.validateUpdateProject(data),
   updateChapter: (data: unknown): ValidationResult => validationService.validateUpdateChapter(data),
   refineOptions: (data: unknown): ValidationResult => validationService.validateRefineOptions(data),
-  content: (content: string): ValidationResult => validationService.validateAndFormatContent(content),
+  content: (content: string): ValidationResult =>
+    validationService.validateAndFormatContent(content),
 };
 
 /**

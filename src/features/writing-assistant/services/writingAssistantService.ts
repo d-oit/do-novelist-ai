@@ -3,7 +3,7 @@
  * Provides intelligent content analysis and writing suggestions
  */
 
-// import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import {
   type ContentAnalysis,
   type WritingSuggestion,
@@ -17,11 +17,31 @@ import {
   type ParagraphAnalysis,
   type SentenceVarietyAnalysis,
   type TransitionAnalysis,
+  type WritingSuggestionCategory,
 } from '../types';
+import { type Character } from '../../characters/types';
+
+// Raw AI response type for suggestions
+interface RawAISuggestion {
+  type?: string;
+  severity?: string;
+  message: string;
+  originalText?: string;
+  suggestedText?: string;
+  position?: {
+    start?: number;
+    end?: number;
+    line?: number;
+    column?: number;
+  };
+  confidence?: number;
+  reasoning?: string;
+  category?: WritingSuggestionCategory;
+}
 
 class WritingAssistantService {
   private static instance: WritingAssistantService;
-  private readonly genAI: any; // GoogleGenerativeAI when available
+  private readonly genAI: ReturnType<typeof createGoogleGenerativeAI> | null;
 
   private constructor() {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -42,50 +62,37 @@ class WritingAssistantService {
   /**
    * Analyze chapter content and provide comprehensive feedback
    */
-  public async analyzeContent(
+  public analyzeContent(
     content: string,
     chapterId: string,
     config: WritingAssistantConfig,
-    characterContext?: any[],
+    characterContext?: Character[],
     plotContext?: string,
-  ): Promise<ContentAnalysis> {
+  ): ContentAnalysis {
     try {
       // Run parallel analyses
-      const [
-        suggestions,
-        readabilityScore,
-        sentimentScore,
-        paceScore,
-        engagementScore,
-        plotHoles,
-        characterIssues,
-        dialogueAnalysis,
-        styleProfile,
-        toneAnalysis,
-        wordUsage,
-        paragraphAnalysis,
-        sentenceVariety,
-        transitionQuality,
-      ] = await Promise.all([
-        this.generateWritingSuggestions(content, config),
-        this.calculateReadabilityScore(content),
-        this.analyzeSentiment(content),
-        this.analyzePacing(content),
-        this.calculateEngagementScore(content),
-        config.enablePlotHoleDetection ? this.detectPlotHoles(content, plotContext) : [],
-        config.enableCharacterTracking
-          ? this.analyzeCharacterConsistency(content, characterContext)
-          : [],
-        config.enableDialogueAnalysis
-          ? this.analyzeDialogue(content)
-          : this.getEmptyDialogueAnalysis(),
-        config.enableStyleAnalysis ? this.analyzeStyle(content) : this.getEmptyStyleProfile(),
-        this.analyzeTone(content),
-        this.analyzeWordUsage(content),
-        this.analyzeParagraphs(content),
-        this.analyzeSentenceVariety(content),
-        this.analyzeTransitions(content),
-      ]);
+      const suggestions = this.generateWritingSuggestions(content, config);
+      const readabilityScore = this.calculateReadabilityScore(content);
+      const sentimentScore = this.analyzeSentiment(content);
+      const pacingScore = this.analyzePacing(content);
+      const engagementScore = this.calculateEngagementScore(content);
+      const plotHoles = config.enablePlotHoleDetection
+        ? this.detectPlotHoles(content, plotContext)
+        : [];
+      const characterIssues = config.enableCharacterTracking
+        ? this.analyzeCharacterConsistency(content, characterContext)
+        : [];
+      const dialogueAnalysis = config.enableDialogueAnalysis
+        ? this.analyzeDialogue(content)
+        : this.getEmptyDialogueAnalysis();
+      const styleProfile = config.enableStyleAnalysis
+        ? this.analyzeStyle(content)
+        : this.getEmptyStyleProfile();
+      const toneAnalysis = this.analyzeTone(content);
+      const wordUsage = this.analyzeWordUsage(content);
+      const paragraphAnalysis = this.analyzeParagraphs(content);
+      const sentenceVariety = this.analyzeSentenceVariety(content);
+      const transitionQuality = this.analyzeTransitions(content);
 
       return {
         chapterId,
@@ -180,21 +187,23 @@ class WritingAssistantService {
         return this.extractSuggestionsFromText(aiResponse);
       }
 
-      const suggestions = JSON.parse(jsonMatch[0]);
+      const suggestions: RawAISuggestion[] = JSON.parse(jsonMatch[0]);
       return suggestions
-        .filter((s: any) => s.confidence >= config.minimumConfidence)
-        .map((s: any, index: number) => ({
-          id: `ai-suggestion-${Date.now()}-${index}`,
-          type: s.type || 'style',
-          severity: s.severity || 'suggestion',
-          message: s.message,
-          originalText: s.originalText || '',
-          suggestedText: s.suggestedText,
-          position: s.position || { start: 0, end: 0 },
-          confidence: s.confidence || 0.7,
-          reasoning: s.reasoning || '',
-          category: s.category || 'readability',
-        }));
+        .filter((s: RawAISuggestion) => (s.confidence ?? 0.7) >= config.minimumConfidence)
+        .map(
+          (s: RawAISuggestion, index: number): WritingSuggestion => ({
+            id: `ai-suggestion-${Date.now()}-${index}`,
+            type: (s.type as WritingSuggestion['type']) ?? 'style',
+            severity: (s.severity as WritingSuggestion['severity']) ?? 'suggestion',
+            message: s.message,
+            originalText: s.originalText ?? '',
+            suggestedText: s.suggestedText,
+            position: s.position ?? { start: 0, end: 0 },
+            confidence: s.confidence ?? 0.7,
+            reasoning: s.reasoning ?? '',
+            category: s.category ?? 'readability',
+          }),
+        );
     } catch (error) {
       console.error('Failed to parse AI suggestions:', error);
       return this.extractSuggestionsFromText(aiResponse);
@@ -299,7 +308,7 @@ class WritingAssistantService {
     // Fast pacing: shorter sentences, more action words
     const actionWords = ['ran', 'jumped', 'shouted', 'grabbed', 'rushed', 'burst', 'slammed'];
     const actionCount = actionWords.reduce((count, word) => {
-      return count + (content.toLowerCase().match(new RegExp(word, 'g')) || []).length;
+      return count + (content.toLowerCase().match(new RegExp(word, 'g')) ?? []).length;
     }, 0);
 
     // Score from 0-100 (0 = very slow, 100 = very fast)
@@ -325,7 +334,7 @@ class WritingAssistantService {
   }
 
   private analyzeDialogueRatio(content: string): number {
-    const dialogueMatches = content.match(/"[^"]*"/g) || [];
+    const dialogueMatches = content.match(/"[^"]*"/g) ?? [];
     const dialogueLength = dialogueMatches.join('').length;
     const ratio = dialogueLength / content.length;
 
@@ -336,7 +345,7 @@ class WritingAssistantService {
   }
 
   private analyzeQuestionUsage(content: string): number {
-    const questions = (content.match(/\?/g) || []).length;
+    const questions = (content.match(/\?/g) ?? []).length;
     const sentences = content.split(/[.!?]+/).length;
     const ratio = questions / sentences;
 
@@ -396,10 +405,7 @@ class WritingAssistantService {
   /**
    * Detect potential plot holes
    */
-  private async detectPlotHoles(
-    content: string,
-    _plotContext?: string,
-  ): Promise<PlotHoleDetection[]> {
+  private detectPlotHoles(content: string, _plotContext?: string): PlotHoleDetection[] {
     // This would use AI to analyze plot consistency
     // For now, return basic detection
     const plotHoles: PlotHoleDetection[] = [];
@@ -408,7 +414,7 @@ class WritingAssistantService {
     const timeReferences =
       content.match(
         /\b(yesterday|today|tomorrow|last week|next month|morning|evening|night)\b/gi,
-      ) || [];
+      ) ?? [];
     if (timeReferences.length > 3) {
       plotHoles.push({
         id: `plot-hole-${Date.now()}`,
@@ -428,10 +434,10 @@ class WritingAssistantService {
   /**
    * Analyze character consistency
    */
-  private async analyzeCharacterConsistency(
+  private analyzeCharacterConsistency(
     _content: string,
     _characterContext?: any[],
-  ): Promise<CharacterConsistencyIssue[]> {
+  ): CharacterConsistencyIssue[] {
     // This would cross-reference character behavior, speech patterns, etc.
     // Basic implementation for now
     return [];
@@ -441,17 +447,17 @@ class WritingAssistantService {
    * Analyze dialogue quality
    */
   private analyzeDialogue(content: string): DialogueAnalysis {
-    const dialogueMatches = content.match(/"[^"]*"/g) || [];
+    const dialogueMatches = content.match(/"[^"]*"/g) ?? [];
     const totalDialogue = dialogueMatches.length;
     const dialogueLength = dialogueMatches.join('').length;
     const dialoguePercentage = (dialogueLength / content.length) * 100;
 
     // Basic dialogue tag analysis
     const tags =
-      content.match(/\b(said|asked|replied|shouted|whispered|muttered|exclaimed)\b/gi) || [];
+      content.match(/\b(said|asked|replied|shouted|whispered|muttered|exclaimed)\b/gi) ?? [];
     const tagCounts = tags.reduce((acc: Record<string, number>, tag) => {
       const lower = tag.toLowerCase();
-      acc[lower] = (acc[lower] || 0) + 1;
+      acc[lower] = (acc[lower] ?? 0) + 1;
       return acc;
     }, {});
 
@@ -503,15 +509,15 @@ class WritingAssistantService {
     const passiveIndicators = ['was', 'were', 'been', 'being'];
     const passiveCount = passiveIndicators.reduce((count, indicator) => {
       return (
-        count + (content.toLowerCase().match(new RegExp(`\\b${indicator}\\b`, 'g')) || []).length
+        count + (content.toLowerCase().match(new RegExp(`\\b${indicator}\\b`, 'g')) ?? []).length
       );
     }, 0);
     const voice = passiveCount / sentences.length > 0.3 ? 'passive' : 'active';
 
     // Analyze perspective
-    const firstPerson = (content.match(/\b[Ii]\b/g) || []).length;
-    const secondPerson = (content.match(/\byou\b/gi) || []).length;
-    const thirdPerson = (content.match(/\b(he|she|they)\b/gi) || []).length;
+    const firstPerson = (content.match(/\b[Ii]\b/g) ?? []).length;
+    const secondPerson = (content.match(/\byou\b/gi) ?? []).length;
+    const thirdPerson = (content.match(/\b(he|she|they)\b/gi) ?? []).length;
 
     const total = firstPerson + secondPerson + thirdPerson;
     let perspective: StyleProfile['perspective'] = 'third_limited';
@@ -566,7 +572,7 @@ class WritingAssistantService {
       intensity: dominantMood ? Math.min(100, dominantMood[1] * 20) : 50,
       consistency: 80,
       emotionalRange: {
-        dominant: [dominantMood?.[0] || 'neutral'],
+        dominant: [dominantMood?.[0] ?? 'neutral'],
         absent: [],
         variety: Object.values(moodScores).filter(score => score > 0).length * 20,
       },
@@ -588,7 +594,7 @@ class WritingAssistantService {
     words.forEach(word => {
       const cleanWord = word.replace(/[^\w]/g, '');
       if (cleanWord.length > 3) {
-        wordCounts[cleanWord] = (wordCounts[cleanWord] || 0) + 1;
+        wordCounts[cleanWord] = (wordCounts[cleanWord] ?? 0) + 1;
       }
     });
 
@@ -728,7 +734,7 @@ class WritingAssistantService {
 
     const transitionCount = transitions.reduce((count, transition) => {
       return (
-        count + (content.toLowerCase().match(new RegExp(`\\b${transition}\\b`, 'g')) || []).length
+        count + (content.toLowerCase().match(new RegExp(`\\b${transition}\\b`, 'g')) ?? []).length
       );
     }, 0);
 

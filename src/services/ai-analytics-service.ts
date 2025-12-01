@@ -276,7 +276,7 @@ export function getOptimizationRecommendations(
       recommendations.push({
         type: 'cheaper_model',
         description: 'Consider switching from GPT-4o to GPT-4o Mini (up to 90% cost reduction)',
-        estimatedSavings: (topCostProvider?.cost || 0) * 0.5,
+        estimatedSavings: (topCostProvider?.cost ?? 0) * 0.5,
         action: { model: 'gpt-4o-mini' },
       });
     }

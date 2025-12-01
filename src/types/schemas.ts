@@ -155,7 +155,7 @@ export const RefineOptionsSchema = z.object({
         'description',
         'plot_consistency',
         'tone',
-      ])
+      ]),
     )
     .default(['grammar', 'style']),
   preserveLength: z.boolean().default(false),
@@ -232,7 +232,7 @@ export const ProjectSchema = z
           name: z.string(),
           email: z.string().email(),
           role: z.enum(['owner', 'collaborator', 'editor', 'viewer']).default('collaborator'),
-        })
+        }),
       )
       .default([]),
 
@@ -264,7 +264,7 @@ export const ProjectSchema = z
           version: z.string(),
           changes: z.array(z.string()),
           timestamp: z.date(),
-        })
+        }),
       )
       .default([]),
   })
@@ -274,15 +274,13 @@ export const ProjectSchema = z
   })
   .refine(
     data => {
-      const completedCount = data.chapters.filter(
-        c => c.status === ('complete' as ChapterStatus)
-      ).length;
+      const completedCount = data.chapters.filter(c => c.status === ChapterStatus.COMPLETE).length;
       return data.worldState.chaptersCompleted === completedCount;
     },
     {
       message: 'World state completed count must match actual completed chapters',
       path: ['worldState', 'chaptersCompleted'],
-    }
+    },
   );
 
 // =============================================================================
@@ -370,7 +368,7 @@ export type Temperature = number;
 export function validateData<T>(
   schema: z.ZodSchema<T>,
   data: unknown,
-  context?: string
+  context?: string,
 ): { success: true; data: T } | { success: false; error: string; issues: z.ZodIssue[] } {
   try {
     const result = schema.safeParse(data);
@@ -379,9 +377,10 @@ export function validateData<T>(
       return { success: true, data: result.data };
     }
 
-    const errorMessage = (context ?? undefined)
-      ? `Validation failed for ${context}: ${result.error.message}`
-      : `Validation failed: ${result.error.message}`;
+    const errorMessage =
+      (context?.length ?? 0) > 0
+        ? `Validation failed for ${context}: ${result.error.message}`
+        : `Validation failed: ${result.error.message}`;
 
     return {
       success: false,
@@ -411,7 +410,7 @@ export function transformAndValidate<TInput, TOutput>(
   inputSchema: z.ZodSchema<TInput>,
   outputSchema: z.ZodSchema<TOutput>,
   data: unknown,
-  transformer: (input: TInput) => TOutput
+  transformer: (input: TInput) => TOutput,
 ): { success: true; data: TOutput } | { success: false; error: string; issues: z.ZodIssue[] } {
   const inputValidation = validateData(inputSchema, data, 'input');
   if (!inputValidation.success) {

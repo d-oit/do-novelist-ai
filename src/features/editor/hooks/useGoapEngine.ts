@@ -249,7 +249,7 @@ export const useGoapEngine = (
       else if (action.name === 'write_chapter_parallel') {
         // Select up to 3 pending chapters
         const pendingChapters = project.chapters
-          .filter(c => c.status === ChapterStatus.PENDING)
+          .filter(c => (c.status as ChapterStatus) === ChapterStatus.PENDING)
           .slice(0, 3);
 
         if (pendingChapters.length === 0) {
@@ -447,10 +447,10 @@ export const useGoapEngine = (
 
       if (!project.worldState.hasOutline) {
         const outlineAction = availableActions.find(a => a.name === 'create_outline');
-        if (outlineAction) executeAction(outlineAction);
+        if (outlineAction) void executeAction(outlineAction);
       } else if (project.worldState.chaptersCompleted < project.worldState.chaptersCount) {
         const writeAction = availableActions.find(a => a.name === 'write_chapter_parallel');
-        if (writeAction) executeAction(writeAction);
+        if (writeAction) void executeAction(writeAction);
       } else {
         addLog('Planner', 'Goal Reached: Book Draft Complete.', 'success');
         setAutoPilot(false);

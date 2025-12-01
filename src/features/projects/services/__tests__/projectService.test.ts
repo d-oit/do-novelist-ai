@@ -31,11 +31,12 @@ const mockRequest = {
 
 global.indexedDB = {
   open: mockOpenDB.mockImplementation((_name, _version) => {
-    setTimeout(() => {
+    // Use microtask to call onsuccess after the request is returned
+    queueMicrotask(() => {
       if (mockRequest.onsuccess) {
         mockRequest.onsuccess({ target: mockRequest });
       }
-    }, 0);
+    });
     return mockRequest;
   }),
 } as any;
@@ -43,6 +44,7 @@ global.indexedDB = {
 describe('ProjectService', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    await projectService.init();
 
     // In-memory storage for mocked IDB operations
     const storage = {

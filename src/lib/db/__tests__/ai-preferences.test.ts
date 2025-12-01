@@ -84,7 +84,7 @@ describe('AI Preferences Database Service', () => {
       const stored = localStorage.getItem(`novelist_ai_preferences_${mockPreference.userId}`);
       expect(stored).not.toBeNull();
 
-      const parsed = JSON.parse(stored!);
+      const parsed = JSON.parse(stored as string);
       expect(parsed.id).toBe(mockPreference.id);
       expect(parsed.selectedProvider).toBe('openai');
       expect(parsed.enableFallback).toBe(true);
@@ -164,7 +164,7 @@ describe('AI Preferences Database Service', () => {
       const stored = localStorage.getItem('novelist_ai_preferences_capabilities');
       expect(stored).not.toBeNull();
 
-      const parsed = JSON.parse(stored!);
+      const parsed = JSON.parse(stored as string);
       expect(parsed).toHaveLength(1);
       expect(parsed[0].modelName).toBe('gpt-4o');
     });
@@ -244,7 +244,7 @@ describe('AI Preferences Database Service', () => {
       const stored = localStorage.getItem('novelist_ai_preferences_analytics');
       expect(stored).not.toBeNull();
 
-      const parsed = JSON.parse(stored!);
+      const parsed = JSON.parse(stored as string);
       expect(parsed).toHaveLength(1);
       expect(parsed[0].totalTokens).toBe(300);
     });
@@ -326,7 +326,7 @@ describe('AI Preferences Database Service', () => {
       const stored = localStorage.getItem('novelist_ai_preferences_health');
       expect(stored).not.toBeNull();
 
-      const parsed = JSON.parse(stored!);
+      const parsed = JSON.parse(stored as string);
       expect(parsed).toHaveLength(1);
       expect(parsed[0].status).toBe('operational');
     });

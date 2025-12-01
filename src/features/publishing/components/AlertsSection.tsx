@@ -20,7 +20,7 @@ const AlertCard: React.FC<{
   onMarkAsRead: () => void;
   onDismiss: () => void;
 }> = ({ alert, onMarkAsRead, onDismiss }) => {
-  const getAlertIcon = (type: string): React.ComponentType<any> => {
+  const getAlertIcon = (type: string): React.ComponentType<{ className?: string }> => {
     switch (type) {
       case 'milestone':
         return Award;

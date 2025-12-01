@@ -26,7 +26,7 @@ const FeedbackCard: React.FC<{
   feedback: ReaderFeedback;
   onExpand?: () => void;
 }> = ({ feedback, onExpand }) => {
-  const getSentimentColor = (sentiment: string) => {
+  const getSentimentColor = (sentiment: string): string => {
     switch (sentiment) {
       case 'positive':
         return 'text-green-600 bg-green-500/10 border-green-500/20';
@@ -37,7 +37,7 @@ const FeedbackCard: React.FC<{
     }
   };
 
-  const formatTimeAgo = (date: Date) => {
+  const formatTimeAgo = (date: Date): string => {
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
@@ -50,7 +50,7 @@ const FeedbackCard: React.FC<{
     <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
       <Card className='cursor-pointer p-4 transition-all hover:shadow-md' onClick={onExpand}>
         <div className='flex items-start gap-3'>
-          {feedback.author.avatar && (
+          {(feedback.author.avatar?.length ?? 0) > 0 && (
             <img
               src={feedback.author.avatar}
               alt={feedback.author.name}
@@ -61,32 +61,34 @@ const FeedbackCard: React.FC<{
           <div className='min-w-0 flex-1'>
             <div className='mb-1 flex items-center gap-2'>
               <h4 className='truncate text-sm font-medium'>{feedback.author.name}</h4>
-              {feedback.author.isVerified && <CheckCircle2 className='h-4 w-4 text-blue-500' />}
+              {feedback.author.isVerified !== null &&
+                feedback.author.isVerified !== undefined &&
+                feedback.author.isVerified && <CheckCircle2 className='h-4 w-4 text-blue-500' />}
               <span
                 className={cn(
                   'rounded-full border px-2 py-1 text-xs capitalize',
-                  getSentimentColor(feedback.sentiment)
+                  getSentimentColor(feedback.sentiment),
                 )}
               >
                 {feedback.sentiment}
               </span>
             </div>
 
-            {feedback.rating && (
+            {feedback.rating != null && !isNaN(feedback.rating) && feedback.rating > 0 && (
               <div className='mb-2 flex items-center gap-1'>
-                {[...Array(5)].map((_, i) => (
+                {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
                     className={cn(
                       'h-4 w-4',
-                      i < feedback.rating! ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'
+                      i < feedback.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300',
                     )}
                   />
                 ))}
               </div>
             )}
 
-            {feedback.content && (
+            {(feedback.content?.length ?? 0) > 0 && (
               <p className='mb-2 line-clamp-3 text-sm text-muted-foreground'>{feedback.content}</p>
             )}
 
@@ -128,12 +130,12 @@ export const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
   const [selectedFeedback, setSelectedFeedback] = useState<ReaderFeedback | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleFeedbackClick = (feedbackItem: ReaderFeedback) => {
+  const handleFeedbackClick = (feedbackItem: ReaderFeedback): void => {
     setSelectedFeedback(feedbackItem);
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = (): void => {
     setIsModalOpen(false);
     setSelectedFeedback(null);
   };
@@ -163,7 +165,7 @@ export const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
 
           <select
             value={feedbackFilter}
-            onChange={e => onFilterChange(e.target.value as any)}
+            onChange={e => onFilterChange(e.target.value as 'all' | 'positive' | 'negative')}
             className='rounded border border-border bg-background px-3 py-2 text-sm'
           >
             <option value='all'>All Feedback</option>

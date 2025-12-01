@@ -46,19 +46,21 @@ const Toggle: React.FC<{
   <div className='flex items-start justify-between py-2'>
     <div className='flex-1'>
       <label className='font-medium text-gray-900 dark:text-gray-100'>{label}</label>
-      {description && <p className='text-sm text-gray-600 dark:text-gray-400'>{description}</p>}
+      {(description?.length ?? 0) > 0 && (
+        <p className='text-sm text-gray-600 dark:text-gray-400'>{description}</p>
+      )}
     </div>
     <button
       onClick={() => onChange(!checked)}
       className={cn(
         'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-        checked ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+        checked ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700',
       )}
     >
       <span
         className={cn(
           'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-          checked ? 'translate-x-6' : 'translate-x-1'
+          checked ? 'translate-x-6' : 'translate-x-1',
         )}
       />
     </button>
@@ -154,7 +156,7 @@ const CategorySelector: React.FC<{
             'flex cursor-pointer items-center rounded-lg border p-3 transition-colors',
             selectedCategories.includes(category.id)
               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-              : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800'
+              : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800',
           )}
           onClick={() => toggleCategory(category.id)}
         >
@@ -167,7 +169,7 @@ const CategorySelector: React.FC<{
               'flex h-4 w-4 items-center justify-center rounded border-2',
               selectedCategories.includes(category.id)
                 ? 'border-blue-500 bg-blue-500'
-                : 'border-gray-300 dark:border-gray-600'
+                : 'border-gray-300 dark:border-gray-600',
             )}
           >
             {selectedCategories.includes(category.id) && (
@@ -382,8 +384,8 @@ export const WritingAssistantSettings: React.FC<WritingAssistantSettingsProps> =
             </label>
             <input
               type='text'
-              value={localConfig.genre || ''}
-              onChange={e => updateLocalConfig({ genre: e.target.value || undefined })}
+              value={localConfig.genre ?? ''}
+              onChange={e => updateLocalConfig({ genre: e.target.value ?? undefined })}
               placeholder='e.g., Fantasy, Romance, Mystery'
               className='w-full rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800'
             />

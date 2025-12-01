@@ -36,7 +36,7 @@ const SettingsView: React.FC = () => {
     }
   }, []);
 
-  const handleThemeChange = (newTheme: 'dark' | 'light') => {
+  const handleThemeChange = (newTheme: 'dark' | 'light'): void => {
     setTheme(newTheme);
     localStorage.setItem('novelist_theme', newTheme);
     const root = window.document.documentElement;
@@ -47,7 +47,7 @@ const SettingsView: React.FC = () => {
     }
   };
 
-  const handleSaveDbConfig = async () => {
+  const handleSaveDbConfig = async (): Promise<void> => {
     saveStoredConfig(dbConfig);
     setIsSaved(true);
 
@@ -144,7 +144,7 @@ const SettingsView: React.FC = () => {
 
           <div className='flex justify-end pt-2'>
             <button
-              onClick={handleSaveDbConfig}
+              onClick={() => void handleSaveDbConfig()}
               className='flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-all hover:opacity-90'
             >
               {isSaved ? <CheckCircle className='h-4 w-4' /> : <Save className='h-4 w-4' />}

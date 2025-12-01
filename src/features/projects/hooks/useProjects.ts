@@ -31,7 +31,7 @@ interface ProjectsState {
   // Actions
   init: () => Promise<void>;
   loadAll: () => Promise<void>;
-  loadStats: () => Promise<void>;
+  loadStats: () => void;
   create: (data: ProjectCreationData) => Promise<Project>;
   update: (id: string, data: ProjectUpdateData) => Promise<void>;
   delete: (id: string) => Promise<void>;
@@ -61,7 +61,7 @@ export const useProjects = create<ProjectsState>()(
         try {
           await projectService.init();
           await get().loadAll();
-          await get().loadStats();
+          get().loadStats();
         } catch (error) {
           set({ error: error instanceof Error ? error.message : 'Failed to initialize projects' });
         }
@@ -82,15 +82,19 @@ export const useProjects = create<ProjectsState>()(
       },
 
       // Load project statistics
-      loadStats: async (): Promise<void> => {
+      loadStats: (): void => {
         try {
           const { projects } = get();
           const stats: ProjectStats = {
             totalProjects: projects.length,
             activeProjects: projects.filter(
-              p => p.status === PublishStatus.EDITING || p.status === PublishStatus.DRAFT,
+              p =>
+                (p.status as PublishStatus) === PublishStatus.EDITING ||
+                (p.status as PublishStatus) === PublishStatus.DRAFT,
             ).length,
-            completedProjects: projects.filter(p => p.status === PublishStatus.PUBLISHED).length,
+            completedProjects: projects.filter(
+              p => (p.status as PublishStatus) === PublishStatus.PUBLISHED,
+            ).length,
             totalWords: projects.reduce(
               (sum, p) =>
                 sum + p.chapters.reduce((chSum, ch) => chSum + ch.content.split(' ').length, 0),
@@ -101,7 +105,7 @@ export const useProjects = create<ProjectsState>()(
               projects.length > 0
                 ? projects.reduce((sum, p) => {
                     const completed = p.chapters.filter(
-                      ch => ch.status === ChapterStatus.COMPLETE,
+                      ch => (ch.status as ChapterStatus) === ChapterStatus.COMPLETE,
                     ).length;
                     return (
                       sum + (p.chapters.length > 0 ? (completed / p.chapters.length) * 100 : 0)
@@ -125,7 +129,7 @@ export const useProjects = create<ProjectsState>()(
             selectedProject: project,
             isLoading: false,
           }));
-          await get().loadStats();
+          get().loadStats();
           return project;
         } catch (error) {
           set({
@@ -155,7 +159,7 @@ export const useProjects = create<ProjectsState>()(
                 : state.selectedProject,
             isLoading: false,
           }));
-          await get().loadStats();
+          get().loadStats();
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Failed to update project',
@@ -175,7 +179,7 @@ export const useProjects = create<ProjectsState>()(
             selectedProject: state.selectedProject?.id === id ? null : state.selectedProject,
             isLoading: false,
           }));
-          await get().loadStats();
+          get().loadStats();
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Failed to delete project',
@@ -230,7 +234,7 @@ export const selectFilteredProjects = (state: ProjectsState): Project[] => {
     };
     const targetStatus = statusMap[state.filters.status];
     if (targetStatus != null) {
-      filtered = filtered.filter(p => p.status === targetStatus);
+      filtered = filtered.filter(p => (p.status as PublishStatus) === targetStatus);
     }
   }
 
@@ -252,13 +256,13 @@ export const selectFilteredProjects = (state: ProjectsState): Project[] => {
       case 'progress':
         const progressA =
           a.chapters.length > 0
-            ? a.chapters.filter(ch => ch.status === ChapterStatus.COMPLETE).length /
-              a.chapters.length
+            ? a.chapters.filter(ch => (ch.status as ChapterStatus) === ChapterStatus.COMPLETE)
+                .length / a.chapters.length
             : 0;
         const progressB =
           b.chapters.length > 0
-            ? b.chapters.filter(ch => ch.status === ChapterStatus.COMPLETE).length /
-              b.chapters.length
+            ? b.chapters.filter(ch => (ch.status as ChapterStatus) === ChapterStatus.COMPLETE)
+                .length / b.chapters.length
             : 0;
         comparison = progressA - progressB;
         break;

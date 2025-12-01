@@ -45,7 +45,10 @@ export class CharacterValidationService {
   private constructor() {}
 
   public static getInstance(): CharacterValidationService {
-    if (!CharacterValidationService.instance) {
+    if (
+      CharacterValidationService.instance === null ||
+      CharacterValidationService.instance === undefined
+    ) {
       CharacterValidationService.instance = new CharacterValidationService();
     }
     return CharacterValidationService.instance;
@@ -79,17 +82,14 @@ export class CharacterValidationService {
     // Calculate a simple score based on character completeness
     let score = 50; // Base score
     const backgroundData = character.background as { backstory?: string } | undefined;
-    if (backgroundData?.backstory && backgroundData.backstory.length > 100) score += 15;
-    if (character.psychology?.desires && character.psychology.desires.length > 0) score += 15;
-    if (character.arc) score += 20;
+    if ((backgroundData?.backstory?.length ?? 0) > 100) score += 15;
+    if ((character.psychology?.desires?.length ?? 0) > 0) score += 15;
+    if (character.arc != null) score += 20;
 
     const strengths: string[] = [];
-    if (backgroundData?.backstory && backgroundData.backstory.length > 100)
-      strengths.push('Well-developed backstory');
-    if (character.psychology?.desires && character.psychology.desires.length > 2)
-      strengths.push('Clear motivations');
-    if (character.appearances && character.appearances.length > 2)
-      strengths.push('Rich relationships');
+    if ((backgroundData?.backstory?.length ?? 0) > 100) strengths.push('Well-developed backstory');
+    if ((character.psychology?.desires?.length ?? 0) > 2) strengths.push('Clear motivations');
+    if ((character.appearances?.length ?? 0) > 2) strengths.push('Rich relationships');
 
     return {
       isValid: true,
@@ -109,7 +109,7 @@ export class CharacterValidationService {
   public validateCreateCharacter(
     data: unknown,
     projectId: ProjectId,
-    existingCharacters: Character[] = []
+    existingCharacters: Character[] = [],
   ): ValidationResult<Character> {
     try {
       // Validate create schema
@@ -122,7 +122,7 @@ export class CharacterValidationService {
 
       // Check for unique name
       const nameExists = existingCharacters.some(
-        char => char.name.toLowerCase() === createData.name.toLowerCase()
+        char => char.name.toLowerCase() === createData.name.toLowerCase(),
       );
       if (nameExists) {
         return {
@@ -174,7 +174,7 @@ export class CharacterValidationService {
         background: {
           significantEvents: [],
           secrets: [],
-          ...((createData as any).background || {}),
+          ...((createData as any).background ?? {}),
         },
         psychology: {
           coreBeliefs: [],
@@ -225,7 +225,7 @@ export class CharacterValidationService {
    */
   public validateUpdateCharacter(
     data: unknown,
-    existingCharacters: Character[] = []
+    existingCharacters: Character[] = [],
   ): ValidationResult<UpdateCharacter> {
     try {
       const validation = validateData(UpdateCharacterSchema, data, 'update character');
@@ -236,10 +236,10 @@ export class CharacterValidationService {
       const updateData = validation.data;
 
       // Check for unique name if name is being updated
-      if (updateData.name) {
+      if ((updateData.name?.length ?? 0) > 0) {
         const nameExists = existingCharacters.some(
           char =>
-            char.id !== updateData.id && char.name.toLowerCase() === updateData.name!.toLowerCase()
+            char.id !== updateData.id && char.name.toLowerCase() === updateData.name.toLowerCase(),
         );
         if (nameExists) {
           return {
@@ -375,7 +375,7 @@ export class CharacterValidationService {
    */
   public validateCharacterRelationship(
     data: unknown,
-    characters: Character[]
+    characters: Character[],
   ): ValidationResult<CharacterRelationship> {
     try {
       const validation = validateData(CharacterRelationshipSchema, data, 'character relationship');
@@ -420,7 +420,7 @@ export class CharacterValidationService {
         const appropriatenessIssue = this.validateRelationshipAppropriateness(
           charA,
           charB,
-          relationship
+          relationship,
         );
         if (appropriatenessIssue) {
           issues.push({
@@ -457,7 +457,7 @@ export class CharacterValidationService {
    */
   public validateCharacterGroup(
     data: unknown,
-    characters: Character[]
+    characters: Character[],
   ): ValidationResult<CharacterGroup> {
     try {
       const validation = validateData(CharacterGroupSchema, data, 'character group');
@@ -496,7 +496,7 @@ export class CharacterValidationService {
    */
   public validateCharacterConflict(
     data: unknown,
-    characters: Character[]
+    characters: Character[],
   ): ValidationResult<CharacterConflict> {
     try {
       const validation = validateData(CharacterConflictSchema, data, 'character conflict');
@@ -541,7 +541,7 @@ export class CharacterValidationService {
     characters: Character[],
     relationships: CharacterRelationship[] = [],
     groups: CharacterGroup[] = [],
-    conflicts: CharacterConflict[] = []
+    conflicts: CharacterConflict[] = [],
   ): ValidationResult<{
     characters: Character[];
     relationships: CharacterRelationship[];
@@ -704,7 +704,7 @@ export class CharacterValidationService {
 
     const foundConflicts: string[] = [];
     traits.forEach(trait => {
-      const conflictingTraits = conflicts[trait] || [];
+      const conflictingTraits = conflicts[trait] ?? [];
       conflictingTraits.forEach(conflictTrait => {
         if (traits.includes(conflictTrait)) {
           foundConflicts.push(`${trait} vs ${conflictTrait}`);
@@ -718,7 +718,7 @@ export class CharacterValidationService {
   private validateRelationshipAppropriateness(
     charA: Character,
     charB: Character,
-    relationship: CharacterRelationship
+    relationship: CharacterRelationship,
   ): { path: (string | number)[]; message: string; code: string } | null {
     // Age-appropriate relationships
     if (relationship.type === 'romantic') {
@@ -762,7 +762,7 @@ export class CharacterValidationService {
    */
   public generateCharacterSuggestions(
     existingCharacters: Character[],
-    projectGenre: string[] = []
+    projectGenre: string[] = [],
   ): { role: CharacterRole; reason: string; importance: number }[] {
     const suggestions: { role: CharacterRole; reason: string; importance: number }[] = [];
 
@@ -832,12 +832,12 @@ export const validateCharacter = {
     characters: Character[],
     relationships?: CharacterRelationship[],
     groups?: CharacterGroup[],
-    conflicts?: CharacterConflict[]
+    conflicts?: CharacterConflict[],
   ) =>
     characterValidationService.validateProjectCharacters(
       characters,
       relationships,
       groups,
-      conflicts
+      conflicts,
     ),
 };

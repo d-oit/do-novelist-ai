@@ -151,7 +151,8 @@ class EditorService {
       const request = store.put(draft);
 
       request.onsuccess = (): void => resolve(draft);
-      request.onerror = (): void => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -166,8 +167,9 @@ class EditorService {
       const store = transaction.objectStore('drafts');
       const request = store.get(chapterId);
 
-      request.onsuccess = (): void => resolve(request.result ?? null);
-      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => resolve((request.result as SavedDraft) ?? null);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -184,7 +186,8 @@ class EditorService {
       const request = index.getAll(projectId);
 
       request.onsuccess = (): void => resolve(request.result);
-      request.onerror = (): void => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -213,7 +216,8 @@ class EditorService {
       const request = store.delete(chapterId);
 
       request.onsuccess = (): void => resolve();
-      request.onerror = (): void => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -237,7 +241,8 @@ class EditorService {
             resolve();
           }
         };
-        request.onerror = (): void => reject(request.error);
+        request.onerror = (): void =>
+          reject(new Error(request.error?.message ?? 'Database operation failed'));
       });
 
       // Handle edge case of no drafts
@@ -275,7 +280,8 @@ class EditorService {
       const request = store.clear();
 
       request.onsuccess = (): void => resolve();
-      request.onerror = (): void => reject(request.error);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 }

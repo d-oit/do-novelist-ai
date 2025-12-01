@@ -4,15 +4,15 @@ import { usePublishingStore } from '../../../lib/stores/publishingStore';
 import { Project } from '../../../types';
 import { publishingAnalyticsService } from '../services/publishingAnalyticsService';
 import {
-  Publication,
-  PlatformAnalytics,
-  ReaderFeedback,
   EngagementMetrics,
-  PublishingGoals,
-  ReaderInsights,
-  PublishingTrends,
+  PlatformAnalytics,
+  Publication,
   PublishingAlert,
+  PublishingGoals,
   PublishingPlatform,
+  PublishingTrends,
+  ReaderFeedback,
+  ReaderInsights,
 } from '../types';
 
 export interface UsePublishingAnalyticsReturn {
@@ -41,10 +41,14 @@ export interface UsePublishingAnalyticsReturn {
   connectedPlatforms: PublishingPlatform[];
 
   // Actions
-  publishProject: (project: Project, platforms: string[], metadata: any) => Promise<Publication>;
+  publishProject: (
+    project: Project,
+    platforms: string[],
+    metadata: Publication['metadata'],
+  ) => Promise<Publication>;
   loadPublicationData: (publicationId: string) => Promise<void>;
   createGoal: (goal: Omit<PublishingGoals, 'id' | 'current'>) => Promise<PublishingGoals>;
-  connectPlatform: (platformId: string, credentials: any) => Promise<boolean>;
+  connectPlatform: (platformId: string, credentials: unknown) => Promise<boolean>;
 
   // Data Loading
   refreshAnalytics: (publicationId: string) => Promise<void>;
@@ -76,19 +80,20 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
   useEffect(() => {
     const controller = new AbortController();
 
-    store.init().catch(err => {
-      if (err.name === 'AbortError') return;
+    store.init().catch((err: unknown) => {
+      if (err instanceof Error && err.name === 'AbortError') return;
       console.error('Failed to initialize publishing analytics:', err);
     });
 
-    return () => {
+    const cleanup = (): void => {
       controller.abort();
     };
+    return cleanup;
   }, [store]);
 
   // Computed values
   const averageRating = useMemo(() => {
-    const rated = store.feedback.filter(f => f.rating);
+    const rated = store.feedback.filter(f => f.rating != null);
     return rated.length > 0 ? rated.reduce((sum, f) => sum + (f.rating ?? 0), 0) / rated.length : 0;
   }, [store.feedback]);
 
@@ -165,8 +170,8 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
   const filterFeedback = useCallback(
     (type?: string, sentiment?: string): ReaderFeedback[] => {
       return store.feedback.filter(item => {
-        if (type && item.type !== type) return false;
-        if (sentiment && item.sentiment !== sentiment) return false;
+        if ((type ?? '') && item.type !== type) return false;
+        if ((sentiment ?? '') && item.sentiment !== sentiment) return false;
         return true;
       });
     },
@@ -178,7 +183,7 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
       const lowercaseQuery = query.toLowerCase();
       return store.feedback.filter(
         item =>
-          item.content?.toLowerCase().includes(lowercaseQuery) ||
+          item.content?.toLowerCase().includes(lowercaseQuery) === true ||
           item.author.name.toLowerCase().includes(lowercaseQuery) ||
           item.topics.some(topic => topic.toLowerCase().includes(lowercaseQuery)),
       );

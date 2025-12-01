@@ -13,14 +13,14 @@ interface AISettingsPanelProps {
   userId: string;
 }
 
-export const AISettingsPanel = ({ userId }: AISettingsPanelProps) => {
+export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
   const [preferences, setPreferences] = useState<ProviderPreferenceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'provider' | 'analytics' | 'health'>('provider');
 
   useEffect(() => {
-    loadUserPreferences(userId).then(prefs => {
+    void loadUserPreferences(userId).then(prefs => {
       setPreferences(prefs);
       setLoading(false);
     });
@@ -111,7 +111,7 @@ export const AISettingsPanel = ({ userId }: AISettingsPanelProps) => {
               <ProviderSelector
                 userId={userId}
                 onProviderChange={(provider, model) => {
-                  handleSave({
+                  void handleSave({
                     selectedProvider: provider,
                     selectedModel: model,
                   });
@@ -128,7 +128,7 @@ export const AISettingsPanel = ({ userId }: AISettingsPanelProps) => {
                   max='2'
                   step='0.1'
                   value={preferences.temperature}
-                  onChange={e => handleSave({ temperature: parseFloat(e.target.value) })}
+                  onChange={e => void handleSave({ temperature: parseFloat(e.target.value) })}
                   className='w-full rounded-md border px-3 py-2'
                 />
                 <p className='mt-1 text-xs text-gray-500'>0.0-2.0 (lower = more focused)</p>
@@ -141,7 +141,7 @@ export const AISettingsPanel = ({ userId }: AISettingsPanelProps) => {
                   min='1'
                   max='128000'
                   value={preferences.maxTokens}
-                  onChange={e => handleSave({ maxTokens: parseInt(e.target.value) })}
+                  onChange={e => void handleSave({ maxTokens: parseInt(e.target.value) })}
                   className='w-full rounded-md border px-3 py-2'
                 />
                 <p className='mt-1 text-xs text-gray-500'>Maximum response length</p>
@@ -153,7 +153,7 @@ export const AISettingsPanel = ({ userId }: AISettingsPanelProps) => {
                 <input
                   type='checkbox'
                   checked={preferences.autoFallback}
-                  onChange={e => handleSave({ autoFallback: e.target.checked })}
+                  onChange={e => void handleSave({ autoFallback: e.target.checked })}
                   className='mr-2'
                 />
                 <span className='text-sm text-gray-700'>
@@ -168,7 +168,7 @@ export const AISettingsPanel = ({ userId }: AISettingsPanelProps) => {
                 <input
                   type='checkbox'
                   checked={preferences.costOptimization}
-                  onChange={e => handleSave({ costOptimization: e.target.checked })}
+                  onChange={e => void handleSave({ costOptimization: e.target.checked })}
                   className='mr-2'
                 />
                 <span className='text-sm text-gray-700'>
@@ -188,7 +188,7 @@ export const AISettingsPanel = ({ userId }: AISettingsPanelProps) => {
                 min='0'
                 step='5'
                 value={preferences.monthlyBudget}
-                onChange={e => handleSave({ monthlyBudget: parseFloat(e.target.value) })}
+                onChange={e => void handleSave({ monthlyBudget: parseFloat(e.target.value) })}
                 className='w-full rounded-md border px-3 py-2'
               />
               <p className='mt-1 text-xs text-gray-500'>Set a monthly spending limit</p>
@@ -242,4 +242,4 @@ export const AISettingsPanel = ({ userId }: AISettingsPanelProps) => {
       </div>
     </div>
   );
-}
+};

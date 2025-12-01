@@ -33,15 +33,15 @@ const PublishingDashboard: React.FC<PublishingDashboardProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    if (publicationId) {
-      analytics.loadPublicationData(publicationId);
+    if ((publicationId?.length ?? 0) > 0) {
+      void analytics.loadPublicationData(publicationId);
       const days = selectedTimeframe === '7d' ? 7 : selectedTimeframe === '30d' ? 30 : 90;
-      analytics.loadTrends(publicationId, days);
+      void analytics.loadTrends(publicationId, days);
     }
   }, [publicationId, selectedTimeframe]);
 
-  const refreshData = async () => {
-    if (!publicationId) return;
+  const refreshData = async (): Promise<void> => {
+    if ((publicationId?.length ?? 0) === 0) return;
     setIsRefreshing(true);
     try {
       await analytics.refreshAnalytics(publicationId);
@@ -80,7 +80,7 @@ const PublishingDashboard: React.FC<PublishingDashboardProps> = ({
     <motion.div
       className={cn(
         'flex h-full flex-col overflow-hidden rounded-lg border border-border/40 bg-card/50 backdrop-blur-sm',
-        className
+        className,
       )}
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -107,7 +107,7 @@ const PublishingDashboard: React.FC<PublishingDashboardProps> = ({
                   'px-3 py-1 text-xs transition-colors',
                   selectedTimeframe === period
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                    : 'bg-secondary/50 text-muted-foreground hover:text-foreground',
                 )}
               >
                 {period}
@@ -118,7 +118,7 @@ const PublishingDashboard: React.FC<PublishingDashboardProps> = ({
           <Button
             variant='outline'
             size='sm'
-            onClick={refreshData}
+            onClick={() => void refreshData()}
             disabled={isRefreshing}
             className='text-xs'
           >

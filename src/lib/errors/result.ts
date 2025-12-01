@@ -89,7 +89,7 @@ export const mapErr = <T, E, F>(result: Result<T, E>, fn: (error: E) => F): Resu
  */
 export const andThen = <T, E, U>(
   result: Result<T, E>,
-  fn: (value: T) => Result<U, E>
+  fn: (value: T) => Result<U, E>,
 ): Result<U, E> => {
   return isOk(result) ? fn(result.data) : result;
 };
@@ -99,7 +99,7 @@ export const andThen = <T, E, U>(
  */
 export const andThenAsync = <T, E, U>(
   result: Result<T, E>,
-  fn: (value: T) => Promise<Result<U, E>>
+  fn: (value: T) => Promise<Result<U, E>>,
 ): Promise<Result<U, E>> => {
   return isOk(result) ? fn(result.data) : Promise.resolve(result);
 };
@@ -109,7 +109,7 @@ export const andThenAsync = <T, E, U>(
  */
 export const mapAsync = <T, E, U>(
   result: Result<T, E>,
-  fn: (value: T) => Promise<U>
+  fn: (value: T) => Promise<U>,
 ): Promise<Result<U, E>> => {
   return isOk(result) ? fn(result.data).then(ok) : Promise.resolve(result);
 };
@@ -119,7 +119,7 @@ export const mapAsync = <T, E, U>(
  */
 export const tryCatch = <T>(
   fn: () => T,
-  errorHandler?: (error: unknown) => AppError
+  errorHandler?: (error: unknown) => AppError,
 ): Result<T, AppError> => {
   try {
     return ok(fn());
@@ -134,7 +134,7 @@ export const tryCatch = <T>(
  */
 export const tryCatchAsync = <T>(
   fn: () => Promise<T>,
-  errorHandler?: (error: unknown) => AppError
+  errorHandler?: (error: unknown) => AppError,
 ): Promise<Result<T, AppError>> => {
   return fn()
     .then(value => ok(value))
@@ -149,7 +149,7 @@ export const tryCatchAsync = <T>(
  */
 export const fromPromise = <T>(
   promise: Promise<T>,
-  errorHandler?: (error: unknown) => AppError
+  errorHandler?: (error: unknown) => AppError,
 ): Promise<Result<T, AppError>> => {
   return promise
     .then(value => ok(value))
@@ -163,7 +163,11 @@ export const fromPromise = <T>(
  * Convert Result to Promise
  */
 export const toPromise = <T, E>(result: Result<T, E>): Promise<T> => {
-  return isOk(result) ? Promise.resolve(result.data) : Promise.reject(result.error);
+  return isOk(result)
+    ? Promise.resolve(result.data)
+    : Promise.reject(
+        result.error instanceof Error ? result.error : new Error(String(result.error)),
+      );
 };
 
 /**
@@ -184,7 +188,7 @@ export const collect = <T, E>(results: Array<Result<T, E>>): Result<T[], E> => {
  * Collect array of results with potential errors
  */
 export const collectAll = <T, E>(
-  results: Array<Result<T, E>>
+  results: Array<Result<T, E>>,
 ): Array<{ success: boolean; data?: T; error?: E }> => {
   return results.map(result => ({
     success: isOk(result),
@@ -199,7 +203,7 @@ export const collectAll = <T, E>(
 export const retry = async <T>(
   fn: () => Promise<Result<T, AppError>>,
   maxAttempts: number,
-  delayMs: number = 0
+  delayMs: number = 0,
 ): Promise<Result<T, AppError>> => {
   let lastError: AppError | undefined;
 
@@ -219,7 +223,10 @@ export const retry = async <T>(
     }
   }
 
-  return err(lastError!);
+  if (!lastError) {
+    throw new Error('No error occurred but retry logic failed');
+  }
+  return err(lastError);
 };
 
 /**
@@ -227,7 +234,7 @@ export const retry = async <T>(
  */
 export const withTimeout = <T>(
   promise: Promise<Result<T, AppError>>,
-  timeoutMs: number
+  timeoutMs: number,
 ): Promise<Result<T, AppError>> => {
   return new Promise(resolve => {
     const timeout = setTimeout(() => {
@@ -251,14 +258,14 @@ export const withTimeout = <T>(
  */
 export const safeAsync = async <T>(
   operation: () => Promise<T>,
-  context?: string
+  context?: string,
 ): Promise<Result<T, AppError>> => {
   return tryCatchAsync(
     async () => {
       const result = await operation();
       return result;
     },
-    error => toAppError(error, context)
+    error => toAppError(error, context),
   );
 };
 
@@ -268,7 +275,7 @@ export const safeAsync = async <T>(
 export const safeSync = <T>(operation: () => T, context?: string): Result<T, AppError> => {
   return tryCatch(
     () => operation(),
-    error => toAppError(error, context)
+    error => toAppError(error, context),
   );
 };
 
@@ -277,7 +284,7 @@ export const safeSync = <T>(operation: () => T, context?: string): Result<T, App
  */
 export const withContext = <T, E extends AppError>(
   result: Result<T, E>,
-  _context: Record<string, unknown>
+  _context: Record<string, unknown>,
 ): Result<T, E> => {
   // Context is read-only in BaseError, so we just return the result
   // In practice, errors should be created with context initially
@@ -292,7 +299,7 @@ export const match = <T, E, U>(
   handlers: {
     ok: (value: T) => U;
     err: (error: E) => U;
-  }
+  },
 ): U => {
   return isOk(result) ? handlers.ok(result.data) : handlers.err(result.error);
 };
@@ -321,7 +328,7 @@ export const tapErr = <T, E>(result: Result<T, E>, fn: (error: E) => void): Resu
  * Combine multiple async operations - fail fast
  */
 export const combine = async <T extends Array<Promise<any>>>(
-  promises: T
+  promises: T,
 ): Promise<{ [K in keyof T]: Awaited<T[K]> extends Promise<infer R> ? R : T[K] }> => {
   const results = await Promise.all(promises);
   return results as any;
@@ -331,7 +338,7 @@ export const combine = async <T extends Array<Promise<any>>>(
  * Combine results with aggregation - fail fast
  */
 export const combineResults = async <T extends Array<Promise<Result<any, AppError>>>>(
-  promises: T
+  promises: T,
 ): Promise<
   Result<
     {

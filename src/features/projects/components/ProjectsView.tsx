@@ -24,7 +24,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadProjects();
+    void loadProjects();
   }, [currentProject.id]);
 
   const loadProjects = async (): Promise<void> => {
@@ -44,7 +44,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
     if (confirm('Are you sure you want to delete this project? This cannot be undone.')) {
       try {
         await db.deleteProject(id);
-        loadProjects();
+        await loadProjects();
       } catch (error) {
         console.error('Failed to delete project:', error);
       }
@@ -193,7 +193,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
                         <div className='mb-4 flex items-start justify-between'>
                           <Folder className='h-6 w-6 text-gray-400 transition-colors group-hover:text-blue-600 dark:text-gray-500 dark:group-hover:text-blue-400' />
                           <button
-                            onClick={e => handleDelete(e, p.id)}
+                            onClick={e => void handleDelete(e, p.id)}
                             className={iconButtonTarget(
                               'rounded text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-red-400',
                             )}

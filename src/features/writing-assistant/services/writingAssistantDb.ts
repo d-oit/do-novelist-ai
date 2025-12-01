@@ -110,12 +110,12 @@ class WritingAssistantDb {
   /**
    * Save analysis results to database for historical tracking
    */
-  public async saveAnalysisHistory(
+  public saveAnalysisHistory(
     analysis: ContentAnalysis,
     projectId: string,
     acceptedCount = 0,
     dismissedCount = 0,
-  ): Promise<void> {
+  ): void {
     if (!this.userId) return;
 
     try {
@@ -138,10 +138,10 @@ class WritingAssistantDb {
       };
 
       // Save to database (would be actual DB call)
-      await this.insertAnalysisHistory(analysisRecord);
+      this.insertAnalysisHistory(analysisRecord);
 
       // Update daily progress metrics
-      await this.updateDailyProgress(projectId, analysis);
+      this.updateDailyProgress(projectId, analysis);
     } catch (error) {
       console.error('Failed to save analysis history:', error);
       // Fail gracefully - don't break the user experience
@@ -151,17 +151,17 @@ class WritingAssistantDb {
   /**
    * Record user feedback on suggestions for machine learning
    */
-  public async recordSuggestionFeedback(
+  public recordSuggestionFeedback(
     suggestion: WritingSuggestion,
     action: 'accepted' | 'dismissed' | 'ignored',
     chapterId: string,
     projectId: string,
     appliedText?: string,
-  ): Promise<void> {
+  ): void {
     if (!this.userId) return;
 
     try {
-      const feedback: any = {
+      const feedback: SuggestionFeedback = {
         id: `feedback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId: this.userId,
         suggestionType: suggestion.type,
@@ -170,13 +170,15 @@ class WritingAssistantDb {
         originalText: suggestion.originalText,
         appliedText,
         confidence: suggestion.confidence,
-        contextWordCount: suggestion.originalText?.split(/\s+/).length || 0,
+        contextWordCount: suggestion.originalText?.split(/\s+/).length ?? 0,
         chapterId,
         projectId,
         timestamp: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
-      await this.insertSuggestionFeedback(feedback);
+      this.insertSuggestionFeedback(feedback);
     } catch (error) {
       console.error('Failed to record suggestion feedback:', error);
     }
@@ -185,11 +187,11 @@ class WritingAssistantDb {
   /**
    * Sync user preferences across devices (optional)
    */
-  public async syncPreferences(config: WritingAssistantConfig): Promise<void> {
+  public syncPreferences(config: WritingAssistantConfig): void {
     if (!this.userId) return;
 
     try {
-      const preferences: any = {
+      const preferences: UserWritingPreferences = {
         id: `pref_${this.userId}_${this.deviceId}`,
         userId: this.userId,
         preferences: config,
@@ -199,7 +201,7 @@ class WritingAssistantDb {
         updatedAt: new Date(),
       };
 
-      await this.upsertUserPreferences(preferences);
+      this.upsertUserPreferences(preferences);
     } catch (error) {
       console.error('Failed to sync preferences:', error);
     }
@@ -208,12 +210,12 @@ class WritingAssistantDb {
   /**
    * Load preferences from database (fallback if localStorage is empty)
    */
-  public async loadPreferences(): Promise<WritingAssistantConfig | null> {
+  public loadPreferences(): WritingAssistantConfig | null {
     if (!this.userId) return null;
 
     try {
-      const preferences = await this.getUserPreferences(this.userId);
-      return preferences?.preferences || null;
+      const preferences = this.getUserPreferences(this.userId);
+      return preferences?.preferences ?? null;
     } catch (error) {
       console.error('Failed to load preferences:', error);
       return null;
@@ -223,10 +225,10 @@ class WritingAssistantDb {
   /**
    * Get writing analytics for progress tracking
    */
-  public async getWritingAnalytics(
+  public getWritingAnalytics(
     projectId: string,
     timeRange: 'week' | 'month' | 'year' = 'month',
-  ): Promise<{
+  ): {
     progressMetrics: WritingProgressMetrics[];
     improvementTrends: {
       readabilityTrend: number;
@@ -238,7 +240,7 @@ class WritingAssistantDb {
       acceptanceRate: number;
       commonPatterns: string[];
     };
-  }> {
+  } {
     if (!this.userId) {
       return {
         progressMetrics: [],
@@ -248,11 +250,9 @@ class WritingAssistantDb {
     }
 
     try {
-      const [progressMetrics, analysisHistory, suggestionFeedback] = await Promise.all([
-        this.getProgressMetrics(this.userId, projectId, timeRange),
-        this.getAnalysisHistory(this.userId, projectId, timeRange),
-        this.getSuggestionFeedback(this.userId, projectId, timeRange),
-      ]);
+      const progressMetrics = this.getProgressMetrics(this.userId, projectId, timeRange);
+      const analysisHistory = this.getAnalysisHistory(this.userId, projectId, timeRange);
+      const suggestionFeedback = this.getSuggestionFeedback(this.userId, projectId, timeRange);
 
       // Calculate trends
       const improvementTrends = this.calculateImprovementTrends(analysisHistory);
@@ -276,16 +276,14 @@ class WritingAssistantDb {
   /**
    * Clean up old data (privacy-friendly)
    */
-  public async cleanupOldData(retentionDays = 365): Promise<void> {
+  public cleanupOldData(retentionDays = 365): void {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
     try {
-      await Promise.all([
-        this.deleteOldAnalysisHistory(cutoffDate),
-        this.deleteOldSuggestionFeedback(cutoffDate),
-        this.deleteOldProgressMetrics(cutoffDate),
-      ]);
+      this.deleteOldAnalysisHistory(cutoffDate);
+      this.deleteOldSuggestionFeedback(cutoffDate);
+      this.deleteOldProgressMetrics(cutoffDate);
     } catch (error) {
       console.error('Failed to cleanup old data:', error);
     }
@@ -332,7 +330,7 @@ class WritingAssistantDb {
     // Find most helpful categories
     const categoryStats = feedback.reduce<Record<string, number>>((acc, f) => {
       if (f.action === 'accepted') {
-        acc[f.suggestionCategory] = (acc[f.suggestionCategory] || 0) + 1;
+        acc[f.suggestionCategory] = (acc[f.suggestionCategory] ?? 0) + 1;
       }
       return acc;
     }, {});
@@ -349,71 +347,71 @@ class WritingAssistantDb {
     };
   }
 
-  private async updateDailyProgress(_projectId: string, _analysis: ContentAnalysis): Promise<void> {
+  private updateDailyProgress(_projectId: string, _analysis: ContentAnalysis): void {
     // This would be actual database operations
     // For now, we'll implement mock versions
   }
 
   // Mock database operations (would be replaced with actual Turso queries)
-  private async insertAnalysisHistory(record: Omit<AnalysisHistory, 'createdAt'>): Promise<void> {
+  private insertAnalysisHistory(record: Omit<AnalysisHistory, 'createdAt'>): void {
     // await db.insert(analysisHistoryTable).values(record);
     console.log('Saving analysis history:', record.id);
   }
 
-  private async insertSuggestionFeedback(record: Omit<SuggestionFeedback, 'id'>): Promise<void> {
+  private insertSuggestionFeedback(record: Omit<SuggestionFeedback, 'id'>): void {
     // await db.insert(suggestionFeedbackTable).values(record);
     console.log('Recording suggestion feedback:', record.suggestionType, record.action);
   }
 
-  private async upsertUserPreferences(
+  private upsertUserPreferences(
     record: Omit<UserWritingPreferences, 'createdAt' | 'updatedAt'>,
-  ): Promise<void> {
+  ): void {
     // await db.insert(userPreferencesTable).values(record).onConflictDoUpdate(...);
     console.log('Syncing preferences for user:', record.userId);
   }
 
-  private async getUserPreferences(userId: string): Promise<UserWritingPreferences | null> {
+  private getUserPreferences(userId: string): UserWritingPreferences | null {
     // return await db.select().from(userPreferencesTable).where(eq(userPreferencesTable.userId, userId));
     console.log('Loading preferences for user:', userId);
     return null;
   }
 
-  private async getProgressMetrics(
+  private getProgressMetrics(
     userId: string,
     projectId: string,
     timeRange: string,
-  ): Promise<WritingProgressMetrics[]> {
+  ): WritingProgressMetrics[] {
     console.log('Loading progress metrics:', userId, projectId, timeRange);
     return [];
   }
 
-  private async getAnalysisHistory(
+  private getAnalysisHistory(
     userId: string,
     projectId: string,
     timeRange: string,
-  ): Promise<AnalysisHistory[]> {
+  ): AnalysisHistory[] {
     console.log('Loading analysis history:', userId, projectId, timeRange);
     return [];
   }
 
-  private async getSuggestionFeedback(
+  private getSuggestionFeedback(
     userId: string,
     projectId: string,
     timeRange: string,
-  ): Promise<SuggestionFeedback[]> {
+  ): SuggestionFeedback[] {
     console.log('Loading suggestion feedback:', userId, projectId, timeRange);
     return [];
   }
 
-  private async deleteOldAnalysisHistory(cutoffDate: Date): Promise<void> {
+  private deleteOldAnalysisHistory(cutoffDate: Date): void {
     console.log('Cleaning up analysis history older than:', cutoffDate);
   }
 
-  private async deleteOldSuggestionFeedback(cutoffDate: Date): Promise<void> {
+  private deleteOldSuggestionFeedback(cutoffDate: Date): void {
     console.log('Cleaning up suggestion feedback older than:', cutoffDate);
   }
 
-  private async deleteOldProgressMetrics(cutoffDate: Date): Promise<void> {
+  private deleteOldProgressMetrics(cutoffDate: Date): void {
     console.log('Cleaning up progress metrics older than:', cutoffDate);
   }
 }

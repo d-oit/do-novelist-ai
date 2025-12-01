@@ -24,8 +24,8 @@ const STORAGE_KEY = 'novelist_ai_preferences';
  */
 function getClient(): Client | null {
   const config = {
-    url: import.meta.env.VITE_TURSO_DATABASE_URL || '',
-    authToken: import.meta.env.VITE_TURSO_AUTH_TOKEN || '',
+    url: import.meta.env.VITE_TURSO_DATABASE_URL ?? '',
+    authToken: import.meta.env.VITE_TURSO_AUTH_TOKEN ?? '',
   };
 
   if (!config.url) return null;
@@ -76,7 +76,7 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
 
       if (result.rows.length === 0) return null;
 
-      const row = result.rows[0]!;
+      const row = result.rows[0];
       return {
         id: row.id as string,
         userId: row.user_id as string,
@@ -165,7 +165,7 @@ export async function saveUserAIPreference(preference: UserAIPreference): Promis
  */
 
 export async function getProviderCapabilities(
-  provider?: AIProvider
+  provider?: AIProvider,
 ): Promise<AIProviderCapability[]> {
   const client = getClient();
 
@@ -254,7 +254,7 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
     const all = stored ? JSON.parse(stored) : [];
     const index = all.findIndex(
       (c: AIProviderCapability) =>
-        c.provider === capability.provider && c.modelName === capability.modelName
+        c.provider === capability.provider && c.modelName === capability.modelName,
     );
 
     if (index >= 0) {
@@ -320,7 +320,7 @@ export interface UsageStats {
 export async function getUserUsageStats(
   userId: string,
   startDate?: string,
-  endDate?: string
+  endDate?: string,
 ): Promise<UsageStats> {
   const client = getClient();
 
@@ -361,11 +361,11 @@ export async function getUserUsageStats(
       }
 
       return {
-        totalTokens: (row.total_tokens as number) || 0,
-        totalCost: (row.total_cost as number) || 0,
-        totalRequests: (row.total_requests as number) || 0,
-        successRate: ((row.success_rate as number) || 0) * 100,
-        avgLatencyMs: (row.avg_latency_ms as number) || 0,
+        totalTokens: (row.total_tokens as number) ?? 0,
+        totalCost: (row.total_cost as number) ?? 0,
+        totalRequests: (row.total_requests as number) ?? 0,
+        successRate: ((row.success_rate as number) ?? 0) * 100,
+        avgLatencyMs: (row.avg_latency_ms as number) ?? 0,
       };
     } catch (e) {
       console.error('Failed to get user usage stats:', e);

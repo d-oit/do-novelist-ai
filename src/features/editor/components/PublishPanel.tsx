@@ -60,7 +60,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
       (ch.content
         .trim()
         .split(/\s+/)
-        .filter(w => w.length > 0).length || 0),
+        .filter(w => w.length > 0).length ?? 0),
     0,
   );
   const targetWords = project.targetWordCount ?? 50000;
@@ -208,7 +208,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
                   className='w-full rounded border border-border bg-secondary/20 px-3 py-2 text-xs focus:border-primary focus:outline-none'
                   value={targetWords}
                   onChange={e =>
-                    onUpdateProject({ targetWordCount: parseInt(e.target.value) || 0 })
+                    onUpdateProject({ targetWordCount: parseInt(e.target.value) ?? 0 })
                   }
                   data-testid='publish-target-words-input'
                 />
@@ -270,7 +270,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
             </div>
 
             <button
-              onClick={handleDownloadEpub}
+              onClick={() => void handleDownloadEpub()}
               disabled={isExporting}
               className='flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-md transition-colors hover:opacity-90 disabled:opacity-50'
               data-testid='export-epub-btn'
@@ -428,7 +428,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
               </select>
 
               <button
-                onClick={handleTranslate}
+                onClick={() => void handleTranslate()}
                 disabled={isTranslating}
                 className='flex items-center gap-2 whitespace-nowrap rounded-md border border-border bg-secondary px-4 py-2 text-xs font-bold text-secondary-foreground transition-colors hover:bg-secondary/80'
               >
@@ -453,7 +453,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
               console.log('Published:', pub);
               setShowPublishingSetup(false);
               // Refresh analytics if needed
-              publishingAnalytics.loadPublicationData(pub.id);
+              void publishingAnalytics.loadPublicationData(pub.id);
             }}
             onClose={() => setShowPublishingSetup(false)}
             className='h-[90vh] w-full max-w-5xl shadow-2xl'

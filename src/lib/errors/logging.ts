@@ -57,7 +57,7 @@ export class ConsoleLogService implements LogService {
   private formatEntry(entry: LogEntry): string {
     const date = new Date(entry.timestamp).toISOString();
     const contextStr = entry.context ? ` ${JSON.stringify(entry.context)}` : '';
-    const errorStr = entry.error ? `\n${entry.error.stack || entry.error.message}` : '';
+    const errorStr = entry.error ? `\n${entry.error.stack ?? entry.error.message}` : '';
     return `[${date}] [${entry.level.toUpperCase()}] ${entry.message}${contextStr}${errorStr}`;
   }
 
@@ -136,14 +136,14 @@ export class SentryLogService implements LogService {
 
   public constructor() {}
 
-  public async ensureSentryLoaded(): Promise<void> {
+  public ensureSentryLoaded(): void {
     if (typeof window === 'undefined' || !(window as any).Sentry) {
       return;
     }
   }
 
   public log(entry: LogEntry): void {
-    this.ensureSentryLoaded().then(() => {
+    void this.ensureSentryLoaded().then(() => {
       const Sentry = (window as any).Sentry;
       if (!Sentry) return;
 
@@ -212,7 +212,10 @@ export class Logger {
   private services: LogService[];
   private minLevel: LogLevel;
 
-  public constructor(services: LogService[] = [new ConsoleLogService()], minLevel: LogLevel = 'info') {
+  public constructor(
+    services: LogService[] = [new ConsoleLogService()],
+    minLevel: LogLevel = 'info',
+  ) {
     this.services = services;
     this.minLevel = minLevel;
   }
@@ -231,7 +234,7 @@ export class Logger {
     level: LogLevel,
     message: string,
     context?: Record<string, unknown>,
-    error?: Error
+    error?: Error,
   ): void {
     if (!this.shouldLog(level)) return;
 
@@ -264,7 +267,7 @@ export class Logger {
       'error',
       message instanceof Error ? message.message : message,
       context,
-      message instanceof Error ? message : undefined
+      message instanceof Error ? message : undefined,
     );
   }
 
@@ -286,7 +289,7 @@ export class Logger {
           cause: appError.cause,
         },
       },
-      appError
+      appError,
     );
   }
 
@@ -306,7 +309,7 @@ export class Logger {
         error: (message: string | Error, ctx?: Record<string, unknown>) =>
           service.error(message, { ...ctx, ...context }),
       })),
-      this.minLevel
+      this.minLevel,
     );
   }
 }

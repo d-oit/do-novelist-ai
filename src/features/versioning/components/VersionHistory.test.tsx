@@ -112,13 +112,7 @@ describe('VersionHistory', () => {
   });
 
   it('renders version history with versions list', () => {
-    render(
-      <VersionHistory
-        chapter={mockChapter}
-        onRestoreVersion={mockOnRestoreVersion}
-        onClose={mockOnClose}
-      />
-    );
+    render(<VersionHistory chapter={mockChapter} onRestoreVersion={mockOnRestoreVersion} onClose={mockOnClose} />);
 
     expect(screen.getByText('Version History')).toBeInTheDocument();
     expect(screen.getByText('(2 versions)')).toBeInTheDocument();
@@ -132,13 +126,7 @@ describe('VersionHistory', () => {
       isLoading: true,
     });
 
-    render(
-      <VersionHistory
-        chapter={mockChapter}
-        onRestoreVersion={mockOnRestoreVersion}
-        onClose={mockOnClose}
-      />
-    );
+    render(<VersionHistory chapter={mockChapter} onRestoreVersion={mockOnRestoreVersion} onClose={mockOnClose} />);
 
     expect(screen.getByText('Loading version history...')).toBeInTheDocument();
   });
@@ -149,25 +137,13 @@ describe('VersionHistory', () => {
       error: 'Failed to load versions',
     });
 
-    render(
-      <VersionHistory
-        chapter={mockChapter}
-        onRestoreVersion={mockOnRestoreVersion}
-        onClose={mockOnClose}
-      />
-    );
+    render(<VersionHistory chapter={mockChapter} onRestoreVersion={mockOnRestoreVersion} onClose={mockOnClose} />);
 
     expect(screen.getByText('Failed to load versions')).toBeInTheDocument();
   });
 
   it('allows filtering versions by search query', async () => {
-    render(
-      <VersionHistory
-        chapter={mockChapter}
-        onRestoreVersion={mockOnRestoreVersion}
-        onClose={mockOnClose}
-      />
-    );
+    render(<VersionHistory chapter={mockChapter} onRestoreVersion={mockOnRestoreVersion} onClose={mockOnClose} />);
 
     const searchInput = screen.getByPlaceholderText('Search versions...');
     fireEvent.change(searchInput, { target: { value: 'initial' } });
@@ -180,17 +156,12 @@ describe('VersionHistory', () => {
   it('allows restoring a version', async () => {
     mockVersioningHook.restoreVersion.mockResolvedValue(mockChapter);
 
-    render(
-      <VersionHistory
-        chapter={mockChapter}
-        onRestoreVersion={mockOnRestoreVersion}
-        onClose={mockOnClose}
-      />
-    );
+    render(<VersionHistory chapter={mockChapter} onRestoreVersion={mockOnRestoreVersion} onClose={mockOnClose} />);
 
     // Click on a version to select it
     const versionCard = screen.getByText('Initial version').closest('div');
-    fireEvent.click(versionCard!);
+    if (!versionCard) throw new Error('Version card not found');
+    fireEvent.click(versionCard);
 
     // Wait for the restore button to appear and click it
     await waitFor(() => {
@@ -226,13 +197,7 @@ describe('VersionHistory', () => {
       return originalCreateElement(tagName);
     });
 
-    render(
-      <VersionHistory
-        chapter={mockChapter}
-        onRestoreVersion={mockOnRestoreVersion}
-        onClose={mockOnClose}
-      />
-    );
+    render(<VersionHistory chapter={mockChapter} onRestoreVersion={mockOnRestoreVersion} onClose={mockOnClose} />);
 
     const exportButton = screen.getByText('Export');
     fireEvent.click(exportButton);
@@ -247,13 +212,7 @@ describe('VersionHistory', () => {
   });
 
   it('calls onClose when close button is clicked', () => {
-    render(
-      <VersionHistory
-        chapter={mockChapter}
-        onRestoreVersion={mockOnRestoreVersion}
-        onClose={mockOnClose}
-      />
-    );
+    render(<VersionHistory chapter={mockChapter} onRestoreVersion={mockOnRestoreVersion} onClose={mockOnClose} />);
 
     const closeButton = screen.getByText('Close');
     fireEvent.click(closeButton);
@@ -265,13 +224,7 @@ describe('VersionHistory', () => {
     mockVersioningHook.getFilteredVersions.mockReturnValue([]);
     mockVersioningHook.searchVersions.mockReturnValue([]);
 
-    render(
-      <VersionHistory
-        chapter={mockChapter}
-        onRestoreVersion={mockOnRestoreVersion}
-        onClose={mockOnClose}
-      />
-    );
+    render(<VersionHistory chapter={mockChapter} onRestoreVersion={mockOnRestoreVersion} onClose={mockOnClose} />);
 
     const searchInput = screen.getByPlaceholderText('Search versions...');
     fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
