@@ -16,9 +16,10 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   webServer: {
-    command: 'npx kill-port 3000 && npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true, // Reuse if already running
+    command: 'npm run dev',
+    port: 3000,
+    reuseExistingServer: !process.env.CI, // Don't reuse in CI
+    timeout: 120000,
     env: {
       // Single Vercel AI Gateway API key for all providers
       VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',

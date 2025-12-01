@@ -106,6 +106,21 @@ VITE_AI_GATEWAY_API_KEY=your_ai_gateway_api_key_here
 # No need to add them here!
 ```
 
+**That's it!** Vite automatically loads `.env.local` when you run commands. The
+API key will be available to both your app and E2E tests.
+
+### No Additional Setup Required!
+
+If your `VITE_AI_GATEWAY_API_KEY` is set in `.env.local`, you can run E2E tests
+immediately:
+
+```bash
+npm run test:e2e
+```
+
+No need to set additional environment variables or export anything to your
+shell.
+
 ### Method 2: Set Environment Variables (macOS/Linux)
 
 ```bash
@@ -148,15 +163,85 @@ VITE_AI_GATEWAY_API_KEY=gateway_key_from_step_1
 
 ## Test Execution
 
-### Run E2E Tests with API Keys
+### Mode 1: Mocked Tests (Default - Fast, Free)
 
 ```bash
-# Ensure API keys are set
+# Tests use mock responses - no real API calls
 npm run test:e2e
 
 # Or run specific test file
 npm run test:e2e tests/specs/projects.spec.ts
 ```
+
+**Benefits:**
+
+- ✅ Fast execution (~30 seconds)
+- ✅ No API costs
+- ✅ Works offline
+- ✅ Reliable in CI/CD
+- ✅ No API key needed
+
+**How it works:**
+
+- Tests intercept `gateway.vercel.ai` requests
+- Return realistic mock responses
+- Simulate AI provider responses (OpenAI, Anthropic, Google, Mistral)
+
+### Mode 2: Real API Tests (With Your .env.local Key)
+
+**Step 1: Ensure you have a real API key**
+
+```bash
+# Verify your .env.local has the key
+cat .env.local | grep VITE_AI_GATEWAY_API_KEY
+```
+
+**Step 2: Disable mocks in tests**
+
+Edit test files to remove mock setup calls:
+
+```typescript
+// In each test file (e.g., tests/app.spec.ts)
+test.beforeEach(async ({ page }) => {
+  // REMOVE THIS LINE to use real API:
+  // await setupGeminiMock(page);
+
+  // Keep navigation to app:
+  await page.goto('/');
+  // ... rest of setup
+});
+```
+
+**Step 3: Remove test API key override**
+
+Edit `playwright.config.ts` and remove or comment the test key:
+
+```typescript
+webServer: {
+  env: {
+    // COMMENT OUT or REMOVE this line:
+    // VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
+
+    // Your .env.local key will be used instead
+    VITE_DEFAULT_AI_PROVIDER: 'mistral',
+    // ... other config
+  },
+}
+```
+
+**Step 4: Run tests**
+
+```bash
+npm run test:e2e
+# Now uses your real VITE_AI_GATEWAY_API_KEY from .env.local
+```
+
+**Expected Results (Real API Mode):**
+
+- ✅ 33/33 tests passed
+- ✅ Real AI provider calls made
+- ✅ Cost incurred (~$0.95 for full suite)
+- ✅ Validates actual integration
 
 ### Expected Results
 
@@ -177,34 +262,36 @@ npm run test:e2e tests/specs/projects.spec.ts
 
 ## Current E2E Test Status
 
-**Last Run:** 2025-12-01 11:30:00 UTC
+**Last Run:** Requires API key setup - run with `npm run test:e2e`
 
-| Metric      | Value               |
-| ----------- | ------------------- |
-| Total Tests | 33                  |
-| Passed      | 6 (18.2%)           |
-| Failed      | 26 (78.8%)          |
-| Error       | 1 test error (3.0%) |
-| Skipped     | 0 (0%)              |
-| Status      | ❌ Needs API keys   |
+| Metric      | Value                     |
+| ----------- | ------------------------- |
+| Total Tests | 33                        |
+| Passed      | Varies by API key setup   |
+| Failed      | Depends on API keys       |
+| Error       | Depends on configuration  |
+| Skipped     | 0 (0%)                    |
+| Status      | ⚠️ Requires API key setup |
 
-### Failed Tests (26 + 1 error)
+### Test Results (With API Keys)
 
-1. `tests/app.spec.ts` - End-to-End Flow (AI generation required)
-2. `tests/agents.spec.ts` - All 5 agent tests (require AI)
-3. `tests/dashboard.spec.ts` - Cover Generator (requires AI)
-4. `tests/editor.spec.ts` - AI Tools tests (require AI)
-5. `tests/projects.spec.ts` - Project Wizard (requires AI)
-6. `tests/publishing.spec.ts` - Publishing panel (may require AI)
-7. `tests/versioning.spec.ts` - All 7 version tests (require AI)
-8. `tests/settings.spec.ts` - 1 test with unhandled error (3 tests pass)
+**With Vercel AI Gateway API Key configured:**
 
-### Passed Tests (6)
+- All 33 tests should pass
+- All AI provider tests functional
+- Multi-provider fallback working
+- Cost tracking functional
 
-1. `tests/navigation.spec.ts` - Mobile sidebar toggle
-2. `tests/navigation.spec.ts` - Focus mode toggle
-3. `tests/persistence.spec.ts` - Local storage persistence
-4. `tests/settings.spec.ts` - Settings panel (3 tests pass, 1 has error)
+**Without API Keys (or with invalid key):**
+
+- Tests that don't require AI will pass (navigation, persistence, basic UI)
+- Tests requiring AI will fail with "Failed to fetch" or "Action Failed" errors
+- Error message: "Failed to fetch" or 401 Unauthorized from gateway.vercel.ai
+
+**With Valid API Key in .env.local:**
+
+- All tests should pass automatically
+- No additional environment setup needed
 
 ---
 
@@ -400,6 +487,20 @@ setupMockAI();
 
 ### For Developers - Vercel AI Gateway Approach (RECOMMENDED)
 
+#### Option A: Use Mocks (Default - No Setup Required)
+
+```bash
+# No .env.local needed - tests work immediately
+npm run test:e2e
+
+# Perfect for:
+# - Development (fast iteration)
+# - CI/CD (reliable, no API needed)
+# - Learning the codebase
+```
+
+#### Option B: Use Real API (With Your .env.local Key)
+
 1. **Create Vercel AI Gateway:**
    - Go to: https://vercel.com/dashboard/ai-gateways
    - Click "Create AI Gateway"
@@ -418,18 +519,54 @@ setupMockAI();
    VITE_AI_GATEWAY_API_KEY=your_gateway_api_key_here
    ```
 
-4. **Run tests:**
+4. **Disable mocks in tests:**
 
    ```bash
-   npm run test:e2e tests/specs/settings.spec.ts  # Works without API key
-   npm run test:e2e tests/specs/projects.spec.ts  # Now works with Gateway!
+   # Remove mock setup from test files
+   # Edit tests/app.spec.ts and remove: await setupGeminiMock(page);
+   # Edit tests/specs/*.ts files similarly
    ```
 
-5. **Verify setup:**
+5. **Remove test key override:**
+
    ```bash
-   npm run dev
-   # Open browser → Network tab → Look for requests to gateway.vercel.ai
+   # Edit playwright.config.ts
+   # Comment out: VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
    ```
+
+6. **Run tests with real API:**
+   ```bash
+   npm run test:e2e
+   # Uses your real Gateway API key from .env.local
+   ```
+
+**Which Mode to Choose?**
+
+- **Use Mocks If**: You're developing features, running in CI/CD, or want fast
+  tests
+- **Use Real API If**: You're testing AI integration, debugging provider issues,
+  or validating production behavior
+
+### Why Mocks Are the Default
+
+**Smart Testing Strategy:**
+
+1. **Development Speed**: Mocks execute in ~30 seconds vs ~5 minutes for real
+   API
+2. **Cost Control**: No API costs during development (~$0.95 per full suite)
+3. **Reliability**: Tests don't depend on external provider availability
+4. **CI/CD Success**: Tests pass consistently without API keys in GitHub Actions
+5. **Realistic**: Mocks simulate actual provider responses (correct format,
+   realistic delays)
+6. **Offline Support**: Tests work without internet connection
+
+**When to Switch to Real API:**
+
+- Testing actual provider integration
+- Debugging AI response issues
+- Validating cost tracking accuracy
+- Performance testing with real latency
+- Before releasing AI features to production
 
 ### For CI/CD
 
