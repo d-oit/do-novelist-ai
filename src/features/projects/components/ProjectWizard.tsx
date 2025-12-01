@@ -13,7 +13,7 @@ import {
 import React, { useState, useRef, useEffect } from 'react';
 
 import { brainstormProject } from '../../../lib/ai';
-import { iconButtonTarget } from '../../../lib/utils';
+import { cn, iconButtonTarget } from '../../../lib/utils';
 
 interface ProjectWizardProps {
   isOpen: boolean;
@@ -225,13 +225,23 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
               <div className='flex border-b border-border bg-secondary/20'>
                 <button
                   onClick={() => setActiveTab('write')}
-                  className={`flex flex-1 items-center justify-center gap-2 px-4 py-2 text-xs font-medium transition-colors ${activeTab === 'write' ? 'border-r border-border bg-card text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={cn(
+                    'flex flex-1 items-center justify-center gap-2 px-4 py-2 text-xs font-medium transition-colors',
+                    activeTab === 'write'
+                      ? 'border-r border-border bg-card text-primary'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
                 >
                   <Book className='h-3 w-3' /> Write Idea
                 </button>
                 <button
                   onClick={() => setActiveTab('upload')}
-                  className={`flex flex-1 items-center justify-center gap-2 px-4 py-2 text-xs font-medium transition-colors ${activeTab === 'upload' ? 'border-l border-border bg-card text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                  className={cn(
+                    'flex flex-1 items-center justify-center gap-2 px-4 py-2 text-xs font-medium transition-colors',
+                    activeTab === 'upload'
+                      ? 'border-l border-border bg-card text-primary'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
                 >
                   <Upload className='h-3 w-3' /> Upload Files
                 </button>

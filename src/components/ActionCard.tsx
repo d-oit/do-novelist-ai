@@ -1,6 +1,7 @@
 import { Play, Activity, Users, Zap, BrainCircuit } from 'lucide-react';
 import React from 'react';
 
+import { cn } from '@/lib/utils';
 import { AgentAction, AgentMode } from '@shared/types';
 
 interface ActionCardProps {
@@ -29,18 +30,23 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, isActive, disabled, onC
   return (
     <div
       onClick={disabled === true ? undefined : onClick}
-      className={`relative overflow-hidden rounded-lg border p-4 transition-all duration-200 ${
+      className={cn(
+        'relative overflow-hidden rounded-lg border p-4 transition-all duration-200',
         isActive
           ? 'border-primary bg-primary/10'
-          : 'border-border bg-card hover:border-primary/50 hover:bg-secondary/50'
-      } ${disabled === true ? 'cursor-not-allowed opacity-50 grayscale' : 'cursor-pointer'} `}
+          : 'border-border bg-card hover:border-primary/50 hover:bg-secondary/50',
+        disabled === true ? 'cursor-not-allowed opacity-50 grayscale' : 'cursor-pointer',
+      )}
       data-testid={`action-card-${action.name}`}
     >
       <div className='mb-2 flex items-start justify-between'>
         <div className='flex items-center gap-2'>
           <ModeIcon mode={action.agentMode} />
           <span
-            className={`text-xs font-bold uppercase tracking-wider ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+            className={cn(
+              'text-xs font-bold uppercase tracking-wider',
+              isActive ? 'text-primary' : 'text-muted-foreground',
+            )}
           >
             {action.agentMode}
           </span>

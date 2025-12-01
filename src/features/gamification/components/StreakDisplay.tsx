@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flame, Calendar, TrendingUp } from 'lucide-react';
+import { cn } from '../../../lib/utils';
 import { type WritingStreak, type StreakMilestone } from '../types';
 
 interface StreakDisplayProps {
@@ -88,11 +89,12 @@ export const StreakDisplay: React.FC<StreakDisplayProps> = ({ streak, milestones
         {milestones.map(milestone => (
           <div
             key={milestone.streak}
-            className={`flex items-center gap-3 rounded-lg p-3 transition-colors ${
+            className={cn(
+              'flex items-center gap-3 rounded-lg p-3 transition-colors',
               milestone.unlocked
                 ? 'bg-green-50 dark:bg-green-900/20'
-                : 'bg-gray-50 dark:bg-gray-700/50'
-            }`}
+                : 'bg-gray-50 dark:bg-gray-700/50',
+            )}
           >
             <span className='text-2xl'>{milestone.icon}</span>
             <div className='flex-1'>

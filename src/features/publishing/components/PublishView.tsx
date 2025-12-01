@@ -2,6 +2,7 @@ import { Project, PublishStatus, Chapter } from '@shared/types';
 import { Download, Globe, Rocket, Target, Languages, Loader2, FileCheck } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { cn } from '@/lib/utils';
 import { generateEpub } from '../services/epubService';
 
 import { translateContent } from '@/lib/ai';
@@ -109,7 +110,12 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
         </div>
         <div className='flex gap-2'>
           <span
-            className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${project.status === PublishStatus.PUBLISHED ? 'border-green-500/20 bg-green-500/10 text-green-500' : 'border-border bg-secondary text-muted-foreground'}`}
+            className={cn(
+              'rounded-full border px-3 py-1 text-xs font-bold uppercase',
+              project.status === PublishStatus.PUBLISHED
+                ? 'border-green-500/20 bg-green-500/10 text-green-500'
+                : 'border-border bg-secondary text-muted-foreground',
+            )}
           >
             {project.status}
           </span>

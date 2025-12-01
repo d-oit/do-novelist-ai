@@ -67,7 +67,10 @@
       "Skill(web-search-researcher)",
       "Bash(echo:*)",
       "Bash(printf:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Skill(agent-coordination)",
+      "Bash(test:*)",
+      "Bash(npm run coverage:*)"
     ],
     "deny": [],
     "ask": []

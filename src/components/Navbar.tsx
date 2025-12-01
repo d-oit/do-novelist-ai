@@ -1,14 +1,23 @@
 import { Menu, X, Database, Plus, LayoutDashboard, Folder, Settings } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
+import { cn } from '../lib/utils';
+
 interface NavbarProps {
+  id?: string;
   projectTitle: string;
   onNewProject: () => void;
   currentView: 'dashboard' | 'projects' | 'settings';
   onNavigate: (view: 'dashboard' | 'projects' | 'settings') => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView, onNavigate }) => {
+const Navbar: React.FC<NavbarProps> = ({
+  id,
+  projectTitle,
+  onNewProject,
+  currentView,
+  onNavigate,
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect((): (() => void) => {
@@ -38,7 +47,12 @@ const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView
     return (
       <button
         onClick={() => handleNav(view)}
-        className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${currentView === view ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+        className={cn(
+          'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+          currentView === view
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+        )}
         data-testid={`nav-${view}`}
         role='menuitem'
         aria-current={currentView === view ? 'page' : undefined}
@@ -51,6 +65,7 @@ const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView
 
   return (
     <nav
+      id={id}
       className='sticky top-0 z-40 w-full border-b border-border bg-card'
       role='navigation'
       aria-label='Main navigation'

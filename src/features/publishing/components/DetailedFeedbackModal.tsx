@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, User, Calendar, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 
+import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { type ReaderFeedback } from '../types';
@@ -17,6 +18,26 @@ export const DetailedFeedbackModal: React.FC<DetailedFeedbackModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      return (): void => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = 'unset';
+      };
+    }
+    return undefined;
+  }, [isOpen, onClose]);
+
   if (!feedback) return null;
 
   const getSentimentIcon = (sentiment: string): React.JSX.Element => {
@@ -52,6 +73,7 @@ export const DetailedFeedbackModal: React.FC<DetailedFeedbackModalProps> = ({
             exit={{ opacity: 0 }}
             className='absolute inset-0 bg-black/50 backdrop-blur-sm'
             onClick={onClose}
+            aria-hidden='true'
           />
 
           {/* Modal */}
@@ -60,23 +82,34 @@ export const DetailedFeedbackModal: React.FC<DetailedFeedbackModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className='relative z-10 mx-4 max-h-[90vh] w-full max-w-2xl overflow-hidden'
+            role='dialog'
+            aria-labelledby='feedback-modal-title'
+            aria-modal='true'
           >
-            <Card className='border-2 bg-white dark:bg-gray-900'>
+            <Card className='border-2 bg-card'>
               {/* Header */}
-              <div className='flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700'>
+              <div className='flex items-center justify-between border-b border-border p-6'>
                 <div className='flex items-center gap-3'>
-                  <MessageSquare className='h-6 w-6 text-blue-600' />
-                  <h2 className='text-xl font-semibold'>Detailed Feedback</h2>
+                  <MessageSquare className='h-6 w-6 text-primary' aria-hidden='true' />
+                  <h2 id='feedback-modal-title' className='text-xl font-semibold text-foreground'>
+                    Detailed Feedback
+                  </h2>
                 </div>
-                <Button variant='ghost' size='sm' onClick={onClose} className='h-8 w-8 p-0'>
-                  <X className='h-4 w-4' />
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  onClick={onClose}
+                  className='h-8 w-8 p-0'
+                  aria-label='Close feedback modal'
+                >
+                  <X className='h-4 w-4' aria-hidden='true' />
                 </Button>
               </div>
 
               {/* Content */}
               <div className='max-h-[70vh] overflow-y-auto p-6'>
                 {/* Feedback Header */}
-                <div className={`mb-6 rounded-lg p-4 ${getSentimentColor(feedback.sentiment)}`}>
+                <div className={cn('mb-6 rounded-lg p-4', getSentimentColor(feedback.sentiment))}>
                   <div className='mb-2 flex items-center justify-between'>
                     <div className='flex items-center gap-2'>
                       {getSentimentIcon(feedback.sentiment)}

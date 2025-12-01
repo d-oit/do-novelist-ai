@@ -17,6 +17,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { useWorldBuilding } from '../hooks/useWorldBuilding';
+import { cn } from '../../../lib/utils';
 import { Card } from '@shared/components/card';
 import { Button } from '@shared/components/button';
 
@@ -116,11 +117,12 @@ const WorldBuildingDashboard: React.FC<WorldBuildingDashboardProps> = ({ project
         <div className='flex items-center gap-3'>
           {validation && (
             <div
-              className={`flex items-center gap-2 rounded-md px-3 py-2 ${
+              className={cn(
+                'flex items-center gap-2 rounded-md px-3 py-2',
                 validation.isValid
                   ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
-                  : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300'
-              }`}
+                  : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300',
+              )}
             >
               {validation.isValid ? (
                 <CheckCircle className='h-4 w-4' />
@@ -145,8 +147,8 @@ const WorldBuildingDashboard: React.FC<WorldBuildingDashboardProps> = ({ project
           return (
             <Card key={stat.label} className='p-4'>
               <div className='flex items-center gap-3'>
-                <div className={`rounded-md p-2 ${stat.bgColor}`}>
-                  <Icon className={`h-5 w-5 ${stat.color}`} />
+                <div className={cn('rounded-md p-2', stat.bgColor)}>
+                  <Icon className={cn('h-5 w-5', stat.color)} />
                 </div>
                 <div>
                   <p className='text-sm text-muted-foreground'>{stat.label}</p>
@@ -161,13 +163,18 @@ const WorldBuildingDashboard: React.FC<WorldBuildingDashboardProps> = ({ project
       {/* Search and Filters */}
       <div className='flex items-center gap-4'>
         <div className='relative max-w-md flex-1'>
-          <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground' />
+          <Search
+            className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground'
+            aria-hidden='true'
+          />
           <input
+            id='world-search-input'
             type='text'
             placeholder='Search locations, cultures, events...'
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className='w-full rounded-md border border-border py-2 pl-10 pr-4 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary'
+            className='w-full rounded-md border border-input bg-background py-2 pl-10 pr-4 text-foreground focus:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+            aria-label='Search world elements'
           />
         </div>
 
@@ -196,11 +203,12 @@ const WorldBuildingDashboard: React.FC<WorldBuildingDashboardProps> = ({ project
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
+                className={cn(
+                  'flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium transition-colors',
                   activeTab === tab.id
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground'
-                }`}
+                    : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground',
+                )}
               >
                 <Icon className='h-4 w-4' />
                 {tab.label}

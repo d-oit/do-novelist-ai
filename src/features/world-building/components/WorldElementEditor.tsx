@@ -55,22 +55,34 @@ export const WorldElementEditor: React.FC<WorldElementEditorProps> = ({
 
           <div className='space-y-4'>
             <div>
-              <label className='mb-2 block text-sm font-medium'>Name</label>
+              <label
+                htmlFor='element-name-input'
+                className='mb-2 block text-sm font-medium text-foreground'
+              >
+                Name
+              </label>
               <input
+                id='element-name-input'
                 type='text'
                 value={(formData as Location | Culture).name ?? ''}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                className='w-full rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                className='w-full rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                 placeholder={`${type} name`}
               />
             </div>
 
             <div>
-              <label className='mb-2 block text-sm font-medium'>Type</label>
+              <label
+                htmlFor='element-type-select'
+                className='mb-2 block text-sm font-medium text-foreground'
+              >
+                Type
+              </label>
               <select
+                id='element-type-select'
                 value={(formData as Location | Culture).type ?? ''}
                 onChange={e => setFormData({ ...formData, type: e.target.value })}
-                className='w-full rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                className='w-full rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
               >
                 {type === 'location' ? (
                   <>
@@ -101,12 +113,18 @@ export const WorldElementEditor: React.FC<WorldElementEditorProps> = ({
             </div>
 
             <div>
-              <label className='mb-2 block text-sm font-medium'>Description</label>
+              <label
+                htmlFor='element-description-textarea'
+                className='mb-2 block text-sm font-medium text-foreground'
+              >
+                Description
+              </label>
               <textarea
+                id='element-description-textarea'
                 value={(formData as Location | Culture).description ?? ''}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
-                className='w-full resize-none rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                className='w-full resize-none rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                 placeholder={`Describe this ${type}...`}
               />
             </div>
@@ -114,36 +132,54 @@ export const WorldElementEditor: React.FC<WorldElementEditorProps> = ({
             {type === 'location' && (
               <>
                 <div>
-                  <label className='mb-2 block text-sm font-medium'>Population</label>
+                  <label
+                    htmlFor='location-population-input'
+                    className='mb-2 block text-sm font-medium text-foreground'
+                  >
+                    Population
+                  </label>
                   <input
+                    id='location-population-input'
                     type='number'
                     value={(formData as Location).population ?? ''}
                     onChange={e =>
                       setFormData({ ...formData, population: parseInt(e.target.value) ?? 0 })
                     }
-                    className='w-full rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                    className='w-full rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     placeholder='Population size'
                   />
                 </div>
 
                 <div>
-                  <label className='mb-2 block text-sm font-medium'>Geography</label>
+                  <label
+                    htmlFor='location-geography-textarea'
+                    className='mb-2 block text-sm font-medium text-foreground'
+                  >
+                    Geography
+                  </label>
                   <textarea
+                    id='location-geography-textarea'
                     value={(formData as Location).geography ?? ''}
                     onChange={e => setFormData({ ...formData, geography: e.target.value })}
                     rows={3}
-                    className='w-full resize-none rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                    className='w-full resize-none rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     placeholder='Geographic features and terrain...'
                   />
                 </div>
 
                 <div>
-                  <label className='mb-2 block text-sm font-medium'>Climate</label>
+                  <label
+                    htmlFor='location-climate-input'
+                    className='mb-2 block text-sm font-medium text-foreground'
+                  >
+                    Climate
+                  </label>
                   <input
+                    id='location-climate-input'
                     type='text'
                     value={(formData as Location).climate ?? ''}
                     onChange={e => setFormData({ ...formData, climate: e.target.value })}
-                    className='w-full rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                    className='w-full rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     placeholder='Climate and weather patterns'
                   />
                 </div>
@@ -153,8 +189,14 @@ export const WorldElementEditor: React.FC<WorldElementEditorProps> = ({
             {type === 'culture' && (
               <>
                 <div>
-                  <label className='mb-2 block text-sm font-medium'>Core Values</label>
+                  <label
+                    htmlFor='culture-values-input'
+                    className='mb-2 block text-sm font-medium text-foreground'
+                  >
+                    Core Values
+                  </label>
                   <input
+                    id='culture-values-input'
                     type='text'
                     value={(formData as Culture).values?.join(', ') ?? ''}
                     onChange={e =>
@@ -163,29 +205,41 @@ export const WorldElementEditor: React.FC<WorldElementEditorProps> = ({
                         values: e.target.value.split(',').map(v => v.trim()),
                       })
                     }
-                    className='w-full rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                    className='w-full rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     placeholder='honor, tradition, family (comma-separated)'
                   />
                 </div>
 
                 <div>
-                  <label className='mb-2 block text-sm font-medium'>Beliefs</label>
+                  <label
+                    htmlFor='culture-beliefs-textarea'
+                    className='mb-2 block text-sm font-medium text-foreground'
+                  >
+                    Beliefs
+                  </label>
                   <textarea
+                    id='culture-beliefs-textarea'
                     value={(formData as Culture).beliefs ?? ''}
                     onChange={e => setFormData({ ...formData, beliefs: e.target.value })}
                     rows={3}
-                    className='w-full resize-none rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                    className='w-full resize-none rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     placeholder='Religious and philosophical beliefs...'
                   />
                 </div>
 
                 <div>
-                  <label className='mb-2 block text-sm font-medium'>Social Structure</label>
+                  <label
+                    htmlFor='culture-social-structure-textarea'
+                    className='mb-2 block text-sm font-medium text-foreground'
+                  >
+                    Social Structure
+                  </label>
                   <textarea
+                    id='culture-social-structure-textarea'
                     value={(formData as Culture).socialStructure ?? ''}
                     onChange={e => setFormData({ ...formData, socialStructure: e.target.value })}
                     rows={3}
-                    className='w-full resize-none rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                    className='w-full resize-none rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     placeholder='How society is organized...'
                   />
                 </div>
@@ -193,8 +247,14 @@ export const WorldElementEditor: React.FC<WorldElementEditorProps> = ({
             )}
 
             <div>
-              <label className='mb-2 block text-sm font-medium'>Tags</label>
+              <label
+                htmlFor='element-tags-input'
+                className='mb-2 block text-sm font-medium text-foreground'
+              >
+                Tags
+              </label>
               <input
+                id='element-tags-input'
                 type='text'
                 value={(formData as Location | Culture).tags?.join(', ') ?? ''}
                 onChange={e =>
@@ -206,7 +266,7 @@ export const WorldElementEditor: React.FC<WorldElementEditorProps> = ({
                       .filter(t => t.length > 0),
                   })
                 }
-                className='w-full rounded-md border border-border p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+                className='w-full rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                 placeholder='fantasy, medieval, important (comma-separated)'
               />
             </div>

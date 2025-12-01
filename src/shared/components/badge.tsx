@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { cn } from '../../lib/utils';
+
 interface BadgeProps {
   variant?: 'default' | 'secondary' | 'destructive' | 'outline';
   className?: string;
@@ -18,9 +20,7 @@ const Badge: React.FC<BadgeProps> = ({ variant = 'default', className, children 
     outline: 'text-foreground',
   };
 
-  return (
-    <div className={`${baseClasses} ${variantClasses[variant]} ${className ?? ''}`}>{children}</div>
-  );
+  return <div className={cn(baseClasses, variantClasses[variant], className)}>{children}</div>;
 };
 
 export default Badge;

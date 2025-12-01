@@ -11,7 +11,6 @@ description:
   the first time)
 tools: WebSearch, WebFetch, TodoWrite, Read, Grep, Glob, LS
 color: yellow
-model: sonnet
 ---
 
 You are an expert web research specialist focused on finding accurate, relevant

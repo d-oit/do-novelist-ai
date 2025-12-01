@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
@@ -5,20 +6,44 @@ import { type Character, type CharacterRole, type CharacterArc } from '../../typ
 import { CharacterCard } from '../CharacterCard';
 
 // Mock framer-motion
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, onClick, className, ...props }: any) => (
-      <div onClick={onClick} className={className} {...props}>
-        {children}
-      </div>
-    ),
-    button: ({ children, onClick, className, ...props }: any) => (
-      <button onClick={onClick} className={className} {...props}>
-        {children}
-      </button>
-    ),
-  },
-}));
+vi.mock('framer-motion', () => {
+  const createMotionComponent = (elementType: string) => {
+    return ({ children, ...props }: any) => {
+      // Filter out Framer Motion specific props that cause React warnings
+      const {
+        whileHover,
+        whileTap,
+        whileFocus,
+        whileInView,
+        initial,
+        animate,
+        exit,
+        transition,
+        variants,
+        layout,
+        layoutId,
+        drag,
+        dragConstraints,
+        dragElastic,
+        onDragStart,
+        onDrag,
+        onDragEnd,
+        ...domProps
+      } = props;
+
+      return React.createElement(elementType, domProps, children);
+    };
+  };
+
+  return {
+    motion: {
+      div: createMotionComponent('div'),
+      button: createMotionComponent('button'),
+      span: createMotionComponent('span'),
+      img: createMotionComponent('img'),
+    },
+  };
+});
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({

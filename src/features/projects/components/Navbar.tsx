@@ -1,14 +1,23 @@
 import { Menu, X, Database, Plus, LayoutDashboard, Folder, Settings } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { cn } from '../../../lib/utils';
+
 interface NavbarProps {
+  id?: string;
   projectTitle: string;
   onNewProject: () => void;
   currentView: 'dashboard' | 'projects' | 'settings';
   onNavigate: (view: 'dashboard' | 'projects' | 'settings') => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView, onNavigate }) => {
+const Navbar: React.FC<NavbarProps> = ({
+  id,
+  projectTitle,
+  onNewProject,
+  currentView,
+  onNavigate,
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleNav = (view: 'dashboard' | 'projects' | 'settings'): void => {
@@ -28,7 +37,12 @@ const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView
     return (
       <button
         onClick={() => handleNav(view)}
-        className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${currentView === view ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+        className={cn(
+          'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+          currentView === view
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+        )}
         data-testid={`nav-${view}`}
       >
         <Icon className='h-4 w-4' /> {label}
@@ -37,7 +51,10 @@ const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView
   };
 
   return (
-    <nav className='sticky top-0 z-40 w-full border-b border-border bg-card/50 backdrop-blur-md'>
+    <nav
+      id={id}
+      className='sticky top-0 z-40 w-full border-b border-border bg-card/50 backdrop-blur-md'
+    >
       <div className='mx-auto flex h-16 max-w-7xl items-center justify-between px-4'>
         <div
           className='flex cursor-pointer items-center gap-3'
