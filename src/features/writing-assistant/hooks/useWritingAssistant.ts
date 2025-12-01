@@ -27,6 +27,7 @@ interface UseWritingAssistantOptions {
   characterContext?: Character[];
   plotContext?: string;
   enablePersistence?: boolean; // Whether to save analysis to database
+  onContentChange?: (newContent: string, suggestionId: string) => void; // Callback to apply text changes to editor
 }
 
 interface UseWritingAssistantReturn extends WritingAssistantState, WritingAssistantActions {
@@ -83,6 +84,7 @@ export function useWritingAssistant(
     characterContext = [],
     plotContext = '',
     enablePersistence = true,
+    onContentChange,
   } = options;
 
   // Core state
@@ -349,10 +351,22 @@ export function useWritingAssistant(
         }
       }
 
-      // TODO: Integrate with editor to actually apply the text change
-      // This would depend on the editor implementation
+      // Apply the text change to the editor via callback
+      if (
+        onContentChange !== undefined &&
+        suggestion.originalText !== null &&
+        suggestion.originalText !== undefined &&
+        suggestion.originalText !== '' &&
+        suggestion.suggestedText !== null &&
+        suggestion.suggestedText !== undefined &&
+        suggestion.suggestedText !== ''
+      ) {
+        // Calculate the new content by replacing the original text with suggested text
+        const newContent = content.replace(suggestion.originalText, suggestion.suggestedText);
+        onContentChange(newContent, suggestionId);
+      }
     },
-    [state.suggestions, enablePersistence, projectId, chapterId],
+    [state.suggestions, enablePersistence, projectId, chapterId, onContentChange, content],
   );
 
   /**

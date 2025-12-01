@@ -17,9 +17,26 @@ class GamificationService {
   private readonly userAchievements = new Map<string, UserAchievement[]>();
   private readonly challenges = new Map<string, WritingChallenge[]>();
   private readonly profiles = new Map<string, GamificationProfile>();
+  private readonly completedChapters = new Map<string, Set<string>>(); // userId -> Set of completed chapter IDs
 
   public constructor() {
     this.initializeDefaultAchievements();
+  }
+
+  /**
+   * Mark a chapter as completed for a user
+   */
+  public markChapterCompleted(userId: string, chapterId: string): void {
+    const userChapters = this.completedChapters.get(userId) ?? new Set<string>();
+    userChapters.add(chapterId);
+    this.completedChapters.set(userId, userChapters);
+  }
+
+  /**
+   * Get the count of completed chapters for a user
+   */
+  private getCompletedChapterCount(userId: string): number {
+    return this.completedChapters.get(userId)?.size ?? 0;
   }
 
   public init(userId: string): Promise<void> {
@@ -365,8 +382,9 @@ class GamificationService {
           break;
 
         case 'chapter_completion':
-          // TODO: Check actual chapter completions
-          isUnlocked = false;
+          // Check actual chapter completions
+          const completedCount = this.getCompletedChapterCount(userId);
+          isUnlocked = completedCount >= (achievement.condition.target ?? 1);
           break;
 
         case 'custom':
