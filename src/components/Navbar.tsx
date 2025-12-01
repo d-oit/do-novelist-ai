@@ -51,7 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView
 
   return (
     <nav
-      className='sticky top-0 z-40 w-full border-b border-border bg-card/50 backdrop-blur-md'
+      className='sticky top-0 z-40 w-full border-b border-border bg-card'
       role='navigation'
       aria-label='Main navigation'
     >
@@ -116,7 +116,7 @@ const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView
 
       {isMenuOpen && (
         <div
-          className='animate-in slide-in-from-top-5 absolute w-full border-t border-border bg-card shadow-lg md:hidden'
+          className='animate-in slide-in-from-top-5 absolute w-full border-t border-border bg-card md:hidden'
           role='menu'
           aria-label='Mobile navigation menu'
         >

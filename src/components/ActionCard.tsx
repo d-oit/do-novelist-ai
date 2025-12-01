@@ -13,15 +13,15 @@ interface ActionCardProps {
 const ModeIcon = ({ mode }: { mode: AgentMode }): React.ReactElement => {
   switch (mode) {
     case AgentMode.SINGLE:
-      return <Zap className='h-4 w-4 text-blue-400' />;
+      return <Zap className='h-4 w-4 text-primary' />;
     case AgentMode.PARALLEL:
-      return <Activity className='h-4 w-4 text-green-400' />;
+      return <Activity className='h-4 w-4 text-primary' />;
     case AgentMode.HYBRID:
-      return <Users className='h-4 w-4 text-purple-400' />;
+      return <Users className='h-4 w-4 text-primary' />;
     case AgentMode.SWARM:
-      return <BrainCircuit className='h-4 w-4 text-orange-400' />;
+      return <BrainCircuit className='h-4 w-4 text-primary' />;
     default:
-      return <Play className='h-4 w-4 text-gray-400' />;
+      return <Play className='h-4 w-4 text-muted-foreground' />;
   }
 };
 
@@ -31,7 +31,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, isActive, disabled, onC
       onClick={disabled === true ? undefined : onClick}
       className={`relative overflow-hidden rounded-lg border p-4 transition-all duration-200 ${
         isActive
-          ? 'border-primary bg-primary/10 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+          ? 'border-primary bg-primary/10'
           : 'border-border bg-card hover:border-primary/50 hover:bg-secondary/50'
       } ${disabled === true ? 'cursor-not-allowed opacity-50 grayscale' : 'cursor-pointer'} `}
       data-testid={`action-card-${action.name}`}

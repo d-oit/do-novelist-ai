@@ -15,28 +15,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: [
-          'bg-gradient-to-r from-primary to-primary/90',
-          'text-primary-foreground shadow-lg shadow-primary/20',
-          'hover:shadow-xl hover:shadow-primary/30',
-        ],
-        destructive: [
-          'bg-gradient-to-r from-destructive to-destructive/90',
-          'text-destructive-foreground shadow-lg shadow-destructive/20',
-          'hover:shadow-xl hover:shadow-destructive/30',
-        ],
+        default: ['bg-primary', 'text-primary-foreground', 'hover:bg-primary/90'],
+        destructive: ['bg-destructive', 'text-destructive-foreground', 'hover:bg-destructive/90'],
         outline: [
-          'border border-input bg-background/50 backdrop-blur-sm',
+          'border border-input bg-background',
           'hover:bg-accent hover:text-accent-foreground',
-          'shadow-sm hover:shadow-md',
         ],
-        secondary: [
-          'bg-gradient-to-r from-secondary to-secondary/90',
-          'text-secondary-foreground shadow-md',
-          'hover:from-secondary/90 hover:to-secondary/80 hover:shadow-lg',
-        ],
-        ghost: ['hover:bg-accent hover:text-accent-foreground', 'hover:shadow-sm'],
-        link: ['text-primary underline-offset-4 hover:underline', 'shadow-none hover:shadow-none'],
+        secondary: ['bg-secondary', 'text-secondary-foreground', 'hover:bg-secondary/90'],
+        ghost: ['hover:bg-accent hover:text-accent-foreground'],
+        link: ['text-primary underline-offset-4 hover:underline'],
       },
       size: {
         default: 'h-10 px-4 py-2',
@@ -49,7 +36,7 @@ const buttonVariants = cva(
       variant: 'default',
       size: 'default',
     },
-  }
+  },
 );
 
 export interface ButtonProps
@@ -74,7 +61,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 Button.displayName = 'Button';
