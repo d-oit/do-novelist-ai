@@ -8,16 +8,20 @@ import {
   Save,
   CheckCircle,
   AlertTriangle,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { getStoredConfig, saveStoredConfig, DbConfig, db } from '../../../lib/db';
+import { getUserId } from '../../../lib/utils';
+import { AISettingsPanel } from './AISettingsPanel';
 
 const SettingsView: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [dbConfig, setDbConfig] = useState<DbConfig>({ url: '', authToken: '', useCloud: false });
   const [isSaved, setIsSaved] = useState(false);
   const [testStatus, setTestStatus] = useState<'none' | 'success' | 'error'>('none');
+  const [userId] = useState<string>(() => getUserId());
 
   useEffect(() => {
     const config = getStoredConfig();
@@ -173,6 +177,15 @@ const SettingsView: React.FC = () => {
             <Moon className='h-4 w-4' /> Dark
           </button>
         </div>
+      </section>
+
+      {/* AI Provider Settings */}
+      <section className='space-y-4'>
+        <h3 className='flex items-center gap-2 text-lg font-medium'>
+          <SettingsIcon className='h-5 w-5' />
+          AI Provider Settings
+        </h3>
+        <AISettingsPanel userId={userId} />
       </section>
 
       {/* API Configuration */}
