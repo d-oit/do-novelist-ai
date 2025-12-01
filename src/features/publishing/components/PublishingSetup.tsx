@@ -54,13 +54,35 @@ const PublishingSetup: React.FC<PublishingSetupProps> = ({
     );
   };
 
-  const handlePublish = async (metadata: Publication['metadata']): Promise<void> => {
+  const handlePublish = async (formMetadata: {
+    description: string;
+    genres: string[];
+    tags: string[];
+    language: string;
+    mature: boolean;
+    price?: number;
+    currency: string;
+    publishDate?: string;
+    visibility: string;
+  }): Promise<void> => {
     if (selectedPlatforms.length === 0) {
       alert('Please select at least one platform to publish to.');
       return;
     }
 
     try {
+      // Transform form metadata to Publication metadata format
+      const metadata: Publication['metadata'] = {
+        genre: formMetadata.genres,
+        tags: formMetadata.tags,
+        language: formMetadata.language,
+        mature: formMetadata.mature,
+        wordCount: project.analytics.totalWordCount,
+        chapterCount: project.chapters.length,
+        price: formMetadata.price,
+        currency: formMetadata.currency,
+      };
+
       const publication = await analytics.publishProject(project, selectedPlatforms, metadata);
       onPublishingComplete(publication);
       setShowMetadataForm(false);
@@ -300,7 +322,7 @@ const PublishingSetup: React.FC<PublishingSetupProps> = ({
               <div className='mt-6 flex gap-2'>
                 <Button
                   onClick={() =>
-                    void (async () => {
+                    void (async (): Promise<void> => {
                       // Mock connection - in real app this would test actual credentials
                       await analytics.connectPlatform(configuringPlatform.id, {
                         apiKey: 'mock-key',

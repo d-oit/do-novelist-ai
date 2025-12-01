@@ -1,19 +1,12 @@
 {
-  "total_searches": 11,
+  "total_searches": 13,
   "cache_hits": 1,
-  "cache_misses": 10,
-  "avg_latency_ms": 48413.93260522322,
+  "cache_misses": 12,
+  "avg_latency_ms": 49209.67542208158,
   "quality_scores": [
-    0.0,
-    0.0,
-    0.0,
-    0.9,
-    0.885,
-    0.7328333333333333,
-    0.9,
-    0.9
+    0.0, 0.0, 0.0, 0.9, 0.885, 0.7328333333333333, 0.9, 0.9, 0.49000000000000005, 0.8310000000000001
   ],
-  "failed_validations": 3,
+  "failed_validations": 4,
   "queries": [
     {
       "query": "React 19 features",
@@ -101,6 +94,22 @@
       "cached": false,
       "latency_ms": 61884.31715965271,
       "quality": 0.9,
+      "valid": true
+    },
+    {
+      "query": "search for rust-self-learning-memory github repository",
+      "timestamp": "2025-12-01T12:14:36.088954",
+      "cached": false,
+      "latency_ms": 65510.14971733093,
+      "quality": 0.49000000000000005,
+      "valid": false
+    },
+    {
+      "query": "search for https://github.com/d-o-hub rust self learning memory systems",
+      "timestamp": "2025-12-01T12:15:26.912299",
+      "cached": false,
+      "latency_ms": 41662.37211227417,
+      "quality": 0.8310000000000001,
       "valid": true
     }
   ]

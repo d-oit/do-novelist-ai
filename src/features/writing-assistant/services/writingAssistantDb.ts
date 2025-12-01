@@ -80,16 +80,14 @@ class WritingAssistantDb {
     this.initializeUserId();
   }
 
-  static getInstance(): WritingAssistantDb {
-    if (!WritingAssistantDb.instance) {
-      WritingAssistantDb.instance = new WritingAssistantDb();
-    }
+  public static getInstance(): WritingAssistantDb {
+    WritingAssistantDb.instance ??= new WritingAssistantDb();
     return WritingAssistantDb.instance;
   }
 
   private getOrCreateDeviceId(): string {
     let deviceId = localStorage.getItem('novelist_device_id');
-    if (!deviceId) {
+    if (deviceId == null) {
       deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       localStorage.setItem('novelist_device_id', deviceId);
     }
@@ -100,7 +98,7 @@ class WritingAssistantDb {
     // In a real app, this would come from authentication
     // For now, create a persistent anonymous user ID
     let userId = localStorage.getItem('novelist_user_id');
-    if (!userId) {
+    if (userId == null) {
       userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       localStorage.setItem('novelist_user_id', userId);
     }
@@ -116,7 +114,7 @@ class WritingAssistantDb {
     acceptedCount = 0,
     dismissedCount = 0,
   ): void {
-    if (!this.userId) return;
+    if (this.userId == null) return;
 
     try {
       const analysisRecord: Omit<AnalysisHistory, 'createdAt'> = {
@@ -158,7 +156,7 @@ class WritingAssistantDb {
     projectId: string,
     appliedText?: string,
   ): void {
-    if (!this.userId) return;
+    if (this.userId == null) return;
 
     try {
       const feedback: SuggestionFeedback = {
@@ -174,8 +172,6 @@ class WritingAssistantDb {
         chapterId,
         projectId,
         timestamp: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
       this.insertSuggestionFeedback(feedback);
@@ -188,7 +184,7 @@ class WritingAssistantDb {
    * Sync user preferences across devices (optional)
    */
   public syncPreferences(config: WritingAssistantConfig): void {
-    if (!this.userId) return;
+    if (this.userId == null) return;
 
     try {
       const preferences: UserWritingPreferences = {
@@ -211,7 +207,7 @@ class WritingAssistantDb {
    * Load preferences from database (fallback if localStorage is empty)
    */
   public loadPreferences(): WritingAssistantConfig | null {
-    if (!this.userId) return null;
+    if (this.userId == null) return null;
 
     try {
       const preferences = this.getUserPreferences(this.userId);
@@ -241,7 +237,7 @@ class WritingAssistantDb {
       commonPatterns: string[];
     };
   } {
-    if (!this.userId) {
+    if (this.userId == null) {
       return {
         progressMetrics: [],
         improvementTrends: { readabilityTrend: 0, engagementTrend: 0, productivityTrend: 0 },
@@ -297,7 +293,11 @@ class WritingAssistantDb {
       .filter(word => word.length > 0).length;
   }
 
-  private calculateImprovementTrends(history: AnalysisHistory[]) {
+  private calculateImprovementTrends(history: AnalysisHistory[]): {
+    readabilityTrend: number;
+    engagementTrend: number;
+    productivityTrend: number;
+  } {
     if (history.length < 2) {
       return { readabilityTrend: 0, engagementTrend: 0, productivityTrend: 0 };
     }
@@ -319,7 +319,11 @@ class WritingAssistantDb {
     };
   }
 
-  private analyzeSuggestionPatterns(feedback: SuggestionFeedback[]) {
+  private analyzeSuggestionPatterns(feedback: SuggestionFeedback[]): {
+    mostHelpfulCategories: string[];
+    acceptanceRate: number;
+    commonPatterns: string[];
+  } {
     if (feedback.length === 0) {
       return { mostHelpfulCategories: [], acceptanceRate: 0, commonPatterns: [] };
     }

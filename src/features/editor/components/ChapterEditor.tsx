@@ -18,14 +18,14 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import { Project, Chapter } from '../../../types';
+import { Project, Chapter, RefineOptions } from '../../../types';
 import { WritingAssistantPanel } from '../../writing-assistant';
 
 interface ChapterEditorProps {
   project: Project;
   selectedChapterId: string | null;
   onUpdateChapter: (chapterId: string, updates: Partial<Chapter>) => void;
-  onRefineChapter?: (chapterId: string, options: Record<string, unknown>) => void;
+  onRefineChapter?: (chapterId: string, options: RefineOptions) => void;
   onContinueChapter?: (chapterId: string) => void;
   className?: string;
 }
@@ -99,9 +99,12 @@ const ChapterEditor: React.FC<ChapterEditorProps> = ({
   const handleRefine = (): void => {
     if (selectedChapter && onRefineChapter) {
       onRefineChapter(selectedChapter.id, {
-        focus: ['grammar', 'style', 'flow'],
+        model: 'gemini-2.5-flash',
+        temperature: 0.7,
+        maxTokens: 2000,
+        topP: 0.95,
+        focusAreas: ['grammar', 'style', 'pacing'],
         preserveLength: true,
-        targetTone: 'consistent',
       });
     }
   };

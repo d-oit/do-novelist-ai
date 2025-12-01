@@ -48,7 +48,7 @@ export interface UsePublishingAnalyticsReturn {
   ) => Promise<Publication>;
   loadPublicationData: (publicationId: string) => Promise<void>;
   createGoal: (goal: Omit<PublishingGoals, 'id' | 'current'>) => Promise<PublishingGoals>;
-  connectPlatform: (platformId: string, credentials: unknown) => Promise<boolean>;
+  connectPlatform: (platformId: string, credentials: Record<string, unknown>) => Promise<boolean>;
 
   // Data Loading
   refreshAnalytics: (publicationId: string) => Promise<void>;
@@ -135,14 +135,14 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
     try {
       // We can use store data if available, or fetch fresh
       // Fetching fresh ensures report is up to date
-      const [analyticsData, engagementData, insightsData] = await Promise.all([
+      const [analyticsData, insightsData] = await Promise.all([
         publishingAnalyticsService.getPublicationAnalytics(publicationId),
-        publishingAnalyticsService.getEngagementMetrics(publicationId, {
-          start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-          end: new Date(),
-        }),
         publishingAnalyticsService.getReaderInsights(publicationId),
       ]);
+      const engagementData = publishingAnalyticsService.getEngagementMetrics(publicationId, {
+        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        end: new Date(),
+      });
 
       const report = {
         publicationId,

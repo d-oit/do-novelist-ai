@@ -14,6 +14,7 @@ import {
   type ContentAnalysis,
   type WritingSuggestion,
   type WritingSuggestionCategory,
+  type WritingProgressMetrics,
 } from '../types';
 import { DEFAULT_WRITING_ASSISTANT_CONFIG } from '../types';
 import { type Character } from '../../characters/types';
@@ -45,12 +46,28 @@ interface UseWritingAssistantReturn extends WritingAssistantState, WritingAssist
   analysisError?: string;
 
   // Analytics and insights
-  getWritingAnalytics: (timeRange?: 'week' | 'month' | 'year') => Promise<any>;
+  getWritingAnalytics: (timeRange?: 'week' | 'month' | 'year') => {
+    progressMetrics: WritingProgressMetrics[];
+    improvementTrends: {
+      readabilityTrend: number;
+      engagementTrend: number;
+      productivityTrend: number;
+    };
+    suggestionInsights: {
+      mostHelpfulCategories: string[];
+      acceptanceRate: number;
+      commonPatterns: string[];
+    };
+  };
   suggestionAcceptanceRate: number;
   learningInsights: {
     preferredCategories: string[];
     improvementTrends: Record<string, number>;
-    writingHabits: Record<string, any>;
+    writingHabits: {
+      analysisFrequency: string;
+      preferredAnalysisTime: string;
+      mostActiveCategories: string[];
+    };
   };
 }
 
@@ -99,14 +116,14 @@ export function useWritingAssistant(
    * Load configuration with hybrid approach: localStorage first, then DB fallback
    */
   useEffect(() => {
-    const loadConfiguration = () => {
+    const loadConfiguration = (): void => {
       try {
         // Fast path: Load from localStorage first for immediate UI response
         const localConfig = localStorage.getItem('novelist_writing_assistant_config');
         const isActive = localStorage.getItem('novelist_writing_assistant_active') === 'true';
 
-        if (localConfig) {
-          const config = JSON.parse(localConfig);
+        if (localConfig != null) {
+          const config = JSON.parse(localConfig) as Partial<WritingAssistantConfig>;
           setState(prev => ({
             ...prev,
             config: { ...DEFAULT_WRITING_ASSISTANT_CONFIG, ...config },
@@ -120,7 +137,7 @@ export function useWritingAssistant(
         if (enablePersistence) {
           try {
             const dbConfig = writingAssistantDb.loadPreferences();
-            if (dbConfig && !localConfig) {
+            if (dbConfig != null && localConfig == null) {
               // Only use DB config if we don't have local config
               setState(prev => ({
                 ...prev,
@@ -188,7 +205,10 @@ export function useWritingAssistant(
    * Analyze content with hybrid persistence: immediate analysis + background DB saving
    */
   const analyzeContent = useCallback(
-    async (contentToAnalyze: string = content, targetChapterId: string = chapterId) => {
+    async (
+      contentToAnalyze: string = content,
+      targetChapterId: string = chapterId,
+    ): Promise<void> => {
       if (!contentToAnalyze.trim() || !state.isActive) return;
 
       setState(prev => ({ ...prev, isAnalyzing: true }));
@@ -238,6 +258,9 @@ export function useWritingAssistant(
             timestamp: new Date(),
           });
         });
+
+        // Ensure the function returns a Promise
+        await Promise.resolve();
       } catch (error) {
         console.error('Analysis failed:', error);
         setAnalysisError(error instanceof Error ? error.message : 'Analysis failed');
@@ -282,7 +305,7 @@ export function useWritingAssistant(
     if (autoAnalyze && content && state.isActive && content !== lastContentRef.current) {
       debouncedAnalyze(content);
     }
-    return () => {
+    return (): void => {
       if (analysisTimeoutRef.current) {
         clearTimeout(analysisTimeoutRef.current);
       }
@@ -293,7 +316,7 @@ export function useWritingAssistant(
    * Apply a suggestion with feedback tracking
    */
   const applySuggestion = useCallback(
-    (suggestionId: string) => {
+    (suggestionId: string): void => {
       const suggestion = state.suggestions.find(s => s.id === suggestionId);
       if (!suggestion) return;
 
@@ -336,7 +359,7 @@ export function useWritingAssistant(
    * Dismiss a suggestion with feedback tracking
    */
   const dismissSuggestion = useCallback(
-    (suggestionId: string) => {
+    (suggestionId: string): void => {
       const suggestion = state.suggestions.find(s => s.id === suggestionId);
       if (!suggestion) return;
 
@@ -375,14 +398,12 @@ export function useWritingAssistant(
    * Update configuration with immediate UI response + background persistence
    */
   const updateConfig = useCallback(
-    (configUpdate: Partial<WritingAssistantConfig>) => {
+    (configUpdate: Partial<WritingAssistantConfig>): void => {
       setState(prev => {
         const newConfig = { ...prev.config, ...configUpdate };
 
-        // Background save (async, non-blocking)
-        saveConfig(newConfig).catch(error => {
-          console.warn('Failed to save config update:', error);
-        });
+        // Background save (synchronous for now)
+        saveConfig(newConfig);
 
         return { ...prev, config: newConfig };
       });
@@ -449,10 +470,10 @@ export function useWritingAssistant(
   const suggestionsByCategory = state.suggestions.reduce(
     (acc, suggestion) => {
       const category = suggestion.category;
-      if (!acc[category]) acc[category] = [];
+      acc[category] ??= [];
       acc[category].push(suggestion);
 
-      if (!acc.all) acc.all = [];
+      acc.all ??= [];
       acc.all.push(suggestion);
 
       return acc;

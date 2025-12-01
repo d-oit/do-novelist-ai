@@ -17,11 +17,11 @@ class SettingsService {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
 
-      if ((stored?.length ?? 0) === 0) {
+      if (stored === null || stored.length === 0) {
         return DEFAULT_SETTINGS;
       }
 
-      const parsed = JSON.parse(stored);
+      const parsed: unknown = JSON.parse(stored);
       const validation = validateSettings(parsed);
 
       if (!validation.isValid || !validation.data) {
@@ -84,7 +84,7 @@ class SettingsService {
    */
   public import(json: string): Settings {
     try {
-      const parsed = JSON.parse(json);
+      const parsed: unknown = JSON.parse(json);
       const validation = validateSettings(parsed);
 
       if (!validation.isValid || !validation.data) {

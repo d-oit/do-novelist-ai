@@ -50,7 +50,7 @@ export const unwrap = <T, E>(result: Result<T, E>, context?: string): T => {
   }
   const error = result.error;
   const errorMessage = error instanceof Error ? error.message : String(error);
-  throw context ? `${context}: ${errorMessage}` : errorMessage;
+  throw new Error(context != null ? `${context}: ${errorMessage}` : errorMessage);
 };
 
 /**
@@ -327,34 +327,29 @@ export const tapErr = <T, E>(result: Result<T, E>, fn: (error: E) => void): Resu
 /**
  * Combine multiple async operations - fail fast
  */
-export const combine = async <T extends Array<Promise<any>>>(
-  promises: T,
-): Promise<{ [K in keyof T]: Awaited<T[K]> extends Promise<infer R> ? R : T[K] }> => {
+export const combine = async <T extends unknown[]>(promises: T): Promise<T> => {
   const results = await Promise.all(promises);
-  return results as any;
+  return results as T;
 };
 
 /**
  * Combine results with aggregation - fail fast
  */
-export const combineResults = async <T extends Array<Promise<Result<any, AppError>>>>(
+export const combineResults = async <T extends Array<Promise<Result<unknown, AppError>>>>(
   promises: T,
-): Promise<
-  Result<
-    {
-      [K in keyof T]: Awaited<T[K]> extends Promise<infer R>
-        ? R extends { success: true; data: infer D }
-          ? D
-          : never
-        : never;
-    },
-    AppError
-  >
-> => {
+): Promise<Result<unknown[], AppError>> => {
   const results = await Promise.all(promises);
   const firstError = results.find(isErr);
   if (firstError) {
-    return firstError as any;
+    // firstError is guaranteed to be Err<AppError> due to isErr type guard
+    return firstError;
   }
-  return ok(results.map(r => (r as any).data)) as any;
+  // All results are Ok, so we can safely access .data
+  return ok(
+    results.map(r => {
+      // Type assertion is safe here since we know all results are Ok
+      const okResult = r as { success: true; data: unknown };
+      return okResult.data;
+    }),
+  );
 };

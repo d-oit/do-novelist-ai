@@ -30,5 +30,8 @@ export type {
 // Type aliases for backward compatibility
 export type { EngagementMetrics as PublishingAnalytics } from '../features/publishing/types';
 
-// Legacy enum exports - import from root types.ts
+// Use enum types from root types.ts for consistency
 export { AgentMode, ChapterStatus, PublishStatus } from '../../types';
+
+// Re-export Zod schemas and utilities
+export * from './schemas';

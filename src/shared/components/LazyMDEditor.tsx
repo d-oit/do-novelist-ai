@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import React, { Suspense, lazy } from 'react';
 import type { ComponentProps } from 'react';
 
 const MDEditor = lazy(() => import('@uiw/react-md-editor'));
@@ -8,7 +8,7 @@ interface LazyMDEditorProps extends Omit<ComponentProps<typeof MDEditor>, 'value
   onChange?: (value?: string) => void;
 }
 
-const LazyMDEditor = (props: LazyMDEditorProps): JSX.Element => {
+const LazyMDEditor = (props: LazyMDEditorProps): React.JSX.Element => {
   return (
     <Suspense
       fallback={

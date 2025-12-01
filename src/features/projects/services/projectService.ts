@@ -52,7 +52,10 @@ class ProjectService {
    */
   public async getAll(): Promise<Project[]> {
     await this.init();
-    const db = this.db!;
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const db = this.db;
 
     return new Promise<Project[]>((resolve, reject) => {
       const transaction: IDBTransaction = db.transaction([this.storeName], 'readonly');
@@ -80,7 +83,10 @@ class ProjectService {
    */
   public async getById(id: string): Promise<Project | null> {
     await this.init();
-    const db = this.db!;
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const db = this.db;
 
     return new Promise<Project | null>((resolve, reject) => {
       const transaction: IDBTransaction = db.transaction([this.storeName], 'readonly');
@@ -106,7 +112,10 @@ class ProjectService {
    */
   public async create(data: ProjectCreationData): Promise<Project> {
     await this.init();
-    const db = this.db!;
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const db = this.db;
 
     const now = Date.now();
     const project: Project = {
@@ -162,9 +171,9 @@ class ProjectService {
     return new Promise((resolve, reject) => {
       const transaction: IDBTransaction = db.transaction([this.storeName], 'readwrite');
       const store: IDBObjectStore = transaction.objectStore(this.storeName);
-      const request: IDBRequest = store.put(updated);
+      const request: IDBRequest = store.put(project);
 
-      request.onsuccess = (): void => resolve();
+      request.onsuccess = (): void => resolve(project);
       request.onerror = (): void =>
         reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
@@ -175,7 +184,10 @@ class ProjectService {
    */
   public async update(id: string, data: ProjectUpdateData): Promise<void> {
     await this.init();
-    const db = this.db!;
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const db = this.db;
 
     const project = await this.getById(id);
     if (!project) {
@@ -204,7 +216,10 @@ class ProjectService {
    */
   public async delete(id: string): Promise<void> {
     await this.init();
-    const db = this.db!;
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const db = this.db;
 
     return new Promise((resolve, reject) => {
       const transaction: IDBTransaction = db.transaction([this.storeName], 'readwrite');
@@ -221,15 +236,29 @@ class ProjectService {
    * Get projects by status
    */
   public async getByStatus(status: string): Promise<Project[]> {
-    const db = await this.init();
+    await this.init();
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const db = this.db;
 
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction([this.storeName], 'readonly');
-      const store = transaction.objectStore(this.storeName);
-      const index = store.index('status');
-      const request = index.getAll(status);
+      const transaction: IDBTransaction = db.transaction([this.storeName], 'readonly');
+      const store: IDBObjectStore = transaction.objectStore(this.storeName);
+      const index: IDBIndex = store.index('status');
+      const request: IDBRequest = index.getAll(status);
 
-      request.onsuccess = (): void => resolve(request.result ?? []);
+      request.onsuccess = (): void => {
+        const rawData = (request.result as Project[]) ?? [];
+        // Validate and parse the data to ensure type safety
+        const validatedProjects = rawData
+          .map(item => {
+            const result = ProjectSchema.safeParse(item);
+            return result.success ? result.data : null;
+          })
+          .filter((project): project is Project => project !== null);
+        resolve(validatedProjects);
+      };
       request.onerror = (): void =>
         reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
@@ -240,11 +269,14 @@ class ProjectService {
    */
   public async save(project: Project): Promise<void> {
     await this.init();
-    const db = this.db!;
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const db = this.db;
 
     const updated = {
       ...project,
-      updatedAt: Date.now(),
+      updatedAt: new Date(),
     };
 
     return new Promise((resolve, reject) => {

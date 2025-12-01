@@ -24,7 +24,7 @@ function checkPlaywrightInstalled() {
   try {
     require.resolve('playwright');
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -93,12 +93,12 @@ function cleanupOldTempFiles() {
         const filePath = path.join(__dirname, file);
         try {
           fs.unlinkSync(filePath);
-        } catch (e) {
+        } catch {
           // Ignore errors - file might be in use or already deleted
         }
       });
     }
-  } catch (e) {
+  } catch {
     // Ignore directory read errors
   }
 }
@@ -190,7 +190,6 @@ async function main() {
 
     // Note: Temp file will be cleaned up on next run
     // This allows long-running async operations to complete safely
-
   } catch (error) {
     console.error('❌ Execution failed:', error.message);
     if (error.stack) {

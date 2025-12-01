@@ -427,7 +427,7 @@ describe('CharacterCard', () => {
         'love-interest',
         'comic-relief',
       ];
-      const expectedIcons = [
+      const expectedIcons: readonly string[] = [
         'crown-icon',
         'sword-icon',
         'target-icon',
@@ -449,7 +449,7 @@ describe('CharacterCard', () => {
           />,
         );
 
-        expect(screen.getByTestId(expectedIcons[index])).toBeInTheDocument();
+        expect(screen.getByTestId(expectedIcons[index]!)).toBeInTheDocument();
         unmount();
       });
     });

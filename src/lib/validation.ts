@@ -28,9 +28,7 @@ export class ValidationService {
   private constructor() {}
 
   public static getInstance(): ValidationService {
-    if (ValidationService.instance === null || ValidationService.instance === undefined) {
-      ValidationService.instance = new ValidationService();
-    }
+    ValidationService.instance ??= new ValidationService();
     return ValidationService.instance;
   }
 

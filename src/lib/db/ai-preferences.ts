@@ -23,12 +23,15 @@ const STORAGE_KEY = 'novelist_ai_preferences';
  * Get database client (reuses existing client from db.ts if available)
  */
 function getClient(): Client | null {
-  const config = {
-    url: import.meta.env.VITE_TURSO_DATABASE_URL ?? '',
-    authToken: import.meta.env.VITE_TURSO_AUTH_TOKEN ?? '',
-  };
+  const url = import.meta.env.VITE_TURSO_DATABASE_URL as string | undefined;
+  const authToken = import.meta.env.VITE_TURSO_AUTH_TOKEN as string | undefined;
 
-  if (!config.url) return null;
+  if (url == null || authToken == null) return null;
+
+  const config = {
+    url: url,
+    authToken: authToken,
+  };
 
   try {
     return createClient({
@@ -77,6 +80,8 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
       if (result.rows.length === 0) return null;
 
       const row = result.rows[0];
+      if (!row) return null;
+
       return {
         id: row.id as string,
         userId: row.user_id as string,
@@ -101,7 +106,7 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
   } else {
     try {
       const stored = localStorage.getItem(`${STORAGE_KEY}_${userId}`);
-      return stored ? JSON.parse(stored) : null;
+      return stored != null ? (JSON.parse(stored) as UserAIPreference) : null;
     } catch (e) {
       console.error('Failed to parse user AI preference from localStorage:', e);
       return null;
@@ -200,7 +205,7 @@ export async function getProviderCapabilities(
     }
   } else {
     const stored = localStorage.getItem(`${STORAGE_KEY}_capabilities`);
-    const all = stored ? JSON.parse(stored) : [];
+    const all = stored != null ? (JSON.parse(stored) as AIProviderCapability[]) : [];
     return provider ? all.filter((c: AIProviderCapability) => c.provider === provider) : all;
   }
 }
@@ -251,7 +256,7 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
     }
   } else {
     const stored = localStorage.getItem(`${STORAGE_KEY}_capabilities`);
-    const all = stored ? JSON.parse(stored) : [];
+    const all = stored != null ? (JSON.parse(stored) as AIProviderCapability[]) : [];
     const index = all.findIndex(
       (c: AIProviderCapability) =>
         c.provider === capability.provider && c.modelName === capability.modelName,
@@ -303,7 +308,7 @@ export async function logUsageAnalytic(analytic: AIUsageAnalytic): Promise<void>
     }
   } else {
     const stored = localStorage.getItem(`${STORAGE_KEY}_analytics`);
-    const all = stored ? JSON.parse(stored) : [];
+    const all = stored != null ? (JSON.parse(stored) as AIUsageAnalytic[]) : [];
     all.push(analytic);
     localStorage.setItem(`${STORAGE_KEY}_analytics`, JSON.stringify(all));
   }
@@ -338,11 +343,11 @@ export async function getUserUsageStats(
       `;
       const args: (string | number)[] = [userId];
 
-      if (startDate) {
+      if (startDate != null) {
         sql += ' AND created_at >= ?';
         args.push(startDate);
       }
-      if (endDate) {
+      if (endDate != null) {
         sql += ' AND created_at <= ?';
         args.push(endDate);
       }
@@ -350,7 +355,7 @@ export async function getUserUsageStats(
       const result = await client.execute({ sql, args });
       const row = result.rows[0];
 
-      if (!row) {
+      if (row == null) {
         return {
           totalTokens: 0,
           totalCost: 0,
@@ -379,11 +384,11 @@ export async function getUserUsageStats(
     }
   } else {
     const stored = localStorage.getItem(`${STORAGE_KEY}_analytics`);
-    const all: AIUsageAnalytic[] = stored ? JSON.parse(stored) : [];
+    const all: AIUsageAnalytic[] = stored != null ? (JSON.parse(stored) as AIUsageAnalytic[]) : [];
     const filtered = all.filter(a => {
       if (a.userId !== userId) return false;
-      if (startDate && a.createdAt < startDate) return false;
-      if (endDate && a.createdAt > endDate) return false;
+      if (startDate != null && a.createdAt < startDate) return false;
+      if (endDate != null && a.createdAt > endDate) return false;
       return true;
     });
 
@@ -439,7 +444,7 @@ export async function getProviderHealth(provider?: AIProvider): Promise<AIProvid
     }
   } else {
     const stored = localStorage.getItem(`${STORAGE_KEY}_health`);
-    const all = stored ? JSON.parse(stored) : [];
+    const all = stored != null ? (JSON.parse(stored) as AIProviderHealth[]) : [];
     return provider ? all.filter((h: AIProviderHealth) => h.provider === provider) : all;
   }
 }
@@ -484,7 +489,7 @@ export async function updateProviderHealth(health: AIProviderHealth): Promise<vo
     }
   } else {
     const stored = localStorage.getItem(`${STORAGE_KEY}_health`);
-    const all = stored ? JSON.parse(stored) : [];
+    const all = stored != null ? (JSON.parse(stored) as AIProviderHealth[]) : [];
     const index = all.findIndex((h: AIProviderHealth) => h.provider === health.provider);
 
     if (index >= 0) {

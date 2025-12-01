@@ -1,6 +1,6 @@
 # E2E Test API Keys Configuration
 
-**Date:** 2025-11-29 (Updated) **Purpose:** Document API keys required for
+**Date:** 2025-12-01 (Updated) **Purpose:** Document API keys required for
 End-to-End (E2E) tests **Status:** Simplified with Vercel AI Gateway **⚠️
 IMPORTANT:** Application now uses Vercel AI Gateway!
 
@@ -177,17 +177,18 @@ npm run test:e2e tests/specs/projects.spec.ts
 
 ## Current E2E Test Status
 
-**Last Run:** 2025-11-29 21:06:10 UTC
+**Last Run:** 2025-12-01 11:30:00 UTC
 
-| Metric      | Value             |
-| ----------- | ----------------- |
-| Total Tests | 33                |
-| Passed      | 6 (18.2%)         |
-| Failed      | 27 (81.8%)        |
-| Skipped     | 1 (3.0%)          |
-| Status      | ❌ Needs API keys |
+| Metric      | Value               |
+| ----------- | ------------------- |
+| Total Tests | 33                  |
+| Passed      | 6 (18.2%)           |
+| Failed      | 26 (78.8%)          |
+| Error       | 1 test error (3.0%) |
+| Skipped     | 0 (0%)              |
+| Status      | ❌ Needs API keys   |
 
-### Failed Tests (27)
+### Failed Tests (26 + 1 error)
 
 1. `tests/app.spec.ts` - End-to-End Flow (AI generation required)
 2. `tests/agents.spec.ts` - All 5 agent tests (require AI)
@@ -196,13 +197,14 @@ npm run test:e2e tests/specs/projects.spec.ts
 5. `tests/projects.spec.ts` - Project Wizard (requires AI)
 6. `tests/publishing.spec.ts` - Publishing panel (may require AI)
 7. `tests/versioning.spec.ts` - All 7 version tests (require AI)
+8. `tests/settings.spec.ts` - 1 test with unhandled error (3 tests pass)
 
 ### Passed Tests (6)
 
 1. `tests/navigation.spec.ts` - Mobile sidebar toggle
 2. `tests/navigation.spec.ts` - Focus mode toggle
 3. `tests/persistence.spec.ts` - Local storage persistence
-4. `tests/settings.spec.ts` - Settings panel (3 tests)
+4. `tests/settings.spec.ts` - Settings panel (3 tests pass, 1 has error)
 
 ---
 

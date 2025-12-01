@@ -106,7 +106,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
 
       {/* Character Portrait */}
       <div className='mb-3 flex items-start gap-3'>
-        {character.imageUrl?.length > 0 ? (
+        {character.imageUrl != null && character.imageUrl.length > 0 ? (
           <img
             src={character.imageUrl}
             alt={character.name}

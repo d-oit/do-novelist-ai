@@ -71,7 +71,7 @@ const AnalyticsContent: React.FC<AnalyticsContentProps> = ({ project, activeView
     totalWords: stats.totalWords,
   };
 
-  const renderContent = (): JSX.Element => {
+  const renderContent = (): React.JSX.Element => {
     switch (activeView) {
       case 'overview':
         return (

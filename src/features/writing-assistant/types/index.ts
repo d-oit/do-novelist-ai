@@ -322,15 +322,34 @@ export interface WritingAssistantState {
 export interface WritingAssistantActions {
   toggleAssistant: () => void;
   analyzeContent: (content: string, chapterId: string) => Promise<void>;
-  applySuggestion: (suggestionId: string) => Promise<void>;
-  dismissSuggestion: (suggestionId: string) => Promise<void>;
-  updateConfig: (config: Partial<WritingAssistantConfig>) => Promise<void>;
+  applySuggestion: (suggestionId: string) => void;
+  dismissSuggestion: (suggestionId: string) => void;
+  updateConfig: (config: Partial<WritingAssistantConfig>) => void;
 
   // UI Actions
   selectSuggestion: (suggestionId: string) => void;
   toggleSuggestions: () => void;
   filterSuggestions: (category: WritingSuggestionCategory | 'all') => void;
   sortSuggestions: (sortBy: WritingAssistantState['sortBy']) => void;
+}
+
+// ============================================================================
+// Progress Tracking Types
+// ============================================================================
+
+export interface WritingProgressMetrics {
+  id: string;
+  userId: string;
+  projectId: string;
+  date: string; // YYYY-MM-DD
+  wordsWritten: number;
+  timeSpent: number; // minutes
+  suggestionsReceived: number;
+  suggestionsAccepted: number;
+  averageReadability: number;
+  averageEngagement: number;
+  chaptersWorkedOn: number;
+  createdAt: Date;
 }
 
 // ============================================================================

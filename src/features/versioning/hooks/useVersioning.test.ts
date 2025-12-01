@@ -67,11 +67,7 @@ describe('useVersioning', () => {
       expect(savedVersion).toEqual(mockVersion);
     });
 
-    expect(mockVersioningService.saveVersion).toHaveBeenCalledWith(
-      mockChapter,
-      'Test save',
-      'manual'
-    );
+    expect(mockVersioningService.saveVersion).toHaveBeenCalledWith(mockChapter, 'Test save', 'manual');
   });
 
   it('restores a version successfully', async () => {
@@ -209,6 +205,7 @@ describe('useVersioning', () => {
   it('creates a new branch successfully', async () => {
     const mockBranch = {
       id: 'branch-1',
+      chapterId: 'test-chapter',
       name: 'feature-branch',
       description: 'A new feature branch',
       parentVersionId: 'version-1',
@@ -222,18 +219,14 @@ describe('useVersioning', () => {
     const { result } = renderHook(() => useVersioning('test-chapter'));
 
     await act(async () => {
-      const branch = await result.current.createBranch(
-        'feature-branch',
-        'A new feature branch',
-        'version-1'
-      );
+      const branch = await result.current.createBranch('feature-branch', 'A new feature branch', 'version-1');
       expect(branch).toEqual(mockBranch);
     });
 
     expect(mockVersioningService.createBranch).toHaveBeenCalledWith(
       'feature-branch',
       'A new feature branch',
-      'version-1'
+      'version-1',
     );
   });
 });

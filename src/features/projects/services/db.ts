@@ -1,7 +1,6 @@
 import { Client, createClient } from '@libsql/client/web';
 import {
   ChapterStatus,
-  Language,
   Project,
   ProjectSettings,
   PublishStatus,
@@ -9,6 +8,7 @@ import {
   WritingStyle,
 } from '@shared/types';
 import { parseChapterStatus, parsePublishStatus } from '../../../shared/utils/validation';
+import { isLanguage } from '../../../types/guards';
 import { ProjectSchema } from '../../../types/schemas';
 
 const STORAGE_KEY = 'novelist_db_config';
@@ -36,18 +36,12 @@ interface DbProjectRow {
 
 interface DbChapterRow {
   id: string;
+  project_id: string;
   order_index: number;
   title: string;
   summary: string;
   content: string;
   status: string;
-  word_count: number;
-  character_count: number;
-  estimated_reading_time: number;
-  tags: string; // JSON string
-  notes: string;
-  created_at: string;
-  updated_at: string;
 }
 
 export const getStoredConfig = (): DbConfig => {
@@ -66,7 +60,7 @@ export const getStoredConfig = (): DbConfig => {
   return {
     url: envUrl ?? '',
     authToken: envToken ?? '',
-    useCloud: envUrl.length > 0 && envToken.length > 0, // Default to cloud if env vars exist
+    useCloud: (envUrl?.length ?? 0) > 0 && (envToken?.length ?? 0) > 0, // Default to cloud if env vars exist
   };
 };
 
@@ -202,7 +196,7 @@ export const db = {
         string,
         Project
       >;
-      projects[project.id] = { ...project, updatedAt: new Date().toISOString() };
+      projects[project.id] = { ...project, updatedAt: new Date() };
       localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
       console.log(`[DB] Local save complete.`);
     }
@@ -218,7 +212,7 @@ export const db = {
           args: [projectId],
         });
         if (pRes.rows.length === 0) return null;
-        const pRow = pRes.rows[0] as DbProjectRow;
+        const pRow = pRes.rows[0] as unknown as DbProjectRow;
 
         const cRes = await client.execute({
           sql: 'SELECT * FROM chapters WHERE project_id = ? ORDER BY order_index',
@@ -229,16 +223,15 @@ export const db = {
           id: pRow.id,
           title: pRow.title,
           idea: pRow.idea,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           style: JSON.parse(pRow.style || '{}') as WritingStyle,
           coverImage: pRow.cover_image,
-           
+
           worldState: JSON.parse(pRow.world_state || '{}') as WorldState,
           isGenerating: false,
           status: parsePublishStatus(pRow.status, PublishStatus.DRAFT),
-          language: pRow.language as Language,
+          language: isLanguage(pRow.language) ? pRow.language : 'en',
           targetWordCount: pRow.target_word_count,
-           
+
           settings: JSON.parse(pRow.settings || '{}') as ProjectSettings,
           genre: [],
           targetAudience: 'adult',
@@ -257,22 +250,25 @@ export const db = {
           changeLog: [],
           createdAt: new Date(),
           updatedAt: new Date(),
-          chapters: cRes.rows.map((r: DbChapterRow) => ({
-            id: r.id,
-            orderIndex: r.order_index,
-            title: r.title,
-            summary: r.summary,
-            content: r.content,
-            status: parseChapterStatus(r.status, ChapterStatus.PENDING),
-            wordCount: 0,
-            characterCount: 0,
-            estimatedReadingTime: 0,
-            tags: [],
-            notes: '',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            illustration: undefined,
-          })),
+          chapters: cRes.rows.map(r => {
+            const cRow = r as unknown as DbChapterRow;
+            return {
+              id: cRow.id ?? '',
+              orderIndex: cRow.order_index ?? 0,
+              title: cRow.title ?? '',
+              summary: cRow.summary ?? '',
+              content: cRow.content ?? '',
+              status: parseChapterStatus(cRow.status ?? 'pending', ChapterStatus.PENDING),
+              wordCount: 0,
+              characterCount: 0,
+              estimatedReadingTime: 0,
+              tags: [],
+              notes: '',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              illustration: undefined,
+            };
+          }),
         };
         // Validate the loaded project data
         const validationResult = ProjectSchema.safeParse(loadedProject);

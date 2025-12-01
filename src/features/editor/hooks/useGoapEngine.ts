@@ -21,7 +21,6 @@ import {
   RefineOptions,
   WorldState,
 } from '../../../types';
-import { OutlineChapter } from '../types';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {
@@ -86,7 +85,7 @@ const INITIAL_ACTIONS: AgentAction[] = [
     label: 'Writers: Parallel Draft',
     description: 'Spawns multiple writing agents to draft pending chapters simultaneously.',
     cost: 50,
-    agentMode: 'PARALLEL' as const,
+    agentMode: AgentMode.PARALLEL,
     preconditions: { hasOutline: true },
     effects: { chaptersCompleted: 1 },
     promptTemplate: '...',
@@ -190,11 +189,11 @@ export const useGoapEngine = (
           'success',
         );
 
-        const newChapters: Chapter[] = result.chapters.map((c: OutlineChapter) => ({
-          id: `${project.id}_ch_${c.orderIndex}`,
-          orderIndex: c.orderIndex,
-          title: c.title,
-          summary: c.summary,
+        const newChapters: Chapter[] = result.chapters.map((c: Partial<Chapter>) => ({
+          id: `${project.id}_ch_${c.orderIndex ?? 0}`,
+          orderIndex: c.orderIndex ?? 0,
+          title: c.title ?? '',
+          summary: c.summary ?? '',
           content: '',
           status: ChapterStatus.PENDING,
           illustration: '',

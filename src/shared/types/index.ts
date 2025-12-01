@@ -184,3 +184,6 @@ export interface ActionResult {
   data?: unknown;
   error?: Error;
 }
+
+// Re-export types from schemas for backward compatibility
+export type { WritingStyle } from '../../types/schemas';

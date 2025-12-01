@@ -44,6 +44,7 @@ export interface VersionDiff {
 
 export interface Branch {
   id: string;
+  chapterId: string;
   name: string;
   description: string;
   parentVersionId: string;

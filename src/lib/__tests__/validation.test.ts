@@ -7,6 +7,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { z } from 'zod';
 
 import { createProjectId } from '../../types/guards';
+import type { Project } from '../../types';
+import { ChapterStatus } from '../../shared/types';
 import { validationService, validate, assertValid, safeConvert } from '../validation';
 
 describe('ValidationService', () => {
@@ -75,7 +77,7 @@ describe('ValidationService', () => {
   });
 
   describe('Project Integrity Validation', () => {
-    let validProject: unknown;
+    let validProject: Project;
 
     beforeEach(() => {
       const createResult = validationService.validateCreateProject({
@@ -86,7 +88,7 @@ describe('ValidationService', () => {
       });
 
       if (createResult.success) {
-        validProject = createResult.data;
+        validProject = createResult.data as Project;
       }
     });
 
@@ -104,7 +106,7 @@ describe('ValidationService', () => {
           title: 'Chapter 1',
           summary: 'First chapter',
           content: 'Content here',
-          status: 'complete',
+          status: ChapterStatus.COMPLETE,
           wordCount: 500,
           characterCount: 2500,
           estimatedReadingTime: 2,
@@ -141,7 +143,7 @@ describe('ValidationService', () => {
           title: 'Chapter 1',
           summary: 'First chapter',
           content: 'Content here',
-          status: 'complete',
+          status: ChapterStatus.COMPLETE,
           wordCount: 500,
           characterCount: 2500,
           estimatedReadingTime: 2,
@@ -177,7 +179,7 @@ describe('ValidationService', () => {
           title: 'Chapter 1',
           summary: 'First chapter',
           content: 'Content here',
-          status: 'pending',
+          status: ChapterStatus.PENDING,
           wordCount: 500,
           characterCount: 2500,
           estimatedReadingTime: 2,
@@ -192,7 +194,7 @@ describe('ValidationService', () => {
           title: 'Chapter 2',
           summary: 'Second chapter',
           content: 'More content',
-          status: 'pending',
+          status: ChapterStatus.PENDING,
           wordCount: 600,
           characterCount: 3000,
           estimatedReadingTime: 3,
@@ -220,7 +222,7 @@ describe('ValidationService', () => {
         title: 'Chapter 1: The Beginning',
         summary: 'Our story begins',
         content: 'Once upon a time, in a land far, far away...',
-        status: 'pending',
+        status: ChapterStatus.PENDING,
         wordCount: 10,
         characterCount: 45,
         estimatedReadingTime: 1,
@@ -239,7 +241,7 @@ describe('ValidationService', () => {
         title: 'Chapter 1',
         summary: 'Summary',
         content: 'This is a test chapter with some content that should be counted.',
-        status: 'pending',
+        status: ChapterStatus.PENDING,
         wordCount: 5, // Should be much higher
       };
 
@@ -257,7 +259,7 @@ describe('ValidationService', () => {
         title: 'Chapter 1',
         summary: 'Summary',
         content: 'Content',
-        status: 'pending',
+        status: ChapterStatus.PENDING,
         wordCount: 1,
       };
 
@@ -314,7 +316,7 @@ describe('ValidationService', () => {
             title: 'Chapter 1',
             summary: 'First',
             content: 'Content',
-            status: 'complete',
+            status: ChapterStatus.COMPLETE,
             wordCount: 1000,
             characterCount: 5000,
             estimatedReadingTime: 4,
@@ -329,7 +331,7 @@ describe('ValidationService', () => {
             title: 'Chapter 2',
             summary: 'Second',
             content: 'More content',
-            status: 'pending',
+            status: ChapterStatus.PENDING,
             wordCount: 1500,
             characterCount: 7500,
             estimatedReadingTime: 6,

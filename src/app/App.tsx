@@ -12,6 +12,7 @@ import { Navbar, ProjectStats, ProjectWizard, ProjectsView } from '../features/p
 import { db } from '../features/projects/services';
 import { SettingsView } from '../features/settings/components';
 import { Project, Chapter, ChapterStatus, PublishStatus } from '../shared/types';
+import { RefineOptions } from '../types';
 import { createChapter } from '../shared/utils';
 
 // --- Initial Data ---
@@ -258,8 +259,8 @@ const App: React.FC = () => {
                 project={project}
                 selectedChapterId={selectedChapterId}
                 onSelectChapter={setSelectedChapterId}
-                onRefineChapter={(chapterId: string): void => {
-                  void engine.handleRefineChapter(chapterId);
+                onRefineChapter={(chapterId: string, options: RefineOptions): void => {
+                  void engine.handleRefineChapter(chapterId, options);
                 }}
                 onUpdateChapter={handleUpdateChapter}
                 onUpdateProject={handleUpdateProject}

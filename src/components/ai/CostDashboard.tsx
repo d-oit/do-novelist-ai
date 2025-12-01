@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Activity, CheckCircle } from 'lucide-react';
 import {
   getUsageStats,
@@ -13,7 +13,7 @@ interface CostDashboardProps {
   userId: string;
 }
 
-export const CostDashboard = ({ userId }: CostDashboardProps): JSX.Element => {
+export const CostDashboard = ({ userId }: CostDashboardProps): React.JSX.Element => {
   const [usageStats, setUsageStats] = useState<EnhancedUsageStats | null>(null);
   const [budgetInfo, setBudgetInfo] = useState<BudgetInfo | null>(null);
   const [loading, setLoading] = useState(true);

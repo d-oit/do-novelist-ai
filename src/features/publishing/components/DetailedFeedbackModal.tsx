@@ -19,7 +19,7 @@ export const DetailedFeedbackModal: React.FC<DetailedFeedbackModalProps> = ({
 }) => {
   if (!feedback) return null;
 
-  const getSentimentIcon = (sentiment: string): JSX.Element => {
+  const getSentimentIcon = (sentiment: string): React.JSX.Element => {
     switch (sentiment.toLowerCase()) {
       case 'positive':
         return <ThumbsUp className='h-5 w-5 text-green-600' />;

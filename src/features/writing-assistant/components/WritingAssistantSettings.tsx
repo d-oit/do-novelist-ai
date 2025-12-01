@@ -139,7 +139,7 @@ const CategorySelector: React.FC<{
     { id: 'show_vs_tell', label: 'Show vs Tell', description: 'Balance showing and telling' },
   ];
 
-  const toggleCategory = (categoryId: string) => {
+  const toggleCategory = (categoryId: string): void => {
     if (selectedCategories.includes(categoryId)) {
       onChange(selectedCategories.filter(id => id !== categoryId));
     } else {
@@ -191,17 +191,17 @@ export const WritingAssistantSettings: React.FC<WritingAssistantSettingsProps> =
   const [localConfig, setLocalConfig] = useState<WritingAssistantConfig>(config);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const updateLocalConfig = (updates: Partial<WritingAssistantConfig>) => {
+  const updateLocalConfig = (updates: Partial<WritingAssistantConfig>): void => {
     setLocalConfig(prev => ({ ...prev, ...updates }));
     setHasChanges(true);
   };
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     onConfigChange(localConfig);
     setHasChanges(false);
   };
 
-  const handleReset = () => {
+  const handleReset = (): void => {
     setLocalConfig(config);
     setHasChanges(false);
   };
@@ -314,7 +314,9 @@ export const WritingAssistantSettings: React.FC<WritingAssistantSettingsProps> =
               { value: 'gemini-pro', label: 'Gemini Pro (High Quality)' },
               { value: 'gemini-flash', label: 'Gemini Flash (Fast)' },
             ]}
-            onChange={value => updateLocalConfig({ aiModel: value as any })}
+            onChange={value =>
+              updateLocalConfig({ aiModel: value as 'gemini-pro' | 'gemini-flash' })
+            }
           />
 
           <SelectInput
@@ -325,7 +327,9 @@ export const WritingAssistantSettings: React.FC<WritingAssistantSettingsProps> =
               { value: 'standard', label: 'Standard (Balanced)' },
               { value: 'comprehensive', label: 'Comprehensive (Detailed, slower)' },
             ]}
-            onChange={value => updateLocalConfig({ analysisDepth: value as any })}
+            onChange={value =>
+              updateLocalConfig({ analysisDepth: value as 'basic' | 'standard' | 'comprehensive' })
+            }
           />
 
           <SliderInput
@@ -363,7 +367,9 @@ export const WritingAssistantSettings: React.FC<WritingAssistantSettingsProps> =
               { value: 'descriptive', label: 'Descriptive (Rich detail)' },
               { value: 'balanced', label: 'Balanced (Mix of both)' },
             ]}
-            onChange={value => updateLocalConfig({ preferredStyle: value as any })}
+            onChange={value =>
+              updateLocalConfig({ preferredStyle: value as 'concise' | 'descriptive' | 'balanced' })
+            }
           />
 
           <SelectInput
@@ -375,7 +381,11 @@ export const WritingAssistantSettings: React.FC<WritingAssistantSettingsProps> =
               { value: 'adult', label: 'Adult' },
               { value: 'literary', label: 'Literary' },
             ]}
-            onChange={value => updateLocalConfig({ targetAudience: value as any })}
+            onChange={value =>
+              updateLocalConfig({
+                targetAudience: value as 'children' | 'young_adult' | 'adult' | 'literary',
+              })
+            }
           />
 
           <div className='py-2'>

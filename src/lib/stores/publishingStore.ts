@@ -37,7 +37,11 @@ interface PublishingState {
 
   // Actions
   init: () => Promise<void>;
-  publishProject: (project: Project, platformIds: string[], metadata: Record<string, unknown>) => Promise<Publication>;
+  publishProject: (
+    project: Project,
+    platformIds: string[],
+    metadata: Record<string, unknown>,
+  ) => Promise<Publication>;
   loadPublicationData: (publicationId: string) => Promise<void>;
   loadTrends: (publicationId: string, days?: number) => Promise<void>;
   loadFeedback: (publicationId: string, limit?: number) => Promise<void>;
@@ -78,11 +82,9 @@ export const usePublishingStore = create<PublishingState>()(
           try {
             set({ isLoading: true, error: null });
             await publishingAnalyticsService.init();
-            const [allPlatforms, connected, alerts] = await Promise.all([
-              publishingAnalyticsService.getAllPlatforms(),
-              publishingAnalyticsService.getConnectedPlatforms(),
-              publishingAnalyticsService.getPublishingAlerts(),
-            ]);
+            const alerts = await publishingAnalyticsService.getPublishingAlerts();
+            const allPlatforms = publishingAnalyticsService.getAllPlatforms();
+            const connected = publishingAnalyticsService.getConnectedPlatforms();
             set({
               platforms: allPlatforms,
               connectedPlatforms: connected,
@@ -105,7 +107,7 @@ export const usePublishingStore = create<PublishingState>()(
             const publication = await publishingAnalyticsService.publishProject(
               project,
               platformIds,
-              metadata
+              metadata,
             );
             set(state => ({
               publications: [publication, ...state.publications],
@@ -139,16 +141,16 @@ export const usePublishingStore = create<PublishingState>()(
         loadPublicationData: async (publicationId): Promise<void> => {
           set({ isLoading: true, error: null });
           try {
-            const [analytics, engagement, insights, feedback, goals] = await Promise.all([
+            const [analytics, insights, feedback, goals] = await Promise.all([
               publishingAnalyticsService.getPublicationAnalytics(publicationId),
-              publishingAnalyticsService.getEngagementMetrics(publicationId, {
-                start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-                end: new Date(),
-              }),
               publishingAnalyticsService.getReaderInsights(publicationId),
               publishingAnalyticsService.getReaderFeedback(publicationId),
               publishingAnalyticsService.getPublishingGoals(publicationId),
             ]);
+            const engagement = publishingAnalyticsService.getEngagementMetrics(publicationId, {
+              start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+              end: new Date(),
+            });
 
             set({
               analytics,
@@ -167,12 +169,9 @@ export const usePublishingStore = create<PublishingState>()(
         },
 
         // Load Trends
-        loadTrends: async (publicationId, days = 30): Promise<void> => {
+        loadTrends: (publicationId, days = 30): void => {
           try {
-            const trends = await publishingAnalyticsService.getPublishingTrends(
-              publicationId,
-              days
-            );
+            const trends = publishingAnalyticsService.getPublishingTrends(publicationId, days);
             set({ trends });
           } catch (err) {
             set({ error: err instanceof Error ? err.message : 'Failed to load trends' });
@@ -184,7 +183,7 @@ export const usePublishingStore = create<PublishingState>()(
           try {
             const feedback = await publishingAnalyticsService.getReaderFeedback(
               publicationId,
-              limit
+              limit,
             );
             set({ feedback });
           } catch (err) {
@@ -223,14 +222,11 @@ export const usePublishingStore = create<PublishingState>()(
         },
 
         // Connect Platform
-        connectPlatform: async (platformId, credentials): Promise<boolean> => {
+        connectPlatform: (platformId, credentials): boolean => {
           try {
-            const success = await publishingAnalyticsService.connectPlatform(
-              platformId,
-              credentials
-            );
+            const success = publishingAnalyticsService.connectPlatform(platformId, credentials);
             if (success) {
-              const connected = await publishingAnalyticsService.getConnectedPlatforms();
+              const connected = publishingAnalyticsService.getConnectedPlatforms();
               set({ connectedPlatforms: connected });
 
               const platform = get().platforms.find(p => p.id === platformId);
@@ -293,21 +289,27 @@ export const usePublishingStore = create<PublishingState>()(
           alerts: state.alerts,
           connectedPlatforms: state.connectedPlatforms,
         }),
-      }
+      },
     ),
-    { name: 'PublishingStore' }
-  )
+    { name: 'PublishingStore' },
+  ),
 );
 
 // Selectors
 export const selectPublications = (state: PublishingState): Publication[] => state.publications;
-export const selectCurrentPublication = (state: PublishingState): Publication | null => state.currentPublication;
-export const selectPublishingAnalytics = (state: PublishingState): PlatformAnalytics | null => state.analytics;
-export const selectEngagement = (state: PublishingState): EngagementMetrics | null => state.engagement;
-export const selectPublishingInsights = (state: PublishingState): ReaderInsights | null => state.insights;
-export const selectPublishingTrends = (state: PublishingState): PublishingTrends | null => state.trends;
+export const selectCurrentPublication = (state: PublishingState): Publication | null =>
+  state.currentPublication;
+export const selectPublishingAnalytics = (state: PublishingState): PlatformAnalytics | null =>
+  state.analytics;
+export const selectEngagement = (state: PublishingState): EngagementMetrics | null =>
+  state.engagement;
+export const selectPublishingInsights = (state: PublishingState): ReaderInsights | null =>
+  state.insights;
+export const selectPublishingTrends = (state: PublishingState): PublishingTrends | null =>
+  state.trends;
 export const selectFeedback = (state: PublishingState): ReaderFeedback[] => state.feedback;
 export const selectPublishingGoals = (state: PublishingState): PublishingGoals[] => state.goals;
 export const selectAlerts = (state: PublishingState): PublishingAlert[] => state.alerts;
 export const selectPlatforms = (state: PublishingState): PublishingPlatform[] => state.platforms;
-export const selectConnectedPlatforms = (state: PublishingState): PublishingPlatform[] => state.connectedPlatforms;
+export const selectConnectedPlatforms = (state: PublishingState): PublishingPlatform[] =>
+  state.connectedPlatforms;

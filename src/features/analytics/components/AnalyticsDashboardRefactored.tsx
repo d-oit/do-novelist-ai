@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import { Project, ChapterStatus } from '../../../shared/types';
+import { Project, ChapterStatus } from '../../../types';
 
 import AnalyticsContent from './AnalyticsContent';
 import AnalyticsSidebar from './AnalyticsSidebar';
@@ -35,6 +35,7 @@ const AnalyticsDashboardRefactored: React.FC<AnalyticsDashboardProps> = ({
       exportDate: new Date().toISOString(),
       chapters: project.chapters.length,
       totalWords: project.chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
       completed: project.chapters.filter(ch => ch.status === ChapterStatus.COMPLETE).length,
     };
 

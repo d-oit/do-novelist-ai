@@ -45,12 +45,7 @@ export class CharacterValidationService {
   private constructor() {}
 
   public static getInstance(): CharacterValidationService {
-    if (
-      CharacterValidationService.instance === null ||
-      CharacterValidationService.instance === undefined
-    ) {
-      CharacterValidationService.instance = new CharacterValidationService();
-    }
+    CharacterValidationService.instance ??= new CharacterValidationService();
     return CharacterValidationService.instance;
   }
 
@@ -174,7 +169,7 @@ export class CharacterValidationService {
         background: {
           significantEvents: [],
           secrets: [],
-          ...((createData as any).background ?? {}),
+          ...(('background' in createData && createData.background) ?? {}),
         },
         psychology: {
           coreBeliefs: [],
@@ -236,10 +231,10 @@ export class CharacterValidationService {
       const updateData = validation.data;
 
       // Check for unique name if name is being updated
-      if ((updateData.name?.length ?? 0) > 0) {
+      if (updateData.name != null && updateData.name.length > 0) {
+        const newName = updateData.name;
         const nameExists = existingCharacters.some(
-          char =>
-            char.id !== updateData.id && char.name.toLowerCase() === updateData.name.toLowerCase(),
+          char => char.id !== updateData.id && char.name.toLowerCase() === newName.toLowerCase(),
         );
         if (nameExists) {
           return {
@@ -338,7 +333,7 @@ export class CharacterValidationService {
       }
 
       // Validate personality trait conflicts
-      const traits = validatedCharacter.psychology?.personalityTraits || [];
+      const traits = validatedCharacter.psychology?.personalityTraits ?? [];
       const conflicts = this.findPersonalityConflicts(traits);
       if (conflicts.length > 0) {
         issues.push({
@@ -816,24 +811,33 @@ export const characterValidationService = CharacterValidationService.getInstance
 // =============================================================================
 
 export const validateCharacter = {
-  create: (data: unknown, projectId: ProjectId, existing: Character[] = []) =>
+  create: (
+    data: unknown,
+    projectId: ProjectId,
+    existing: Character[] = [],
+  ): ValidationResult<Character> =>
     characterValidationService.validateCreateCharacter(data, projectId, existing),
-  update: (data: unknown, existing: Character[] = []) =>
+  update: (data: unknown, existing: Character[] = []): ValidationResult<UpdateCharacter> =>
     characterValidationService.validateUpdateCharacter(data, existing),
-  integrity: (character: Character) =>
+  integrity: (character: Character): ValidationResult<Character> =>
     characterValidationService.validateCharacterIntegrity(character),
-  relationship: (data: unknown, characters: Character[]) =>
+  relationship: (data: unknown, characters: Character[]): ValidationResult<CharacterRelationship> =>
     characterValidationService.validateCharacterRelationship(data, characters),
-  group: (data: unknown, characters: Character[]) =>
+  group: (data: unknown, characters: Character[]): ValidationResult<CharacterGroup> =>
     characterValidationService.validateCharacterGroup(data, characters),
-  conflict: (data: unknown, characters: Character[]) =>
+  conflict: (data: unknown, characters: Character[]): ValidationResult<CharacterConflict> =>
     characterValidationService.validateCharacterConflict(data, characters),
   project: (
     characters: Character[],
     relationships?: CharacterRelationship[],
     groups?: CharacterGroup[],
     conflicts?: CharacterConflict[],
-  ) =>
+  ): ValidationResult<{
+    characters: Character[];
+    relationships: CharacterRelationship[];
+    groups: CharacterGroup[];
+    conflicts: CharacterConflict[];
+  }> =>
     characterValidationService.validateProjectCharacters(
       characters,
       relationships,

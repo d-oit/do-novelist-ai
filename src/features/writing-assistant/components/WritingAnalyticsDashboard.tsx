@@ -182,7 +182,7 @@ export const WritingAnalyticsDashboard: React.FC<WritingAnalyticsDashboardProps>
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
   useEffect(() => {
-    const loadAnalytics = () => {
+    const loadAnalytics = (): void => {
       setLoading(true);
       try {
         const data = writingAssistantDb.getWritingAnalytics(projectId, timeRange);

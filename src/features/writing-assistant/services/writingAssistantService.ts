@@ -4,6 +4,7 @@
  */
 
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateText, type LanguageModel } from 'ai';
 import {
   type ContentAnalysis,
   type WritingSuggestion,
@@ -41,40 +42,44 @@ interface RawAISuggestion {
 
 class WritingAssistantService {
   private static instance: WritingAssistantService;
-  private readonly genAI: ReturnType<typeof createGoogleGenerativeAI> | null;
+  private readonly genAI: LanguageModel | null;
 
   private constructor() {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+    if (apiKey == null) {
       console.warn('Gemini API key not found. Writing assistant will use mock data.');
+      this.genAI = null;
+    } else {
+      // Initialize with Vercel AI SDK
+      const googleClient = createGoogleGenerativeAI({
+        apiKey,
+        baseURL: 'https://gateway.vercel.ai/v1/google',
+      });
+      this.genAI = googleClient('gemini-pro');
     }
-    // this.genAI = new GoogleGenerativeAI(apiKey || 'mock-key');
-    this.genAI = null; // For now, use mock data
   }
 
-  static getInstance(): WritingAssistantService {
-    if (!WritingAssistantService.instance) {
-      WritingAssistantService.instance = new WritingAssistantService();
-    }
+  public static getInstance(): WritingAssistantService {
+    WritingAssistantService.instance ??= new WritingAssistantService();
     return WritingAssistantService.instance;
   }
 
   /**
    * Analyze chapter content and provide comprehensive feedback
    */
-  public analyzeContent(
+  public async analyzeContent(
     content: string,
     chapterId: string,
     config: WritingAssistantConfig,
     characterContext?: Character[],
     plotContext?: string,
-  ): ContentAnalysis {
+  ): Promise<ContentAnalysis> {
     try {
       // Run parallel analyses
-      const suggestions = this.generateWritingSuggestions(content, config);
+      const suggestions = await this.generateWritingSuggestions(content, config);
       const readabilityScore = this.calculateReadabilityScore(content);
       const sentimentScore = this.analyzeSentiment(content);
-      const pacingScore = this.analyzePacing(content);
+      const paceScore = this.analyzePacing(content);
       const engagementScore = this.calculateEngagementScore(content);
       const plotHoles = config.enablePlotHoleDetection
         ? this.detectPlotHoles(content, plotContext)
@@ -114,7 +119,10 @@ class WritingAssistantService {
         transitionQuality,
       };
     } catch (error) {
-      console.error('Content analysis failed:', error);
+      console.error(
+        'Content analysis failed:',
+        error instanceof Error ? error.message : String(error),
+      );
       return this.getMockAnalysis(content, chapterId);
     }
   }
@@ -126,13 +134,12 @@ class WritingAssistantService {
     content: string,
     config: WritingAssistantConfig,
   ): Promise<WritingSuggestion[]> {
-    if (!import.meta.env.VITE_GEMINI_API_KEY) {
+    if (import.meta.env.VITE_GEMINI_API_KEY == null || this.genAI == null) {
       return this.getMockSuggestions(content);
     }
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: config.aiModel });
-
+      // genAI is guaranteed to be non-null here due to the check above
       const prompt = `
         Analyze the following text and provide writing suggestions. Focus on:
         - Style improvements (clarity, flow, engagement)
@@ -145,7 +152,7 @@ class WritingAssistantService {
 
         Target audience: ${config.targetAudience}
         Preferred style: ${config.preferredStyle}
-        ${config.genre ? `Genre: ${config.genre}` : ''}
+        ${config.genre != null ? `Genre: ${config.genre}` : ''}
 
         Please provide suggestions in JSON format with:
         - type: category of suggestion
@@ -162,13 +169,18 @@ class WritingAssistantService {
         "${content.substring(0, 2000)}${content.length > 2000 ? '...' : ''}"
       `;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const result = await generateText({
+        model: this.genAI,
+        prompt,
+        temperature: 0.7,
+      });
 
-      return this.parseAISuggestions(text, config);
+      return this.parseAISuggestions(result.text, config);
     } catch (error) {
-      console.error('AI suggestion generation failed:', error);
+      console.error(
+        'AI suggestion generation failed:',
+        error instanceof Error ? error.message : String(error),
+      );
       return this.getMockSuggestions(content);
     }
   }
@@ -187,7 +199,7 @@ class WritingAssistantService {
         return this.extractSuggestionsFromText(aiResponse);
       }
 
-      const suggestions: RawAISuggestion[] = JSON.parse(jsonMatch[0]);
+      const suggestions: RawAISuggestion[] = JSON.parse(jsonMatch[0]) as RawAISuggestion[];
       return suggestions
         .filter((s: RawAISuggestion) => (s.confidence ?? 0.7) >= config.minimumConfidence)
         .map(
@@ -198,14 +210,24 @@ class WritingAssistantService {
             message: s.message,
             originalText: s.originalText ?? '',
             suggestedText: s.suggestedText,
-            position: s.position ?? { start: 0, end: 0 },
+            position: s.position
+              ? {
+                  start: s.position.start ?? 0,
+                  end: s.position.end ?? 0,
+                  line: s.position.line,
+                  column: s.position.column,
+                }
+              : { start: 0, end: 0 },
             confidence: s.confidence ?? 0.7,
             reasoning: s.reasoning ?? '',
             category: s.category ?? 'readability',
           }),
         );
     } catch (error) {
-      console.error('Failed to parse AI suggestions:', error);
+      console.error(
+        'Failed to parse AI suggestions:',
+        error instanceof Error ? error.message : String(error),
+      );
       return this.extractSuggestionsFromText(aiResponse);
     }
   }
@@ -436,7 +458,7 @@ class WritingAssistantService {
    */
   private analyzeCharacterConsistency(
     _content: string,
-    _characterContext?: any[],
+    _characterContext?: Character[],
   ): CharacterConsistencyIssue[] {
     // This would cross-reference character behavior, speech patterns, etc.
     // Basic implementation for now

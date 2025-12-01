@@ -66,7 +66,7 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     expect(mockSettingsService.load).toHaveBeenCalled();
@@ -78,7 +78,7 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await waitFor(() => {
@@ -93,7 +93,7 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await waitFor(() => {
@@ -105,9 +105,7 @@ describe('useSettings', () => {
   });
 
   it('sets loading state during initialization', async () => {
-    mockSettingsService.load.mockImplementation(() => {
-      return new Promise(resolve => setTimeout(() => resolve(DEFAULT_SETTINGS), 100));
-    });
+    mockSettingsService.load.mockReturnValue(DEFAULT_SETTINGS);
 
     const { result } = renderHook(() => useSettings());
 
@@ -127,7 +125,7 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     const updates: Partial<Settings> = {
@@ -136,7 +134,7 @@ describe('useSettings', () => {
     };
 
     await act(async () => {
-      await result.current.update(updates);
+      result.current.update(updates);
     });
 
     expect(mockSettingsService.save).toHaveBeenCalled();
@@ -149,13 +147,13 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     mockClassListToggle.mockClear();
 
     await act(async () => {
-      await result.current.update({ theme: 'dark' });
+      result.current.update({ theme: 'dark' });
     });
 
     expect(mockClassListToggle).toHaveBeenCalledWith('dark', true);
@@ -165,11 +163,11 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await act(async () => {
-      await result.current.update({ fontSize: 20 });
+      result.current.update({ fontSize: 20 });
     });
 
     expect(document.documentElement.style.fontSize).toBe('20px');
@@ -179,13 +177,13 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     // Try to update with invalid data (fontSize too low)
     await expect(async () => {
       await act(async () => {
-        await result.current.update({ fontSize: 5 } as any);
+        result.current.update({ fontSize: 5 } as any);
       });
     }).rejects.toThrow();
   });
@@ -196,12 +194,12 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await expect(async () => {
       await act(async () => {
-        await result.current.update({ theme: 'dark' });
+        result.current.update({ theme: 'dark' });
       });
     }).rejects.toThrow('Save failed');
 
@@ -217,7 +215,7 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     act(() => {
@@ -236,15 +234,15 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await act(async () => {
-      await result.current.update({ fontSize: 20, theme: 'dark' });
+      result.current.update({ fontSize: 20, theme: 'dark' });
     });
 
     await act(async () => {
-      await result.current.reset();
+      result.current.reset();
     });
 
     expect(result.current.settings).toEqual(DEFAULT_SETTINGS);
@@ -255,17 +253,17 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await act(async () => {
-      await result.current.update({ theme: 'dark', fontSize: 20 });
+      result.current.update({ theme: 'dark', fontSize: 20 });
     });
 
     mockClassListToggle.mockClear();
 
     await act(async () => {
-      await result.current.reset();
+      result.current.reset();
     });
 
     expect(mockClassListToggle).toHaveBeenCalled();
@@ -278,12 +276,12 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await expect(async () => {
       await act(async () => {
-        await result.current.reset();
+        result.current.reset();
       });
     }).rejects.toThrow('Reset failed');
 
@@ -295,11 +293,11 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await act(async () => {
-      await result.current.update({
+      result.current.update({
         theme: 'dark',
         fontSize: 20,
         fontFamily: 'serif',
@@ -310,7 +308,7 @@ describe('useSettings', () => {
     });
 
     await act(async () => {
-      await result.current.resetCategory('appearance');
+      result.current.resetCategory('appearance');
     });
 
     expect(result.current.settings.theme).toBe(DEFAULT_SETTINGS.theme);
@@ -324,11 +322,11 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await act(async () => {
-      await result.current.update({
+      result.current.update({
         aiModel: 'gpt-4',
         aiTemperature: 1.0,
         enableAIAssistance: false,
@@ -336,7 +334,7 @@ describe('useSettings', () => {
     });
 
     await act(async () => {
-      await result.current.resetCategory('ai');
+      result.current.resetCategory('ai');
     });
 
     expect(result.current.settings.aiModel).toBe(DEFAULT_SETTINGS.aiModel);
@@ -348,11 +346,11 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await act(async () => {
-      await result.current.update({
+      result.current.update({
         autoSave: false,
         autoSaveInterval: 120,
         spellCheck: false,
@@ -361,7 +359,7 @@ describe('useSettings', () => {
     });
 
     await act(async () => {
-      await result.current.resetCategory('editor');
+      result.current.resetCategory('editor');
     });
 
     expect(result.current.settings.autoSave).toBe(DEFAULT_SETTINGS.autoSave);
@@ -399,7 +397,7 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     expect(result.current.error).toBe('Load error');
@@ -417,12 +415,12 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     await expect(async () => {
       await act(async () => {
-        await result.current.update({ theme: 'dark' });
+        result.current.update({ theme: 'dark' });
       });
     }).rejects.toThrow();
 
@@ -431,7 +429,7 @@ describe('useSettings', () => {
     mockSettingsService.save.mockResolvedValue();
 
     await act(async () => {
-      await result.current.update({ theme: 'light' });
+      result.current.update({ theme: 'light' });
     });
 
     expect(result.current.error).toBeNull();
@@ -442,13 +440,13 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     mockClassListToggle.mockClear();
 
     await act(async () => {
-      await result.current.update({ theme: 'light' });
+      result.current.update({ theme: 'light' });
     });
 
     expect(mockClassListToggle).toHaveBeenCalledWith('dark', false);
@@ -458,13 +456,13 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     mockClassListToggle.mockClear();
 
     await act(async () => {
-      await result.current.update({ theme: 'dark' });
+      result.current.update({ theme: 'dark' });
     });
 
     expect(mockClassListToggle).toHaveBeenCalledWith('dark', true);
@@ -487,13 +485,13 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     mockClassListToggle.mockClear();
 
     await act(async () => {
-      await result.current.update({ theme: 'system' });
+      result.current.update({ theme: 'system' });
     });
 
     expect(mockClassListToggle).toHaveBeenCalledWith('dark', true);
@@ -523,7 +521,7 @@ describe('useSettings', () => {
     const { result: result1 } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result1.current.init();
+      result1.current.init();
     });
 
     expect(result1.current.settings.theme).toBe('dark');
@@ -532,7 +530,7 @@ describe('useSettings', () => {
     const { result: result2 } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result2.current.init();
+      result2.current.init();
     });
 
     expect(result2.current.settings.theme).toBe('dark');
@@ -543,7 +541,7 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     const updates: Partial<Settings> = {
@@ -554,7 +552,7 @@ describe('useSettings', () => {
     };
 
     await act(async () => {
-      await result.current.update(updates);
+      result.current.update(updates);
     });
 
     expect(result.current.settings.theme).toBe('dark');
@@ -568,13 +566,13 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
     const originalSettings = { ...result.current.settings };
 
     await act(async () => {
-      await result.current.update({});
+      result.current.update({});
     });
 
     expect(result.current.settings).toEqual(originalSettings);
@@ -584,21 +582,14 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings());
 
     await act(async () => {
-      await result.current.init();
+      result.current.init();
     });
 
-    const categories: SettingsCategory[] = [
-      'appearance',
-      'ai',
-      'editor',
-      'goals',
-      'privacy',
-      'experimental',
-    ];
+    const categories: SettingsCategory[] = ['appearance', 'ai', 'editor', 'goals', 'privacy', 'experimental'];
 
     for (const category of categories) {
       await act(async () => {
-        await result.current.resetCategory(category);
+        result.current.resetCategory(category);
       });
     }
 

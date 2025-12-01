@@ -308,7 +308,7 @@ describe('useProjects', () => {
 
     await act(async () => {
       await result.current.loadAll();
-      result.current.select(existingProject.id);
+      result.current.loadStats();
     });
 
     await act(async () => {
@@ -404,7 +404,7 @@ describe('useProjects', () => {
 
     await act(async () => {
       await result.current.loadAll();
-      await result.current.loadStats();
+      result.current.loadStats();
     });
 
     expect(result.current.stats?.totalProjects).toBe(1);
@@ -448,10 +448,10 @@ describe('useProjects', () => {
     expect(projects[0]).toBeDefined();
 
     act(() => {
-      result.current.select(projects[0].id);
+      result.current.select(projects[0]!.id);
     });
 
-    expect(result.current.selectedProject?.id).toBe(projects[0].id);
+    expect(result.current.selectedProject?.id).toBe(projects[0]!.id);
   });
 
   it('sets null when selecting non-existent project', async () => {
@@ -536,7 +536,7 @@ describe('useProjects', () => {
 
     await act(async () => {
       await result.current.loadAll();
-      await result.current.loadStats();
+      result.current.loadStats();
     });
 
     expect(result.current.stats?.totalProjects).toBe(3);
@@ -554,7 +554,7 @@ describe('useProjects', () => {
 
     await act(async () => {
       await result.current.loadAll();
-      await result.current.loadStats();
+      result.current.loadStats();
     });
 
     expect(result.current.stats?.activeProjects).toBe(2);
@@ -572,7 +572,7 @@ describe('useProjects', () => {
 
     await act(async () => {
       await result.current.loadAll();
-      await result.current.loadStats();
+      result.current.loadStats();
     });
 
     expect(result.current.stats?.completedProjects).toBe(2);
@@ -627,7 +627,7 @@ describe('useProjects', () => {
 
     await act(async () => {
       await result.current.loadAll();
-      await result.current.loadStats();
+      result.current.loadStats();
     });
 
     expect(result.current.stats?.totalWords).toBe(8);
@@ -714,7 +714,7 @@ describe('useProjects', () => {
 
     await act(async () => {
       await result.current.loadAll();
-      await result.current.loadStats();
+      result.current.loadStats();
     });
 
     // Project 1: 50%, Project 2: 100%, Average: 75%

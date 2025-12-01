@@ -7,13 +7,14 @@ import {
   EngagementMetrics,
   PublishingGoals,
   ReaderInsights,
+  PublishingInsights,
   PublishingTrends,
   PublishingAlert,
   PublishingPlatform,
 } from '../types';
 
 class PublishingAnalyticsService {
-  private static instance: PublishingAnalyticsService;
+  private static instance: PublishingAnalyticsService | null = null;
   private readonly dbName = 'novelist-publishing';
   private readonly dbVersion = 1;
   private db: IDBDatabase | null = null;
@@ -51,12 +52,7 @@ class PublishingAnalyticsService {
   ];
 
   public static getInstance(): PublishingAnalyticsService {
-    if (
-      PublishingAnalyticsService.instance === null ||
-      PublishingAnalyticsService.instance === undefined
-    ) {
-      PublishingAnalyticsService.instance = new PublishingAnalyticsService();
-    }
+    PublishingAnalyticsService.instance ??= new PublishingAnalyticsService();
     return PublishingAnalyticsService.instance;
   }
 
@@ -125,13 +121,13 @@ class PublishingAnalyticsService {
       platforms: platforms.map(platformId => this.createPublishedInstance(platformId, project)),
       status: 'published',
       metadata: {
-        genre: ['Fiction'], // Would be extracted from project
-        tags: this.extractTags(project),
-        language: 'en',
-        mature: false,
-        wordCount: this.calculateWordCount(project),
-        chapterCount: project.chapters.length,
         ...metadata,
+        genre: metadata.genre ?? ['Fiction'], // Would be extracted from project
+        tags: metadata.tags ?? this.extractTags(project),
+        language: metadata.language ?? 'en',
+        mature: metadata.mature ?? false,
+        wordCount: metadata.wordCount ?? this.calculateWordCount(project),
+        chapterCount: metadata.chapterCount ?? project.chapters.length,
       },
     };
 
@@ -286,8 +282,9 @@ class PublishingAnalyticsService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['feedback'], 'readonly');
+      const transaction = db.transaction(['feedback'], 'readonly');
       const store = transaction.objectStore('feedback');
       const index = store.index('publicationId');
       const request = index.getAll(publicationId);
@@ -357,8 +354,9 @@ class PublishingAnalyticsService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['publishingGoals'], 'readwrite');
+      const transaction = db.transaction(['publishingGoals'], 'readwrite');
       const store = transaction.objectStore('publishingGoals');
       const request = store.add(newGoal);
 
@@ -372,8 +370,9 @@ class PublishingAnalyticsService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['publishingGoals'], 'readonly');
+      const transaction = db.transaction(['publishingGoals'], 'readonly');
       const store = transaction.objectStore('publishingGoals');
       const index = store.index('publicationId');
       const request = index.getAll(publicationId);
@@ -423,8 +422,9 @@ class PublishingAnalyticsService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['alerts'], 'readonly');
+      const transaction = db.transaction(['alerts'], 'readonly');
       const store = transaction.objectStore('alerts');
       const index = store.index('timestamp');
       const request = index.getAll();
@@ -506,8 +506,9 @@ class PublishingAnalyticsService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['publications'], 'readwrite');
+      const transaction = db.transaction(['publications'], 'readwrite');
       const store = transaction.objectStore('publications');
       const request = store.put(publication);
 
@@ -521,8 +522,9 @@ class PublishingAnalyticsService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['publications'], 'readonly');
+      const transaction = db.transaction(['publications'], 'readonly');
       const store = transaction.objectStore('publications');
       const request = store.get(publicationId);
 
@@ -568,8 +570,9 @@ class PublishingAnalyticsService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['feedback'], 'readwrite');
+      const transaction = db.transaction(['feedback'], 'readwrite');
       const store = transaction.objectStore('feedback');
       const request = store.put(feedback);
 
@@ -726,7 +729,7 @@ class PublishingAnalyticsService {
       date.setDate(date.getDate() - i);
 
       metrics.push({
-        date: date.toISOString().split('T')[0],
+        date: date.toISOString().split('T')[0] ?? '',
         views: Math.floor(Math.random() * 200) + 50,
         engagement: Math.random() * 100,
         rating: 3.5 + Math.random() * 1.5,
@@ -766,14 +769,24 @@ class PublishingAnalyticsService {
   /**
    * Generate publishing insights
    */
-  public generateInsights(_publicationId: string): PublishingInsights[] {
+  public generateInsights(publicationId: string): PublishingInsights[] {
     try {
       return [
         {
-          type: 'content',
-          priority: 'high',
-          suggestion: 'Consider updating chapter titles for better engagement',
-          expectedImpact: 'Increase reader engagement by 15%',
+          publicationId,
+          overallSentiment: 'positive' as const,
+          engagementLevel: 'high' as const,
+          readabilityScore: 85,
+          recommendationRate: 75,
+          trendingTopics: ['fantasy', 'adventure'],
+          insights: ['Consider updating chapter titles for better engagement'],
+          audienceProfile: {
+            primaryDemographic: 'young adult',
+            topCountries: ['US', 'UK', 'CA'],
+            peakReadingTimes: ['evening'],
+            averageSessionDuration: 45,
+          },
+          lastAnalyzed: new Date(),
         },
       ];
     } catch (error) {
@@ -790,8 +803,9 @@ class PublishingAnalyticsService {
       if (!this.db) await this.init();
       if (!this.db) throw new Error('Database not initialized');
 
+      const db = this.db;
       return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction(['publications'], 'readonly');
+        const transaction = db.transaction(['publications'], 'readonly');
         const store = transaction.objectStore('publications');
         const index = store.index('projectId');
         const request = index.getAll(projectId);

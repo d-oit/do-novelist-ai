@@ -33,7 +33,7 @@ const PublishingDashboard: React.FC<PublishingDashboardProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    if ((publicationId?.length ?? 0) > 0) {
+    if (publicationId != null && publicationId.length > 0) {
       void analytics.loadPublicationData(publicationId);
       const days = selectedTimeframe === '7d' ? 7 : selectedTimeframe === '30d' ? 30 : 90;
       void analytics.loadTrends(publicationId, days);
@@ -41,7 +41,7 @@ const PublishingDashboard: React.FC<PublishingDashboardProps> = ({
   }, [publicationId, selectedTimeframe]);
 
   const refreshData = async (): Promise<void> => {
-    if ((publicationId?.length ?? 0) === 0) return;
+    if (publicationId == null || publicationId.length === 0) return;
     setIsRefreshing(true);
     try {
       await analytics.refreshAnalytics(publicationId);

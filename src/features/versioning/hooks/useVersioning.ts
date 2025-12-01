@@ -48,14 +48,14 @@ export const useVersioning = (chapterId?: string): UseVersioningReturn => {
   useEffect(() => {
     const controller = new AbortController();
 
-    if ((chapterId?.length ?? 0) > 0) {
+    if (chapterId != null && chapterId.length > 0) {
       Promise.all([loadVersionHistory(chapterId), loadBranches(chapterId)]).catch(err => {
-        if (err.name === 'AbortError') return;
+        if (err instanceof Error && err.name === 'AbortError') return;
         console.error('Failed to load versioning data:', err);
       });
     }
 
-    return () => {
+    return (): void => {
       controller.abort();
     };
   }, [chapterId, loadVersionHistory, loadBranches]);
@@ -70,7 +70,15 @@ export const useVersioning = (chapterId?: string): UseVersioningReturn => {
     restoreVersion: store.restoreVersion,
     deleteVersion: store.deleteVersion,
     compareVersions: store.compareVersions,
-    createBranch: store.createBranch,
+    createBranch: async (
+      name: string,
+      description: string,
+      parentVersionId: string,
+    ): Promise<Branch> => {
+      if (chapterId == null || chapterId.length === 0)
+        throw new Error('Chapter ID is required to create a branch');
+      return store.createBranch(chapterId, name, description, parentVersionId);
+    },
     switchBranch: store.switchBranch,
     mergeBranch: store.mergeBranch,
     deleteBranch: store.deleteBranch,

@@ -32,12 +32,7 @@ export { worldBuildingService } from './services/worldBuildingService';
 export { worldBuildingDb } from './services/worldBuildingDb';
 
 // Components
-export { WorldBuildingDashboard } from './components/WorldBuildingDashboard';
+export { default as WorldBuildingDashboard } from './components/WorldBuildingDashboard';
 export { WorldElementEditor } from './components/WorldElementEditor';
 export { LocationManager } from './components/LocationManager';
 export { CultureManager } from './components/CultureManager';
-export { TimelineEditor } from './components/TimelineEditor';
-export { LoreLibrary } from './components/LoreLibrary';
-export { ResearchPanel } from './components/ResearchPanel';
-export { WorldMap as WorldMapComponent } from './components/WorldMap';
-export { ConsistencyChecker } from './components/ConsistencyChecker';

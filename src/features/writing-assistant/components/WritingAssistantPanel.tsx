@@ -109,7 +109,7 @@ const SuggestionCard: React.FC<{
 
           <p className='mb-2 text-sm text-gray-900 dark:text-gray-100'>{suggestion.message}</p>
 
-          {suggestion.originalText && (
+          {suggestion.originalText != null && (
             <div className='mb-2 rounded bg-gray-100 p-2 dark:bg-gray-800'>
               <p className='mb-1 text-xs text-gray-600 dark:text-gray-400'>Original:</p>
               <p className='font-mono text-sm text-gray-800 dark:text-gray-200'>
@@ -118,7 +118,7 @@ const SuggestionCard: React.FC<{
             </div>
           )}
 
-          {suggestion.suggestedText && (
+          {suggestion.suggestedText != null && (
             <div className='mb-2 rounded bg-green-50 p-2 dark:bg-green-900/30'>
               <p className='mb-1 text-xs text-green-600 dark:text-green-400'>Suggested:</p>
               <p className='font-mono text-sm text-green-800 dark:text-green-200'>

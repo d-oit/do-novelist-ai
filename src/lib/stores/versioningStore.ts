@@ -24,13 +24,18 @@ interface VersioningState {
   saveVersion: (
     chapter: Chapter,
     message?: string,
-    type?: ChapterVersion['type']
+    type?: ChapterVersion['type'],
   ) => Promise<ChapterVersion>;
   restoreVersion: (versionId: string) => Promise<Chapter | null>;
   deleteVersion: (versionId: string) => Promise<boolean>;
   compareVersions: (versionId1: string, versionId2: string) => Promise<VersionCompareResult | null>;
 
-  createBranch: (name: string, description: string, parentVersionId: string) => Promise<Branch>;
+  createBranch: (
+    chapterId: string,
+    name: string,
+    description: string,
+    parentVersionId: string,
+  ) => Promise<Branch>;
   switchBranch: (branchId: string) => Promise<boolean>;
   mergeBranch: (sourceBranchId: string, targetBranchId: string) => Promise<boolean>;
   deleteBranch: (branchId: string) => Promise<boolean>;
@@ -77,7 +82,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
   saveVersion: async (
     chapter: Chapter,
     message?: string,
-    type: ChapterVersion['type'] = 'manual'
+    type: ChapterVersion['type'] = 'manual',
   ): Promise<ChapterVersion> => {
     set({ isLoading: true, error: null });
     try {
@@ -124,7 +129,10 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  compareVersions: async (versionId1: string, versionId2: string): Promise<VersionCompareResult | null> => {
+  compareVersions: async (
+    versionId1: string,
+    versionId2: string,
+  ): Promise<VersionCompareResult | null> => {
     try {
       return await versioningService.compareVersions(versionId1, versionId2);
     } catch (err) {
@@ -133,9 +141,19 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  createBranch: async (name: string, description: string, parentVersionId: string): Promise<Branch> => {
+  createBranch: async (
+    chapterId: string,
+    name: string,
+    description: string,
+    parentVersionId: string,
+  ): Promise<Branch> => {
     try {
-      const branch = await versioningService.createBranch(name, description, parentVersionId);
+      const branch = await versioningService.createBranch(
+        chapterId,
+        name,
+        description,
+        parentVersionId,
+      );
       set(state => ({ branches: [...state.branches, branch] }));
       return branch;
     } catch (err) {
@@ -145,9 +163,9 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  switchBranch: async (branchId: string): Promise<boolean> => {
+  switchBranch: (branchId: string): boolean => {
     try {
-      const success = await versioningService.switchBranch(branchId);
+      const success = versioningService.switchBranch(branchId);
       if (success) {
         set(state => {
           const updatedBranches = state.branches.map(b => ({ ...b, isActive: b.id === branchId }));
@@ -162,9 +180,9 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
     }
   },
 
-  mergeBranch: async (sourceBranchId: string, targetBranchId: string): Promise<boolean> => {
+  mergeBranch: (sourceBranchId: string, targetBranchId: string): boolean => {
     try {
-      return await versioningService.mergeBranch(sourceBranchId, targetBranchId);
+      return versioningService.mergeBranch(sourceBranchId, targetBranchId);
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to merge branch' });
       return false;
@@ -214,7 +232,7 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
         version.message.toLowerCase().includes(lowercaseQuery) ||
         version.authorName.toLowerCase().includes(lowercaseQuery) ||
         version.content.toLowerCase().includes(lowercaseQuery) ||
-        version.title.toLowerCase().includes(lowercaseQuery)
+        version.title.toLowerCase().includes(lowercaseQuery),
     );
   },
 

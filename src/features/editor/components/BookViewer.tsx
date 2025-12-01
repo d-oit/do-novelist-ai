@@ -223,11 +223,11 @@ const BookViewer: React.FC<BookViewerProps> = ({
   const currentWordCount = getWordCount(state.content);
   const readingTime = Math.max(1, Math.ceil(currentWordCount / 230));
 
-  const handleGenerateIllustration = async (): Promise<void> => {
+  const handleGenerateIllustration = (): void => {
     if (!selectedChapter || !onUpdateChapter) return;
     actions.setGeneratingImage(true);
     try {
-      const image = await generateChapterIllustration(
+      const image = generateChapterIllustration(
         selectedChapter.title,
         selectedChapter.summary,
         project.style,
@@ -245,10 +245,10 @@ const BookViewer: React.FC<BookViewerProps> = ({
     }
   };
 
-  const saveVersion = async (
+  const saveVersion = (
     type: 'manual' | 'auto' | 'ai-generated' | 'restore' = 'manual',
     message?: string,
-  ): Promise<void> => {
+  ): void => {
     if (!selectedChapter) return;
 
     const currentChapter: Chapter = {
@@ -257,11 +257,9 @@ const BookViewer: React.FC<BookViewerProps> = ({
       content: state.content,
     };
 
-    try {
-      await versioning.saveVersion(currentChapter, message, type);
-    } catch (error) {
+    versioning.saveVersion(currentChapter, message, type).catch(error => {
       console.error('Failed to save version:', error);
-    }
+    });
   };
 
   const handleRestoreVersion = (restoredChapter: Chapter): void => {
@@ -521,7 +519,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                     <>
                       <div className='hidden h-4 w-px bg-border sm:block' />
                       <div className='group relative'>
-                        {((): JSX.Element => {
+                        {((): React.JSX.Element => {
                           const config = getStatusConfig(selectedChapter.status);
                           const StatusIcon = config.icon;
                           return (

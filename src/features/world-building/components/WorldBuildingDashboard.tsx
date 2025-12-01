@@ -24,7 +24,7 @@ interface WorldBuildingDashboardProps {
   projectId: string;
 }
 
-export const WorldBuildingDashboard: React.FC<WorldBuildingDashboardProps> = ({ projectId }) => {
+const WorldBuildingDashboard: React.FC<WorldBuildingDashboardProps> = ({ projectId }) => {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'locations' | 'cultures' | 'timeline' | 'lore'
   >('overview');
@@ -425,3 +425,5 @@ export const WorldBuildingDashboard: React.FC<WorldBuildingDashboardProps> = ({ 
     </div>
   );
 };
+
+export default WorldBuildingDashboard;

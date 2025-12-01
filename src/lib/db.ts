@@ -2,7 +2,7 @@ import { createClient } from '@libsql/client/web';
 
 import { type Project, PublishStatus, ChapterStatus } from '../types';
 import { parseChapterStatus, parsePublishStatus } from '../shared/utils/validation';
-import { ProjectSchema } from '../types/schemas';
+import { ProjectSchema, type WorldState, type ProjectSettings } from '../types/schemas';
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';
@@ -21,24 +21,24 @@ type Client = ReturnType<typeof createClient>;
 export const getStoredConfig = (): DbConfig => {
   // 1. Check LocalStorage (User overrides)
   const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-  if (stored) {
-    const parsed = JSON.parse(stored);
+  if (stored != null) {
+    const parsed = JSON.parse(stored) as DbConfig;
     // If user has explicitly explicitly configured, return it
     return parsed;
   }
 
   // 2. Check Environment (System defaults)
-  const envUrl = import.meta.env.VITE_TURSO_DATABASE_URL ?? '';
-  const envToken = import.meta.env.VITE_TURSO_AUTH_TOKEN ?? '';
+  const envUrl = (import.meta.env.VITE_TURSO_DATABASE_URL as string | undefined) ?? '';
+  const envToken = (import.meta.env.VITE_TURSO_AUTH_TOKEN as string | undefined) ?? '';
 
   return {
     url: envUrl ?? '',
     authToken: envToken ?? '',
-    useCloud: !!(envUrl && envToken), // Default to cloud if env vars exist
+    useCloud: envUrl != null && envToken != null, // Default to cloud if env vars exist
   };
 };
 
-export const saveStoredConfig = (config: DbConfig) => {
+export const saveStoredConfig = (config: DbConfig): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
   // Force client refresh
   dbClient = null;
@@ -65,7 +65,7 @@ const getClient = (): Client | null => {
 };
 
 export const db = {
-  init: async () => {
+  init: async (): Promise<void> => {
     const client = getClient();
     if (client) {
       try {
@@ -123,7 +123,7 @@ export const db = {
     }
   },
 
-  saveProject: async (project: Project) => {
+  saveProject: async (project: Project): Promise<void> => {
     console.log(`[DB] Saving project: ${project.title} (${project.id})`);
     const client = getClient();
     if (client) {
@@ -166,8 +166,11 @@ export const db = {
       }
     } else {
       // Local Save
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
-      projects[project.id] = { ...project, updatedAt: new Date().toISOString() };
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
+        string,
+        Project
+      >;
+      projects[project.id] = { ...project, updatedAt: new Date() };
       localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
       console.log(`[DB] Local save complete.`);
     }
@@ -184,35 +187,57 @@ export const db = {
         });
         if (pRes.rows.length === 0) return null;
         const pRow = pRes.rows[0];
+        if (!pRow) return null;
 
         const cRes = await client.execute({
           sql: 'SELECT * FROM chapters WHERE project_id = ? ORDER BY order_index',
           args: [projectId],
         });
 
+        // Parse worldState and settings safely
+
+        const ws = (pRow as Record<string, unknown>).world_state;
+
+        const worldStateParsed: WorldState =
+          typeof ws === 'string' ? (JSON.parse(ws) as WorldState) : (ws as WorldState);
+
+        const s = (pRow as Record<string, unknown>).settings;
+
+        const settingsParsed: ProjectSettings =
+          typeof s === 'string'
+            ? (JSON.parse(s) as ProjectSettings)
+            : ((s as ProjectSettings) ?? { enableDropCaps: true });
+
         const loadedProject: Project = {
-          id: pRow.id as string,
-          title: pRow.title as string,
-          idea: pRow.idea as string,
-          style: pRow.style as any,
-          coverImage: pRow.cover_image as string,
-          worldState:
-            typeof pRow.world_state === 'string' ? JSON.parse(pRow.world_state) : pRow.world_state,
+          id: (pRow.id as string) ?? '',
+          title: (pRow.title as string) ?? '',
+          idea: (pRow.idea as string) ?? '',
+          style: ((pRow.style as string) ?? 'General Fiction') as Project['style'],
+          coverImage: (pRow.cover_image as string) ?? undefined,
+
+          worldState: worldStateParsed,
           isGenerating: false,
-          status: parsePublishStatus(pRow.status, PublishStatus.DRAFT),
-          language: (pRow.language as any) ?? 'en',
+          status: parsePublishStatus((pRow.status as string) ?? 'draft', PublishStatus.DRAFT),
+          language: ((pRow.language as string) ?? 'en') as
+            | 'en'
+            | 'es'
+            | 'fr'
+            | 'de'
+            | 'it'
+            | 'pt'
+            | 'ja'
+            | 'ko'
+            | 'zh',
           targetWordCount: (pRow.target_word_count as number) ?? 50000,
-          settings:
-            typeof pRow.settings === 'string'
-              ? JSON.parse(pRow.settings)
-              : (pRow.settings ?? { enableDropCaps: true }),
+
+          settings: settingsParsed,
           chapters: cRes.rows.map(r => ({
-            id: r.id as string,
-            orderIndex: r.order_index as number,
-            title: r.title as string,
-            summary: r.summary as string,
-            content: r.content as string,
-            status: parseChapterStatus(r.status, ChapterStatus.PENDING),
+            id: (r.id as string) ?? '',
+            orderIndex: (r.order_index as number) ?? 0,
+            title: (r.title as string) ?? '',
+            summary: (r.summary as string) ?? '',
+            content: (r.content as string) ?? '',
+            status: parseChapterStatus((r.status as string) ?? 'pending', ChapterStatus.PENDING),
             wordCount: 0,
             characterCount: 0,
             estimatedReadingTime: 0,
@@ -254,17 +279,20 @@ export const db = {
         return null;
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
+        string,
+        Project
+      >;
       const p = projects[projectId];
-      if (!p) return null;
-      console.log(`[DB] Local load success: ${p.title}`);
+      if (p == null) return null;
+      console.log(`[DB] Local load success: ${(p as { title?: string }).title ?? 'Unknown'}`);
       // Ensure structure matches Project type (handling legacy data if any)
       return {
-        status: PublishStatus.DRAFT,
-        language: 'en',
-        targetWordCount: 50000,
-        settings: { enableDropCaps: true },
         ...p,
+        status: p.status ?? PublishStatus.DRAFT,
+        language: p.language ?? 'en',
+        targetWordCount: p.targetWordCount ?? 50000,
+        settings: p.settings ?? { enableDropCaps: true },
         isGenerating: false,
       };
     }
@@ -291,7 +319,10 @@ export const db = {
         return [];
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
+        string,
+        Project
+      >;
       return Object.values(projects)
         .map((p: Record<string, unknown>) => ({
           id: p.id as string,
@@ -304,7 +335,7 @@ export const db = {
     }
   },
 
-  deleteProject: async (projectId: string) => {
+  deleteProject: async (projectId: string): Promise<void> => {
     console.log(`[DB] Deleting project: ${projectId}`);
     const client = getClient();
     if (client) {
@@ -320,7 +351,10 @@ export const db = {
         console.error('Failed to delete from Cloud', e);
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}');
+      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
+        string,
+        Project
+      >;
       delete projects[projectId];
       localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
     }

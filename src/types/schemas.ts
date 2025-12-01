@@ -37,7 +37,6 @@ export const LANGUAGES = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh'] 
 // Chapter status enum values - must match the enum in ../shared/types
 export const CHAPTER_STATUSES = ['pending', 'drafting', 'review', 'complete'] as const;
 
-export const AgentModeSchema = z.enum(['SINGLE', 'PARALLEL', 'HYBRID', 'SWARM']);
 export const ChapterStatusSchema = z.nativeEnum(ChapterStatus);
 export const PublishStatusSchema = z.nativeEnum(PublishStatus);
 export const LogTypeSchema = z.enum(['info', 'success', 'warning', 'error', 'thought']);
@@ -169,7 +168,7 @@ export const AgentActionSchema = z.object({
   cost: z.number().min(0),
   preconditions: WorldStateSchema.partial(),
   effects: WorldStateSchema.partial(),
-  agentMode: AgentModeSchema,
+  agentMode: z.nativeEnum(AgentMode),
   promptTemplate: z.string().min(1),
   // Enhanced action metadata
   category: z.enum(['generation', 'editing', 'analysis', 'publishing']).default('generation'),
@@ -327,7 +326,8 @@ export const ProjectFilterSchema = z.object({
 // TYPE EXPORTS (Inferred from schemas)
 // =============================================================================
 
-export type AgentMode = z.infer<typeof AgentModeSchema>;
+// Use the enum from root types.ts instead of Zod inferred type
+// export type AgentMode = z.infer<typeof AgentModeSchema>;
 export type LogType = z.infer<typeof LogTypeSchema>;
 export type Language = z.infer<typeof LanguageSchema>;
 export type WritingStyle = z.infer<typeof WritingStyleSchema>;

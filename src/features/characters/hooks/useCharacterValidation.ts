@@ -4,20 +4,18 @@ import { characterValidationService } from '../../../lib/character-validation';
 import { type Character } from '../../../types/character-schemas';
 import { type CharacterValidationResult } from '../types';
 
-export function useCharacterValidation(character: Character | null): {
-  isValid: boolean;
-  score: number;
-  issues: Array<{
-    field: string;
-    message: string;
-    severity: 'warning';
-    suggestion: string | undefined;
-  }>;
-  strengths: string[];
+export function useCharacterValidation(character: Character | null): CharacterValidationResult & {
   validate: (character: Character) => CharacterValidationResult;
 } {
-  const validationResult = useMemo<CharacterValidationResult | null>(() => {
-    if (!character) return null;
+  const validationResult = useMemo<CharacterValidationResult>(() => {
+    if (!character) {
+      return {
+        isValid: false,
+        score: 0,
+        issues: [],
+        strengths: [],
+      };
+    }
 
     const result = characterValidationService.validate(character);
 
@@ -26,24 +24,29 @@ export function useCharacterValidation(character: Character | null): {
       score: result.score,
       strengths: result.strengths,
       issues: result.issues.map(issue => ({
-        field: issue.path.join('.'),
+        field: Array.isArray(issue.path) ? issue.path.join('.') : String(issue.path || ''),
         message: issue.message,
-        severity: 'warning', // Default to warning as service doesn't provide severity
+        severity: 'error' as const, // Zod validation errors are typically errors
         suggestion: undefined,
       })),
     };
   }, [character]);
 
-  const isValid = validationResult?.isValid ?? false;
-  const score = validationResult?.score ?? 0;
-  const issues = validationResult?.issues ?? [];
-  const strengths = validationResult?.strengths ?? [];
-
   return {
-    isValid,
-    score,
-    issues,
-    strengths,
-    validate: characterValidationService.validate.bind(characterValidationService),
+    ...validationResult,
+    validate: (character: Character): CharacterValidationResult => {
+      const result = characterValidationService.validate(character);
+      return {
+        isValid: result.isValid,
+        score: result.score,
+        strengths: result.strengths,
+        issues: result.issues.map(issue => ({
+          field: Array.isArray(issue.path) ? issue.path.join('.') : String(issue.path || ''),
+          message: issue.message,
+          severity: 'error' as const,
+          suggestion: undefined,
+        })),
+      };
+    },
   };
 }

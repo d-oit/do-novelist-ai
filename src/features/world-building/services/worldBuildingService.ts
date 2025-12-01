@@ -39,13 +39,16 @@ class WorldBuildingService {
   // Location Management
   // ============================================================================
 
-  public async createLocation(projectId: string, locationData: Partial<Location>): Promise<Location> {
+  public async createLocation(
+    projectId: string,
+    locationData: Partial<Location>,
+  ): Promise<Location> {
     const location: Location = {
       id: crypto.randomUUID(),
       projectId,
-      name: (locationData.name?.length ?? 0) > 0 ? locationData.name : 'Untitled Location',
+      name: locationData.name ?? 'Untitled Location',
       type: locationData.type ?? 'city',
-      description: (locationData.description?.length ?? 0) > 0 ? locationData.description : '',
+      description: locationData.description ?? '',
       tags: locationData.tags ?? [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -81,9 +84,9 @@ class WorldBuildingService {
     const culture: Culture = {
       id: crypto.randomUUID(),
       projectId,
-      name: (cultureData.name?.length ?? 0) > 0 ? cultureData.name : 'Untitled Culture',
+      name: cultureData.name ?? 'Untitled Culture',
       type: cultureData.type ?? 'civilization',
-      description: (cultureData.description?.length ?? 0) > 0 ? cultureData.description : '',
+      description: cultureData.description ?? '',
       values: cultureData.values ?? [],
       tags: cultureData.tags ?? [],
       createdAt: Date.now(),
@@ -132,22 +135,29 @@ class WorldBuildingService {
       worldBuildingDb.getLoreByProject(projectId),
     ]);
 
-    const filterBySearch = (items: FilterableWorldElement[], searchTerm: string): FilterableWorldElement[] => {
+    const filterBySearch = (
+      items: FilterableWorldElement[],
+      searchTerm: string,
+    ): FilterableWorldElement[] => {
       if (searchTerm.length === 0) return items;
       const lower = searchTerm.toLowerCase();
-      return items.filter(
-        (item: FilterableWorldElement): boolean => {
-          const name = ('name' in item ? item.name : ('title' in item ? item.title : '')) ?? '';
-          const description = item.description ?? '';
-          const tags = item.tags ?? [];
-          return name.toLowerCase().includes(lower) ||
-                 description.toLowerCase().includes(lower) ||
-                 tags.some((tag: string) => tag.toLowerCase().includes(lower));
-        }
-      );
+      return items.filter((item: FilterableWorldElement): boolean => {
+        const name = ('name' in item ? item.name : 'title' in item ? item.title : '') ?? '';
+        const description =
+          ('description' in item ? item.description : 'content' in item ? item.content : '') ?? '';
+        const tags = item.tags ?? [];
+        return (
+          name.toLowerCase().includes(lower) ||
+          description.toLowerCase().includes(lower) ||
+          tags.some((tag: string) => tag.toLowerCase().includes(lower))
+        );
+      });
     };
 
-    const filterByTags = (items: FilterableWorldElement[], tags: string[]): FilterableWorldElement[] => {
+    const filterByTags = (
+      items: FilterableWorldElement[],
+      tags: string[],
+    ): FilterableWorldElement[] => {
       if (tags.length === 0) return items;
       return items.filter(item => tags.some(tag => (item.tags ?? []).includes(tag)));
     };
@@ -238,7 +248,12 @@ class WorldBuildingService {
         const current = events[i];
         const previous = events[i - 1];
 
-        if (current.date === previous.date && current.type === previous.type) {
+        if (
+          current &&
+          previous &&
+          current.date === previous.date &&
+          current.type === previous.type
+        ) {
           issues.push({
             id: crypto.randomUUID(),
             type: 'warning',
@@ -256,7 +271,7 @@ class WorldBuildingService {
     const locationMap = new Map(locations.map(l => [l.id, l]));
 
     locations.forEach(location => {
-      if ((location.parentLocationId?.length ?? 0) > 0) {
+      if (location.parentLocationId != null && location.parentLocationId.length > 0) {
         const parent = locationMap.get(location.parentLocationId);
         if (!parent) {
           issues.push({
@@ -282,7 +297,7 @@ class WorldBuildingService {
 
     if (locations.length >= 5) strengths.push('Rich geographic diversity');
     if (cultures.length >= 3) strengths.push('Multiple cultural perspectives');
-    if (timelines.length >= 1 && timelines[0].events.length >= 10)
+    if (timelines.length >= 1 && timelines[0] && timelines[0].events.length >= 10)
       strengths.push('Detailed historical timeline');
     if (lore.length >= 10) strengths.push('Comprehensive lore documentation');
 

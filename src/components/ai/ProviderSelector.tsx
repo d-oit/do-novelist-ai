@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, Zap, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { loadUserPreferences, saveUserPreferences } from '@/services/ai-config-service';
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
@@ -11,7 +11,7 @@ interface ProviderSelectorProps {
 export const ProviderSelector = ({
   userId,
   onProviderChange,
-}: ProviderSelectorProps): JSX.Element => {
+}: ProviderSelectorProps): React.JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<AIProvider>('google');
   const [selectedModel, setSelectedModel] = useState<string>('gemini-2.0-flash-exp');
@@ -46,7 +46,7 @@ export const ProviderSelector = ({
     }
   };
 
-  const getStatusIcon = (provider: AIProvider): JSX.Element => {
+  const getStatusIcon = (provider: AIProvider): React.JSX.Element => {
     const isEnabled = config.providers[provider].enabled;
 
     if (!isEnabled) {

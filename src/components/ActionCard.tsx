@@ -1,7 +1,7 @@
 import { Play, Activity, Users, Zap, BrainCircuit } from 'lucide-react';
 import React from 'react';
 
-import { AgentAction, AgentMode } from '../types';
+import { AgentAction, AgentMode } from '@shared/types';
 
 interface ActionCardProps {
   action: AgentAction;

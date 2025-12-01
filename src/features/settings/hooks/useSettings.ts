@@ -140,7 +140,7 @@ export const useSettings = create<SettingsState>()(
 /**
  * Apply theme to document
  */
-function applyTheme(theme: Settings['theme']) {
+function applyTheme(theme: Settings['theme']): void {
   if (theme === 'system') {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.classList.toggle('dark', prefersDark);
@@ -152,7 +152,7 @@ function applyTheme(theme: Settings['theme']) {
 /**
  * Apply font size to document
  */
-function applyFontSize(fontSize: number) {
+function applyFontSize(fontSize: number): void {
   document.documentElement.style.fontSize = `${fontSize}px`;
 }
 

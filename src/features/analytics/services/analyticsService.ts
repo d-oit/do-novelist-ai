@@ -312,7 +312,7 @@ class AnalyticsService {
 
   private updateDailyStatsForSession(session: WritingSession): Promise<void> {
     const projectId = this.sessionProjects.get(session.id);
-    if (projectId === undefined) return;
+    if (projectId === undefined) return Promise.resolve();
 
     const dateKey =
       session.endTime.toISOString().split('T')[0] ?? session.endTime.toISOString().substring(0, 10);

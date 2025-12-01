@@ -8,7 +8,7 @@
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
-import { generateText } from 'ai';
+import { generateText, type LanguageModel } from 'ai';
 
 import { Chapter, RefineOptions } from '../types/index';
 
@@ -27,13 +27,26 @@ const enabledProviders = getEnabledProviders(config);
 const aiLogger = logger.child({ module: 'ai-service' });
 
 /**
+ * Type guard for outline response
+ */
+function isValidOutline(obj: unknown): obj is { title: string; chapters: Partial<Chapter>[] } {
+  const record = obj as Record<string, unknown>;
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof record.title === 'string' &&
+    Array.isArray(record.chapters)
+  );
+}
+
+/**
  * Get the appropriate model instance based on provider
  * Uses Vercel AI Gateway for routing
  */
 function getModel(
   provider: AIProvider,
   complexity: 'fast' | 'standard' | 'advanced' = 'standard',
-): ReturnType<typeof createOpenAI | typeof createAnthropic | typeof createGoogleGenerativeAI> {
+): LanguageModel {
   const modelName = getModelForTask(provider, complexity, config);
   const providerConfig = config.providers[provider];
 
@@ -115,8 +128,10 @@ function getModel(
     }
 
     default: {
-      const error = createAIError(`Unsupported provider: ${provider}`, {
-        provider,
+      // This should never happen if all AIProvider cases are handled
+      const providerString = provider as string;
+      const error = createAIError(`Unsupported provider: ${providerString}`, {
+        provider: providerString,
         model: modelName,
         operation: 'getModel',
         context: {
@@ -125,7 +140,7 @@ function getModel(
       });
 
       aiLogger.error('Unsupported provider', {
-        provider,
+        provider: providerString,
         modelName,
         complexity,
       });
@@ -273,7 +288,10 @@ Return a JSON object with this structure:
     });
 
     try {
-      const parsed = JSON.parse(response.text);
+      const parsed = JSON.parse(response.text) as { title: string; chapters: Partial<Chapter>[] };
+      if (!isValidOutline(parsed)) {
+        throw new Error('Invalid outline structure received from AI');
+      }
       operationLogger.info('Outline generated successfully', {
         provider,
         title: parsed.title,
@@ -291,7 +309,13 @@ Return a JSON object with this structure:
       const jsonMatch = /\{[\s\S]*\}/.exec(response.text);
       if (jsonMatch) {
         try {
-          const parsed = JSON.parse(jsonMatch[0]);
+          const parsed = JSON.parse(jsonMatch[0]) as {
+            title: string;
+            chapters: Partial<Chapter>[];
+          };
+          if (!isValidOutline(parsed)) {
+            throw new Error('Invalid outline structure received from AI');
+          }
           operationLogger.info('Successfully extracted JSON from response', {
             provider,
             title: parsed.title,
@@ -342,7 +366,7 @@ export const writeChapterContent = async (
     const prompt = `
 Write the full content for the chapter: "${chapterTitle}".
 Context / Summary: ${chapterSummary}
-${previousChapterSummary ? `Previously: ${previousChapterSummary}` : ''}
+${previousChapterSummary != null ? `Previously: ${previousChapterSummary}` : ''}
 Style: ${style}.
 Write in Markdown. Focus on "Show, Don't Tell". Use sensory details.
 Output only the chapter content.`;

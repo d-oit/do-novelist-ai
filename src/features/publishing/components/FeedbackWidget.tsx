@@ -81,7 +81,9 @@ const FeedbackCard: React.FC<{
                     key={i}
                     className={cn(
                       'h-4 w-4',
-                      i < feedback.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300',
+                      i < (feedback.rating ?? 0)
+                        ? 'fill-yellow-500 text-yellow-500'
+                        : 'text-gray-300',
                     )}
                   />
                 ))}

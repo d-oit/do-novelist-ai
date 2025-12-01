@@ -13,13 +13,13 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
 
-  const handleGenerate = async (): Promise<void> => {
+  const handleGenerate = (): void => {
     setIsGenerating(true);
     setError('');
     try {
-      const base64Cover = await generateCoverImage(project.title, project.style, project.idea);
+      const base64Cover = generateCoverImage(project.title, project.style, project.idea);
       if ((base64Cover?.length ?? 0) > 0) {
-        onUpdateProject({ coverImage: base64Cover });
+        onUpdateProject({ coverImage: base64Cover ?? undefined });
       } else {
         setError('Failed to generate image. Please try again.');
       }

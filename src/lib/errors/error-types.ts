@@ -152,14 +152,15 @@ export const createNetworkError = (
     response?: unknown;
     cause?: Error;
     context?: Record<string, unknown>;
-  }
+  },
 ): NetworkError => {
   return {
     name: 'NetworkError',
     code: 'NETWORK_ERROR',
     message,
     severity: 'high',
-    retryable: options.statusCode ? options.statusCode >= 500 || options.statusCode === 429 : true,
+    retryable:
+      options.statusCode != null ? options.statusCode >= 500 || options.statusCode === 429 : true,
     timestamp: Date.now(),
     statusCode: options.statusCode,
     endpoint: options.endpoint,
@@ -178,7 +179,7 @@ export const createValidationError = (
     received?: unknown;
     expected?: unknown;
     context?: Record<string, unknown>;
-  }
+  },
 ): ValidationError => {
   return {
     name: 'ValidationError',
@@ -200,7 +201,7 @@ export const createBusinessLogicError = (
     businessRule: string;
     violation: string;
     context?: Record<string, unknown>;
-  }
+  },
 ): BusinessLogicError => {
   return {
     name: 'BusinessLogicError',
@@ -222,7 +223,7 @@ export const createSystemError = (
     operation: string;
     cause?: Error;
     context?: Record<string, unknown>;
-  }
+  },
 ): SystemError => {
   return {
     name: 'SystemError',
@@ -247,7 +248,7 @@ export const createAIError = (
     requestId?: string;
     cause?: Error;
     context?: Record<string, unknown>;
-  }
+  },
 ): AIError => {
   return {
     name: 'AIError',
@@ -273,7 +274,7 @@ export const createStorageError = (
     key?: string;
     cause?: Error;
     context?: Record<string, unknown>;
-  }
+  },
 ): StorageError => {
   return {
     name: 'StorageError',
@@ -296,7 +297,7 @@ export const createConfigurationError = (
     configKey: string;
     configValue?: unknown;
     context?: Record<string, unknown>;
-  }
+  },
 ): ConfigurationError => {
   return {
     name: 'ConfigurationError',
@@ -316,7 +317,7 @@ export const createConfigurationError = (
  */
 export const toAppError = (error: unknown, context?: string): AppError => {
   // Already an AppError
-  if (error && typeof error === 'object' && 'code' in error && 'name' in error) {
+  if (error != null && typeof error === 'object' && 'code' in error && 'name' in error) {
     return error as AppError;
   }
 
@@ -325,7 +326,7 @@ export const toAppError = (error: unknown, context?: string): AppError => {
     // Network-related
     if (error.message.includes('fetch') || error.message.includes('network')) {
       return createNetworkError(error.message, {
-        endpoint: context || 'unknown',
+        endpoint: context ?? 'unknown',
         method: 'unknown',
         cause: error,
       });
@@ -335,7 +336,7 @@ export const toAppError = (error: unknown, context?: string): AppError => {
     if (error.message.includes('AI') || error.message.includes('provider')) {
       return createAIError(error.message, {
         provider: 'unknown',
-        operation: context || 'unknown',
+        operation: context ?? 'unknown',
         cause: error,
       });
     }
@@ -352,7 +353,7 @@ export const toAppError = (error: unknown, context?: string): AppError => {
     // Default to system error
     return createSystemError(error.message, {
       subsystem: 'application',
-      operation: context || 'unknown',
+      operation: context ?? 'unknown',
       cause: error,
     });
   }
@@ -361,7 +362,7 @@ export const toAppError = (error: unknown, context?: string): AppError => {
   const message = typeof error === 'string' ? error : 'Unknown error occurred';
   return createSystemError(message, {
     subsystem: 'application',
-    operation: context || 'unknown',
+    operation: context ?? 'unknown',
   });
 };
 
@@ -377,12 +378,12 @@ export const getErrorMessage = (error: unknown): string => {
       if (appError.statusCode === 403) return 'Access denied. Check your permissions.';
       if (appError.statusCode === 404) return 'The requested resource was not found.';
       if (appError.statusCode === 429) return 'Too many requests. Please try again later.';
-      if (appError.statusCode && appError.statusCode >= 500)
+      if (appError.statusCode != null && appError.statusCode >= 500)
         return 'Server error. Please try again.';
       return 'Network error. Please check your connection and try again.';
 
     case 'ValidationError':
-      return appError.field
+      return appError.field != null
         ? `Invalid ${appError.field}. ${appError.message}`
         : `Validation failed. ${appError.message}`;
 

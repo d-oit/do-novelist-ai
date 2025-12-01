@@ -137,30 +137,44 @@ export class SentryLogService implements LogService {
   public constructor() {}
 
   public ensureSentryLoaded(): void {
-    if (typeof window === 'undefined' || !(window as any).Sentry) {
+    if (typeof window === 'undefined' || (window as { Sentry?: unknown }).Sentry == null) {
       return;
     }
   }
 
   public log(entry: LogEntry): void {
-    void this.ensureSentryLoaded().then(() => {
-      const Sentry = (window as any).Sentry;
-      if (!Sentry) return;
-
-      if (entry.level === 'error' && entry.error) {
-        Sentry.captureException(entry.error, {
-          level: 'error',
-          extra: entry.context,
-        });
-      } else {
-        Sentry.addBreadcrumb({
-          message: entry.message,
-          level: entry.level,
-          data: entry.context,
-          timestamp: entry.timestamp / 1000,
-        });
+    this.ensureSentryLoaded();
+    const Sentry = (
+      window as {
+        Sentry?: {
+          captureException: (
+            error: Error,
+            options?: { level: string; extra?: Record<string, unknown> },
+          ) => void;
+          addBreadcrumb: (breadcrumb: {
+            message: string;
+            level: string;
+            data?: Record<string, unknown>;
+            timestamp: number;
+          }) => void;
+        };
       }
-    });
+    ).Sentry;
+    if (!Sentry) return;
+
+    if (entry.level === 'error' && entry.error) {
+      Sentry.captureException(entry.error, {
+        level: 'error',
+        extra: entry.context,
+      });
+    } else {
+      Sentry.addBreadcrumb({
+        message: entry.message,
+        level: entry.level,
+        data: entry.context,
+        timestamp: entry.timestamp / 1000,
+      });
+    }
   }
 
   public debug(message: string, context?: Record<string, unknown>): void {
@@ -327,7 +341,7 @@ export const getLogger = (): Logger => {
     const services: LogService[] = [new ConsoleLogService()];
 
     // Add Sentry in production if available
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
+    if (typeof window !== 'undefined' && (window as { Sentry?: unknown }).Sentry != null) {
       services.push(new SentryLogService());
     }
 

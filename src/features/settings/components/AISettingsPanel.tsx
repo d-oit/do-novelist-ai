@@ -26,7 +26,7 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
     });
   }, [userId]);
 
-  const handleSave = async (updates: Partial<ProviderPreferenceData>) => {
+  const handleSave = async (updates: Partial<ProviderPreferenceData>): Promise<void> => {
     if (!preferences) return;
 
     setSaving(true);

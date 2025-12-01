@@ -106,15 +106,14 @@ export const useGoapEngine = (
         );
 
         // FIX: Unique Chapter IDs based on Project ID to prevent collisions in DB
-        const newChapters: Chapter[] = result.chapters.map(
-          (c: { orderIndex: number; title: string; summary: string }) =>
-            createChapter({
-              id: `${project.id}_ch_${c.orderIndex}`,
-              orderIndex: c.orderIndex,
-              title: c.title,
-              summary: c.summary,
-              status: ChapterStatus.PENDING,
-            }),
+        const newChapters: Chapter[] = result.chapters.map((c: Partial<Chapter>) =>
+          createChapter({
+            id: `${project.id}_ch_${c.orderIndex ?? 0}`,
+            orderIndex: c.orderIndex ?? 0,
+            title: c.title ?? '',
+            summary: c.summary ?? '',
+            status: ChapterStatus.PENDING,
+          }),
         );
 
         setProject(prev => ({
@@ -261,7 +260,7 @@ export const useGoapEngine = (
 
   // Autopilot Loop
   useEffect((): (() => void) => {
-    if (!autoPilot || project.isGenerating) return;
+    if (!autoPilot || project.isGenerating) return () => {};
     const timer = setTimeout(() => {
       if (!project.worldState.hasOutline) {
         const outlineAction = availableActions.find(a => a.name === 'create_outline');

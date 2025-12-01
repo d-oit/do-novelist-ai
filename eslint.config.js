@@ -14,6 +14,8 @@ export default tseslint.config(
       'dist/**',
       'node_modules/**',
       '.claude/**',
+      '.opencode/**',
+      '.factory/**',
       '*.config.js',
       '*.config.ts',
       'coverage/**',

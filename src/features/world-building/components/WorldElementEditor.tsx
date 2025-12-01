@@ -14,7 +14,7 @@ interface WorldElementEditorProps {
   type: 'location' | 'culture';
   isOpen: boolean;
   onClose: () => void;
-  onSave: (element: Partial<Location | Culture>) => void;
+  onSave: (element: Record<string, unknown>) => void;
   onDelete?: (id: string) => void;
 }
 

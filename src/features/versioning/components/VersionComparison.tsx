@@ -41,7 +41,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
   const [showStats, setShowStats] = useState(true);
 
   useEffect(() => {
-    const loadComparison = async () => {
+    const loadComparison = async (): Promise<void> => {
       setIsLoading(true);
       try {
         const result = await compareVersions(version1.id, version2.id);
@@ -99,7 +99,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const renderUnifiedDiff = (): JSX.Element | null => {
+  const renderUnifiedDiff = (): React.ReactElement | null => {
     if (!comparison) return null;
 
     return (
@@ -150,7 +150,7 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
     );
   };
 
-  const renderSideBySide = (): JSX.Element => {
+  const renderSideBySide = (): React.JSX.Element => {
     const lines1 = version1.content.split('\n');
     const lines2 = version2.content.split('\n');
     return (

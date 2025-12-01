@@ -30,8 +30,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ project, onClos
         analytics.loadWeeklyStats(),
         analytics.loadInsights(),
         analytics.loadWordCountChart(project.id),
-        analytics.loadProductivityChart(),
       ]);
+      analytics.loadProductivityChart();
     };
 
     void loadData();
@@ -45,8 +45,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ project, onClos
         analytics.loadWeeklyStats(),
         analytics.loadInsights(),
         analytics.loadWordCountChart(project.id),
-        analytics.loadProductivityChart(),
       ]);
+      analytics.loadProductivityChart();
     } catch (error) {
       console.error('Failed to refresh analytics:', error);
     } finally {

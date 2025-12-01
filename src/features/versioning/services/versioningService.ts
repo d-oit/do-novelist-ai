@@ -8,10 +8,8 @@ class VersioningService {
   private readonly dbVersion = 1;
   private db: IDBDatabase | null = null;
 
-  static getInstance(): VersioningService {
-    if (VersioningService.instance === null || VersioningService.instance === undefined) {
-      VersioningService.instance = new VersioningService();
-    }
+  public static getInstance(): VersioningService {
+    VersioningService.instance ??= new VersioningService();
     return VersioningService.instance;
   }
 
@@ -20,8 +18,11 @@ class VersioningService {
    */
   private getUserName(): string {
     try {
-      const settings = JSON.parse(localStorage.getItem('novelist_settings') ?? '{}');
-      const userName = settings.userName ?? settings.authorName;
+      const settings = JSON.parse(localStorage.getItem('novelist_settings') ?? '{}') as Record<
+        string,
+        unknown
+      >;
+      const userName = (settings.userName as string) ?? (settings.authorName as string);
       return userName ?? 'Anonymous User';
     } catch {
       return 'Anonymous User';
@@ -32,14 +33,14 @@ class VersioningService {
     return new Promise((resolve, _reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
 
-      request.onerror = () =>
+      request.onerror = (): void =>
         _reject(new Error(request.error?.message ?? 'Database operation failed'));
-      request.onsuccess = () => {
+      request.onsuccess = (): void => {
         this.db = request.result;
         resolve();
       };
 
-      request.onupgradeneeded = event => {
+      request.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Create versions store
@@ -68,6 +69,7 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     const version: ChapterVersion = {
       id: `version_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       chapterId: chapter.id,
@@ -85,12 +87,12 @@ class VersioningService {
     };
 
     return new Promise((resolve, _reject) => {
-      const transaction = this.db.transaction(['versions'], 'readwrite');
+      const transaction = db.transaction(['versions'], 'readwrite');
       const store = transaction.objectStore('versions');
       const request = store.add(version);
 
-      request.onsuccess = () => resolve(version);
-      request.onerror = () =>
+      request.onsuccess = (): void => resolve(version);
+      request.onerror = (): void =>
         _reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
@@ -99,19 +101,20 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, _reject) => {
-      const transaction = this.db.transaction(['versions'], 'readonly');
+      const transaction = db.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const index = store.index('chapterId');
       const request = index.getAll(chapterId);
 
-      request.onsuccess = () => {
-        const versions = request.result.sort(
+      request.onsuccess = (): void => {
+        const versions = (request.result as ChapterVersion[]).sort(
           (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
         );
         resolve(versions);
       };
-      request.onerror = () =>
+      request.onerror = (): void =>
         _reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
@@ -120,12 +123,13 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, _reject) => {
-      const transaction = this.db.transaction(['versions'], 'readonly');
+      const transaction = db.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const request = store.get(versionId);
 
-      request.onsuccess = () => {
+      request.onsuccess = (): void => {
         const version = request.result as ChapterVersion;
         if (version != null) {
           const chapter = createChapter({
@@ -141,7 +145,7 @@ class VersioningService {
           resolve(null);
         }
       };
-      request.onerror = () =>
+      request.onerror = (): void =>
         _reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
@@ -150,6 +154,7 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     // Check if version exists first
     const version = await this.getVersion(versionId);
     if (!version) {
@@ -157,12 +162,12 @@ class VersioningService {
     }
 
     return new Promise((resolve, _reject) => {
-      const transaction = this.db.transaction(['versions'], 'readwrite');
+      const transaction = db.transaction(['versions'], 'readwrite');
       const store = transaction.objectStore('versions');
       const request = store.delete(versionId);
 
-      request.onsuccess = () => resolve(true);
-      request.onerror = () => {
+      request.onsuccess = (): void => resolve(true);
+      request.onerror = (): void => {
         console.error('Failed to delete version:', request.error);
         resolve(false);
       };
@@ -201,6 +206,7 @@ class VersioningService {
   }
 
   public async createBranch(
+    chapterId: string,
     name: string,
     description: string,
     parentVersionId: string,
@@ -208,8 +214,10 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     const branch: Branch = {
       id: `branch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      chapterId,
       name,
       description,
       parentVersionId,
@@ -219,12 +227,12 @@ class VersioningService {
     };
 
     return new Promise((resolve, _reject) => {
-      const transaction = this.db.transaction(['branches'], 'readwrite');
+      const transaction = db.transaction(['branches'], 'readwrite');
       const store = transaction.objectStore('branches');
       const request = store.add(branch);
 
-      request.onsuccess = () => resolve(branch);
-      request.onerror = () =>
+      request.onsuccess = (): void => resolve(branch);
+      request.onerror = (): void =>
         _reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
@@ -233,16 +241,17 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, _reject) => {
-      const transaction = this.db.transaction(['branches'], 'readonly');
+      const transaction = db.transaction(['branches'], 'readonly');
       const store = transaction.objectStore('branches');
       const request = store.getAll();
 
-      request.onsuccess = () => {
-        const branches = request.result.filter(b => b.chapterId === chapterId);
+      request.onsuccess = (): void => {
+        const branches = (request.result as Branch[]).filter(b => b.chapterId === chapterId);
         resolve(branches);
       };
-      request.onerror = () =>
+      request.onerror = (): void =>
         _reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
@@ -261,13 +270,14 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, _reject) => {
-      const transaction = this.db.transaction(['branches'], 'readwrite');
+      const transaction = db.transaction(['branches'], 'readwrite');
       const store = transaction.objectStore('branches');
       const request = store.delete(branchId);
 
-      request.onsuccess = () => resolve(true);
-      request.onerror = () => resolve(false);
+      request.onsuccess = (): void => resolve(true);
+      request.onerror = (): void => resolve(false);
     });
   }
 
@@ -296,13 +306,14 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    const db = this.db;
     return new Promise((resolve, _reject) => {
-      const transaction = this.db.transaction(['versions'], 'readonly');
+      const transaction = db.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const request = store.get(versionId);
 
-      request.onsuccess = () => resolve(request.result ?? null);
-      request.onerror = () =>
+      request.onsuccess = (): void => resolve((request.result as ChapterVersion | null) ?? null);
+      request.onerror = (): void =>
         _reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
@@ -346,7 +357,7 @@ class VersioningService {
       '#06B6D4',
       '#84CC16',
     ];
-    return colors[Math.floor(Math.random() * colors.length)];
+    return colors[Math.floor(Math.random() * colors.length)] ?? '#3B82F6';
   }
 
   private computeDiffs(content1: string, content2: string): VersionDiff[] {

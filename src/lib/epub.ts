@@ -58,7 +58,7 @@ export const generateEpub = async (project: Project, enableDropCaps = false): Pr
 
   // Cover Image (if exists)
   let coverFilename = '';
-  if ((project.coverImage?.length ?? 0) > 0) {
+  if (project.coverImage != null && project.coverImage.length > 0) {
     // Assuming base64 PNG from Imagen
     const base64Data = project.coverImage.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
     coverFilename = 'cover.png';
