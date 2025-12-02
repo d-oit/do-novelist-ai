@@ -7,6 +7,16 @@ var addSorting = (function () {
       desc: false,
     };
 
+  // Escape HTML meta-characters in a string
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // returns the summary table element
   function getTable() {
     return document.querySelector('.coverage-summary');
@@ -99,6 +109,8 @@ var addSorting = (function () {
       val = colNode.getAttribute('data-value');
       if (col.type === 'number') {
         val = Number(val);
+      } else {
+        val = escapeHtml(val);
       }
       data[col.key] = val;
     }
