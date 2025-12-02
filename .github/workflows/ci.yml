@@ -167,21 +167,19 @@ jobs:
 
       - name: Start preview server
         run: |
-          # Start server in background and persist it, bind to all interfaces
+          # Start server in background with nohup to persist across steps
           nohup pnpm run preview --host 0.0.0.0 --port 4173 > /tmp/server.log 2>&1 &
-          echo $! > /tmp/server.pid
-          SERVER_PID=$(cat /tmp/server.pid)
+          SERVER_PID=$!
+          echo $SERVER_PID > /tmp/server.pid
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+          echo "Started server with PID: $SERVER_PID"
 
-          # Keep server alive by ensuring it doesn't get SIGHUP
-          trap "echo 'Stopping server (PID: $SERVER_PID)'; kill $SERVER_PID 2>/dev/null || true" EXIT
-
-          # Wait for server to be ready with better checks
+          # Wait for server to be ready
           echo "Waiting for preview server to be ready..."
           for i in {1..60}; do
-            if curl -f http://localhost:4173 > /dev/null 2>&1; then
+            if curl -sf http://localhost:4173 > /dev/null 2>&1; then
               echo "✅ Preview server is ready!"
-              break
+              exit 0
             fi
             if ! kill -0 $SERVER_PID 2>/dev/null; then
               echo "❌ Server process died! Check /tmp/server.log"
@@ -192,22 +190,9 @@ jobs:
             sleep 1
           done
 
-          # Double-check server is still alive
-          if ! kill -0 $SERVER_PID 2>/dev/null; then
-            echo "❌ Server not running after health check"
-            cat /tmp/server.log
-            exit 1
-          fi
-
-          # Start server monitor in background
-          (
-            while kill -0 $SERVER_PID 2>/dev/null; do
-              sleep 5
-            done
-            echo "⚠️ Server monitor: Server process died!"
-          ) &
-          MONITOR_PID=$!
-          echo $MONITOR_PID > /tmp/monitor.pid
+          echo "❌ Server didn't respond in 60 seconds"
+          cat /tmp/server.log
+          exit 1
         env:
           CI: true
 
