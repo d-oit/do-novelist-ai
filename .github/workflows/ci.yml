@@ -167,20 +167,37 @@ jobs:
 
       - name: Start preview server
         run: |
-          pnpm run preview &
-          SERVER_PID=$!
+          # Start server in background and persist it
+          setsid pnpm run preview > /tmp/server.log 2>&1 &
+          echo $! > /tmp/server.pid
+          SERVER_PID=$(cat /tmp/server.pid)
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
 
-          # Wait for server to be ready
+          # Keep server alive by ensuring it doesn't get SIGHUP
+          trap "echo 'Stopping server (PID: $SERVER_PID)'; kill $SERVER_PID 2>/dev/null || true" EXIT
+
+          # Wait for server to be ready with better checks
           echo "Waiting for preview server to be ready..."
-          for i in {1..30}; do
+          for i in {1..60}; do
             if curl -f http://localhost:4173 > /dev/null 2>&1; then
               echo "✅ Preview server is ready!"
               break
             fi
-            echo "Waiting... ($i/30)"
-            sleep 2
+            if ! kill -0 $SERVER_PID 2>/dev/null; then
+              echo "❌ Server process died! Check /tmp/server.log"
+              cat /tmp/server.log
+              exit 1
+            fi
+            echo "Waiting... ($i/60)"
+            sleep 1
           done
+
+          # Double-check server is still alive
+          if ! kill -0 $SERVER_PID 2>/dev/null; then
+            echo "❌ Server not running after health check"
+            cat /tmp/server.log
+            exit 1
+          fi
         env:
           CI: true
 
@@ -191,21 +208,6 @@ jobs:
             CI=true pnpm exec playwright test
           else
             echo "Playwright not configured, skipping E2E tests"
-          fi
-        env:
-          # Use test values for E2E tests
-          VITE_AI_GATEWAY_API_KEY: "test-gateway-key"
-          VITE_DEFAULT_AI_PROVIDER: "mistral"
-          VITE_DEFAULT_AI_MODEL: "mistral:mistral-medium-latest"
-          VITE_TURSO_DATABASE_URL: "test-url"
-          VITE_TURSO_AUTH_TOKEN: "test-token"
-
-      - name: Stop preview server
-        if: always()
-        run: |
-          if [ ! -z "$SERVER_PID" ]; then
-            echo "Stopping preview server (PID: $SERVER_PID)..."
-            kill $SERVER_PID || true
           fi
         env:
           # Use test values for E2E tests
