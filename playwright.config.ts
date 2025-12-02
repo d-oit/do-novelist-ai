@@ -10,16 +10,18 @@ export default defineConfig({
   timeout: 120000, // 2 minutes per test
   globalTimeout: 600000, // 10 minutes total
   use: {
-    baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000',
+    baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
   webServer: {
     command: process.env.CI ? 'pnpm run preview --host 0.0.0.0' : 'npm run preview',
-    port: 4173,
+    url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
+    stdout: 'pipe',
+    stderr: 'pipe',
     env: {
       VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
       VITE_DEFAULT_AI_PROVIDER: 'mistral',
