@@ -15,24 +15,19 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  webServer: process.env.CI
-    ? undefined
-    : {
-        command: 'npm run preview',
-        port: 4173,
-        reuseExistingServer: true,
-        timeout: 120000,
-        env: {
-          // Single Vercel AI Gateway API key for all providers
-          VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
-
-          // Other configuration
-          VITE_DEFAULT_AI_PROVIDER: 'mistral',
-          VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
-          VITE_TURSO_DATABASE_URL: 'test-url',
-          VITE_TURSO_AUTH_TOKEN: 'test-token',
-        },
-      },
+  webServer: {
+    command: process.env.CI ? 'pnpm run preview --host 0.0.0.0' : 'npm run preview',
+    port: 4173,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+    env: {
+      VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
+      VITE_DEFAULT_AI_PROVIDER: 'mistral',
+      VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
+      VITE_TURSO_DATABASE_URL: 'test-url',
+      VITE_TURSO_AUTH_TOKEN: 'test-token',
+    },
+  },
 
   projects: [
     {

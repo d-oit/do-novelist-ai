@@ -165,63 +165,10 @@ jobs:
           name: production-build-${{ github.sha }}
           path: dist/
 
-      - name: Start preview server
-        run: |
-          # Start server in background with nohup to persist across steps
-          nohup pnpm run preview --host 0.0.0.0 --port 4173 > /tmp/server.log 2>&1 &
-          SERVER_PID=$!
-          echo $SERVER_PID > /tmp/server.pid
-          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
-          echo "Started server with PID: $SERVER_PID"
-
-          # Wait for server to be ready
-          echo "Waiting for preview server to be ready..."
-          for i in {1..60}; do
-            if curl -sf http://localhost:4173 > /dev/null 2>&1; then
-              echo "✅ Preview server is ready!"
-              exit 0
-            fi
-            if ! kill -0 $SERVER_PID 2>/dev/null; then
-              echo "❌ Server process died! Check /tmp/server.log"
-              cat /tmp/server.log
-              exit 1
-            fi
-            echo "Waiting... ($i/60)"
-            sleep 1
-          done
-
-          echo "❌ Server didn't respond in 60 seconds"
-          cat /tmp/server.log
-          exit 1
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
         env:
           CI: true
-
-      - name: Run Playwright tests
-        run: |
-          if grep -q "playwright" package.json; then
-            # Verify server is still running before tests
-            if [ -f /tmp/server.pid ]; then
-              SERVER_PID=$(cat /tmp/server.pid)
-              if ! kill -0 $SERVER_PID 2>/dev/null; then
-                echo "❌ Server not running before tests!"
-                cat /tmp/server.log
-                exit 1
-              fi
-              echo "✅ Server verified running (PID: $SERVER_PID)"
-            fi
-
-            # Run tests against preview server
-            CI=true pnpm exec playwright test
-          else
-            echo "Playwright not configured, skipping E2E tests"
-          fi
-        env:
-          # Use test values for E2E tests
-          VITE_AI_GATEWAY_API_KEY: "test-gateway-key"
-          VITE_DEFAULT_AI_PROVIDER: "mistral"
-          VITE_DEFAULT_AI_MODEL: "mistral:mistral-medium-latest"
-          VITE_TURSO_DATABASE_URL: "test-url"
-          VITE_TURSO_AUTH_TOKEN: "test-token"
 
       - name: Upload Playwright report
         if: always()
