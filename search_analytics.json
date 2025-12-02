@@ -1,8 +1,8 @@
 {
-  "total_searches": 13,
+  "total_searches": 15,
   "cache_hits": 1,
-  "cache_misses": 12,
-  "avg_latency_ms": 49209.67542208158,
+  "cache_misses": 14,
+  "avg_latency_ms": 54618.16248893738,
   "quality_scores": [
     0.0, 0.0, 0.0, 0.9, 0.885, 0.7328333333333333, 0.9, 0.9, 0.49000000000000005, 0.8310000000000001
   ],
@@ -110,6 +110,22 @@
       "cached": false,
       "latency_ms": 41662.37211227417,
       "quality": 0.8310000000000001,
+      "valid": true
+    },
+    {
+      "query": "search for GitHub Actions background process killed between steps Playwright E2E testing best practices 2024",
+      "timestamp": "2025-12-02T10:46:52.009197",
+      "cached": false,
+      "latency_ms": 102810.7385635376,
+      "quality": null,
+      "valid": true
+    },
+    {
+      "query": "search for Playwright webServer config playwright.config.ts CI GitHub Actions",
+      "timestamp": "2025-12-02T10:48:47.330162",
+      "cached": false,
+      "latency_ms": 76735.91828346252,
+      "quality": null,
       "valid": true
     }
   ]

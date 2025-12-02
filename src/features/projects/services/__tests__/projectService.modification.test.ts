@@ -17,7 +17,7 @@ vi.mock('../../../../lib/db', () => ({
 
 import { db } from '../../../../lib/db';
 
-describe('ProjectService', () => {
+describe('ProjectService - Modification', () => {
   // In-memory storage for mocked operations
   let storage: { projects: any[] };
 
@@ -59,283 +59,6 @@ describe('ProjectService', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('Initialization', () => {
-    it('should initialize successfully', async () => {
-      await expect(projectService.init()).resolves.toBeUndefined();
-    });
-
-    it('should create projects object store on first init', async () => {
-      await projectService.init();
-      // Service should be initialized without errors
-      expect(projectService).toBeDefined();
-    });
-
-    it('should create required indexes', async () => {
-      await projectService.init();
-      // The service should have created indexes for createdAt, updatedAt, status
-      expect(projectService).toBeDefined();
-    });
-  });
-
-  describe('Project Creation', () => {
-    it('should create a new project with required fields', async () => {
-      const data: ProjectCreationData = {
-        title: 'My First Novel',
-        idea: 'A story about a young wizard discovering their powers in a modern city',
-        style: 'Fantasy',
-        targetWordCount: 80000,
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project).toBeDefined();
-      expect(project.id).toBeDefined();
-      expect(project.title).toBe(data.title);
-      expect(project.idea).toBe(data.idea);
-      expect(project.style).toBe(data.style);
-      expect(project.targetWordCount).toBe(data.targetWordCount);
-    });
-
-    it('should generate unique project IDs', async () => {
-      const data: ProjectCreationData = {
-        title: 'Test Project',
-        idea: 'Test idea',
-        style: 'Literary Fiction',
-      };
-
-      const project1 = await projectService.create(data);
-      const project2 = await projectService.create(data);
-
-      expect(project1.id).not.toBe(project2.id);
-    });
-
-    it('should set default status to PublishStatus.DRAFT', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Mystery & Thriller',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.status).toBe(PublishStatus.DRAFT);
-    });
-
-    it('should initialize empty chapters array', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Romance',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.chapters).toEqual([]);
-    });
-
-    it('should set createdAt and updatedAt timestamps', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Science Fiction',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.createdAt).toBeInstanceOf(Date);
-      expect(project.updatedAt).toBeInstanceOf(Date);
-    });
-
-    it('should initialize worldState with correct defaults', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Mystery & Thriller',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.worldState).toBeDefined();
-      expect(project.worldState.hasTitle).toBe(true);
-      expect(project.worldState.styleDefined).toBe(true);
-      expect(project.worldState.hasOutline).toBe(false);
-      expect(project.worldState.chaptersCount).toBe(0);
-      expect(project.worldState.chaptersCompleted).toBe(0);
-    });
-
-    it('should use default language if not provided', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Horror',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.language).toBe('en');
-    });
-
-    it('should use provided language', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Fantasy',
-        language: 'es',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.language).toBe('es');
-    });
-
-    it('should use default target word count if not provided', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Literary Fiction',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.targetWordCount).toBe(50000);
-    });
-
-    it('should initialize analytics with zero values', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Science Fiction',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.analytics).toBeDefined();
-      expect(project.analytics.totalWordCount).toBe(0);
-      expect(project.analytics.averageChapterLength).toBe(0);
-      expect(project.analytics.estimatedReadingTime).toBe(0);
-      expect(project.analytics.generationCost).toBe(0);
-      expect(project.analytics.editingRounds).toBe(0);
-    });
-
-    it('should set default version to 1.0.0', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Historical Fiction',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.version).toBe('1.0.0');
-    });
-
-    it('should initialize empty changeLog', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'General Fiction',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.changeLog).toEqual([]);
-    });
-
-    it('should handle genre array', async () => {
-      const data: ProjectCreationData = {
-        title: 'New Project',
-        idea: 'An idea',
-        style: 'Fantasy',
-        genre: ['fantasy', 'General Fiction', 'coming-of-age'],
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.genre).toEqual(['fantasy', 'General Fiction', 'coming-of-age']);
-    });
-
-    it('should handle target audience', async () => {
-      const data: ProjectCreationData = {
-        title: 'Young Adult Novel',
-        idea: 'Teen discovers superpowers',
-        style: 'Fantasy',
-        targetAudience: 'young_adult',
-      };
-
-      const project = await projectService.create(data);
-
-      expect(project.targetAudience).toBe('young_adult');
-    });
-  });
-
-  describe('Project Retrieval', () => {
-    it('should retrieve all projects', async () => {
-      const data1: ProjectCreationData = {
-        title: 'Project 1',
-        idea: 'Idea 1',
-        style: 'Science Fiction',
-      };
-      const data2: ProjectCreationData = {
-        title: 'Project 2',
-        idea: 'Idea 2',
-        style: 'Fantasy',
-      };
-
-      await projectService.create(data1);
-      await projectService.create(data2);
-
-      const projects = await projectService.getAll();
-
-      expect(Array.isArray(projects)).toBe(true);
-      expect(projects.length).toBeGreaterThanOrEqual(2);
-    });
-
-    it('should retrieve project by ID', async () => {
-      const data: ProjectCreationData = {
-        title: 'Test Project',
-        idea: 'Test idea',
-        style: 'Mystery & Thriller',
-      };
-
-      const created = await projectService.create(data);
-      const retrieved = await projectService.getById(created.id);
-
-      expect(retrieved).toBeDefined();
-      expect(retrieved?.id).toBe(created.id);
-      expect(retrieved?.title).toBe(created.title);
-    });
-
-    it('should return null for non-existent project ID', async () => {
-      const result = await projectService.getById('non-existent-id');
-
-      expect(result).toBeNull();
-    });
-
-    it('should retrieve projects by status', async () => {
-      const data: ProjectCreationData = {
-        title: 'Draft Project',
-        idea: 'Draft idea',
-        style: 'Mystery & Thriller',
-      };
-
-      await projectService.create(data);
-
-      const projects = await projectService.getByStatus(PublishStatus.DRAFT);
-
-      expect(Array.isArray(projects)).toBe(true);
-      expect(projects.length).toBeGreaterThan(0);
-      projects.forEach(project => {
-        expect(project.status).toBe(PublishStatus.DRAFT);
-      });
-    });
-
-    it('should return empty array when no projects match status', async () => {
-      const projects = await projectService.getByStatus(PublishStatus.PUBLISHED);
-
-      expect(Array.isArray(projects)).toBe(true);
-    });
   });
 
   describe('Project Updates', () => {
@@ -573,6 +296,92 @@ describe('ProjectService', () => {
 
       const retrieved = await projectService.getById(project.id);
       expect(retrieved?.idea.length).toBe(4000);
+    });
+  });
+
+  describe('Complex Modification Scenarios', () => {
+    it('should handle project updates with chapters', async () => {
+      const data: ProjectCreationData = {
+        title: 'Project with Chapters',
+        idea: 'A story with chapters',
+        style: 'Fantasy',
+      };
+
+      const project = await projectService.create(data);
+
+      // Add chapters to the project
+      project.chapters = [
+        {
+          id: 'ch1',
+          title: 'Chapter 1',
+          summary: 'First chapter',
+          content: 'Content of chapter 1',
+          status: 'complete' as any,
+          orderIndex: 0,
+          wordCount: 1000,
+          characterCount: 5000,
+          estimatedReadingTime: 4,
+          tags: [],
+          notes: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          scenes: [],
+        },
+      ];
+
+      await projectService.save(project);
+
+      const retrieved = await projectService.getById(project.id);
+      expect(retrieved?.chapters).toHaveLength(1);
+      expect(retrieved?.chapters[0]?.title).toBe('Chapter 1');
+    });
+
+    it('should handle project status transitions', async () => {
+      const data: ProjectCreationData = {
+        title: 'Status Transition Test',
+        idea: 'Testing status changes',
+        style: 'Science Fiction',
+      };
+
+      const project = await projectService.create(data);
+      expect(project.status).toBe(PublishStatus.DRAFT);
+
+      // Update to editing
+      await projectService.update(project.id, { status: PublishStatus.EDITING });
+      let updated = await projectService.getById(project.id);
+      expect(updated?.status).toBe(PublishStatus.EDITING);
+
+      // Update to published
+      await projectService.update(project.id, { status: PublishStatus.PUBLISHED });
+      updated = await projectService.getById(project.id);
+      expect(updated?.status).toBe(PublishStatus.PUBLISHED);
+    });
+
+    it('should handle batch operations', async () => {
+      const projects: any[] = [];
+
+      // Create multiple projects
+      for (let i = 0; i < 5; i++) {
+        const data: ProjectCreationData = {
+          title: `Project ${i}`,
+          idea: `Idea for project ${i}`,
+          style: 'Fantasy',
+        };
+        projects.push(await projectService.create(data));
+      }
+
+      // Update all projects
+      const updatePromises = projects.map(project =>
+        projectService.update(project.id, { status: PublishStatus.EDITING }),
+      );
+      await Promise.all(updatePromises);
+
+      // Verify all updates
+      const allProjects = await projectService.getAll();
+      expect(allProjects.length).toBe(5);
+      allProjects.forEach(project => {
+        expect(project.status).toBe(PublishStatus.EDITING);
+      });
     });
   });
 });

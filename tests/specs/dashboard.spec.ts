@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { setupAISDKMock } from '../utils/mock-ai-sdk';
 
 test.describe('Feature: Dashboard & Tools', () => {
   test.beforeEach(async ({ page }) => {
+    await setupAISDKMock(page);
     await setupGeminiMock(page);
     await page.goto('/');
     await page.waitForLoadState('networkidle');

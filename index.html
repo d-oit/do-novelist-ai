@@ -1,25 +1,88 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Novelist.ai | GOAP Engine</title>
+    <script>
+      (function () {
+        try {
+          const stored = localStorage.getItem('novelist_theme');
+          if (stored === 'light') document.documentElement.classList.remove('dark');
+          else if (stored === 'dark') document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
+    <script>
+      // AI SDK Logger Patch - Global Preload
+      // This runs before any other scripts to prevent "m.log is not a function" errors
+      (function () {
+        const safeLogger = {
+          log: function (...args) {
+            console.log('[AI-SDK-Patch-Global]', ...args);
+            return;
+          },
+          debug: function (...args) {
+            console.log('[AI-SDK-Patch-Global]', ...args);
+            return;
+          },
+          info: function (...args) {
+            console.log('[AI-SDK-Patch-Global]', ...args);
+            return;
+          },
+          warn: function (...args) {
+            console.log('[AI-SDK-Patch-Global]', ...args);
+            return;
+          },
+          error: function (...args) {
+            console.log('[AI-SDK-Patch-Global]', ...args);
+            return;
+          },
+          trace: function (...args) {
+            console.log('[AI-SDK-Patch-Global]', ...args);
+            return;
+          },
+        };
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Novelist.ai | GOAP Engine</title>
-  <script>
-    (function () {
-      try {
-        const stored = localStorage.getItem('novelist_theme');
-        if (stored === 'light') document.documentElement.classList.remove('dark');
-        else if (stored === 'dark') document.documentElement.classList.add('dark');
-      } catch (e) { }
-    })();
-  </script>
-</head>
+        // Patch global objects aggressively
+        ['window', 'globalThis', 'global', 'self'].forEach(globalObj => {
+          if (typeof window[globalObj] !== 'undefined') {
+            ['m', 'logger', 'aiSDKLogger', 'log'].forEach(loggerName => {
+              try {
+                Object.defineProperty(window[globalObj], loggerName, {
+                  value: safeLogger,
+                  writable: false,
+                  configurable: true,
+                  enumerable: false,
+                });
+              } catch (e) {
+                // Ignore errors
+              }
+            });
+          }
+        });
 
-<body>
-  <div id="root"></div>
-  <script type="module" src="./index.tsx"></script>
-</body>
+        // Override Object.defineProperty to catch AI SDK assignments
+        const originalDefineProperty = Object.defineProperty;
+        Object.defineProperty = function (obj, prop, descriptor) {
+          if (typeof prop === 'string' && ['m', 'logger', 'aiSDKLogger'].includes(prop)) {
+            console.log('[AI-SDK-Patch-Global] Intercepted property definition for "' + prop + '"');
+            descriptor.value = safeLogger;
+            descriptor.writable = false;
+            descriptor.configurable = true;
+            descriptor.enumerable = false;
+          }
+          return originalDefineProperty.call(this, obj, prop, descriptor);
+        };
 
+        console.log('[AI-SDK-Patch-Global] Global patch applied');
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+  </body>
 </html>

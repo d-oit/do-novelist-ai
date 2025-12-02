@@ -29,6 +29,8 @@ export default defineConfig(({ mode }) => {
     ],
     define: {
       'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      // Force test environment detection for Playwright
+      'import.meta.env.PLAYWRIGHT_TEST': JSON.stringify(env.PLAYWRIGHT_TEST || 'false'),
     },
     resolve: {
       alias: {

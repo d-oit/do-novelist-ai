@@ -75,7 +75,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
     setBrainstorming(prev => ({ ...prev, [field]: true }));
     try {
       const result = await brainstormProject(promptContext, field);
-      if (result) {
+      if (result !== null) {
         if (field === 'title') setTitle(result);
         if (field === 'style') setStyle(result);
         if (field === 'idea') setIdea(result);
@@ -212,7 +212,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                 className='flex items-center gap-1.5 rounded border border-border bg-secondary px-2 py-1 text-[10px] text-primary transition-all hover:bg-secondary/80 disabled:opacity-50'
                 data-testid='wizard-brainstorm-idea'
               >
-                {brainstorming.idea != null ? (
+                {brainstorming.idea === true ? (
                   <Loader2 className='h-3 w-3 animate-spin' />
                 ) : (
                   <Sparkles className='h-3 w-3' />
@@ -325,7 +325,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                   title='Generate Title from Idea'
                   data-testid='wizard-brainstorm-title'
                 >
-                  {brainstorming.title != null ? (
+                  {brainstorming.title === true ? (
                     <Loader2 className='h-4 w-4 animate-spin' />
                   ) : (
                     <Wand2 className='h-4 w-4' />
@@ -353,7 +353,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                   title='Suggest Style from Idea'
                   data-testid='wizard-brainstorm-style'
                 >
-                  {brainstorming.style != null ? (
+                  {brainstorming.style === true ? (
                     <Loader2 className='h-4 w-4 animate-spin' />
                   ) : (
                     <Wand2 className='h-4 w-4' />

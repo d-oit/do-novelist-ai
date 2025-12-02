@@ -70,7 +70,13 @@
       "WebFetch(domain:github.com)",
       "Skill(agent-coordination)",
       "Bash(test:*)",
-      "Bash(npm run coverage:*)"
+      "Bash(npm run coverage:*)",
+      "WebFetch(domain:playwright.dev)",
+      "WebFetch(domain:stackoverflow.com)",
+      "Bash(CI=true pnpm exec playwright test --reporter=line)",
+      "Bash(CI=true timeout 60 pnpm:*)",
+      "Bash(pnpm run build)",
+      "Bash(CI=true pnpm exec playwright test:*)"
     ],
     "deny": [],
     "ask": []

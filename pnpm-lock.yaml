@@ -26,8 +26,8 @@ importers:
         specifier: ^1.56.1
         version: 1.57.0
       ai:
-        specifier: ^5.0.104
-        version: 5.0.104(zod@4.1.13)
+        specifier: ^5.0.106
+        version: 5.0.106(zod@4.1.13)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -74,6 +74,9 @@ importers:
       "@eslint/js":
         specifier: ^9.39.1
         version: 9.39.1
+      "@faker-js/faker":
+        specifier: ^10.1.0
+        version: 10.1.0
       "@tailwindcss/forms":
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.4.18(yaml@2.8.1))
@@ -193,10 +196,10 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  "@ai-sdk/gateway@2.0.17":
+  "@ai-sdk/gateway@2.0.18":
     resolution:
       {
-        integrity: sha512-oVAG6q72KsjKlrYdLhWjRO7rcqAR8CjokAbYuyVZoCO4Uh2PH/VzZoxZav71w2ipwlXhHCNaInGYWNs889MMDA==,
+        integrity: sha512-sDQcW+6ck2m0pTIHW6BPHD7S125WD3qNkx/B8sEzJp/hurocmJ5Cni0ybExg6sQMGo+fr/GWOwpHF1cmCdg5rQ==,
       }
     engines: { node: ">=18" }
     peerDependencies:
@@ -809,6 +812,13 @@ packages:
         integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==,
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
+
+  "@faker-js/faker@10.1.0":
+    resolution:
+      {
+        integrity: sha512-C3mrr3b5dRVlKPJdfrAXS8+dq+rq8Qm5SNRazca0JKgw1HQERFmrVb0towvMmw5uu8hHKNiQasMaR/tydf3Zsg==,
+      }
+    engines: { node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: ">=10" }
 
   "@google/genai@1.30.0":
     resolution:
@@ -1797,10 +1807,10 @@ packages:
       }
     engines: { node: ">= 14" }
 
-  ai@5.0.104:
+  ai@5.0.106:
     resolution:
       {
-        integrity: sha512-MZOkL9++nY5PfkpWKBR3Rv+Oygxpb9S16ctv8h91GvrSif7UnNEdPMVZe3bUyMd2djxf0AtBk/csBixP0WwWZQ==,
+        integrity: sha512-M5obwavxSJJ3tGlAFqI6eltYNJB0D20X6gIBCFx/KVorb/X1fxVVfiZZpZb+Gslu4340droSOjT0aKQFCarNVg==,
       }
     engines: { node: ">=18" }
     peerDependencies:
@@ -5639,7 +5649,7 @@ snapshots:
       "@ai-sdk/provider-utils": 3.0.18(zod@4.1.13)
       zod: 4.1.13
 
-  "@ai-sdk/gateway@2.0.17(zod@4.1.13)":
+  "@ai-sdk/gateway@2.0.18(zod@4.1.13)":
     dependencies:
       "@ai-sdk/provider": 2.0.0
       "@ai-sdk/provider-utils": 3.0.18(zod@4.1.13)
@@ -5987,6 +5997,8 @@ snapshots:
     dependencies:
       "@eslint/core": 0.17.0
       levn: 0.4.1
+
+  "@faker-js/faker@10.1.0": {}
 
   "@google/genai@1.30.0":
     dependencies:
@@ -6564,9 +6576,9 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ai@5.0.104(zod@4.1.13):
+  ai@5.0.106(zod@4.1.13):
     dependencies:
-      "@ai-sdk/gateway": 2.0.17(zod@4.1.13)
+      "@ai-sdk/gateway": 2.0.18(zod@4.1.13)
       "@ai-sdk/provider": 2.0.0
       "@ai-sdk/provider-utils": 3.0.18(zod@4.1.13)
       "@opentelemetry/api": 1.9.0

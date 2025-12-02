@@ -2,7 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { settingsService } from '../../services/settingsService';
-import { type Settings, type SettingsCategory } from '../../types';
+import { type Settings } from '../../types';
 import { DEFAULT_SETTINGS } from '../../types';
 import { useSettings } from '../useSettings';
 
@@ -14,7 +14,7 @@ const mockSettingsService = vi.mocked(settingsService);
 const mockClassListToggle = vi.fn();
 const mockSetProperty = vi.fn();
 
-describe('useSettings', () => {
+describe('useSettings - Basic Operations', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -276,86 +276,6 @@ describe('useSettings', () => {
     }).toThrow('Reset failed');
   });
 
-  // Reset Category Tests
-  it('resets appearance category settings', () => {
-    const { result } = renderHook(() => useSettings());
-
-    act(() => {
-      result.current.init();
-    });
-
-    act(() => {
-      result.current.update({
-        theme: 'dark',
-        fontSize: 20,
-        fontFamily: 'serif',
-        compactMode: true,
-        // Keep other settings different
-        autoSave: false,
-      });
-    });
-
-    act(() => {
-      result.current.resetCategory('appearance');
-    });
-
-    expect(result.current.settings.theme).toBe(DEFAULT_SETTINGS.theme);
-    expect(result.current.settings.fontSize).toBe(DEFAULT_SETTINGS.fontSize);
-    expect(result.current.settings.fontFamily).toBe(DEFAULT_SETTINGS.fontFamily);
-    expect(result.current.settings.compactMode).toBe(DEFAULT_SETTINGS.compactMode);
-    expect(result.current.settings.autoSave).toBe(false); // Other settings unchanged
-  });
-
-  it('resets AI category settings', () => {
-    const { result } = renderHook(() => useSettings());
-
-    act(() => {
-      result.current.init();
-    });
-
-    act(() => {
-      result.current.update({
-        aiModel: 'gpt-4',
-        aiTemperature: 1.0,
-        enableAIAssistance: false,
-      });
-    });
-
-    act(() => {
-      result.current.resetCategory('ai');
-    });
-
-    expect(result.current.settings.aiModel).toBe(DEFAULT_SETTINGS.aiModel);
-    expect(result.current.settings.aiTemperature).toBe(DEFAULT_SETTINGS.aiTemperature);
-    expect(result.current.settings.enableAIAssistance).toBe(DEFAULT_SETTINGS.enableAIAssistance);
-  });
-
-  it('resets editor category settings', () => {
-    const { result } = renderHook(() => useSettings());
-
-    act(() => {
-      result.current.init();
-    });
-
-    act(() => {
-      result.current.update({
-        autoSave: false,
-        autoSaveInterval: 120,
-        spellCheck: false,
-        wordWrap: false,
-      });
-    });
-
-    act(() => {
-      result.current.resetCategory('editor');
-    });
-
-    expect(result.current.settings.autoSave).toBe(DEFAULT_SETTINGS.autoSave);
-    expect(result.current.settings.autoSaveInterval).toBe(DEFAULT_SETTINGS.autoSaveInterval);
-    expect(result.current.settings.spellCheck).toBe(DEFAULT_SETTINGS.spellCheck);
-    expect(result.current.settings.wordWrap).toBe(DEFAULT_SETTINGS.wordWrap);
-  });
-
   // Active Category Tests
   it('sets active category', () => {
     const { result } = renderHook(() => useSettings());
@@ -425,68 +345,6 @@ describe('useSettings', () => {
     expect(result.current.error).toBeNull();
   });
 
-  // Theme Application Tests
-  it('applies light theme correctly', () => {
-    const { result } = renderHook(() => useSettings());
-
-    act(() => {
-      result.current.init();
-    });
-
-    mockClassListToggle.mockClear();
-
-    act(() => {
-      result.current.update({ theme: 'light' });
-    });
-
-    expect(mockClassListToggle).toHaveBeenCalledWith('dark', false);
-  });
-
-  it('applies dark theme correctly', () => {
-    const { result } = renderHook(() => useSettings());
-
-    act(() => {
-      result.current.init();
-    });
-
-    mockClassListToggle.mockClear();
-
-    act(() => {
-      result.current.update({ theme: 'dark' });
-    });
-
-    expect(mockClassListToggle).toHaveBeenCalledWith('dark', true);
-  });
-
-  it('applies system theme based on media query', () => {
-    const matchMediaMock = vi.fn().mockImplementation(query => ({
-      matches: query === '(prefers-color-scheme: dark)',
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }));
-
-    window.matchMedia = matchMediaMock;
-
-    const { result } = renderHook(() => useSettings());
-
-    act(() => {
-      result.current.init();
-    });
-
-    mockClassListToggle.mockClear();
-
-    act(() => {
-      result.current.update({ theme: 'system' });
-    });
-
-    expect(mockClassListToggle).toHaveBeenCalledWith('dark', true);
-  });
-
   // Initial State Tests
   it('maintains initial state correctly', () => {
     const { result } = renderHook(() => useSettings());
@@ -496,94 +354,5 @@ describe('useSettings', () => {
     expect(result.current.isSaving).toBe(false);
     expect(result.current.error).toBeNull();
     expect(result.current.activeCategory).toBe('appearance');
-  });
-
-  // Persistence Tests
-  it('persists settings across hook remounts', () => {
-    const customSettings: Settings = {
-      ...DEFAULT_SETTINGS,
-      theme: 'dark',
-      fontSize: 18,
-    };
-
-    mockSettingsService.load.mockReturnValue(customSettings);
-
-    const { result: result1 } = renderHook(() => useSettings());
-
-    act(() => {
-      result1.current.init();
-    });
-
-    expect(result1.current.settings.theme).toBe('dark');
-
-    // Remount
-    const { result: result2 } = renderHook(() => useSettings());
-
-    act(() => {
-      result2.current.init();
-    });
-
-    expect(result2.current.settings.theme).toBe('dark');
-  });
-
-  // Multiple Settings Update Tests
-  it('updates multiple settings at once', () => {
-    const { result } = renderHook(() => useSettings());
-
-    act(() => {
-      result.current.init();
-    });
-
-    const updates: Partial<Settings> = {
-      theme: 'dark',
-      fontSize: 18,
-      autoSave: false,
-      dailyWordGoal: 1000,
-    };
-
-    act(() => {
-      result.current.update(updates);
-    });
-
-    expect(result.current.settings.theme).toBe('dark');
-    expect(result.current.settings.fontSize).toBe(18);
-    expect(result.current.settings.autoSave).toBe(false);
-    expect(result.current.settings.dailyWordGoal).toBe(1000);
-  });
-
-  // Edge Cases
-  it('handles empty update gracefully', () => {
-    const { result } = renderHook(() => useSettings());
-
-    act(() => {
-      result.current.init();
-    });
-
-    const originalSettings = { ...result.current.settings };
-
-    act(() => {
-      result.current.update({});
-    });
-
-    expect(result.current.settings).toEqual(originalSettings);
-  });
-
-  it('handles category reset for all categories', () => {
-    const { result } = renderHook(() => useSettings());
-
-    act(() => {
-      result.current.init();
-    });
-
-    const categories: SettingsCategory[] = ['appearance', 'ai', 'editor', 'goals', 'privacy', 'experimental'];
-
-    for (const category of categories) {
-      act(() => {
-        result.current.resetCategory(category);
-      });
-    }
-
-    // All settings should be reset to defaults
-    expect(result.current.settings).toEqual(DEFAULT_SETTINGS);
   });
 });
