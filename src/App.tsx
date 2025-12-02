@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Project, Chapter, ChapterStatus, PublishStatus } from './types/index';
 import { MainLayout, Header } from './components/layout';
 import { db } from './lib/db';
+import { UserProvider } from './contexts/UserContext';
 
 const ProjectDashboard = lazy(() => import('./components/ProjectDashboardOptimized'));
 const ProjectWizard = lazy(() => import('./features/projects/components/ProjectWizard'));
@@ -212,73 +213,75 @@ const App: React.FC = () => {
   }
 
   return (
-    <MainLayout>
-      <Suspense
-        fallback={
-          <div className='flex min-h-screen items-center justify-center'>
-            <Loader2 className='h-8 w-8 animate-spin' />
-          </div>
-        }
-      >
-        <ProjectWizard
-          isOpen={showWizard}
-          onCreate={handleCreateProject}
-          onCancel={() => setShowWizard(false)}
-        />
-      </Suspense>
-
-      <Header
-        projectTitle={project.title}
-        onNewProject={() => setShowWizard(true)}
-        currentView={currentView}
-        onNavigate={setCurrentView}
-      />
-
-      <main className='relative flex-1 pt-0'>
+    <UserProvider>
+      <MainLayout>
         <Suspense
           fallback={
-            <div className='flex items-center justify-center p-8'>
+            <div className='flex min-h-screen items-center justify-center'>
               <Loader2 className='h-8 w-8 animate-spin' />
             </div>
           }
         >
-          {currentView === 'dashboard' && (
-            <ProjectDashboard
-              project={project}
-              engine={engine}
-              selectedChapterId={selectedChapterId}
-              onSelectChapter={setSelectedChapterId}
-              onUpdateChapter={handleUpdateChapter}
-              onUpdateProject={handleUpdateProject}
-              onAddChapter={handleAddChapter}
-              onSettingsClick={() => setCurrentView('settings')}
-            />
-          )}
-          {currentView === 'projects' && (
-            <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
-              <ProjectsView
-                currentProject={project}
-                onNewProject={() => setShowWizard(true)}
-                onLoadProject={(id: string): void => {
-                  void handleLoadProject(id);
-                }}
-                onNavigate={setCurrentView}
-              />
-            </div>
-          )}
-          {currentView === 'world-building' && (
-            <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
-              <WorldBuildingDashboard projectId={project.id} />
-            </div>
-          )}
-          {currentView === 'settings' && (
-            <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
-              <SettingsView />
-            </div>
-          )}
+          <ProjectWizard
+            isOpen={showWizard}
+            onCreate={handleCreateProject}
+            onCancel={() => setShowWizard(false)}
+          />
         </Suspense>
-      </main>
-    </MainLayout>
+
+        <Header
+          projectTitle={project.title}
+          onNewProject={() => setShowWizard(true)}
+          currentView={currentView}
+          onNavigate={setCurrentView}
+        />
+
+        <main className='relative flex-1 pt-0'>
+          <Suspense
+            fallback={
+              <div className='flex items-center justify-center p-8'>
+                <Loader2 className='h-8 w-8 animate-spin' />
+              </div>
+            }
+          >
+            {currentView === 'dashboard' && (
+              <ProjectDashboard
+                project={project}
+                engine={engine}
+                selectedChapterId={selectedChapterId}
+                onSelectChapter={setSelectedChapterId}
+                onUpdateChapter={handleUpdateChapter}
+                onUpdateProject={handleUpdateProject}
+                onAddChapter={handleAddChapter}
+                onSettingsClick={() => setCurrentView('settings')}
+              />
+            )}
+            {currentView === 'projects' && (
+              <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+                <ProjectsView
+                  currentProject={project}
+                  onNewProject={() => setShowWizard(true)}
+                  onLoadProject={(id: string): void => {
+                    void handleLoadProject(id);
+                  }}
+                  onNavigate={setCurrentView}
+                />
+              </div>
+            )}
+            {currentView === 'world-building' && (
+              <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+                <WorldBuildingDashboard projectId={project.id} />
+              </div>
+            )}
+            {currentView === 'settings' && (
+              <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+                <SettingsView />
+              </div>
+            )}
+          </Suspense>
+        </main>
+      </MainLayout>
+    </UserProvider>
   );
 };
 export default App;

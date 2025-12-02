@@ -75,45 +75,63 @@ const SliderInput: React.FC<{
   step?: number;
   onChange: (value: number) => void;
   formatValue?: (value: number) => string;
-}> = ({ label, value, min, max, step = 1, onChange, formatValue }) => (
-  <div className='py-2'>
-    <div className='mb-2 flex items-center justify-between'>
-      <label className='font-medium text-gray-900 dark:text-gray-100'>{label}</label>
-      <span className='text-sm text-gray-600'>{formatValue ? formatValue(value) : value}</span>
+}> = ({ label, value, min, max, step = 1, onChange, formatValue }) => {
+  const sliderId = `slider-${label.toLowerCase().replace(/\s+/g, '-')}`;
+  return (
+    <div className='py-2'>
+      <div className='mb-2 flex items-center justify-between'>
+        <label htmlFor={sliderId} className='font-medium text-foreground'>
+          {label}
+        </label>
+        <span className='text-sm text-muted-foreground' aria-live='polite'>
+          {formatValue ? formatValue(value) : value}
+        </span>
+      </div>
+      <input
+        id={sliderId}
+        type='range'
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className='h-2 w-full cursor-pointer appearance-none rounded-lg bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
+        aria-valuetext={formatValue ? formatValue(value) : value.toString()}
+      />
     </div>
-    <input
-      type='range'
-      min={min}
-      max={max}
-      step={step}
-      value={value}
-      onChange={e => onChange(Number(e.target.value))}
-      className='slider h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700'
-    />
-  </div>
-);
+  );
+};
 
 const SelectInput: React.FC<{
   label: string;
   value: string;
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
-}> = ({ label, value, options, onChange }) => (
-  <div className='py-2'>
-    <label className='mb-2 block font-medium text-gray-900 dark:text-gray-100'>{label}</label>
-    <select
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      className='w-full rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-800'
-    >
-      {options.map(option => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
+}> = ({ label, value, options, onChange }) => {
+  const selectId = `select-${label.toLowerCase().replace(/\s+/g, '-')}`;
+  return (
+    <div className='py-2'>
+      <label htmlFor={selectId} className='mb-2 block font-medium text-foreground'>
+        {label}
+      </label>
+      <select
+        id={selectId}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className='w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+      >
+        {options.map(option => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
 
 const CategorySelector: React.FC<{
   selectedCategories: string[];

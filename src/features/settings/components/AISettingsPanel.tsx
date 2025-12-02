@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Settings, DollarSign, Shield, Zap, Activity } from 'lucide-react';
 import { ProviderSelector } from '@/components/ai/ProviderSelector';
 import { CostDashboard } from '@/components/ai/CostDashboard';
+import { cn } from '@/lib/utils';
 import {
   loadUserPreferences,
   saveUserPreferences,
@@ -71,31 +72,34 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
         <div className='mb-6 flex gap-2 border-b'>
           <button
             onClick={() => setActiveTab('provider')}
-            className={`border-b-2 px-4 py-2 transition-colors ${
+            className={cn(
+              'border-b-2 px-4 py-2 transition-colors',
               activeTab === 'provider'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+                : 'border-transparent text-gray-600 hover:text-gray-900',
+            )}
           >
             Provider Selection
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`border-b-2 px-4 py-2 transition-colors ${
+            className={cn(
+              'border-b-2 px-4 py-2 transition-colors',
               activeTab === 'analytics'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+                : 'border-transparent text-gray-600 hover:text-gray-900',
+            )}
           >
             Cost Analytics
           </button>
           <button
             onClick={() => setActiveTab('health')}
-            className={`border-b-2 px-4 py-2 transition-colors ${
+            className={cn(
+              'border-b-2 px-4 py-2 transition-colors',
               activeTab === 'health'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+                : 'border-transparent text-gray-600 hover:text-gray-900',
+            )}
           >
             Provider Health
           </button>
@@ -121,42 +125,61 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
 
             <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className='mb-2 block text-sm font-medium text-gray-700'>Temperature</label>
+                <label
+                  htmlFor='temperature-input'
+                  className='mb-2 block text-sm font-medium text-foreground'
+                >
+                  Temperature
+                </label>
                 <input
+                  id='temperature-input'
                   type='number'
                   min='0'
                   max='2'
                   step='0.1'
                   value={preferences.temperature}
                   onChange={e => void handleSave({ temperature: parseFloat(e.target.value) })}
-                  className='w-full rounded-md border px-3 py-2'
+                  className='w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                  aria-describedby='temperature-help'
                 />
-                <p className='mt-1 text-xs text-gray-500'>0.0-2.0 (lower = more focused)</p>
+                <p id='temperature-help' className='mt-1 text-xs text-muted-foreground'>
+                  0.0-2.0 (lower = more focused)
+                </p>
               </div>
 
               <div>
-                <label className='mb-2 block text-sm font-medium text-gray-700'>Max Tokens</label>
+                <label
+                  htmlFor='max-tokens-input'
+                  className='mb-2 block text-sm font-medium text-foreground'
+                >
+                  Max Tokens
+                </label>
                 <input
+                  id='max-tokens-input'
                   type='number'
                   min='1'
                   max='128000'
                   value={preferences.maxTokens}
                   onChange={e => void handleSave({ maxTokens: parseInt(e.target.value) })}
-                  className='w-full rounded-md border px-3 py-2'
+                  className='w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                  aria-describedby='max-tokens-help'
                 />
-                <p className='mt-1 text-xs text-gray-500'>Maximum response length</p>
+                <p id='max-tokens-help' className='mt-1 text-xs text-muted-foreground'>
+                  Maximum response length
+                </p>
               </div>
             </div>
 
             <div>
-              <label className='flex items-center'>
+              <label htmlFor='auto-fallback-checkbox' className='flex cursor-pointer items-center'>
                 <input
+                  id='auto-fallback-checkbox'
                   type='checkbox'
                   checked={preferences.autoFallback}
                   onChange={e => void handleSave({ autoFallback: e.target.checked })}
-                  className='mr-2'
+                  className='mr-2 h-4 w-4 rounded border border-input bg-background text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2'
                 />
-                <span className='text-sm text-gray-700'>
+                <span className='text-sm text-foreground'>
                   <Shield className='mr-1 inline h-4 w-4' />
                   Enable automatic fallback to other providers
                 </span>
@@ -164,14 +187,18 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
             </div>
 
             <div>
-              <label className='flex items-center'>
+              <label
+                htmlFor='cost-optimization-checkbox'
+                className='flex cursor-pointer items-center'
+              >
                 <input
+                  id='cost-optimization-checkbox'
                   type='checkbox'
                   checked={preferences.costOptimization}
                   onChange={e => void handleSave({ costOptimization: e.target.checked })}
-                  className='mr-2'
+                  className='mr-2 h-4 w-4 rounded border border-input bg-background text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2'
                 />
-                <span className='text-sm text-gray-700'>
+                <span className='text-sm text-foreground'>
                   <Zap className='mr-1 inline h-4 w-4' />
                   Enable cost optimization (route to cheapest provider)
                 </span>
@@ -179,19 +206,26 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
             </div>
 
             <div>
-              <label className='mb-2 block text-sm font-medium text-gray-700'>
+              <label
+                htmlFor='monthly-budget-input'
+                className='mb-2 block text-sm font-medium text-foreground'
+              >
                 <DollarSign className='mr-1 inline h-4 w-4' />
                 Monthly Budget ($)
               </label>
               <input
+                id='monthly-budget-input'
                 type='number'
                 min='0'
                 step='5'
                 value={preferences.monthlyBudget}
                 onChange={e => void handleSave({ monthlyBudget: parseFloat(e.target.value) })}
-                className='w-full rounded-md border px-3 py-2'
+                className='w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                aria-describedby='monthly-budget-help'
               />
-              <p className='mt-1 text-xs text-gray-500'>Set a monthly spending limit</p>
+              <p id='monthly-budget-help' className='mt-1 text-xs text-muted-foreground'>
+                Set a monthly spending limit
+              </p>
             </div>
 
             {saving && (

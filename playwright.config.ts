@@ -10,21 +10,20 @@ export default defineConfig({
   timeout: 120000, // 2 minutes per test
   globalTimeout: 600000, // 10 minutes total
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run dev',
-    port: 3000,
-    reuseExistingServer: !process.env.CI, // Don't reuse in CI
+    command: process.env.CI ? 'pnpm run preview --host 0.0.0.0' : 'npm run preview',
+    url: 'http://localhost:4173',
+    reuseExistingServer: !process.env.CI,
     timeout: 120000,
+    stdout: 'pipe',
+    stderr: 'pipe',
     env: {
-      // Single Vercel AI Gateway API key for all providers
       VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
-
-      // Other configuration
       VITE_DEFAULT_AI_PROVIDER: 'mistral',
       VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
       VITE_TURSO_DATABASE_URL: 'test-url',

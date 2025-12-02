@@ -1,27 +1,46 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
 import { WritingStatsCard } from '../WritingStatsCard';
 
-// Mock framer-motion with complete prop handling
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({
-      children,
-      className,
-      _whileHover,
-      _whileTap,
-      _transition,
-      _animate,
-      _initial,
-      ...props
-    }: any) => (
-      <div className={className} {...props} data-testid='motion-div'>
-        {children}
-      </div>
-    ),
-  },
-}));
+// Mock framer-motion
+vi.mock('framer-motion', () => {
+  const createMotionComponent = (elementType: string) => {
+    return ({ children, ...props }: any) => {
+      // Filter out Framer Motion specific props that cause React warnings
+      const {
+        whileHover,
+        whileTap,
+        whileFocus,
+        whileInView,
+        initial,
+        animate,
+        exit,
+        transition,
+        variants,
+        layout,
+        layoutId,
+        drag,
+        dragConstraints,
+        dragElastic,
+        onDragStart,
+        onDrag,
+        onDragEnd,
+        ...domProps
+      } = props;
+
+      return React.createElement(elementType, { ...domProps, 'data-testid': 'motion-div' }, children);
+    };
+  };
+
+  return {
+    motion: {
+      div: createMotionComponent('div'),
+      circle: createMotionComponent('circle'),
+    },
+  };
+});
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
@@ -183,7 +202,7 @@ describe('WritingStatsCard', () => {
           weeklyWords={0}
           currentStreak={0}
           aiAssistance={0}
-        />
+        />,
       );
 
       expect(screen.getByText('0 days')).toBeInTheDocument();

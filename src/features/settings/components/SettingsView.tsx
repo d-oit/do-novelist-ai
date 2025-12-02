@@ -13,17 +13,18 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
+import { cn } from '../../../lib/utils';
 import { getStoredConfig, saveStoredConfig, DbConfig, db } from '../../../lib/db';
-import { getUserId } from '../../../lib/utils';
+import { useUser } from '../../../contexts/UserContext';
 import { AISettingsPanel } from './AISettingsPanel';
 import { GamificationPanel } from '../../gamification';
 
 const SettingsView: React.FC = () => {
+  const { userId } = useUser();
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [dbConfig, setDbConfig] = useState<DbConfig>({ url: '', authToken: '', useCloud: false });
   const [isSaved, setIsSaved] = useState(false);
   const [testStatus, setTestStatus] = useState<'none' | 'success' | 'error'>('none');
-  const [userId] = useState<string>(() => getUserId());
 
   useEffect(() => {
     const config = getStoredConfig();
@@ -95,13 +96,23 @@ const SettingsView: React.FC = () => {
             <div className='flex rounded-lg bg-secondary/50 p-1'>
               <button
                 onClick={() => setDbConfig(p => ({ ...p, useCloud: false }))}
-                className={`rounded-md px-4 py-1.5 text-xs font-bold transition-all ${!dbConfig.useCloud ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground'}`}
+                className={cn(
+                  'rounded-md px-4 py-1.5 text-xs font-bold transition-all',
+                  !dbConfig.useCloud
+                    ? 'bg-primary text-primary-foreground shadow'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
               >
                 Local (Browser)
               </button>
               <button
                 onClick={() => setDbConfig(p => ({ ...p, useCloud: true }))}
-                className={`rounded-md px-4 py-1.5 text-xs font-bold transition-all ${dbConfig.useCloud ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground'}`}
+                className={cn(
+                  'rounded-md px-4 py-1.5 text-xs font-bold transition-all',
+                  dbConfig.useCloud
+                    ? 'bg-primary text-primary-foreground shadow'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
               >
                 Turso Cloud
               </button>
@@ -111,27 +122,35 @@ const SettingsView: React.FC = () => {
           {dbConfig.useCloud && (
             <div className='animate-in fade-in slide-in-from-top-2 space-y-4 rounded-md border border-border bg-secondary/10 p-4'>
               <div className='space-y-1.5'>
-                <label className='text-xs font-bold uppercase text-muted-foreground'>
+                <label
+                  htmlFor='db-url-input'
+                  className='text-xs font-bold uppercase text-muted-foreground'
+                >
                   Database URL (libsql://)
                 </label>
                 <input
+                  id='db-url-input'
                   type='text'
                   value={dbConfig.url}
                   onChange={e => setDbConfig(p => ({ ...p, url: e.target.value }))}
                   placeholder='libsql://your-db.turso.io'
-                  className='w-full rounded border border-border bg-background px-3 py-2 font-mono text-sm focus:border-primary focus:outline-none'
+                  className='w-full rounded border border-input bg-background px-3 py-2 font-mono text-sm text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                 />
               </div>
               <div className='space-y-1.5'>
-                <label className='text-xs font-bold uppercase text-muted-foreground'>
+                <label
+                  htmlFor='auth-token-input'
+                  className='text-xs font-bold uppercase text-muted-foreground'
+                >
                   Auth Token
                 </label>
                 <input
+                  id='auth-token-input'
                   type='password'
                   value={dbConfig.authToken}
                   onChange={e => setDbConfig(p => ({ ...p, authToken: e.target.value }))}
                   placeholder='ey...'
-                  className='w-full rounded border border-border bg-background px-3 py-2 font-mono text-sm focus:border-primary focus:outline-none'
+                  className='w-full rounded border border-input bg-background px-3 py-2 font-mono text-sm text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                 />
               </div>
 
@@ -168,13 +187,23 @@ const SettingsView: React.FC = () => {
         <div className='grid max-w-sm grid-cols-2 rounded-lg border border-border bg-card p-1'>
           <button
             onClick={() => handleThemeChange('light')}
-            className={`flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all ${theme === 'light' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground'}`}
+            className={cn(
+              'flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all',
+              theme === 'light'
+                ? 'bg-primary text-primary-foreground shadow'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
           >
             <Sun className='h-4 w-4' /> Light
           </button>
           <button
             onClick={() => handleThemeChange('dark')}
-            className={`flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all ${theme === 'dark' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground'}`}
+            className={cn(
+              'flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all',
+              theme === 'dark'
+                ? 'bg-primary text-primary-foreground shadow'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
           >
             <Moon className='h-4 w-4' /> Dark
           </button>

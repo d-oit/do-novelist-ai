@@ -7,14 +7,6 @@ import { Page } from '@playwright/test';
  * Supports: OpenAI, Anthropic, Google Gemini, Mistral, MiniMax, and Moonshot via Vercel AI Gateway
  */
 export const setupAIGatewayMock = async (page: Page) => {
-  // Add debug logging for Gateway requests
-  await page.route('**/*', async route => {
-    const url = route.request().url();
-    if (url.includes('gateway.vercel.ai')) {
-      console.log(`[Mock-Gateway] ${route.request().method()} ${url}`);
-    }
-  });
-
   // Mock Vercel AI Gateway - OpenAI endpoint
   await page.route('**/gateway.vercel.ai/v1/openai/**', async route => {
     const request = route.request();

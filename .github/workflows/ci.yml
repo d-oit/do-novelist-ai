@@ -166,20 +166,9 @@ jobs:
           path: dist/
 
       - name: Run Playwright tests
-        run: |
-          if grep -q "playwright" package.json; then
-            # Set test environment variables and run tests
-            CI=true pnpm exec playwright test
-          else
-            echo "Playwright not configured, skipping E2E tests"
-          fi
+        run: pnpm exec playwright test
         env:
-          # Use test values for E2E tests
-          VITE_AI_GATEWAY_API_KEY: "test-gateway-key"
-          VITE_DEFAULT_AI_PROVIDER: "mistral"
-          VITE_DEFAULT_AI_MODEL: "mistral:mistral-medium-latest"
-          VITE_TURSO_DATABASE_URL: "test-url"
-          VITE_TURSO_AUTH_TOKEN: "test-token"
+          CI: true
 
       - name: Upload Playwright report
         if: always()

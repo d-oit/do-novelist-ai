@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 
+import { cn } from '@/lib/utils';
 import CoverGenerator from '../../publishing/components/CoverGenerator';
 import PublishPanel from '../../publishing/components/PublishPanel';
 
@@ -187,11 +188,17 @@ const BookViewer: React.FC<BookViewerProps> = ({
 
   return (
     <div
-      className={`relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 md:flex-row ${isFocusMode ? 'fixed inset-0 z-50 m-0 rounded-none border-none' : ''}`}
+      className={cn(
+        'relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 md:flex-row',
+        isFocusMode ? 'fixed inset-0 z-50 m-0 rounded-none border-none' : '',
+      )}
     >
       {/* Mobile Header */}
       <div
-        className={`flex items-center justify-between border-b border-border bg-secondary/10 p-4 md:hidden ${isFocusMode ? 'hidden' : ''}`}
+        className={cn(
+          'flex items-center justify-between border-b border-border bg-secondary/10 p-4 md:hidden',
+          isFocusMode ? 'hidden' : '',
+        )}
       >
         <div className='flex items-center gap-2 text-sm font-semibold'>
           <BookOpen className='h-4 w-4 text-primary' />
@@ -215,7 +222,11 @@ const BookViewer: React.FC<BookViewerProps> = ({
 
       {/* Sidebar */}
       <div
-        className={`absolute inset-y-0 left-0 z-20 flex w-64 flex-col border-r border-border bg-card shadow-2xl transition-all duration-300 ease-in-out md:relative md:bg-secondary/10 md:shadow-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${isFocusMode ? 'md:w-0 md:-translate-x-full md:border-none' : ''} `}
+        className={cn(
+          'absolute inset-y-0 left-0 z-20 flex w-64 flex-col border-r border-border bg-card shadow-2xl transition-all duration-300 ease-in-out md:relative md:bg-secondary/10 md:shadow-none',
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
+          isFocusMode ? 'md:w-0 md:-translate-x-full md:border-none' : '',
+        )}
         data-testid='chapter-sidebar'
       >
         <div className='hidden border-b border-border bg-secondary/10 p-4 md:block'>
@@ -229,14 +240,24 @@ const BookViewer: React.FC<BookViewerProps> = ({
           <div className='mb-2 shrink-0 space-y-1'>
             <button
               onClick={() => onSelectChapter('overview')}
-              className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors ${selectedChapterId === 'overview' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+              className={cn(
+                'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors',
+                selectedChapterId === 'overview'
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+              )}
               data-testid='chapter-item-overview'
             >
               <AlignLeft className='h-3 w-3 shrink-0' /> Project Overview
             </button>
             <button
               onClick={() => onSelectChapter('publish')}
-              className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors ${selectedChapterId === 'publish' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+              className={cn(
+                'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-bold uppercase tracking-wider transition-colors',
+                selectedChapterId === 'publish'
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+              )}
               data-testid='chapter-item-publish'
             >
               <UploadCloud className='h-3 w-3 shrink-0' /> Publish & Export
@@ -256,7 +277,12 @@ const BookViewer: React.FC<BookViewerProps> = ({
               <button
                 key={chapter.id}
                 onClick={() => onSelectChapter(chapter.id)}
-                className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs transition-colors ${selectedChapterId === chapter.id ? 'bg-primary/10 font-medium text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+                className={cn(
+                  'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs transition-colors',
+                  selectedChapterId === chapter.id
+                    ? 'bg-primary/10 font-medium text-primary'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+                )}
                 data-testid={`chapter-item-${chapter.id}`}
               >
                 {getStatusIcon(chapter.status)}
@@ -346,11 +372,17 @@ const BookViewer: React.FC<BookViewerProps> = ({
           />
         ) : selectedChapter ? (
           <div
-            className={`mx-auto flex min-h-full w-full flex-col p-6 transition-all duration-500 md:p-12 ${isFocusMode ? 'max-w-4xl pt-20' : 'max-w-3xl'}`}
+            className={cn(
+              'mx-auto flex min-h-full w-full flex-col p-6 transition-all duration-500 md:p-12',
+              isFocusMode ? 'max-w-4xl pt-20' : 'max-w-3xl',
+            )}
             data-testid='chapter-editor'
           >
             <div
-              className={`mb-6 flex flex-col gap-2 ${isFocusMode ? 'opacity-50 transition-opacity hover:opacity-100' : ''}`}
+              className={cn(
+                'mb-6 flex flex-col gap-2',
+                isFocusMode ? 'opacity-50 transition-opacity hover:opacity-100' : '',
+              )}
             >
               <div className='flex items-center justify-between'>
                 <div className='flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground'>
@@ -364,15 +396,16 @@ const BookViewer: React.FC<BookViewerProps> = ({
                             status: e.target.value as ChapterStatus,
                           })
                         }
-                        className={`cursor-pointer appearance-none rounded bg-transparent py-0.5 pl-2 pr-4 text-[10px] font-bold uppercase focus:outline-none ${
+                        className={cn(
+                          'cursor-pointer appearance-none rounded bg-transparent py-0.5 pl-2 pr-4 text-[10px] font-bold uppercase focus:outline-none',
                           selectedChapter.status === ChapterStatus.COMPLETE
                             ? 'text-green-500'
                             : selectedChapter.status === ChapterStatus.DRAFTING
                               ? 'text-blue-500'
                               : selectedChapter.status === ChapterStatus.REVIEW
                                 ? 'text-yellow-500'
-                                : 'text-muted-foreground'
-                        }`}
+                                : 'text-muted-foreground',
+                        )}
                       >
                         {Object.values(ChapterStatus).map(s => (
                           <option key={s} value={s}>

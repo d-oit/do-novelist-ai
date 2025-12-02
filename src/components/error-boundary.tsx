@@ -44,7 +44,6 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-
     // Log error using error handler
     errorHandler.handle(error, {
       context: this.props.componentName ?? 'ErrorBoundary',
@@ -317,3 +316,6 @@ export const AIServiceErrorBoundary: React.FC<Props> = ({ children, componentNam
     {children}
   </ErrorBoundary>
 );
+
+// Default export for backward compatibility
+export default ErrorBoundary;

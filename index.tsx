@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import './src/index.css';
 import './src/assets/styles.css';
 import App from './src/App';
-import ErrorBoundary from './src/components/ErrorBoundary';
+import ErrorBoundary from './src/components/error-boundary';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -17,5 +17,5 @@ root.render(
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

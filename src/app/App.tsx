@@ -193,6 +193,20 @@ const App: React.FC = () => {
 
   return (
     <div className='flex min-h-screen flex-col bg-background font-sans text-foreground selection:bg-primary/20'>
+      {/* Skip Links for Accessibility */}
+      <a
+        href='#main-content'
+        className='sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg'
+      >
+        Skip to main content
+      </a>
+      <a
+        href='#navigation'
+        className='sr-only focus:not-sr-only focus:absolute focus:left-32 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg'
+      >
+        Skip to navigation
+      </a>
+
       <ProjectWizard
         isOpen={showWizard}
         onCreate={handleCreateProject}
@@ -200,13 +214,14 @@ const App: React.FC = () => {
       />
 
       <Navbar
+        id='navigation'
         projectTitle={project.title}
         onNewProject={() => setShowWizard(true)}
         currentView={currentView}
         onNavigate={setCurrentView}
       />
 
-      <main className='relative flex-1'>
+      <main id='main-content' className='relative flex-1'>
         {currentView === 'dashboard' && (
           <div className='animate-in fade-in mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>
             {/* Left Column: Planner & Controls */}

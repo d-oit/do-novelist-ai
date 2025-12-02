@@ -1,6 +1,8 @@
 import { Play, Pause, Loader2, BrainCircuit } from 'lucide-react';
 import React from 'react';
 
+import { cn } from '../../../lib/utils';
+
 interface PlannerControlProps {
   isPlannerRunning: boolean;
   isGenerating: boolean;
@@ -21,7 +23,10 @@ const PlannerControl: React.FC<PlannerControlProps> = ({
         <div className='flex-1'>
           <h3 className='flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground'>
             <BrainCircuit
-              className={`h-4 w-4 ${isPlannerRunning ? 'animate-pulse text-primary' : 'text-muted-foreground'}`}
+              className={cn(
+                'h-4 w-4',
+                isPlannerRunning ? 'animate-pulse text-primary' : 'text-muted-foreground',
+              )}
             />
             GOAP Engine
           </h3>
@@ -40,11 +45,13 @@ const PlannerControl: React.FC<PlannerControlProps> = ({
         <button
           onClick={onTogglePlanner}
           disabled={isGenerating || !isStyleDefined}
-          className={`group relative flex items-center justify-center gap-3 overflow-hidden rounded-lg px-6 py-3 text-sm font-bold shadow-md transition-all ${
+          className={cn(
+            'group relative flex items-center justify-center gap-3 overflow-hidden rounded-lg px-6 py-3 text-sm font-bold shadow-md transition-all',
             isPlannerRunning
               ? 'border border-red-500/20 bg-red-500/10 text-red-500 hover:bg-red-500/20'
-              : 'bg-primary text-primary-foreground hover:scale-[1.02] hover:shadow-primary/25'
-          } disabled:scale-100 disabled:cursor-not-allowed disabled:opacity-50`}
+              : 'bg-primary text-primary-foreground hover:scale-[1.02] hover:shadow-primary/25',
+            'disabled:scale-100 disabled:cursor-not-allowed disabled:opacity-50',
+          )}
           data-testid='planner-control-btn'
         >
           {isGenerating ? (
@@ -67,7 +74,10 @@ const PlannerControl: React.FC<PlannerControlProps> = ({
       {/* Progress Bar (Visual Feedback) */}
       <div className='mt-3 h-1 w-full overflow-hidden rounded-full bg-secondary'>
         <div
-          className={`h-full transition-all duration-500 ${isPlannerRunning ? 'w-full animate-[pulse_2s_infinite] bg-primary' : 'w-0 bg-muted'}`}
+          className={cn(
+            'h-full transition-all duration-500',
+            isPlannerRunning ? 'w-full animate-[pulse_2s_infinite] bg-primary' : 'w-0 bg-muted',
+          )}
         />
       </div>
     </div>

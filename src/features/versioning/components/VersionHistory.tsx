@@ -201,13 +201,18 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
       <div className='space-y-3 border-b border-border/40 bg-secondary/20 p-4'>
         <div className='flex items-center gap-2'>
           <div className='relative flex-1'>
-            <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground' />
+            <Search
+              className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground'
+              aria-hidden='true'
+            />
             <input
+              id='version-search-input'
               type='text'
               placeholder='Search versions...'
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className='w-full rounded-md border border-border bg-background py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20'
+              className='w-full rounded-md border border-input bg-background py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+              aria-label='Search version history'
             />
           </div>
           <Button

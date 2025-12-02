@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { cn } from '../../lib/utils';
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
@@ -35,7 +37,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className ?? ''}`}
+      className={cn(baseClasses, variantClasses[variant], sizeClasses[size], className)}
       {...props}
     >
       {children}

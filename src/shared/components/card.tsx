@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { cn } from '../../lib/utils';
+
 interface CardProps {
   className?: string;
   children: React.ReactNode;
@@ -7,7 +9,7 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ className, children }) => {
   return (
-    <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className ?? ''}`}>
+    <div className={cn('rounded-lg border bg-card text-card-foreground shadow-sm', className)}>
       {children}
     </div>
   );
@@ -19,7 +21,7 @@ interface CardHeaderProps {
 }
 
 const CardHeader: React.FC<CardHeaderProps> = ({ className, children }) => {
-  return <div className={`flex flex-col space-y-1.5 p-6 ${className ?? ''}`}>{children}</div>;
+  return <div className={cn('flex flex-col space-y-1.5 p-6', className)}>{children}</div>;
 };
 
 interface CardTitleProps {
@@ -29,7 +31,7 @@ interface CardTitleProps {
 
 const CardTitle: React.FC<CardTitleProps> = ({ className, children }) => {
   return (
-    <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className ?? ''}`}>
+    <h3 className={cn('text-2xl font-semibold leading-none tracking-tight', className)}>
       {children}
     </h3>
   );
@@ -41,7 +43,7 @@ interface CardContentProps {
 }
 
 const CardContent: React.FC<CardContentProps> = ({ className, children }) => {
-  return <div className={`p-6 pt-0 ${className ?? ''}`}>{children}</div>;
+  return <div className={cn('p-6 pt-0', className)}>{children}</div>;
 };
 
 export default Card;

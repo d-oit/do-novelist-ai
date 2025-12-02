@@ -306,14 +306,27 @@ handleRefineChapter(chapterId, {
 npm run dev          # Start Vite dev server (http://localhost:5173)
 npm run build        # Build for production
 npm run preview      # Preview production build
+npm run analyze      # Build with bundle analysis (generates dist/stats.html)
+npm run clean        # Clear build artifacts and caches
 
 # Testing
-npx playwright test                    # Run all tests
-npx playwright test tests/specs/name.spec.ts  # Run specific test
-npx playwright test --ui              # Run tests in UI mode
+npm run test         # Run unit tests with Vitest
+npm run coverage     # Run tests with coverage report
+npm run test:e2e     # Run E2E tests with Playwright
 
-# Type Checking
-npx tsc --noEmit     # Check TypeScript types without emitting files
+# Code Quality
+npm run lint         # Lint and fix code with ESLint + TypeScript checking
+npm run lint:ci      # Lint check for CI (no fixes)
+npm run lint:fix     # Fix linting issues only
+npm run format       # Format code with Prettier
+npm run format:check # Check code formatting
+npm run typecheck    # Standalone TypeScript type checking
+
+# Advanced Testing
+npx playwright test                    # Run all E2E tests
+npx playwright test tests/specs/name.spec.ts  # Run specific E2E test
+npx playwright test --ui              # Run E2E tests in UI mode
+npx playwright test --debug           # Debug E2E tests
 ```
 
 ### Code Style & Conventions

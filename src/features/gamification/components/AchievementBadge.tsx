@@ -1,5 +1,6 @@
 import React from 'react';
 import { Award, Lock } from 'lucide-react';
+import { cn } from '../../../lib/utils';
 import { type Achievement, type UserAchievement } from '../types';
 
 interface AchievementBadgeProps {
@@ -26,9 +27,11 @@ export const AchievementBadge: React.FC<AchievementBadgeProps> = ({
 
   return (
     <div
-      className={`relative rounded-lg border-2 p-4 transition-all hover:shadow-md ${
-        isUnlocked ? rarity : 'border-gray-300 bg-gray-100 dark:bg-gray-800/50'
-      } ${!isUnlocked ? 'opacity-60' : ''}`}
+      className={cn(
+        'relative rounded-lg border-2 p-4 transition-all hover:shadow-md',
+        isUnlocked ? rarity : 'border-gray-300 bg-gray-100 dark:bg-gray-800/50',
+        !isUnlocked ? 'opacity-60' : '',
+      )}
     >
       <div className='flex items-start gap-3'>
         <div className='text-4xl'>{achievement.icon}</div>
@@ -41,7 +44,8 @@ export const AchievementBadge: React.FC<AchievementBadgeProps> = ({
 
           <div className='mt-2 flex items-center justify-between'>
             <span
-              className={`rounded-full px-2 py-1 text-xs font-semibold ${
+              className={cn(
+                'rounded-full px-2 py-1 text-xs font-semibold',
                 achievement.rarity === 'legendary'
                   ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
                   : achievement.rarity === 'epic'
@@ -50,8 +54,8 @@ export const AchievementBadge: React.FC<AchievementBadgeProps> = ({
                       ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
                       : achievement.rarity === 'uncommon'
                         ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-              }`}
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+              )}
             >
               {achievement.rarity}
             </span>
