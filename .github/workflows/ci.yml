@@ -168,7 +168,7 @@ jobs:
       - name: Start preview server
         run: |
           # Start server in background and persist it
-          setsid pnpm run preview > /tmp/server.log 2>&1 &
+          nohup pnpm run preview > /tmp/server.log 2>&1 &
           echo $! > /tmp/server.pid
           SERVER_PID=$(cat /tmp/server.pid)
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
@@ -198,12 +198,33 @@ jobs:
             cat /tmp/server.log
             exit 1
           fi
+
+          # Start server monitor in background
+          (
+            while kill -0 $SERVER_PID 2>/dev/null; do
+              sleep 5
+            done
+            echo "⚠️ Server monitor: Server process died!"
+          ) &
+          MONITOR_PID=$!
+          echo $MONITOR_PID > /tmp/monitor.pid
         env:
           CI: true
 
       - name: Run Playwright tests
         run: |
           if grep -q "playwright" package.json; then
+            # Verify server is still running before tests
+            if [ -f /tmp/server.pid ]; then
+              SERVER_PID=$(cat /tmp/server.pid)
+              if ! kill -0 $SERVER_PID 2>/dev/null; then
+                echo "❌ Server not running before tests!"
+                cat /tmp/server.log
+                exit 1
+              fi
+              echo "✅ Server verified running (PID: $SERVER_PID)"
+            fi
+
             # Run tests against preview server
             CI=true pnpm exec playwright test
           else
