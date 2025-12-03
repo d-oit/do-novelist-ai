@@ -80,7 +80,9 @@
       "Bash(ls:*)",
       "Bash(npm run lint:fix:*)",
       "Bash(npm run lint:ci:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(PLAYWRIGHT_TEST=true npm run test:e2e:*)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:4178 npm run test:e2e:*)"
     ],
     "deny": [],
     "ask": []
