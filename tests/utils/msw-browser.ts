@@ -15,13 +15,16 @@ export const mswWorker = setupWorker(...handlers);
 /**
  * Start MSW in the browser
  * Call this in test.beforeEach to ensure MSW is active
+ *
+ * NOTE: This function has a circular import issue and is currently unused.
+ * Left for future reference if browser-based MSW is needed.
  */
-export async function startMockingInBrowser(page: import('@playwright/test').Page): Promise<void> {
+/* export async function startMockingInBrowser(page: import('@playwright/test').Page): Promise<void> {
   // Register the service worker in the browser
   await page.addInitScript(async () => {
     // Import MSW worker in the browser context
     if (typeof window !== 'undefined') {
-      const { mswWorker } = await import('./tests/utils/msw-browser');
+      const { mswWorker } = await import('/tests/utils/msw-browser');
       await mswWorker.start({
         serviceWorker: {
           url: '/mockServiceWorker.js',
@@ -31,7 +34,7 @@ export async function startMockingInBrowser(page: import('@playwright/test').Pag
       console.log('🎭 MSW browser worker started');
     }
   });
-}
+} */
 
 /**
  * Alternative approach: Start MSW directly in the page

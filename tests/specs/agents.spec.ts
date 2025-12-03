@@ -56,13 +56,11 @@ test.describe('Feature: Creative Agents', () => {
       await expect(consoleArea).toContainText('Character Profiling', { timeout: 5000 });
     }
 
-    // Check that it updated the "Idea" content in Overview
-    // Wait for sidebar to be ready
+    // Check that it updated the Project Idea content in the Overview section
+    // Wait for the action to complete and sidebar to update
     await page.waitForTimeout(500);
-    await page.getByTestId('chapter-item-overview').click();
-    await expect(page.getByTestId('overview-panel')).toContainText('**Alice**: A brilliant physicist', {
-      timeout: 10000,
-    });
+    const projectIdea = page.locator('[data-testid="project-idea-content"]');
+    await expect(projectIdea).toContainText('**Alice**: A brilliant physicist', { timeout: 10000 });
   });
 
   test('Builder Agent: Can expand world building', async ({ page }) => {
