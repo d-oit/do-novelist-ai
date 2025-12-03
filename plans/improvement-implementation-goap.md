@@ -34,6 +34,16 @@ execution where possible.
 
 ---
 
+## Prerequisites
+
+> [!IMPORTANT] **E2E Test Fixes Required First:** Before executing this
+> implementation plan, the E2E test failures in GitHub Actions must be resolved.
+> See **[E2E-FIX-GOAP-ORCHESTRATOR.md](E2E-FIX-GOAP-ORCHESTRATOR.md)** for the
+> orchestrator plan to fix 5 failing E2E tests. This ensures a stable CI/CD
+> pipeline for validating all changes in this plan.
+
+---
+
 ## Task Decomposition & Execution Plan
 
 ### Phase 1: High Priority Critical Fixes (Parallel Execution)

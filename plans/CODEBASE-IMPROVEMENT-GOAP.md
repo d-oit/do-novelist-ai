@@ -32,6 +32,16 @@ architecture, testing, performance, and developer experience.
 
 ---
 
+## Prerequisites
+
+> [!IMPORTANT] Before implementing the improvements in this plan, first fix the
+> failing E2E tests in GitHub Actions. See
+> **[E2E-FIX-GOAP-ORCHESTRATOR.md](file:///d:/git/do-novelist-ai/plans/E2E-FIX-GOAP-ORCHESTRATOR.md)**
+> for the orchestrator plan to resolve 5 failing E2E tests. A stable CI/CD
+> pipeline is essential for validating all improvements.
+
+---
+
 ## Priority 1: Critical Improvements (Week 1-2)
 
 ### Action 1.1: Add Missing Test Coverage
