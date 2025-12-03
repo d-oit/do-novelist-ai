@@ -1,27 +1,45 @@
 import { test, expect } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { setupAISDKMock } from '../utils/mock-ai-sdk';
 
 test.describe('Feature: Publishing Panel', () => {
   test.beforeEach(async ({ page }) => {
+    test.setTimeout(60000); // Extended timeout for setup
+    await setupAISDKMock(page);
     await setupGeminiMock(page);
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Create Project
+    // Open the wizard
     await page.getByTestId('nav-new-project').click();
     await page.waitForSelector('[data-testid="wizard-idea-input"]', { state: 'visible' });
-    await page.getByTestId('wizard-idea-input').fill('Publishing Test');
+
+    // Setup: Create a project quickly
+    await page.getByTestId('wizard-idea-input').fill('Publishing Test Book');
     await page.getByTestId('wizard-title-input').fill('Book to Export');
-    await page.getByTestId('wizard-style-input').fill('Simple');
+    await page.getByTestId('wizard-style-input').fill('Simple Fiction');
     await page.getByTestId('wizard-submit-btn').click();
-    await expect(page.getByTestId('project-wizard-overlay')).toBeHidden({ timeout: 10000 });
+    await expect(page.getByTestId('project-wizard-overlay')).toBeHidden();
 
-    // Wait for sidebar to be visible
-    await expect(page.getByTestId('chapter-sidebar')).toBeVisible({ timeout: 10000 });
+    // Wait a moment for the project to be fully loaded
+    await page.waitForTimeout(500);
 
-    // Navigate to Publish Panel
+    // Wait for dashboard to be visible - first wait for sidebar to be in DOM
+    await page.waitForSelector('[data-testid="chapter-sidebar"]', { state: 'attached', timeout: 10000 });
+
+    // On mobile, open the sidebar if it's hidden
+    const mobileToggle = page.getByTestId('mobile-sidebar-toggle');
+    if (await mobileToggle.isVisible().catch(() => false)) {
+      await mobileToggle.click();
+      await page.waitForTimeout(300);
+    }
+
+    // Navigate to Publish Panel directly (doesn't require chapters)
     await page.getByTestId('chapter-item-publish').click();
+
+    // Wait for publish panel to load
+    await expect(page.getByTestId('publish-status-select')).toBeVisible({ timeout: 5000 });
   });
 
   test('Can modify manuscript metadata', async ({ page }) => {

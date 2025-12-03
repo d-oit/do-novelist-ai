@@ -76,7 +76,11 @@
       "Bash(CI=true pnpm exec playwright test --reporter=line)",
       "Bash(CI=true timeout 60 pnpm:*)",
       "Bash(pnpm run build)",
-      "Bash(CI=true pnpm exec playwright test:*)"
+      "Bash(CI=true pnpm exec playwright test:*)",
+      "Bash(ls:*)",
+      "Bash(npm run lint:fix:*)",
+      "Bash(npm run lint:ci:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

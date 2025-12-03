@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { setupAISDKMock } from './mock-ai-sdk';
 
 // Mock AI responses for E2E tests
 const MOCK_RESPONSES = {
@@ -78,16 +79,21 @@ The adventure unfolds with new challenges and developments that propel the plot 
  * Intercepts AI API calls using Playwright's network interception
  */
 export const setupGeminiMock = async (page: Page): Promise<void> => {
-  console.log('Gemini AI Gateway mock configured for E2E tests');
+  // CRITICAL: Initialize AI SDK logger FIRST to prevent "m.log is not a function" errors
+  await setupAISDKMock(page);
+
+  console.log('[mock-ai-gateway] Gemini AI Gateway mock configured for E2E tests');
 
   // Intercept chat completions (character development, dialogue polish, etc.)
   await page.route('**/v1/chat/completions', async route => {
+    // Respond immediately with no artificial delay for fast test execution
     const request = route.request();
     const postData = request.postDataJSON();
     const userMessage = postData?.messages?.[postData.messages.length - 1]?.content || '';
 
     let mockContent = MOCK_RESPONSES.writeChapterContent;
 
+    // Smart content matching for different AI operations
     if (
       userMessage.toLowerCase().includes('character') ||
       userMessage.toLowerCase().includes('profil')
@@ -111,6 +117,7 @@ export const setupGeminiMock = async (page: Page): Promise<void> => {
       mockContent = MOCK_RESPONSES.writeChapterContent;
     }
 
+    // Fulfill immediately - no delays for fast tests (<100ms target)
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -138,11 +145,13 @@ export const setupGeminiMock = async (page: Page): Promise<void> => {
     });
   });
 
-  // Intercept image generation (cover generator)
+  // Intercept image generation (cover generator) - immediate response
   await page.route('**/v1/images/generations', async route => {
+    // Use 1x1 transparent PNG for fast mock image
     const transparentPNG =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
+    // Fulfill immediately - no delays
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -156,4 +165,6 @@ export const setupGeminiMock = async (page: Page): Promise<void> => {
       }),
     });
   });
+
+  console.log('[mock-ai-gateway] Mock setup complete - all routes configured');
 };

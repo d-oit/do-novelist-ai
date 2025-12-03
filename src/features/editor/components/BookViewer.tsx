@@ -451,7 +451,10 @@ const BookViewer: React.FC<BookViewerProps> = ({
                 <h4 className='mb-2 text-xs font-bold uppercase text-muted-foreground'>
                   Core Idea
                 </h4>
-                <p className='whitespace-pre-wrap font-mono text-sm text-foreground'>
+                <p
+                  className='whitespace-pre-wrap font-mono text-sm text-foreground'
+                  data-testid='project-idea-content'
+                >
                   {project.idea}
                 </p>
               </section>
@@ -707,6 +710,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                         disabled={project.isGenerating || !state.content}
                         className='flex h-[36px] flex-1 items-center justify-center gap-2 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-emerald-600 shadow-sm transition-all hover:bg-emerald-500/20 disabled:opacity-50 xl:flex-none'
                         title='Save Version Checkpoint'
+                        data-testid='save-version-btn'
                       >
                         <GitBranch className='h-4 w-4' /> Save Version
                       </button>
@@ -716,6 +720,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                         disabled={project.isGenerating}
                         className='flex h-[36px] flex-1 items-center justify-center gap-2 rounded-md border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-blue-600 shadow-sm transition-all hover:bg-blue-500/20 disabled:opacity-50 xl:flex-none'
                         title='View Version History'
+                        data-testid='version-history-btn'
                       >
                         <History className='h-4 w-4' /> History
                       </button>

@@ -10,16 +10,28 @@
 const logger = {
   log: (...args: unknown[]): void => {
     // Minimal implementation - just ensure the method exists
-    if (process.env.NODE_ENV === 'development') {
+    // Only log in development, suppress in test/production
+    const isDev =
+      (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') ||
+      (typeof import.meta !== 'undefined' && import.meta.env?.DEV === true);
+
+    if (isDev) {
       console.log('[AI SDK]', ...args);
     }
   },
 };
 
-// Make logger available globally
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
-globalThis.m = logger;
+// Make logger available globally (works in both Node.js and browser)
+if (typeof globalThis !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  (globalThis as any).m = logger;
+}
+
+// Also set on window for browser environments
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  (window as any).m = logger;
+}
 
 // Export for module usage
 export default logger;

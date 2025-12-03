@@ -144,6 +144,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
                   Project Status
                 </label>
                 <select
+                  data-testid='publish-status-select'
                   className='w-full rounded border border-border bg-secondary/20 px-3 py-2 text-xs focus:border-primary focus:outline-none'
                   value={project.status}
                   onChange={e => onUpdateProject({ status: e.target.value as PublishStatus })}
@@ -161,6 +162,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
                   Language
                 </label>
                 <select
+                  data-testid='publish-language-select'
                   className='w-full rounded border border-border bg-secondary/20 px-3 py-2 text-xs focus:border-primary focus:outline-none'
                   value={currentLanguage}
                   onChange={e => onUpdateProject({ language: e.target.value })}
@@ -178,6 +180,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
                   Target Words
                 </label>
                 <input
+                  data-testid='publish-target-words-input'
                   type='number'
                   className='w-full rounded border border-border bg-secondary/20 px-3 py-2 text-xs focus:border-primary focus:outline-none'
                   value={targetWords}
@@ -230,6 +233,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
                   Use "Drop Caps" styling
                 </span>
                 <input
+                  data-testid='export-dropcaps-checkbox'
                   type='checkbox'
                   checked={settings.enableDropCaps}
                   onChange={e => handleUpdateSettings({ enableDropCaps: e.target.checked })}
@@ -239,6 +243,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
             </div>
 
             <button
+              data-testid='export-epub-btn'
               onClick={() => void handleDownloadEpub()}
               disabled={isExporting}
               className='flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-md transition-colors hover:opacity-90 disabled:opacity-50'

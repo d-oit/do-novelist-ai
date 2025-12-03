@@ -43,9 +43,8 @@ test.describe('Feature: Creative Agents', () => {
     // Execute
     await actionCard.click();
 
-    // Verify Log Output - Note: AI SDK has known logging issues in test environment
-    // The action should still execute and show some result, even if AI SDK logging fails
-    const consoleArea = page.locator('.bg-black\\/40');
+    // Verify Log Output using data-testid instead of CSS selector
+    const consoleArea = page.getByTestId('agent-console');
 
     // Check for either success or the known AI SDK error
     try {
@@ -59,7 +58,7 @@ test.describe('Feature: Creative Agents', () => {
     // Check that it updated the Project Idea content in the Overview section
     // Wait for the action to complete and sidebar to update
     await page.waitForTimeout(500);
-    const projectIdea = page.locator('[data-testid="project-idea-content"]');
+    const projectIdea = page.getByTestId('project-idea-content');
     await expect(projectIdea).toContainText('**Alice**: A brilliant physicist', { timeout: 10000 });
   });
 
@@ -69,8 +68,8 @@ test.describe('Feature: Creative Agents', () => {
 
     await actionCard.click();
 
-    // Verify Log Output - Note: AI SDK has known logging issues in test environment
-    const consoleArea = page.locator('.bg-black\\/40');
+    // Verify Log Output using data-testid instead of CSS selector
+    const consoleArea = page.getByTestId('agent-console');
 
     try {
       await expect(consoleArea).toContainText('Series Bible expanded', { timeout: 10000 });
@@ -86,7 +85,7 @@ test.describe('Feature: Creative Agents', () => {
 
     await actionCard.click();
 
-    const consoleArea = page.locator('.bg-black\\/40');
+    const consoleArea = page.getByTestId('agent-console');
 
     try {
       await expect(consoleArea).toContainText('Plot beats refined', { timeout: 10000 });
@@ -101,7 +100,7 @@ test.describe('Feature: Creative Agents', () => {
     await page.getByTestId('action-card-create_outline').click();
 
     // Wait for action to complete by checking console log
-    const consoleArea = page.locator('.bg-black\\/40');
+    const consoleArea = page.getByTestId('agent-console');
     // Accept either success or the known logger error (which doesn't prevent the action from working)
     try {
       await expect(consoleArea).toContainText('Outline created', { timeout: 30000 });
@@ -148,7 +147,7 @@ test.describe('Feature: Creative Agents', () => {
     await page.getByTestId('action-card-create_outline').click();
 
     // Wait for action to complete by checking console log
-    const consoleArea = page.locator('.bg-black\\/40');
+    const consoleArea = page.getByTestId('agent-console');
     // Accept either success or the known logger error (which doesn't prevent the action from working)
     try {
       await expect(consoleArea).toContainText('Outline created', { timeout: 30000 });

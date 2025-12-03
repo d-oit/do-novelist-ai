@@ -283,7 +283,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                     ? 'bg-primary/10 font-medium text-primary'
                     : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
                 )}
-                data-testid={`chapter-item-${chapter.id}`}
+                data-testid={`chapter-item-order-${chapter.orderIndex}`}
               >
                 {getStatusIcon(chapter.status)}
                 <span className='flex-1 truncate'>
@@ -358,7 +358,10 @@ const BookViewer: React.FC<BookViewerProps> = ({
                 <h4 className='mb-2 text-xs font-bold uppercase text-muted-foreground'>
                   Core Idea
                 </h4>
-                <p className='whitespace-pre-wrap font-mono text-sm text-foreground'>
+                <p
+                  className='whitespace-pre-wrap font-mono text-sm text-foreground'
+                  data-testid='project-idea-content'
+                >
                   {project.idea}
                 </p>
               </section>

@@ -29,7 +29,10 @@ const AgentConsole: React.FC<AgentConsoleProps> = ({ logs }) => {
   }, [logs]);
 
   return (
-    <div className='flex h-full flex-col overflow-hidden rounded-lg border border-border bg-black/40 backdrop-blur-sm'>
+    <div
+      className='flex h-full flex-col overflow-hidden rounded-lg border border-border bg-black/40 backdrop-blur-sm'
+      data-testid='agent-console'
+    >
       <div className='flex items-center justify-between border-b border-border bg-secondary/50 px-4 py-2'>
         <div className='flex items-center gap-2'>
           <Terminal className='h-4 w-4 text-muted-foreground' />

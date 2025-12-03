@@ -2,17 +2,25 @@
 
 ## Executive Summary
 
-**Goal**: Fix all E2E test failures in PR #29 and ensure GitHub Actions pass
-completely **Strategy**: Hybrid (Sequential analysis → Parallel fixes →
-Sequential validation) **Estimated Duration**: 30-45 minutes **Quality Gates**:
-3 checkpoints
+**Goal**: Fix all E2E test failures (120+ failures across 170 tests) and achieve
+100% pass rate **Strategy**: Hybrid (Sequential infrastructure → Parallel fixes
+→ Sequential validation) **Estimated Duration**: 15-25 minutes with 9 parallel
+agents **Quality Gates**: 3 checkpoints
 
 ## Task Analysis
 
 ### Primary Goal
 
-Fix E2E test failures caused by AI SDK logging issues (`m.log is not a function`
-error)
+Fix all E2E test failures identified in test run:
+
+- **Timeout issues (70%)**: Tests waiting 30-60s for elements that never appear
+- **AI SDK mock issues (15%)**: Console output expectations not met
+- **Version history tests (10%)**: Selector issues and timing problems
+- **Navigation tests (3%)**: Sidebar visibility timing issues
+- **Publishing tests (2%)**: Element visibility timeouts
+
+**Current Status**: 12/170 tests passing (7% pass rate) → Target: 170/170 (100%
+pass rate)
 
 ### Constraints
 

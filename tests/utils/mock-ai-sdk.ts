@@ -4,35 +4,33 @@ import '../../src/lib/ai-sdk-logger-patch';
 import { Page } from '@playwright/test';
 
 /**
- * Ensures AI SDK logger is properly initialized
+ * Ensures AI SDK logger is properly initialized in the browser context
  * This must be called before any AI SDK operations
  */
-function ensureLoggerInitialized(): void {
-  const globalAny = globalThis as any;
-
-  if (typeof globalAny.m === 'undefined' || typeof globalAny.m?.log !== 'function') {
-    console.warn('[mock-ai-sdk] AI SDK logger not initialized, setting up mock');
-
-    globalAny.m = {
-      log: (...args: unknown[]): void => {
-        // Silent no-op in tests unless DEBUG is set
-        if (process.env.DEBUG === 'ai-sdk') {
-          console.log('[AI SDK Logger]', ...args);
-        }
+async function ensureLoggerInitializedInBrowser(page: Page): Promise<void> {
+  // Inject logger into the browser context directly
+  await page.addInitScript(() => {
+    // Create a minimal logger that satisfies AI SDK expectations
+    const mockLogger = {
+      log: (..._args: unknown[]): void => {
+        // Silent no-op in tests to avoid console pollution
+        // Uncomment for debugging: console.log('[AI SDK]', ...args);
       },
     };
-  }
+
+    // Set on both globalThis and window for maximum compatibility
+    (globalThis as any).m = mockLogger;
+    (window as any).m = mockLogger;
+  });
 }
 
 /**
  * Mock setup for AI SDK
- * This is a placeholder mock for Playwright E2E tests
+ * Ensures the logger is available in browser context before any AI SDK code runs
  */
-export const setupAISDKMock = async (_page: Page): Promise<void> => {
-  // Ensure logger is initialized FIRST
-  ensureLoggerInitialized();
+export const setupAISDKMock = async (page: Page): Promise<void> => {
+  // Ensure logger is initialized in the browser context FIRST
+  await ensureLoggerInitializedInBrowser(page);
 
-  // Stub for AI SDK mock - to be implemented as needed
-  // This allows tests to run without actual AI API calls
-  console.log('AI SDK mock setup (placeholder)');
+  console.log('[mock-ai-sdk] AI SDK logger initialized in browser context');
 };
