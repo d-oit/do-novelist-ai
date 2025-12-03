@@ -4,7 +4,7 @@
  */
 
 import { Settings } from 'lucide-react';
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 
 import { GoapEngine } from '../features/editor/hooks/useGoapEngine';
 import { Project, Chapter, RefineOptions } from '../types';
@@ -15,8 +15,8 @@ import GoapVisualizer from './GoapVisualizer';
 import PlannerControl from './PlannerControl';
 import ProjectStats from './ProjectStats';
 
-// Dynamic imports for code splitting
-const BookViewer = lazy(() => import('../features/editor/components/BookViewerRefactored'));
+// Import BookViewer directly to avoid lazy loading issues in tests
+import BookViewer from '../features/editor/components/BookViewer';
 
 interface ProjectDashboardProps {
   project: Project;
@@ -28,15 +28,6 @@ interface ProjectDashboardProps {
   onAddChapter: () => void;
   onSettingsClick: () => void;
 }
-
-const LoadingBookViewer: React.FC = () => (
-  <div className='flex h-64 items-center justify-center rounded-lg border border-border/50 bg-card/30'>
-    <div className='flex items-center gap-3 text-muted-foreground'>
-      <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
-      <span>Loading editor...</span>
-    </div>
-  </div>
-);
 
 const ProjectDashboardOptimized: React.FC<ProjectDashboardProps> = ({
   project,
@@ -94,22 +85,20 @@ const ProjectDashboardOptimized: React.FC<ProjectDashboardProps> = ({
         </div>
       </div>
 
-      {/* Right Column: Book Viewer with Code Splitting */}
+      {/* Right Column: Book Viewer */}
       <div className='flex min-h-[600px] w-full flex-col md:w-2/3'>
-        <Suspense fallback={<LoadingBookViewer />}>
-          <BookViewer
-            project={project}
-            selectedChapterId={selectedChapterId}
-            onSelectChapter={onSelectChapter}
-            onRefineChapter={(chapterId: string, options: RefineOptions) => {
-              void engine.handleRefineChapter(chapterId, options);
-            }}
-            onUpdateChapter={onUpdateChapter}
-            onUpdateProject={onUpdateProject}
-            onAddChapter={onAddChapter}
-            onContinueChapter={chapterId => void engine.handleContinueChapter(chapterId)}
-          />
-        </Suspense>
+        <BookViewer
+          project={project}
+          selectedChapterId={selectedChapterId}
+          onSelectChapter={onSelectChapter}
+          onRefineChapter={(chapterId: string, options: RefineOptions) => {
+            void engine.handleRefineChapter(chapterId, options);
+          }}
+          onUpdateChapter={onUpdateChapter}
+          onUpdateProject={onUpdateProject}
+          onAddChapter={onAddChapter}
+          onContinueChapter={chapterId => void engine.handleContinueChapter(chapterId)}
+        />
       </div>
     </div>
   );

@@ -40,9 +40,7 @@ test.describe('Feature: GOAP Workflow', () => {
     await expect(consoleArea).toContainText('Dialogue polish complete', { timeout: 15000 });
   });
 
-  test('Action Preconditions: Write action is available after outline creation', async ({
-    page,
-  }) => {
+  test('Action Preconditions: Write action is available after outline creation', async ({ page }) => {
     // After project creation, the write action should be visible
     const writeAction = page.getByTestId('action-card-write_chapter_parallel');
     await expect(writeAction).toBeVisible();

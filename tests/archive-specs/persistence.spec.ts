@@ -14,7 +14,7 @@ test.describe('Feature: Persistence', () => {
           url: '',
           authToken: '',
           useCloud: false,
-        })
+        }),
       );
     });
   });

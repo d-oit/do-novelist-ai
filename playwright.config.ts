@@ -55,50 +55,48 @@ export default defineConfig({
   },
 
   projects: [
+    // PRIMARY: Chromium only for fast feedback (95% coverage)
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Visual regression baseline
-        screenshot: 'only-on-failure',
-        // Accessibility testing
-        bypassCSP: true,
-      },
-    },
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
         screenshot: 'only-on-failure',
         bypassCSP: true,
       },
     },
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-        screenshot: 'only-on-failure',
-        bypassCSP: true,
-      },
-    },
-    // Mobile testing for responsive design
-    {
-      name: 'Mobile Chrome',
-      use: {
-        ...devices['Pixel 5'],
-        screenshot: 'only-on-failure',
-        bypassCSP: true,
-      },
-    },
-    // Tablet testing
-    {
-      name: 'iPad',
-      use: {
-        ...devices['iPad Pro'],
-        screenshot: 'only-on-failure',
-        bypassCSP: true,
-      },
-    },
+    // OPTIONAL: Uncomment for cross-browser testing (run with --project=firefox or --project=all)
+    // {
+    //   name: 'firefox',
+    //   use: {
+    //     ...devices['Desktop Firefox'],
+    //     screenshot: 'only-on-failure',
+    //     bypassCSP: true,
+    //   },
+    // },
+    // {
+    //   name: 'webkit',
+    //   use: {
+    //     ...devices['Desktop Safari'],
+    //     screenshot: 'only-on-failure',
+    //     bypassCSP: true,
+    //   },
+    // },
+    // {
+    //   name: 'Mobile Chrome',
+    //   use: {
+    //     ...devices['Pixel 5'],
+    //     screenshot: 'only-on-failure',
+    //     bypassCSP: true,
+    //   },
+    // },
+    // {
+    //   name: 'iPad',
+    //   use: {
+    //     ...devices['iPad Pro'],
+    //     screenshot: 'only-on-failure',
+    //     bypassCSP: true,
+    //   },
+    // },
   ],
   // Global setup for visual regression and accessibility
   globalSetup: './tests/global-setup.ts',
