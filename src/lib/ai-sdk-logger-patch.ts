@@ -7,7 +7,6 @@
 // Prevent "m.log is not a function" errors
 // This patch is imported by test files and the AI SDK to ensure logger compatibility
 
-// @ts-expect-error - Ignoring TypeScript errors for logger compatibility
 const logger = {
   log: (...args: unknown[]): void => {
     // Minimal implementation - just ensure the method exists
