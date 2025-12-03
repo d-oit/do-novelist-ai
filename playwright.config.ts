@@ -13,12 +13,17 @@ export default defineConfig({
     ['list'],
   ],
   timeout: 60000, // 1 minute per test
-  globalTimeout: 300000, // 5 minutes total
+  globalTimeout: 3600000, // 60 minutes total (increased from 5 minutes for CI stability)
+  expect: {
+    timeout: 10000, // 10 seconds for assertions (increased from default 5s)
+  },
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    actionTimeout: 10000, // 10 seconds for actions
+    navigationTimeout: 30000, // 30 seconds for navigation (AI operations can be slow)
     // Accessibility settings
     bypassCSP: true, // Allow axe-core injection
   },

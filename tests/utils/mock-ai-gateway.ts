@@ -75,37 +75,85 @@ The adventure unfolds with new challenges and developments that propel the plot 
 
 /**
  * Setup comprehensive AI Gateway mock for E2E tests
- * Intercepts AI SDK calls and returns mock responses
+ * Intercepts AI API calls using Playwright's network interception
  */
-export const setupGeminiMock = async (_page: Page): Promise<void> => {
-  // Inject mock responses into the page context
-  await _page.addInitScript(() => {
-    // Override the AI service functions to return mock data in test environment
-    const isTestEnv = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+export const setupGeminiMock = async (page: Page): Promise<void> => {
+  console.log('Gemini AI Gateway mock configured for E2E tests');
 
-    if (isTestEnv) {
-      // Mock AI Gateway responses by patching the global fetch if needed
-      console.log('[Mock AI Gateway] Test environment detected, AI calls will be mocked');
+  // Intercept chat completions (character development, dialogue polish, etc.)
+  await page.route('**/v1/chat/completions', async route => {
+    const request = route.request();
+    const postData = request.postDataJSON();
+    const userMessage = postData?.messages?.[postData.messages.length - 1]?.content || '';
 
-      // Store mock data in window for access by the app
-      (window as any).__MOCK_AI_RESPONSES__ = {
-        generateOutline: () => Promise.resolve(MOCK_RESPONSES.generateOutline),
-        developCharacters: () => Promise.resolve(MOCK_RESPONSES.developCharacters),
-        buildWorld: () => Promise.resolve(MOCK_RESPONSES.buildWorld),
-        enhancePlot: () => Promise.resolve(MOCK_RESPONSES.enhancePlot),
-        polishDialogue: () => Promise.resolve(MOCK_RESPONSES.polishDialogue),
-        writeChapterContent: () => Promise.resolve(MOCK_RESPONSES.writeChapterContent),
-        analyzeConsistency: () => Promise.resolve(MOCK_RESPONSES.analyzeConsistency),
-        refineChapterContent: () => Promise.resolve(MOCK_RESPONSES.refineChapterContent),
-        continueWriting: () => Promise.resolve(MOCK_RESPONSES.continueWriting),
-        brainstormProject: () => Promise.resolve(MOCK_RESPONSES.brainstormProject),
-        translateContent: () => Promise.resolve(MOCK_RESPONSES.translateContent),
-        generateCoverImage: () => Promise.resolve(MOCK_RESPONSES.generateCoverImage),
-        generateChapterIllustration: () =>
-          Promise.resolve(MOCK_RESPONSES.generateChapterIllustration),
-      };
+    let mockContent = MOCK_RESPONSES.writeChapterContent;
+
+    if (
+      userMessage.toLowerCase().includes('character') ||
+      userMessage.toLowerCase().includes('profil')
+    ) {
+      mockContent = MOCK_RESPONSES.developCharacters;
+    } else if (
+      userMessage.toLowerCase().includes('dialogue') ||
+      userMessage.toLowerCase().includes('polish')
+    ) {
+      mockContent = MOCK_RESPONSES.polishDialogue;
+    } else if (userMessage.toLowerCase().includes('world')) {
+      mockContent = MOCK_RESPONSES.buildWorld;
+    } else if (userMessage.toLowerCase().includes('outline')) {
+      mockContent = JSON.stringify(MOCK_RESPONSES.generateOutline);
+    } else if (userMessage.toLowerCase().includes('plot')) {
+      mockContent = MOCK_RESPONSES.enhancePlot;
+    } else if (
+      userMessage.toLowerCase().includes('draft') ||
+      userMessage.toLowerCase().includes('write')
+    ) {
+      mockContent = MOCK_RESPONSES.writeChapterContent;
     }
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: `chatcmpl-mock-${Date.now()}`,
+        object: 'chat.completion',
+        created: Math.floor(Date.now() / 1000),
+        model: 'mistral-medium-latest',
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: 'assistant',
+              content: mockContent,
+            },
+            finish_reason: 'stop',
+          },
+        ],
+        usage: {
+          prompt_tokens: 50,
+          completion_tokens: 200,
+          total_tokens: 250,
+        },
+      }),
+    });
   });
 
-  console.log('Gemini AI Gateway mock configured for E2E tests');
+  // Intercept image generation (cover generator)
+  await page.route('**/v1/images/generations', async route => {
+    const transparentPNG =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        created: Math.floor(Date.now() / 1000),
+        data: [
+          {
+            url: transparentPNG,
+          },
+        ],
+      }),
+    });
+  });
 };

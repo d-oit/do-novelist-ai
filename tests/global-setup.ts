@@ -1,9 +1,13 @@
 import { chromium, FullConfig } from '@playwright/test';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import { startMockServer } from './utils/msw-server';
 
 async function globalSetup(_config: FullConfig): Promise<void> {
   console.log('🚀 Setting up test environment...');
+
+  // Start MSW mock server for API interception
+  startMockServer();
 
   // Create necessary directories
   const directories = [

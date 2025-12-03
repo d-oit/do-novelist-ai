@@ -1,9 +1,13 @@
 import { FullConfig } from '@playwright/test';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import { stopMockServer } from './utils/msw-server';
 
 function globalTeardown(_config: FullConfig): void {
   console.log('🧹 Cleaning up test environment...');
+
+  // Stop MSW mock server
+  stopMockServer();
 
   try {
     // Generate test summary report
