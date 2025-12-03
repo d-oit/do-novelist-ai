@@ -310,6 +310,8 @@ Return a JSON object with this structure:
   ]
 }`,
       temperature: 0.7,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     try {
@@ -409,6 +411,8 @@ Output only the chapter content.`;
       model,
       prompt,
       temperature: 0.7,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text ?? '';
@@ -447,6 +451,8 @@ Context: ...${context}`;
       model,
       prompt,
       temperature: 0.75,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text ?? '';
@@ -493,6 +499,8 @@ Content: ${content}`;
       model,
       prompt,
       temperature: options.temperature,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text ?? content;
@@ -531,6 +539,8 @@ INSTRUCTIONS: Identify up to 3 issues. For EACH, provide a "SUGGESTED FIX".`;
       model,
       prompt,
       temperature: 0.3,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text ?? 'No issues found.';
@@ -567,6 +577,8 @@ export const brainstormProject = async (
       model,
       prompt,
       temperature: 0.8,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text?.trim().replace(/^"|"$/g, '') ?? '';
@@ -631,6 +643,8 @@ export const translateContent = async (
       model,
       prompt,
       temperature: 0.3,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text ?? '';
@@ -655,6 +669,8 @@ export const developCharacters = async (idea: string, style: string): Promise<st
       model,
       prompt,
       temperature: 0.8,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text ?? '';
@@ -679,6 +695,8 @@ export const buildWorld = async (idea: string, style: string): Promise<string> =
       model,
       prompt,
       temperature: 0.85,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text ?? '';
@@ -703,6 +721,8 @@ export const enhancePlot = async (idea: string, style: string): Promise<string> 
       model,
       prompt,
       temperature: 0.7,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text ?? '';
@@ -733,6 +753,8 @@ export const polishDialogue = async (content: string, style: string): Promise<st
       model,
       prompt,
       temperature: 0.6,
+      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
+      experimental_telemetry: { isEnabled: false },
     });
 
     return response.text ?? '';
