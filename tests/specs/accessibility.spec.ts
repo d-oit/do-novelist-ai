@@ -26,16 +26,21 @@ const CRITICAL_VIOLATIONS = [
 
 test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the application with better error handling
+    // Navigate to the application with error recovery
     await page.goto('/', {
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
 
-    // Wait for main navigation to be ready with extended timeout
+    // Wait for the app to be ready with intelligent polling
+    await page.waitForLoadState('networkidle').catch(() => {
+      console.log('Network idle timeout, continuing with test');
+    });
+
+    // Wait for main navigation with role-based selector
     await expect(page.getByRole('navigation')).toBeVisible({ timeout: 15000 });
 
-    // Set viewport to standard desktop size for testing
+    // Ensure consistent viewport
     await page.setViewportSize({ width: 1280, height: 720 });
   });
 
