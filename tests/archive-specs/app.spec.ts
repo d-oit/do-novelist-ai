@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-import { setupGeminiMock } from './utils/mock-ai-gateway';
-import { setupAISDKMock } from './utils/mock-ai-sdk';
+import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { setupAISDKMock } from '../utils/mock-ai-sdk';
 
 test.describe('Smoke Test: Critical User Journey', () => {
   test.beforeEach(async ({ page }) => {
