@@ -28,43 +28,6 @@ export async function navigateToDashboard(page: Page): Promise<void> {
   await expect(page.getByTestId('nav-dashboard')).toBeVisible();
 }
 
-export async function waitForElement(page: Page, testId: string): Promise<boolean> {
-  try {
-    await expect(page.getByTestId(testId)).toBeVisible();
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function isElementVisible(page: Page, selector: string): Promise<boolean> {
-  const element = page.locator(selector);
-  try {
-    await expect(element.first()).toBeVisible({ timeout: 3000 });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function waitForNavigation(page: Page): Promise<void> {
-  await page.waitForLoadState('domcontentloaded');
-}
-
-export async function waitForRole(
-  page: Page,
-  role: 'button' | 'dialog' | 'heading' | 'link' | 'menu' | 'textbox',
-  name?: string,
-): Promise<boolean> {
-  try {
-    const locator = name ? page.getByRole(role, { name }) : page.getByRole(role).first();
-    await expect(locator).toBeVisible();
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 // Enhanced React-specific test helpers
 export class ReactTestHelpers {
   /**
