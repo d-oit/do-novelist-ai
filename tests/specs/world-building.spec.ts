@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
@@ -15,7 +15,6 @@ test.describe('World Building Features E2E Tests', () => {
 
     if (await worldNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await worldNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for world building interface
       const worldDashboard = page.locator('[data-testid*="world"], [data-testid*="building"]');
@@ -26,7 +25,6 @@ test.describe('World Building Features E2E Tests', () => {
     } else {
       // Try accessing through dashboard
       await page.getByTestId('nav-dashboard').click();
-      await page.waitForTimeout(1000);
 
       // Look for world building actions
       const worldActions = page.locator('[data-testid*="world"], [data-testid*="building"]');
@@ -50,14 +48,12 @@ test.describe('World Building Features E2E Tests', () => {
 
     if (await worldNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await worldNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for world element creation
       const createButton = page.locator('button:has-text("Create"), [data-testid*="create"], [data-testid*="add"]');
 
       if (await createButton.isVisible({ timeout: 3000 }).catch(() => false)) {
         await createButton.click();
-        await page.waitForTimeout(1000);
 
         // Look for creation form
         const creationForm = page.locator('[data-testid*="form"], form, [data-testid*="modal"]');
@@ -79,7 +75,6 @@ test.describe('World Building Features E2E Tests', () => {
 
     if (await worldNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await worldNav.click();
-      await page.waitForTimeout(1001);
 
       // Look for categories
       const categories = page.locator('[data-testid*="category"], [data-testid*="type"], .category');

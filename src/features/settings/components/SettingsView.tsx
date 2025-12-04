@@ -1,23 +1,23 @@
 import {
-  Moon,
-  Sun,
-  Laptop,
-  Key,
-  ShieldCheck,
-  Database,
-  Save,
-  CheckCircle,
   AlertTriangle,
+  CheckCircle,
+  Database,
+  Key,
+  Laptop,
+  Moon,
+  Save,
   Settings as SettingsIcon,
+  ShieldCheck,
+  Sun,
   Zap,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-import { cn } from '../../../lib/utils';
-import { getStoredConfig, saveStoredConfig, DbConfig, db } from '../../../lib/db';
 import { useUser } from '../../../contexts/UserContext';
-import { AISettingsPanel } from './AISettingsPanel';
+import { DbConfig, db, getStoredConfig, saveStoredConfig } from '../../../lib/db';
+import { cn } from '../../../lib/utils';
 import { GamificationPanel } from '../../gamification';
+import { AISettingsPanel } from './AISettingsPanel';
 
 const SettingsView: React.FC = () => {
   const { userId } = useUser();
@@ -74,7 +74,7 @@ const SettingsView: React.FC = () => {
   };
 
   return (
-    <div className='mx-auto max-w-3xl space-y-8 p-6 pb-20'>
+    <div data-testid='settings-view' className='mx-auto max-w-3xl space-y-8 p-6 pb-20'>
       <div className='border-b border-border pb-4'>
         <h2 className='font-serif text-3xl font-bold'>Settings</h2>
         <p className='mt-1 text-muted-foreground'>Configure your Novelist workspace preference.</p>

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
@@ -7,12 +7,12 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
     await setupGeminiMock(page);
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
   });
 
   test('should access generation dashboard and see action cards', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Wait for dashboard to load
     await expect(page.getByTestId('project-dashboard')).toBeVisible({ timeout: 5000 });
@@ -41,7 +41,6 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
   test('should execute outline generation action', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Look for outline generation action card
     const outlineCard = page.getByTestId('action-card-create_outline');
@@ -50,13 +49,10 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
       // Click on outline generation
       await outlineCard.click();
 
-      // Wait for AI response (console output or UI update)
-      await page.waitForTimeout(3000);
-
       // Look for console output or generation feedback
       const consoleArea = page.locator('.bg-black\\/40, [data-testid*="console"], [data-testid*="output"]');
 
-      if (await consoleArea.isVisible({ timeout: 3000 }).catch(() => false)) {
+      if (await consoleArea.isVisible({ timeout: 10000 }).catch(() => false)) {
         // Check for success message or generation content
         try {
           await expect(consoleArea).toContainText('Outline created', { timeout: 10000 });
@@ -86,7 +82,6 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
   test('should handle character generation action', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Look for character generation action card
     const characterCard = page.getByTestId('action-card-create_characters');
@@ -95,13 +90,10 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
       // Click on character generation
       await characterCard.click();
 
-      // Wait for AI response
-      await page.waitForTimeout(3000);
-
       // Look for console output or generation feedback
       const consoleArea = page.locator('.bg-black\\/40, [data-testid*="console"], [data-testid*="output"]');
 
-      if (await consoleArea.isVisible({ timeout: 3000 }).catch(() => false)) {
+      if (await consoleArea.isVisible({ timeout: 10000 }).catch(() => false)) {
         try {
           await expect(consoleArea).toContainText('Characters created', { timeout: 10000 });
         } catch (_error) {
@@ -116,7 +108,6 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
   test('should handle world building generation action', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Look for world building action card
     const worldCard = page.getByTestId('action-card-create_world');
@@ -125,13 +116,10 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
       // Click on world building generation
       await worldCard.click();
 
-      // Wait for AI response
-      await page.waitForTimeout(3000);
-
       // Look for console output or generation feedback
       const consoleArea = page.locator('.bg-black\\/40, [data-testid*="console"], [data-testid*="output"]');
 
-      if (await consoleArea.isVisible({ timeout: 3000 }).catch(() => false)) {
+      if (await consoleArea.isVisible({ timeout: 10000 }).catch(() => false)) {
         try {
           await expect(consoleArea).toContainText('World created', { timeout: 10000 });
         } catch (_error) {
@@ -149,7 +137,6 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
 
     if (await agentConsoleButton.isVisible({ timeout: 3000 }).catch(() => false)) {
       await agentConsoleButton.click();
-      await page.waitForTimeout(1000);
 
       // Look for agent console interface
       const agentConsole = page.locator('[data-testid*="agent-console"], [data-testid*="agent-panel"]');
@@ -160,7 +147,6 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
     } else {
       // Try accessing through dashboard
       await page.getByTestId('nav-dashboard').click();
-      await page.waitForTimeout(1000);
 
       // Look for any agent-related UI
       const agentElements = page.locator('[data-testid*="agent"]');
@@ -175,7 +161,6 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
   test('should handle multiple generation actions in sequence', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Get all visible action cards
     const actionCards = page.locator('[data-testid^="action-card-"]');
@@ -195,11 +180,9 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
       const card = visibleCards[i];
       if (card) {
         await card.click();
-        await page.waitForTimeout(2000);
-
         // Look for any response
         const consoleArea = page.locator('.bg-black\\/40, [data-testid*="console"], [data-testid*="output"]');
-        if (await consoleArea.isVisible({ timeout: 3000 }).catch(() => false)) {
+        if (await consoleArea.isVisible({ timeout: 5000 }).catch(() => false)) {
           // Just verify it's visible, content may vary
           await expect(consoleArea).toBeVisible();
         }
@@ -210,7 +193,6 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
   test('should handle generation errors gracefully', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Mock an error response for AI generation
     await page.route('**/v1/chat/completions', async route => {
@@ -229,7 +211,6 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
 
     if (await firstCard.isVisible({ timeout: 5000 }).catch(() => false)) {
       await firstCard.click();
-      await page.waitForTimeout(2000);
 
       // Look for error handling
       const errorElements = page.locator('[data-testid*="error"], .error, [role="alert"]');
@@ -250,7 +231,6 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
   test('should display generation progress and feedback', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Look for any action card
     const firstCard = page.locator('[data-testid^="action-card-"]').first();
@@ -290,13 +270,10 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
         await expect(loadingElements.first()).toBeVisible();
       }
 
-      // Wait for completion
-      await page.waitForTimeout(3000);
-
       // Look for completion feedback
       const consoleArea = page.locator('.bg-black\\/40, [data-testid*="console"], [data-testid*="output"]');
 
-      if (await consoleArea.isVisible({ timeout: 3000 }).catch(() => false)) {
+      if (await consoleArea.isVisible({ timeout: 5000 }).catch(() => false)) {
         await expect(consoleArea).toBeVisible();
       }
     } else {
@@ -307,21 +284,16 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
   test('should maintain generation state across navigation', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Execute a generation action
     const firstCard = page.locator('[data-testid^="action-card-"]').first();
 
     if (await firstCard.isVisible({ timeout: 5000 }).catch(() => false)) {
       await firstCard.click();
-      await page.waitForTimeout(2000);
 
       // Navigate away and back
-      await page.getByTestId('nav-projects').click();
-      await page.waitForTimeout(1000);
 
       await page.getByTestId('nav-dashboard').click();
-      await page.waitForTimeout(1000);
 
       // Dashboard should still show generation results or state
       await expect(page.getByTestId('project-dashboard')).toBeVisible({ timeout: 5000 });

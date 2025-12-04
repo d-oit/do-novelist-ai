@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
@@ -30,7 +30,6 @@ test.describe('Project Management E2E Tests', () => {
 
     // Navigate to dashboard to see the new project
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Verify project appears in dashboard
     await expect(page.getByText('The Mystery of the Lost Manuscript')).toBeVisible({ timeout: 5000 });
@@ -39,7 +38,6 @@ test.describe('Project Management E2E Tests', () => {
   test('should navigate to project dashboard and view project details', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Wait for dashboard to load
     await expect(page.getByTestId('project-dashboard')).toBeVisible({ timeout: 5000 });
@@ -63,7 +61,6 @@ test.describe('Project Management E2E Tests', () => {
   test('should access projects view and see project list', async ({ page }) => {
     // Navigate to projects view
     await page.getByTestId('nav-projects').click();
-    await page.waitForTimeout(1000);
 
     // Wait for projects view to load
     await expect(page.getByTestId('projects-view')).toBeVisible({ timeout: 5000 });
@@ -116,7 +113,6 @@ test.describe('Project Management E2E Tests', () => {
     for (const navTest of navigationTests) {
       // Navigate to the view
       await page.click(navTest.selector);
-      await page.waitForTimeout(1000);
 
       // Verify navigation was successful (URL changed or element appeared)
       const currentUrl = page.url();
@@ -131,7 +127,6 @@ test.describe('Project Management E2E Tests', () => {
   test('should handle project actions and generation workflow', async ({ page }) => {
     // Navigate to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Look for action cards
     const actionCards = page.locator('[data-testid^="action-card-"]');
@@ -146,7 +141,6 @@ test.describe('Project Management E2E Tests', () => {
       await actionCards.first().click();
 
       // Wait for some response (could be console output, modal, etc.)
-      await page.waitForTimeout(2000);
 
       // Check for any console output or UI changes
       const consoleArea = page.locator('.bg-black\\/40, [data-testid*="console"], [data-testid*="output"]');
@@ -165,7 +159,6 @@ test.describe('Project Management E2E Tests', () => {
 
     for (const view of views) {
       await page.getByTestId(`nav-${view}`).click();
-      await page.waitForTimeout(1000);
 
       // Check that no error messages are immediately visible
       const errorElements = page.locator('[data-testid*="error"], .error, [role="alert"]');
@@ -183,15 +176,12 @@ test.describe('Project Management E2E Tests', () => {
   test('should maintain state during navigation', async ({ page }) => {
     // Start with dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Navigate to projects
     await page.getByTestId('nav-projects').click();
-    await page.waitForTimeout(1000);
 
     // Navigate back to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Verify dashboard is still functional
     await expect(page.getByTestId('project-dashboard')).toBeVisible({ timeout: 5000 });

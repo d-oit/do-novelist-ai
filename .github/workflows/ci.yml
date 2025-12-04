@@ -1,4 +1,4 @@
-name: CI/CD Pipeline (Optimized)
+name: CI/CD Pipeline
 
 on:
   push:
@@ -126,10 +126,13 @@ jobs:
 
   # E2E Tests (Separate job with caching)
   e2e-tests:
-    name: 🧪 E2E Tests
+    name: 🧪 E2E Tests [Shard ${{ matrix.shard }}/3]
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     needs: build-and-test
+    strategy:
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -166,7 +169,7 @@ jobs:
           path: dist/
 
       - name: Run Playwright tests
-        run: pnpm exec playwright test
+        run: pnpm exec playwright test --shard=${{ matrix.shard }}/3
         env:
           CI: true
 
@@ -174,7 +177,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ github.sha }}
+          name: playwright-report-shard-${{ matrix.shard }}-${{ github.sha }}
           path: playwright-report/
           retention-days: 7
 

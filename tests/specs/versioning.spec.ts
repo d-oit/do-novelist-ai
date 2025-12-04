@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
@@ -15,7 +15,6 @@ test.describe('Version History and Comparison E2E Tests', () => {
 
     if (await versionNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await versionNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for version history interface
       const versionHistory = page.locator('[data-testid*="version"], [data-testid*="history"]');
@@ -34,7 +33,6 @@ test.describe('Version History and Comparison E2E Tests', () => {
 
     if (await versionNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await versionNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for version list
       const versionList = page.locator('[data-testid*="list"], [data-testid*="versions"]');
@@ -55,7 +53,6 @@ test.describe('Version History and Comparison E2E Tests', () => {
 
     if (await versionNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await versionNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for comparison controls
       const compareButton = page.locator('button:has-text("Compare"), [data-testid*="compare"]');

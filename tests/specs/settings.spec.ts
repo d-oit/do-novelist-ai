@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
@@ -7,21 +7,20 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
     await setupGeminiMock(page);
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
   });
 
   test('should access settings view', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Verify settings view is loaded
-    await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
   });
 
   test('should display AI configuration panel', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Look for AI settings panel
     const aiSettingsPanel = page.getByTestId('ai-settings-panel');
@@ -55,7 +54,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
   test('should handle AI provider selection', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Look for provider selector
     const providerSelector = page.locator('[data-testid*="provider"], select[name*="provider" i]');
@@ -68,7 +66,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
 
       // Try to select a different option
       await providerSelector.click();
-      await page.waitForTimeout(500);
 
       // Look for available options
       const options = providerSelector.locator('option');
@@ -91,7 +88,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
   test('should handle AI model selection', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Look for model selector
     const modelSelector = page.locator('[data-testid*="model"], select[name*="model" i]');
@@ -104,7 +100,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
 
       // Try to select a different option
       await modelSelector.click();
-      await page.waitForTimeout(500);
 
       // Look for available options
       const options = modelSelector.locator('option');
@@ -127,7 +122,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
   test('should handle API key input and validation', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Look for API key input
     const apiKeyInput = page.locator('input[name*="api" i], input[placeholder*="api" i], [data-testid*="api-key"]');
@@ -155,7 +149,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
   test('should save and persist AI configuration', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Look for save button
     const saveButton = page.locator('button:has-text("Save"), [data-testid*="save"], button[type="submit"]');
@@ -166,7 +159,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
 
       if (await providerSelector.isVisible({ timeout: 1000 }).catch(() => false)) {
         await providerSelector.click();
-        await page.waitForTimeout(500);
 
         const options = providerSelector.locator('option');
         if ((await options.count()) > 1) {
@@ -176,7 +168,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
 
       // Save settings
       await saveButton.click();
-      await page.waitForTimeout(1000);
 
       // Look for success message or confirmation
       const successMessage = page.locator('[data-testid*="success"], .success, [role="status"]');
@@ -187,13 +178,11 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
 
       // Navigate away and back to check persistence
       await page.getByTestId('nav-dashboard').click();
-      await page.waitForTimeout(1000);
 
       await page.getByTestId('nav-settings').click();
-      await page.waitForTimeout(1000);
 
       // Settings should still be accessible
-      await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
     } else {
       test.skip();
     }
@@ -202,7 +191,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
   test('should handle AI configuration errors gracefully', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Mock an error for AI configuration
     await page.route('**/api/v1/ai/config', async route => {
@@ -221,7 +209,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
 
     if (await saveButton.isVisible({ timeout: 3000 }).catch(() => false)) {
       await saveButton.click();
-      await page.waitForTimeout(2000);
 
       // Look for error handling
       const errorElements = page.locator('[data-testid*="error"], .error, [role="alert"]');
@@ -242,7 +229,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
   test('should display AI usage statistics', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Look for usage statistics
     const usageSection = page.locator('[data-testid*="usage"], [data-testid*="stats"], section:has-text("Usage")');
@@ -266,7 +252,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
   test('should handle advanced AI settings', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Look for advanced settings
     const advancedSection = page.locator('[data-testid*="advanced"], section:has-text("Advanced")');
@@ -306,7 +291,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
   test('should handle settings navigation and organization', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Look for settings navigation or tabs
     const settingsNav = page.locator('[data-testid*="settings-nav"], .settings-nav, nav:has-text("Settings")');
@@ -324,7 +308,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
         // Try clicking on different sections
         for (let i = 0; i < Math.min(navCount, 3); i++) {
           await navItems.nth(i).click();
-          await page.waitForTimeout(500);
 
           // Verify some content is visible
           const body = page.locator('body');
@@ -333,14 +316,13 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
       }
     } else {
       // Settings might be a single page, which is fine
-      await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
     }
   });
 
   test('should reset settings to defaults', async ({ page }) => {
     // Navigate to settings
     await page.getByTestId('nav-settings').click();
-    await page.waitForTimeout(1000);
 
     // Look for reset button
     const resetButton = page.locator('button:has-text("Reset"), [data-testid*="reset"], button:has-text("Defaults")');
@@ -353,7 +335,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
 
       if (await providerSelector.isVisible({ timeout: 1000 }).catch(() => false)) {
         await providerSelector.click();
-        await page.waitForTimeout(500);
 
         const options = providerSelector.locator('option');
         if ((await options.count()) > 1) {
@@ -363,7 +344,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
 
       // Reset settings
       await resetButton.click();
-      await page.waitForTimeout(1000);
 
       // Look for confirmation dialog
       const confirmButton = page.locator(
@@ -372,7 +352,6 @@ test.describe('Settings Panel and AI Configuration E2E Tests', () => {
 
       if (await confirmButton.isVisible({ timeout: 3000 }).catch(() => false)) {
         await confirmButton.click();
-        await page.waitForTimeout(1000);
       }
 
       // Look for success message

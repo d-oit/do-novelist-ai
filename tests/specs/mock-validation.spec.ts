@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
@@ -85,8 +85,6 @@ test.describe('Mock Infrastructure Validation', () => {
         consoleErrors.push(msg.text());
       }
     });
-
-    await page.waitForTimeout(500);
 
     // Should not have mock-related errors
     const mockErrors = consoleErrors.filter(

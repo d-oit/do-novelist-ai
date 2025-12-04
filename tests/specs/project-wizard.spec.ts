@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
@@ -70,7 +70,6 @@ test.describe('Project Wizard E2E Tests', () => {
 
     // Navigate to dashboard to verify project was created
     await page.getByTestId('nav-dashboard').click();
-    await page.waitForTimeout(1000);
 
     // Look for the new project
     await expect(page.getByText(projectData.title)).toBeVisible({ timeout: 5000 });
@@ -197,7 +196,6 @@ test.describe('Project Wizard E2E Tests', () => {
 
     // Navigate away and back (if possible)
     await page.keyboard.press('Escape'); // Close wizard
-    await page.waitForTimeout(500);
 
     // Reopen wizard
     await page.getByTestId('nav-new-project').click();

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
 
@@ -15,7 +15,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
     if (await publishNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await publishNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for publishing interface
       const publishView = page.locator('[data-testid*="publish"], [data-testid*="export"]');
@@ -26,7 +25,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
     } else {
       // Try accessing through dashboard or project actions
       await page.getByTestId('nav-dashboard').click();
-      await page.waitForTimeout(1000);
 
       // Look for publish buttons in dashboard
       const publishButtons = page.locator('[data-testid*="publish"], [data-testid*="export"]');
@@ -50,7 +48,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
     if (await publishNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await publishNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for metadata form elements
       const metadataForm = page.locator('[data-testid*="metadata"], [data-testid*="form"]');
@@ -94,7 +91,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
     if (await publishNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await publishNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for EPUB export button
       const epubButton = page.locator('[data-testid*="epub"], button:has-text("EPUB"), button:has-text("Export")');
@@ -110,7 +106,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
           expect(download.suggestedFilename()).toMatch(/\.epub$/i);
         } catch (_error) {
           // If download doesn't work, check for other feedback
-          await page.waitForTimeout(2000);
 
           // Look for success message or progress indicator
           const successMessage = page.locator('[data-testid*="success"], .success, [role="status"]');
@@ -136,7 +131,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
     if (await publishNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await publishNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for form validation
       const submitButton = page.locator('button[type="submit"], [data-testid*="submit"], [data-testid*="publish-btn"]');
@@ -144,7 +138,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
       if (await submitButton.isVisible({ timeout: 3000 }).catch(() => false)) {
         // Try to submit without filling required fields
         await submitButton.click();
-        await page.waitForTimeout(1000);
 
         // Look for validation errors
         const validationErrors = page.locator('[data-testid*="error"], .error, [role="alert"]');
@@ -173,7 +166,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
           // Try submitting again
           await submitButton.click();
-          await page.waitForTimeout(1000);
 
           // Validation should pass or show different errors
         }
@@ -191,7 +183,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
     if (await publishNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await publishNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for analytics or metrics section
       const analyticsSection = page.locator(
@@ -223,7 +214,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
     if (await publishNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await publishNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for cover generation
       const coverGenerator = page.locator('[data-testid*="cover"], [data-testid*="generate-cover"]');
@@ -236,7 +226,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
         if (await generateButton.isVisible({ timeout: 3000 }).catch(() => false)) {
           await generateButton.click();
-          await page.waitForTimeout(2000);
 
           // Look for generated cover or loading state
           const coverImage = page.locator('img[src*="cover"], [data-testid*="cover-image"]');
@@ -262,7 +251,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
     if (await publishNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await publishNav.click();
-      await page.waitForTimeout(1000);
 
       // Look for platform options
       const platformCards = page.locator('[data-testid*="platform"], [data-testid*="marketplace"]');
@@ -281,7 +269,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
           // Try interacting with a platform
           await platformOptions.first().click();
-          await page.waitForTimeout(1000);
 
           // Look for platform-specific options
           const platformSettings = page.locator('[data-testid*="settings"], [data-testid*="config"]');
@@ -304,7 +291,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
     if (await publishNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await publishNav.click();
-      await page.waitForTimeout(1000);
 
       // Mock an error for publishing
       await page.route('**/api/v1/publish/**', async route => {
@@ -325,7 +311,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
       if (await publishButton.isVisible({ timeout: 3000 }).catch(() => false)) {
         await publishButton.click();
-        await page.waitForTimeout(2000);
 
         // Look for error handling
         const errorElements = page.locator('[data-testid*="error"], .error, [role="alert"]');
@@ -352,7 +337,6 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
     if (await publishNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await publishNav.click();
-      await page.waitForTimeout(1000);
 
       // Fill in some metadata
       const titleInput = page.locator('input[placeholder*="title" i], input[name*="title" i], [data-testid*="title"]');
@@ -367,10 +351,8 @@ test.describe('Publishing Panel and EPUB Export E2E Tests', () => {
 
         // Navigate away and back
         await page.getByTestId('nav-dashboard').click();
-        await page.waitForTimeout(1000);
 
         await publishNav.click();
-        await page.waitForTimeout(1000);
 
         // Check if title is still filled (may or may not be persisted)
         const titleValue = await titleInput.first().inputValue();
