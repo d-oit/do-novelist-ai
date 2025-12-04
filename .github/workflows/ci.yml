@@ -242,11 +242,8 @@ jobs:
           timeout 2400 pnpm exec playwright test \
             --shard=${{ matrix.shard }}/3 \
             --workers=1 \
-            --reporter=list,json,junit \
+            --reporter=list \
             --output=test-results \
-            --trace=on-first-retry \
-            --video=retain-on-failure \
-            --screenshot=only-on-failure \
             --max-failures=5 \
             || {
               echo "❌ Tests failed or timed out"
