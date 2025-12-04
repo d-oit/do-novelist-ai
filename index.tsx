@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 
 import './src/index.css';
 import './src/assets/styles.css';
-import App from './src/App';
+import App from './src/app/App';
 import ErrorBoundary from './src/components/error-boundary';
 
 const rootElement = document.getElementById('root');

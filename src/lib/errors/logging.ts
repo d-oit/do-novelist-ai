@@ -313,7 +313,9 @@ export class Logger {
   public child(context: Record<string, unknown>): Logger {
     return new Logger(
       this.services.map(service => ({
-        ...service,
+        name: service.name,
+        // Preserve the log method - spread doesn't copy class methods
+        log: (entry: LogEntry) => service.log(entry),
         debug: (message: string, ctx?: Record<string, unknown>) =>
           service.debug(message, { ...ctx, ...context }),
         info: (message: string, ctx?: Record<string, unknown>) =>

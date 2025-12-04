@@ -346,9 +346,9 @@ const BookViewer: React.FC<BookViewerProps> = ({
           >
             <div className='mb-8 flex flex-col items-start justify-between gap-4 border-b border-border pb-4 md:flex-row md:items-center'>
               <div>
-                <h1 className='font-serif text-2xl font-bold text-foreground md:text-3xl'>
+                <h2 className='font-serif text-2xl font-bold text-foreground md:text-3xl'>
                   {project.title}
-                </h1>
+                </h2>
                 <p className='mt-1 text-sm text-muted-foreground'>{project.style}</p>
               </div>
             </div>
@@ -441,9 +441,9 @@ const BookViewer: React.FC<BookViewerProps> = ({
                   </div>
                 </div>
               </div>
-              <h1 className='border-b border-border pb-4 font-serif text-2xl font-bold text-foreground md:text-3xl'>
+              <h2 className='border-b border-border pb-4 font-serif text-2xl font-bold text-foreground md:text-3xl'>
                 {selectedChapter.title}
-              </h1>
+              </h2>
             </div>
 
             <div className='flex flex-1 flex-col gap-6'>

@@ -108,7 +108,7 @@ const WorldBuildingDashboard: React.FC<WorldBuildingDashboardProps> = ({ project
       {/* Header */}
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='text-3xl font-bold'>World-Building Assistant</h1>
+          <h2 className='text-3xl font-bold'>World-Building Assistant</h2>
           <p className='mt-2 text-muted-foreground'>
             Create and manage the rich world behind your story
           </p>

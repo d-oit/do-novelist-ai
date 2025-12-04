@@ -1,16 +1,17 @@
 import {
-  Upload,
-  FileText,
-  X,
-  Sparkles,
+  AlertCircle,
   Book,
-  Plus,
-  Loader2,
-  Wand2,
   ChevronDown,
   ChevronUp,
+  FileText,
+  Loader2,
+  Plus,
+  Sparkles,
+  Upload,
+  Wand2,
+  X,
 } from 'lucide-react';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { brainstormProject } from '../../../lib/ai';
 import { cn, iconButtonTarget } from '../../../lib/utils';
@@ -38,8 +39,10 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
 
   // Brainstorming States
   const [brainstorming, setBrainstorming] = useState<Record<string, boolean>>({});
+  const [brainstormError, setBrainstormError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const ideaTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Reset state when wizard opens
   useEffect(() => {
@@ -73,6 +76,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
     }
 
     setBrainstorming(prev => ({ ...prev, [field]: true }));
+    setBrainstormError(null);
     try {
       const result = await brainstormProject(promptContext, field);
       if (result !== null) {
@@ -82,6 +86,19 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
       }
     } catch (err) {
       console.error(err);
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      // Provide user-friendly messages for common errors
+      if (errorMessage.includes('402') || errorMessage.includes('Payment')) {
+        setBrainstormError(
+          'AI service requires payment setup. Please check your Vercel AI Gateway billing.',
+        );
+      } else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+        setBrainstormError('API key is invalid or expired. Please check your settings.');
+      } else if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+        setBrainstormError('Too many requests. Please wait a moment and try again.');
+      } else {
+        setBrainstormError(`AI brainstorming failed: ${errorMessage}`);
+      }
     } finally {
       setBrainstorming(prev => ({ ...prev, [field]: false }));
     }
@@ -173,10 +190,10 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
 
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm'
+      className='fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md'
       data-testid='project-wizard-overlay'
     >
-      <div className='animate-in fade-in zoom-in-95 flex max-h-[90dvh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border bg-card shadow-2xl duration-200'>
+      <div className='animate-in fade-in zoom-in-95 flex h-full w-full flex-col overflow-hidden bg-card shadow-2xl duration-200 md:m-4 md:h-[calc(100dvh-2rem)] md:max-w-4xl md:rounded-xl md:border md:border-border lg:max-w-5xl'>
         {/* Header */}
         <div className='flex shrink-0 items-center justify-between border-b border-border bg-secondary/30 p-6'>
           <div>
@@ -247,19 +264,32 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                 </button>
               </div>
 
-              <div className='h-32 bg-card p-4'>
+              <div className='min-h-[200px] flex-1 bg-card p-4'>
                 {activeTab === 'write' ? (
                   <textarea
-                    className='h-full w-full resize-none bg-transparent font-mono text-sm text-muted-foreground focus:outline-none'
-                    placeholder='Describe your plot, characters, and themes here...'
+                    className='h-full min-h-[180px] w-full resize-y bg-transparent font-mono text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none'
+                    placeholder='Describe your plot, characters, and themes here...
+
+Examples:
+• A story about a detective who can see ghosts...
+• In a world where dreams are currency...
+• Two rival chefs fall in love during a cooking competition...'
                     value={idea}
                     onChange={e => setIdea(e.target.value)}
+                    onKeyDown={e => {
+                      // Ctrl/Cmd + Enter to submit
+                      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        if (title && style && idea) handleSubmit();
+                      }
+                    }}
+                    ref={ideaTextareaRef}
                     data-testid='wizard-idea-input'
                   />
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className='group flex h-full w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border transition-all hover:border-primary/50 hover:bg-secondary/10'
+                    className='group flex h-full min-h-[180px] w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-secondary/5 transition-all hover:border-primary/50 hover:bg-secondary/10'
                   >
                     <input
                       type='file'
@@ -269,13 +299,15 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                       accept='.txt,.md,.json'
                       onChange={e => void handleFileChange(e)}
                     />
-                    <div className='mb-3 rounded-full bg-secondary/50 p-3 transition-transform group-hover:scale-110'>
-                      <Upload className='h-6 w-6 text-muted-foreground group-hover:text-primary' />
+                    <div className='mb-4 rounded-full bg-secondary/50 p-4 transition-transform group-hover:scale-110'>
+                      <Upload className='h-8 w-8 text-muted-foreground group-hover:text-primary' />
                     </div>
-                    <p className='text-sm font-medium text-foreground'>Click to upload files</p>
-                    <p className='mt-1 text-xs text-muted-foreground'>Supports .txt, .md, .json</p>
+                    <p className='text-base font-medium text-foreground'>
+                      Click or drag files here
+                    </p>
+                    <p className='mt-2 text-sm text-muted-foreground'>Supports .txt, .md, .json</p>
                     {isReading && (
-                      <p className='mt-2 animate-pulse text-xs text-primary'>
+                      <p className='mt-3 animate-pulse text-sm text-primary'>
                         Reading file content...
                       </p>
                     )}
@@ -283,6 +315,26 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
                 )}
               </div>
             </div>
+
+            {/* Error Banner */}
+            {brainstormError && (
+              <div className='flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4'>
+                <AlertCircle className='mt-0.5 h-5 w-5 shrink-0 text-red-500' />
+                <div className='flex-1'>
+                  <p className='text-sm font-medium text-red-600 dark:text-red-400'>
+                    {brainstormError}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setBrainstormError(null)}
+                  className='shrink-0 rounded p-1 text-red-500 hover:bg-red-500/20'
+                  aria-label='Dismiss error'
+                >
+                  <X className='h-4 w-4' />
+                </button>
+              </div>
+            )}
+
             {files.length > 0 && (
               <div className='flex flex-wrap gap-2 pt-2'>
                 {files.map((f, i) => (
@@ -489,22 +541,30 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
         </div>
 
         {/* Footer */}
-        <div className='flex shrink-0 justify-end gap-3 border-t border-border bg-secondary/10 p-6'>
-          <button
-            onClick={onCancel}
-            className='px-4 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground'
-          >
-            Cancel
-          </button>
-          <button
-            disabled={!title || !style || !idea}
-            onClick={handleSubmit}
-            className='flex items-center gap-2 rounded-md bg-primary px-6 py-2 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
-            data-testid='wizard-submit-btn'
-          >
-            <Plus className='h-4 w-4' />
-            Initialize Project
-          </button>
+        <div className='flex shrink-0 items-center justify-between border-t border-border bg-secondary/10 px-6 py-4'>
+          <p className='hidden text-xs text-muted-foreground md:block'>
+            <kbd className='rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]'>Ctrl</kbd>
+            {' + '}
+            <kbd className='rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]'>Enter</kbd>
+            {' to submit'}
+          </p>
+          <div className='flex gap-3'>
+            <button
+              onClick={onCancel}
+              className='px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+            >
+              Cancel
+            </button>
+            <button
+              disabled={!title || !style || !idea}
+              onClick={handleSubmit}
+              className='flex items-center gap-2 rounded-md bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
+              data-testid='wizard-submit-btn'
+            >
+              <Plus className='h-4 w-4' />
+              Initialize Project
+            </button>
+          </div>
         </div>
       </div>
     </div>

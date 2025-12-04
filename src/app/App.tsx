@@ -8,7 +8,8 @@ import {
   PlannerControl,
 } from '../features/generation/components';
 import { useGoapEngine } from '../features/generation/hooks';
-import { Navbar, ProjectStats, ProjectWizard, ProjectsView } from '../features/projects/components';
+import { ProjectStats, ProjectWizard, ProjectsView } from '../features/projects/components';
+import Navbar from '../components/Navbar';
 import { db } from '../features/projects/services';
 import { SettingsView } from '../features/settings/components';
 import { Project, Chapter, ChapterStatus, PublishStatus } from '../shared/types';
@@ -222,6 +223,16 @@ const App: React.FC = () => {
       />
 
       <main id='main-content' className='relative flex-1'>
+        {/* Page Title - Hidden visually but available to screen readers */}
+        <h1 className='sr-only'>
+          {currentView === 'dashboard' && project.title !== 'Untitled Project'
+            ? `${project.title} - Novelist.ai Dashboard`
+            : currentView === 'projects'
+              ? 'Projects - Novelist.ai'
+              : currentView === 'settings'
+                ? 'Settings - Novelist.ai'
+                : 'Novelist.ai Dashboard'}
+        </h1>
         {currentView === 'dashboard' && (
           <div className='animate-in fade-in mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>
             {/* Left Column: Planner & Controls */}

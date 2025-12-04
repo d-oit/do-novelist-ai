@@ -16,8 +16,8 @@ import { getAIConfig, getEnabledProviders, getModelForTask, type AIProvider } fr
 import { withCache } from './cache';
 
 // Import error handling system
-import { logger } from './errors/logging';
 import { createAIError, createConfigurationError } from './errors/error-types';
+import { logger } from './errors/logging';
 
 // Get configuration
 const config = getAIConfig();
@@ -30,12 +30,43 @@ const aiLogger = logger.child({ module: 'ai-service' });
  * Check if running in test/CI environment
  */
 const isTestEnvironment = (): boolean => {
-  return (
-    process.env.CI === 'true' ||
-    process.env.NODE_ENV === 'test' ||
-    process.env.PLAYWRIGHT === 'true' ||
-    typeof window !== 'undefined'
-  );
+  // Check for browser environment first
+  if (typeof window !== 'undefined') {
+    // Explicit test environment flags always trigger mock mode
+    if (
+      import.meta.env?.CI === 'true' ||
+      import.meta.env?.NODE_ENV === 'test' ||
+      import.meta.env?.PLAYWRIGHT_TEST === 'true' ||
+      import.meta.env?.PLAYWRIGHT === 'true'
+    ) {
+      return true;
+    }
+
+    // On localhost/127.0.0.1, only use mock mode if no API key is configured
+    // This allows local development with real AI when API key is present
+    const isLocalhost =
+      window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const hasApiKey = !!import.meta.env?.VITE_AI_GATEWAY_API_KEY;
+
+    if (isLocalhost && !hasApiKey) {
+      return true;
+    }
+
+    // Not a test environment if we have an API key (even on localhost)
+    return false;
+  }
+
+  // Node.js environment (for server-side rendering or testing)
+  if (typeof process !== 'undefined' && process.env) {
+    return (
+      process.env.CI === 'true' ||
+      process.env.NODE_ENV === 'test' ||
+      process.env.PLAYWRIGHT === 'true'
+    );
+  }
+
+  // Default to false if we can't determine
+  return false;
 };
 
 /**
@@ -549,6 +580,7 @@ INSTRUCTIONS: Identify up to 3 issues. For EACH, provide a "SUGGESTED FIX".`;
 
 /**
  * Brainstorm ideas
+ * Uses API route to avoid CORS issues in browser
  */
 export const brainstormProject = async (
   context: string,
@@ -561,28 +593,28 @@ export const brainstormProject = async (
     return '## Brainstorming Notes\n\n### Themes\n- Friendship and teamwork\n- Overcoming adversity\n- Discovery and exploration\n\n### Character Ideas\n- Protagonist with unique abilities\n- Loyal companion\n- Formidable antagonist\n\n### Plot Ideas\n- Quest to save the world\n- Journey of self-discovery\n- Mystery to solve';
   }
 
-  return executeWithFallback(async provider => {
-    const model = getModel(provider, 'fast');
-    const safeContext = context.substring(0, 50000);
+  // Use API route to avoid CORS issues in browser
+  const response = await fetch('/api/ai/brainstorm', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      context: context.substring(0, 50000),
+      field,
+      provider: config.defaultProvider,
+    }),
+  });
 
-    let prompt = '';
-    if (field === 'title')
-      prompt = `Generate a catchy book title for: "${safeContext}". Output ONLY title.`;
-    else if (field === 'style')
-      prompt = `Suggest a genre/style for: "${safeContext}". Output ONLY style.`;
-    else if (field === 'idea')
-      prompt = `Enhance this concept into a detailed paragraph: "${safeContext}"`;
-
-    const response = await generateText({
-      model,
-      prompt,
-      temperature: 0.8,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    aiLogger.error('Brainstorm API error', {
+      status: response.status,
+      error: error.error || error.message,
     });
+    throw new Error(error.error || error.message || `API request failed: ${response.status}`);
+  }
 
-    return response.text?.trim().replace(/^"|"$/g, '') ?? '';
-  }, 'brainstormProject');
+  const data = await response.json();
+  return data.text?.trim().replace(/^"|"$/g, '') ?? '';
 };
 
 /**

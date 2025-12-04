@@ -82,7 +82,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <Database className='h-5 w-5 text-primary' aria-hidden='true' />
           </div>
           <div className='hidden md:block'>
-            <h1 className='text-lg font-bold leading-none'>Novelist.ai</h1>
+            <span className='text-lg font-bold leading-none'>Novelist.ai</span>
             <span className='font-mono text-xs text-muted-foreground'>GOAP Engine v0.5.0</span>
           </div>
         </div>

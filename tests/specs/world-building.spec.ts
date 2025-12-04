@@ -7,7 +7,10 @@ test.describe('World Building E2E Tests', () => {
     await setupGeminiMock(page);
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
+
+    // Use role-based waiting instead of hardcoded timeout
+    await expect(page.getByRole('navigation')).toBeVisible();
+    await expect(page.getByTestId('nav-dashboard')).toBeVisible();
   });
 
   test('should access dashboard', async ({ page }) => {
@@ -18,10 +21,11 @@ test.describe('World Building E2E Tests', () => {
   test('should have functional navigation', async ({ page }) => {
     // Dashboard
     await page.getByTestId('nav-dashboard').click();
+    await page.waitForLoadState('domcontentloaded');
     await expect(page.getByTestId('nav-dashboard')).toBeVisible();
 
-    // Settings
-    await page.getByTestId('nav-settings').click();
-    await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
+    // Settings using role-based selector
+    await page.getByRole('button', { name: /settings/i }).click();
+    await expect(page.getByTestId('settings-view')).toBeVisible();
   });
 });

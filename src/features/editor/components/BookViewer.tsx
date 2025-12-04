@@ -466,9 +466,9 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
               data-testid='overview-panel'
             >
               <div className='mb-8 border-b border-border pb-4'>
-                <h1 className='font-serif text-2xl font-bold text-foreground md:text-3xl'>
+                <h2 className='font-serif text-2xl font-bold text-foreground md:text-3xl'>
                   {project.title}
-                </h1>
+                </h2>
                 <p className='mt-1 text-sm text-muted-foreground'>{project.style}</p>
               </div>
               <div className='space-y-8'>
@@ -614,9 +614,9 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
                     </div>
                   </div>
                 </div>
-                <h1 className='pb-2 font-serif text-3xl font-bold leading-tight tracking-tight text-foreground md:text-5xl'>
+                <h2 className='pb-2 font-serif text-3xl font-bold leading-tight tracking-tight text-foreground md:text-5xl'>
                   {selectedChapter.title}
-                </h1>
+                </h2>
                 <div className='h-px w-full bg-gradient-to-r from-border via-border/50 to-transparent' />
               </div>
 

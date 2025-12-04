@@ -124,13 +124,14 @@ jobs:
           retention-days: 7
           compression-level: 9
 
-  # E2E Tests (Separate job with caching)
+  # E2E Tests (Separate job with enhanced caching and retries)
   e2e-tests:
     name: 🧪 E2E Tests [Shard ${{ matrix.shard }}/3]
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     needs: build-and-test
     strategy:
+      fail-fast: false
       matrix:
         shard: [1, 2, 3]
     steps:
@@ -148,19 +149,66 @@ jobs:
           node-version: "20"
           cache: "pnpm"
 
+      - name: Install system dependencies for Playwright
+        run: |
+          # Install additional system dependencies for browser stability
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-6 \
+            libx11-xcb1 \
+            libxcb1 \
+            libxcomposite1 \
+            libxcursor1 \
+            libxdamage1 \
+            libxext6 \
+            libxfixes3 \
+            libxi6 \
+            libxrandr2 \
+            libxrender1 \
+            libxss1 \
+            libxtst6 \
+            libnss3 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libdrm2 \
+            libgbm1 \
+            libgtk-3-0 \
+            libxshmfence1 \
+            ca-certificates \
+            fonts-liberation \
+            wget
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         id: playwright-cache
         with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/ms-playwright/chromium-*
+            ~/.cache/ms-playwright/firefox-*
+            ~/.cache/ms-playwright/webkit-*
+          key: ${{ runner.os }}-playwright-browsers-${{ hashFiles('**/pnpm-lock.yaml', 'package.json') }}-${{ matrix.shard }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-browsers-${{ hashFiles('**/pnpm-lock.yaml', 'package.json') }}-
+            ${{ runner.os }}-playwright-browsers-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browsers with system dependencies
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps
+        run: |
+          # Install Playwright browsers with all system dependencies
+          pnpm exec playwright install --with-deps chromium
+          echo "✅ Playwright browsers installed successfully"
+
+      - name: Verify Playwright installation
+        run: |
+          echo "🔍 Verifying Playwright installation..."
+          pnpm exec playwright --version
+          echo "📦 Available browsers:"
+          ls -la ~/.cache/ms-playwright/ 2>/dev/null || echo "No browser cache found"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v6
@@ -168,17 +216,64 @@ jobs:
           name: production-build-${{ github.sha }}
           path: dist/
 
-      - name: Run Playwright tests
-        run: pnpm exec playwright test --shard=${{ matrix.shard }}/3
-        env:
-          CI: true
+      - name: Run Playwright tests with enhanced debugging
+        run: |
+          echo "🧪 Starting E2E tests for shard ${{ matrix.shard }}/3"
+          echo "📋 Test configuration:"
+          echo "  - Workers: 1 (to avoid conflicts with sharding)"
+          echo "  - Retries: 2 (for CI stability)"
+          echo "  - Timeout: 90s per test"
+          echo "  - CI Mode: Enabled"
 
-      - name: Upload Playwright report
+          # Set enhanced environment variables for CI stability
+          export CI=true
+          export PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright
+          export DEBUG=pw:browser
+          export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
+          export NODE_ENV=test
+
+          # Run tests with automatic retries and better error reporting
+          timeout 2400 pnpm exec playwright test \
+            --shard=${{ matrix.shard }}/3 \
+            --workers=1 \
+            --reporter=list,json,junit \
+            --outputDir=test-results \
+            --trace=on-first-retry \
+            --video=retain-on-failure \
+            --screenshot=only-on-failure \
+            --max-failures=5 \
+            || {
+              echo "❌ Tests failed or timed out"
+              echo "📊 Collecting debug information..."
+              echo "🐍 Browser processes:"
+              ps aux | grep -E "(chromium|firefox|webkit)" || echo "No browser processes found"
+              echo "💾 Disk space:"
+              df -h
+              echo "🧠 Memory usage:"
+              free -h
+              echo "📁 Playwright cache contents:"
+              ls -la ~/.cache/ms-playwright/ 2>/dev/null || echo "No cache directory"
+              exit 1
+            }
+
+      - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-shard-${{ matrix.shard }}-${{ github.sha }}
-          path: playwright-report/
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+      - name: Upload test results summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary-shard-${{ matrix.shard }}-${{ github.sha }}
+          path: |
+            test-results/results.json
+            test-results/junit.xml
           retention-days: 7
 
   # Deployment gate (only for main branch)

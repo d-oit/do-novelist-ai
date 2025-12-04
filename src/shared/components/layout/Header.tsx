@@ -134,9 +134,9 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
             </div>
             <div className='hidden md:block'>
               <div className='flex items-center gap-2'>
-                <h1 className='text-shadow-sm bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-lg font-bold leading-none text-transparent'>
+                <span className='text-shadow-sm bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-lg font-bold leading-none text-transparent'>
                   Novelist.ai
-                </h1>
+                </span>
                 <Sparkles className='h-4 w-4 text-primary/70' aria-hidden='true' />
               </div>
               <span className='font-mono text-xs tracking-wide text-muted-foreground'>

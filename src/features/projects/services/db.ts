@@ -54,8 +54,8 @@ export const getStoredConfig = (): DbConfig => {
   }
 
   // 2. Check Environment (System defaults)
-  const envUrl = typeof process !== 'undefined' ? process.env.TURSO_DATABASE_URL : '';
-  const envToken = typeof process !== 'undefined' ? process.env.TURSO_AUTH_TOKEN : '';
+  const envUrl = import.meta.env?.VITE_TURSO_DATABASE_URL || '';
+  const envToken = import.meta.env?.VITE_TURSO_AUTH_TOKEN || '';
 
   return {
     url: envUrl ?? '',

@@ -58,9 +58,11 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
         <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
           <div className='flex h-16 items-center justify-between'>
             <div className='flex items-center'>
-              <h1 className='text-xl font-semibold text-gray-900 dark:text-white'>Novelist.ai</h1>
+              <span className='text-xl font-semibold text-gray-900 dark:text-white'>
+                Novelist.ai
+              </span>
             </div>
-            <nav className='hidden space-x-8 md:flex'>
+            <div className='hidden space-x-8 md:flex'>
               <button
                 onClick={() => onNavigate('dashboard')}
                 className='px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
@@ -79,7 +81,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
               >
                 Settings
               </button>
-            </nav>
+            </div>
             <button
               onClick={onNewProject}
               className='inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95'
@@ -91,12 +93,12 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
         </div>
       </header>
 
-      <main className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
         {/* Hero Section */}
         <div className='mb-12 text-center'>
-          <h1 className='text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl'>
+          <h2 className='text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl'>
             My Projects
-          </h1>
+          </h2>
           <p className='mx-auto mt-3 max-w-2xl text-xl text-gray-500 dark:text-gray-400'>
             Manage your ongoing manuscripts and generated ebooks.
           </p>
@@ -225,7 +227,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
             </section>
           </>
         )}
-      </main>
+      </div>
     </div>
   );
 };

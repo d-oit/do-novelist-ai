@@ -7,6 +7,9 @@ test.describe('Settings Panel E2E Tests', () => {
     await setupGeminiMock(page);
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+
+    // Wait for the main navigation to be fully loaded
+    await expect(page.getByRole('navigation')).toBeVisible();
     await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
   });
 
