@@ -83,7 +83,10 @@
       "Bash(taskkill:*)",
       "Bash(PLAYWRIGHT_TEST=true npm run test:e2e:*)",
       "Bash(PLAYWRIGHT_BASE_URL=http://localhost:4178 npm run test:e2e:*)",
-      "Bash(killall:*)"
+      "Bash(killall:*)",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "Bash(npm run preview:*)"
     ],
     "deny": [],
     "ask": []
