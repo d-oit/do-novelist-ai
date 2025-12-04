@@ -1,29 +1,35 @@
 ---
 name: mock-infrastructure-engineer
-version: 1.0.0
-tags: [testing, msw, mocks, fixtures, playwright]
 description:
-  Specialized agent for creating and optimizing MSW (Mock Service Worker)
-  handlers, test fixtures, and mock infrastructure for Playwright E2E tests.
-  Focus on AI Gateway mocking, performance optimization, and maintainable test
-  data.
+  Creates and optimizes MSW (Mock Service Worker) handlers for Playwright E2E
+  tests, implementing handler caching, fixture management, and AI Gateway
+  mocking patterns. Use when mock setup is slow or test data needs
+  centralization.
 ---
 
-# Mock Infrastructure Engineer Agent
+# Mock Infrastructure Engineer
 
-## Purpose
+## Quick Start
 
-Design, implement, and optimize mock infrastructure for E2E testing using MSW
-(Mock Service Worker). Focus on AI Gateway mocking, handler performance, fixture
-management, and test data consistency.
+This skill optimizes mock infrastructure for E2E tests:
 
-## Capabilities
+1. **Handler caching**: Reduce mock setup from 1.7s to 200ms per test (88%
+   faster)
+2. **Fixture management**: Centralize test data for consistency
+3. **AI Gateway mocking**: Mock Gemini API responses efficiently
 
-### 1. MSW Handler Optimization
+### When to Use
 
-**Current Optimized Pattern** (88% faster setup):
+- Mock setup overhead exceeds 500ms per test
+- E2E tests need AI Gateway mocking
+- Test data scattered across files
+- Inconsistent responses across test runs
 
-**Handler Caching System**:
+## Optimized Mock Pattern
+
+### Handler Caching System
+
+This pattern achieved 88% performance improvement:
 
 ```typescript
 // tests/utils/mock-ai-gateway.ts
@@ -35,40 +41,24 @@ interface GeminiMockConfig {
   customResponse?: any;
 }
 
-// Pre-built static response (95% faster)
+// Pre-built static response (Object.freeze prevents mutation)
 const DEFAULT_MOCK_RESPONSE = Object.freeze({
   candidates: [
     {
       content: {
-        parts: [
-          {
-            text: 'This is a mocked AI response for testing purposes.',
-          },
-        ],
+        parts: [{ text: 'This is a mocked AI response for testing purposes.' }],
         role: 'model',
       },
       finishReason: 'STOP',
       index: 0,
-      safetyRatings: [
-        {
-          category: 'HARM_CATEGORY_HARASSMENT',
-          probability: 'NEGLIGIBLE',
-        },
-      ],
     },
   ],
-  promptFeedback: {
-    safetyRatings: [],
-  },
 });
 
-// Handler cache (94% faster)
+// Handler cache (reuse handlers across tests)
 const handlerCache = new Map<string, (route: Route) => Promise<void>>();
 
-// Cached route handler factory
-function createGeminiRouteHandler(
-  config: GeminiMockConfig = {},
-): (route: Route) => Promise<void> {
+function createGeminiRouteHandler(config: GeminiMockConfig = {}) {
   const { shouldFail = false, delay = 0, customResponse } = config;
 
   return async (route: Route) => {
@@ -90,7 +80,7 @@ function createGeminiRouteHandler(
   };
 }
 
-// Optimized setup function (88% faster)
+// Optimized setup function
 export async function setupGeminiMock(
   page: Page,
   config: GeminiMockConfig = {},
@@ -103,21 +93,19 @@ export async function setupGeminiMock(
     handlerCache.set(cacheKey, handler);
   }
 
-  // Single route registration (87% faster)
   await page.route('**/v1beta/models/**', handler);
 }
 ```
 
 **Performance Results**:
 
-- Mock Setup per Test: 1.7s → 200ms (88% faster)
-- Total Mock Overhead: 93.5s → 11s (88% faster)
-- Memory Allocations: ~110KB → ~6KB (95% reduction)
-- Handler Creations: 55+ → 2-4 (96% reduction)
+- Mock setup: 1.7s → 200ms (88% faster)
+- Memory allocations: 110KB → 6KB (95% reduction)
+- Handler creations: 55+ → 2-4 (96% reduction)
 
-### 2. AI Gateway Response Patterns
+## AI Gateway Response Patterns
 
-**Success Response**:
+### Success Response
 
 ```typescript
 const successResponse = {
@@ -134,28 +122,14 @@ const successResponse = {
           category: 'HARM_CATEGORY_HARASSMENT',
           probability: 'NEGLIGIBLE',
         },
-        {
-          category: 'HARM_CATEGORY_HATE_SPEECH',
-          probability: 'NEGLIGIBLE',
-        },
-        {
-          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-          probability: 'NEGLIGIBLE',
-        },
-        {
-          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-          probability: 'NEGLIGIBLE',
-        },
       ],
     },
   ],
-  promptFeedback: {
-    safetyRatings: [],
-  },
+  promptFeedback: { safetyRatings: [] },
 };
 ```
 
-**Error Response**:
+### Error Response
 
 ```typescript
 const errorResponse = {
@@ -167,15 +141,15 @@ const errorResponse = {
 };
 ```
 
-**Streaming Response** (for real-time generation):
+### Streaming Response
 
 ```typescript
 async function handleStreamingRequest(route: Route) {
   const chunks = [
-    'data: {"candidates":[{"content":{"parts":[{"text":"First "}]}}]}\n\n',
-    'data: {"candidates":[{"content":{"parts":[{"text":"chunk "}]}}]}\n\n',
-    'data: {"candidates":[{"content":{"parts":[{"text":"here"}]}}]}\n\n',
-    'data: [DONE]\n\n',
+    'data: {"candidates":[{"content":{"parts":[{"text":"First "}]}}]}\\n\\n',
+    'data: {"candidates":[{"content":{"parts":[{"text":"chunk "}]}}]}\\n\\n',
+    'data: {"candidates":[{"content":{"parts":[{"text":"here"}]}}]}\\n\\n',
+    'data: [DONE]\\n\\n',
   ];
 
   await route.fulfill({
@@ -186,28 +160,28 @@ async function handleStreamingRequest(route: Route) {
 }
 ```
 
-### 3. Test Fixture Management
+## Fixture Management
 
-**Fixture Registry Pattern**:
+### Fixture Registry Pattern
 
 ```typescript
 // tests/fixtures/ai-responses.fixture.ts
 export const aiResponseFixtures = {
   outline: {
-    text: 'Chapter 1: Introduction\nChapter 2: Rising Action\nChapter 3: Climax',
+    text: 'Chapter 1: Introduction\\nChapter 2: Rising Action\\nChapter 3: Climax',
     metadata: { chapters: 3, wordCount: 15 },
   },
   character: {
-    text: 'Name: John Doe\nAge: 35\nBackground: Former detective',
+    text: 'Name: John Doe\\nAge: 35\\nBackground: Former detective',
     metadata: { fields: 3 },
   },
   worldBuilding: {
-    text: 'Location: New York City\nTime Period: 2024\nSetting: Urban fantasy',
+    text: 'Location: New York City\\nTime Period: 2024\\nSetting: Urban fantasy',
     metadata: { elements: 3 },
   },
 };
 
-// Usage in tests:
+// Usage in tests
 import { aiResponseFixtures } from '../fixtures/ai-responses.fixture';
 
 await setupGeminiMock(page, {
@@ -224,7 +198,7 @@ await setupGeminiMock(page, {
 });
 ```
 
-**Fixture Factory Pattern**:
+### Fixture Factory Pattern
 
 ```typescript
 // tests/fixtures/project.fixture.ts
@@ -243,212 +217,39 @@ export function createProjectFixture(
   };
 }
 
-// Usage:
+// Usage
 const project = createProjectFixture({ title: 'My Novel', genre: 'scifi' });
 ```
 
-### 4. Global Setup/Teardown
+## Global Setup for Performance
 
-**Browser Warm-up** (66% faster first test):
+### Browser Warm-Up
+
+Add to `tests/global-setup.ts` for 66% faster first test:
 
 ```typescript
-// tests/global-setup.ts
 import { chromium, type FullConfig } from '@playwright/test';
 
 export default async function globalSetup(config: FullConfig): Promise<void> {
-  console.log('🚀 Warming up browser...');
-
-  // Launch and close browser to warm up
   const browser = await chromium.launch();
   await browser.close();
-
-  console.log('✅ Browser ready');
 }
 ```
 
-**Resource Cleanup**:
+Configure in `playwright.config.ts`:
 
 ```typescript
-// tests/global-teardown.ts
-import type { FullConfig } from '@playwright/test';
-
-export default async function globalTeardown(
-  config: FullConfig,
-): Promise<void> {
-  console.log('🧹 Cleaning up test resources...');
-
-  // Clear handler cache
-  if (global.handlerCache) {
-    global.handlerCache.clear();
-  }
-
-  console.log('✅ Cleanup complete');
-}
-```
-
-**Configuration**:
-
-```typescript
-// playwright.config.ts
 export default defineConfig({
   globalSetup: require.resolve('./tests/global-setup'),
-  globalTeardown: require.resolve('./tests/global-teardown'),
   // ... rest of config
 });
 ```
 
-### 5. Mock Registry System
+## Test Examples
 
-**Centralized Registry**:
-
-```typescript
-// tests/utils/mock-registry.ts
-type MockHandler = (route: Route) => Promise<void>;
-
-class MockRegistry {
-  private handlers = new Map<string, MockHandler>();
-  private cache = new Map<string, any>();
-
-  register(name: string, handler: MockHandler): void {
-    this.handlers.set(name, handler);
-  }
-
-  get(name: string): MockHandler | undefined {
-    return this.handlers.get(name);
-  }
-
-  cacheResponse(key: string, response: any): void {
-    this.cache.set(key, Object.freeze(response));
-  }
-
-  getCached(key: string): any | undefined {
-    return this.cache.get(key);
-  }
-
-  clear(): void {
-    this.handlers.clear();
-    this.cache.clear();
-  }
-}
-
-export const mockRegistry = new MockRegistry();
-
-// Pre-register common handlers
-mockRegistry.register('gemini-success', createGeminiRouteHandler());
-mockRegistry.register(
-  'gemini-error',
-  createGeminiRouteHandler({ shouldFail: true }),
-);
-mockRegistry.register('gemini-slow', createGeminiRouteHandler({ delay: 1000 }));
-```
-
-**Usage in Tests**:
+### Example 1: Custom Response Mock
 
 ```typescript
-import { mockRegistry } from '../utils/mock-registry';
-
-test('should handle AI generation', async ({ page }) => {
-  const handler = mockRegistry.get('gemini-success');
-  await page.route('**/v1beta/models/**', handler);
-
-  // Test continues...
-});
-```
-
-## Integration Points
-
-### With e2e-test-optimizer
-
-- Provide optimized mock setup patterns
-- Reduce mock overhead to improve test speed
-- Coordinate mock caching strategies
-
-### With playwright-skill
-
-- Supply mock handlers for test execution
-- Ensure consistent test data across runs
-- Provide fixture utilities
-
-### With ci-optimization-specialist
-
-- Optimize mock setup for CI environment
-- Coordinate resource allocation
-- Share performance metrics
-
-## Workflow
-
-### Phase 1: Analysis
-
-1. Identify API endpoints requiring mocking
-2. Analyze current mock setup overhead
-3. Review test data requirements
-4. Identify performance bottlenecks
-
-### Phase 2: Design
-
-1. Design mock response patterns
-2. Create fixture structure
-3. Plan caching strategy
-4. Design registry system
-
-### Phase 3: Implementation
-
-1. Implement optimized handlers
-2. Create fixture factories
-3. Set up global setup/teardown
-4. Build mock registry
-
-### Phase 4: Validation
-
-1. Measure mock setup performance
-2. Verify test isolation maintained
-3. Validate response consistency
-4. Test cache efficiency
-
-### Phase 5: Documentation
-
-1. Document mock patterns
-2. Create fixture usage guide
-3. Write migration guide
-4. Establish best practices
-
-## Quality Gates
-
-### Pre-Implementation
-
-- [ ] API endpoints identified
-- [ ] Current performance baseline captured
-- [ ] Mock strategy documented
-- [ ] Test data requirements defined
-
-### During Implementation
-
-- [ ] Each mock handler tested independently
-- [ ] Test isolation verified
-- [ ] No breaking changes to tests
-- [ ] Performance improvements measured
-
-### Post-Implementation
-
-- [ ] Mock setup overhead <250ms per test
-- [ ] Handler cache hit rate >90%
-- [ ] All tests pass with new mocks
-- [ ] Documentation complete
-
-## Success Metrics
-
-- **Mock Setup Time**: <200ms per test (from 1.7s)
-- **Total Overhead**: <15s (from 93.5s)
-- **Cache Hit Rate**: >90%
-- **Memory Usage**: <10KB per test (from 110KB)
-- **Handler Reuse**: 96% reduction in creations
-
-## Examples
-
-### Example 1: Create Custom Response Mock
-
-```typescript
-// Test-specific mock with custom response
 test('should generate character description', async ({ page }) => {
   await setupGeminiMock(page, {
     customResponse: {
@@ -457,7 +258,7 @@ test('should generate character description', async ({ page }) => {
           content: {
             parts: [
               {
-                text: 'Name: Sarah Chen\nAge: 28\nOccupation: Software Engineer',
+                text: 'Name: Sarah Chen\\nAge: 28\\nOccupation: Software Engineer',
               },
             ],
             role: 'model',
@@ -474,7 +275,7 @@ test('should generate character description', async ({ page }) => {
 });
 ```
 
-### Example 2: Test Error Handling
+### Example 2: Error Handling
 
 ```typescript
 test('should handle AI generation failure', async ({ page }) => {
@@ -488,7 +289,7 @@ test('should handle AI generation failure', async ({ page }) => {
 });
 ```
 
-### Example 3: Test Slow Response
+### Example 3: Loading State
 
 ```typescript
 test('should show loading state during generation', async ({ page }) => {
@@ -497,7 +298,7 @@ test('should show loading state during generation', async ({ page }) => {
   await page.goto('/ai-generation');
   await page.getByRole('button', { name: 'Generate' }).click();
 
-  // Loading indicator should appear
+  // Loading indicator appears
   await expect(page.getByTestId('loading-spinner')).toBeVisible();
 
   // Wait for response
@@ -508,64 +309,37 @@ test('should show loading state during generation', async ({ page }) => {
 });
 ```
 
-### Example 4: Use Fixture Factory
-
-```typescript
-import { createProjectFixture } from '../fixtures/project.fixture';
-
-test('should display project details', async ({ page }) => {
-  const project = createProjectFixture({
-    title: 'Epic Fantasy Novel',
-    genre: 'fantasy',
-    targetWordCount: 100000,
-  });
-
-  // Mock API to return fixture
-  await page.route('**/api/projects/*', async route => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(project),
-    });
-  });
-
-  await page.goto(`/projects/${project.id}`);
-  await expect(page.getByText('Epic Fantasy Novel')).toBeVisible();
-  await expect(page.getByText('Target: 100,000 words')).toBeVisible();
-});
-```
-
 ## Best Practices
 
-### 1. Always Use Handler Caching
+### Always Use Handler Caching
 
 ```typescript
-// ✅ GOOD: Use caching
+// ✅ Use caching
 await setupGeminiMock(page, config);
 
-// ❌ BAD: Create handler inline every time
+// ❌ Create handler inline (slow)
 await page.route('**/api/**', async route => {
   // Handler creation on every call
 });
 ```
 
-### 2. Freeze Static Responses
+### Freeze Static Responses
 
 ```typescript
-// ✅ GOOD: Frozen response (immutable)
+// ✅ Frozen response (immutable)
 const RESPONSE = Object.freeze({ data: 'value' });
 
-// ❌ BAD: Mutable response (can be modified)
+// ❌ Mutable response (can be modified)
 const response = { data: 'value' };
 ```
 
-### 3. Use Fixtures for Test Data
+### Use Fixtures for Test Data
 
 ```typescript
-// ✅ GOOD: Reusable fixture
+// ✅ Reusable fixture
 const project = createProjectFixture({ title: 'Test' });
 
-// ❌ BAD: Inline test data (hard to maintain)
+// ❌ Inline test data (hard to maintain)
 const project = {
   id: '123',
   title: 'Test',
@@ -574,79 +348,56 @@ const project = {
 };
 ```
 
-### 4. Minimize Async Operations
+### Minimize Async Operations
 
 ```typescript
-// ✅ GOOD: Single route registration
+// ✅ Single route registration
 await page.route('**/api/**', cachedHandler);
 
-// ❌ BAD: Multiple route registrations
+// ❌ Multiple route registrations (slower)
 await page.route('**/api/endpoint1', handler1);
 await page.route('**/api/endpoint2', handler2);
 await page.route('**/api/endpoint3', handler3);
 ```
 
-## Common Issues & Solutions
+## Common Issues
 
-### Issue: Mock not intercepting requests
+**Mock not intercepting requests**
 
-**Solution**: Check route pattern matches request URL
+- Debug route matching:
+  `page.route('**/*', route => console.log(route.request().url()))`
+- Verify pattern matches actual request URL
 
-```typescript
-// Debug route matching
-await page.route('**/*', async route => {
-  console.log('Request:', route.request().url());
-  await route.continue();
-});
-```
+**Responses inconsistent across tests**
 
-### Issue: Responses inconsistent across tests
+- Use `Object.freeze()` for static responses
+- Implement fixture factories for dynamic data
 
-**Solution**: Use frozen objects and fixtures
+**Mock setup still slow despite caching**
 
-```typescript
-const RESPONSE = Object.freeze(createResponseFixture());
-```
+- Verify cache is working: `console.log('Cache size:', handlerCache.size)`
+- Should be small (2-4), not growing per test
 
-### Issue: Mock setup slow despite optimization
+**Test isolation broken (state leaking)**
 
-**Solution**: Verify handler caching working
+- Clear cache between tests if needed: `handlerCache.clear()`
+- Or use unique config per test
 
-```typescript
-console.log('Cache size:', handlerCache.size);
-// Should be small (2-4), not growing per test
-```
+## Success Metrics
 
-### Issue: Test isolation broken (state leaking)
+- Mock setup time < 200ms per test
+- Total mock overhead < 15s for full suite
+- Cache hit rate > 90%
+- Memory usage < 10KB per test
+- Handler reuse: 96% reduction in creations
 
-**Solution**: Clear cache between tests or use unique configs
+## References
 
-```typescript
-test.afterEach(() => {
-  handlerCache.clear();
-});
-```
+See tests/docs/ for detailed analysis:
 
-## Documentation References
+- MOCK-OPTIMIZATION-GUIDE.md - Implementation patterns
+- MOCK-PERFORMANCE-ANALYSIS.md - Optimization results
 
-- Mock Optimization Guide: `tests/docs/MOCK-OPTIMIZATION-GUIDE.md`
-- Performance Analysis: `tests/docs/MOCK-PERFORMANCE-ANALYSIS.md`
-- Migration Guide: `tests/docs/MOCK-MIGRATION-GUIDE.md`
-- Playwright Route Mocking: https://playwright.dev/docs/network
+External documentation:
 
-## Invocation
-
-Use this skill when:
-
-- Need to create or optimize MSW mock handlers
-- E2E tests require AI Gateway mocking
-- Mock setup overhead impacting test performance
-- Need to manage test fixtures and data
-- Creating reusable mock infrastructure
-
-**Example Usage**:
-
-```
-Please optimize the mock infrastructure using the mock-infrastructure-engineer skill.
-Focus on reducing mock setup overhead and creating reusable fixtures.
-```
+- Playwright Network Mocking: https://playwright.dev/docs/network

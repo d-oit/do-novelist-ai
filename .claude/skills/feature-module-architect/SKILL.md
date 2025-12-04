@@ -1,703 +1,314 @@
 ---
 name: feature-module-architect
-version: 1.0.0
-tags: [architecture, features, structure, colocation, scaffolding]
 description:
-  Specialized agent for scaffolding feature modules following the codebase's
-  feature-based architecture. Enforces 500 LOC file limit, colocation principle,
-  and standardized structure patterns.
+  Scaffolds feature modules following feature-based architecture with colocation
+  principle and 500 LOC file limit. Use when creating new features or
+  refactoring large files into modular structure.
 ---
 
-# Feature Module Architect Agent
+# Feature Module Architect
 
-## Purpose
+## Quick Start
 
-Design and scaffold feature modules following the established feature-based
-architecture. Ensure colocation, enforce file size limits, maintain consistent
-structure, and integrate with existing patterns.
+This skill scaffolds feature modules following project architecture:
 
-## Capabilities
+1. **Feature structure**: Standard directory layout with components, hooks,
+   services, types, utils
+2. **File size limit**: 500 LOC maximum per file (hard limit)
+3. **Colocation**: Keep related code together within feature directory
+4. **Public API**: Export only what other features need via `index.ts`
 
-### 1. Feature Module Structure
+### When to Use
 
-**Standard Feature Directory Pattern**:
+- Creating new feature modules
+- Refactoring files exceeding 500 LOC
+- Organizing scattered feature code
+- Need feature architecture guidance
+
+## Standard Feature Structure
 
 ```
 src/features/{feature-name}/
-├── components/           # Feature-specific React components
+├── components/           # React components for this feature
 │   ├── FeatureComponent.tsx
 │   ├── FeatureComponent.test.tsx
 │   └── index.ts
-├── hooks/               # Feature-specific custom hooks
+├── hooks/               # Custom React hooks
 │   ├── useFeatureData.ts
 │   ├── useFeatureData.test.ts
 │   └── index.ts
-├── services/            # Feature-specific business logic
+├── services/            # Business logic and API calls
 │   ├── featureService.ts
 │   ├── featureService.test.ts
 │   └── index.ts
-├── types/               # Feature-specific TypeScript types
+├── types/               # TypeScript interfaces and types
 │   ├── feature.types.ts
 │   └── index.ts
-├── utils/               # Feature-specific utilities
+├── utils/               # Pure utility functions
 │   ├── featureUtils.ts
 │   ├── featureUtils.test.ts
 │   └── index.ts
-└── index.ts             # Public API exports
+└── index.ts             # Public API (exports for other features)
 ```
 
-**Real-World Examples from Codebase**:
+## Existing Feature Examples
 
-1. **`src/features/ai-generation/`** (AI content generation):
-   - `components/` - GenerationForm, GenerationHistory
-   - `hooks/` - useGeneration, useAIProvider
-   - `services/` - generationService, aiGatewayClient
-   - `types/` - GenerationRequest, GenerationResponse
-   - `utils/` - promptBuilder, responseParser
+**AI Generation** (`src/features/ai-generation/`):
 
-2. **`src/features/project-management/`** (Project CRUD):
-   - `components/` - ProjectCard, ProjectList, ProjectForm
-   - `hooks/` - useProjects, useProjectMutations
-   - `services/` - projectService
-   - `types/` - Project, ProjectMetadata
-   - `utils/` - projectValidation
+- Components: GenerationForm, GenerationHistory
+- Hooks: useGeneration, useAIProvider
+- Services: generationService, aiGatewayClient
+- Types: GenerationRequest, GenerationResponse
 
-3. **`src/features/world-building/`** (Story world management):
-   - `components/` - WorldMap, LocationEditor
-   - `hooks/` - useWorldState
-   - `services/` - worldService
-   - `types/` - WorldElement, Location
-   - `utils/` - worldGenerator
+**Project Management** (`src/features/project-management/`):
 
-### 2. File Size Enforcement
+- Components: ProjectCard, ProjectList, ProjectForm
+- Hooks: useProjects, useProjectMutations
+- Services: projectService
+- Types: Project, ProjectMetadata
 
-**Hard Limit**: 500 LOC per file (enforced by AGENTS.md)
+**World Building** (`src/features/world-building/`):
 
-**Detection**:
+- Components: WorldMap, LocationEditor
+- Hooks: useWorldState
+- Services: worldService
+- Types: WorldElement, Location
+
+## File Size Enforcement
+
+**Hard Limit**: 500 LOC per file (from AGENTS.md)
+
+Check file sizes:
 
 ```bash
-# Check file line count
+# Count lines in all TypeScript files
 wc -l src/features/**/*.ts src/features/**/*.tsx
 
-# Find files exceeding limit
+# Find files exceeding 500 LOC
 find src/features -name "*.ts" -o -name "*.tsx" | xargs wc -l | awk '$1 > 500'
 ```
 
-**Refactoring Strategy** (if file exceeds 500 LOC):
+### Refactoring Strategy
+
+When a file exceeds 500 LOC, split by responsibility:
 
 **Before** (600 LOC component):
 
 ```typescript
 // ProjectDashboard.tsx (600 LOC) ❌
 export const ProjectDashboard: React.FC = () => {
-  // 100 LOC of state and hooks
+  // 100 LOC of state/hooks
   // 200 LOC of handlers
   // 300 LOC of JSX
 };
 ```
 
-**After** (split into 3 files):
+**After** (split into 3 files, each <200 LOC):
 
 ```typescript
-// ProjectDashboard.tsx (150 LOC) ✅
-import { useProjectDashboard } from '../hooks/useProjectDashboard';
-import { ProjectStats } from './ProjectStats';
-import { ProjectActions } from './ProjectActions';
-
-export const ProjectDashboard: React.FC = () => {
-  const { projects, stats } = useProjectDashboard();
-  return (
-    <>
-      <ProjectStats stats={stats} />
-      <ProjectActions projects={projects} />
-    </>
-  );
-};
-
-// hooks/useProjectDashboard.ts (200 LOC) ✅
+// useProjectDashboard.ts (100 LOC)
 export function useProjectDashboard() {
-  // State and logic
+  // State and effects
 }
 
-// components/ProjectStats.tsx (150 LOC) ✅
-export const ProjectStats: React.FC<Props> = ({ stats }) => {
-  // Stats display
-};
-```
-
-### 3. Colocation Principle
-
-**Rule**: Keep related code together
-
-**Good Examples**:
-
-```
-✅ src/features/ai-generation/components/GenerationForm.tsx
-✅ src/features/ai-generation/components/GenerationForm.test.tsx
-✅ src/features/ai-generation/hooks/useGeneration.ts
-✅ src/features/ai-generation/hooks/useGeneration.test.ts
-```
-
-**Bad Examples**:
-
-```
-❌ src/components/ai/GenerationForm.tsx
-❌ src/hooks/useGeneration.ts (shared location)
-❌ src/tests/ai/GenerationForm.test.tsx
-```
-
-**Migration Pattern**:
-
-```bash
-# Move scattered files to feature folder
-mv src/components/ai/GenerationForm.tsx \
-   src/features/ai-generation/components/GenerationForm.tsx
-
-mv src/hooks/useGeneration.ts \
-   src/features/ai-generation/hooks/useGeneration.ts
-```
-
-### 4. Public API Pattern
-
-**Feature Index File** (`src/features/{feature}/index.ts`):
-
-```typescript
-// Export only public API (components, hooks, types)
-// Internal implementation details stay private
-
-// Components
-export { ProjectDashboard } from './components/ProjectDashboard';
-export { ProjectCard } from './components/ProjectCard';
-
-// Hooks
-export { useProjects } from './hooks/useProjects';
-export { useProjectMutations } from './hooks/useProjectMutations';
-
-// Types (only public interfaces)
-export type { Project, ProjectMetadata } from './types/project.types';
-
-// Services (only if needed externally)
-export { createProject, updateProject } from './services/projectService';
-
-// Do NOT export internal utilities, helpers, or implementation details
-```
-
-**Usage from Other Features**:
-
-```typescript
-// ✅ GOOD: Import from feature index
-import { ProjectCard, useProjects } from '@/features/project-management';
-
-// ❌ BAD: Import from internal files
-import { ProjectCard } from '@/features/project-management/components/ProjectCard';
-import { useProjects } from '@/features/project-management/hooks/useProjects';
-```
-
-### 5. Feature Scaffolding Template
-
-**Generate New Feature** (automation script):
-
-```typescript
-// scripts/create-feature.ts
-import fs from 'fs/promises';
-import path from 'path';
-
-interface FeatureOptions {
-  name: string;
-  description: string;
-  withDatabase?: boolean;
-  withAPI?: boolean;
+// projectDashboardHandlers.ts (100 LOC)
+export function createHandlers(projects: Project[]) {
+  // Event handlers
 }
 
-async function createFeature(options: FeatureOptions): Promise<void> {
-  const { name, description, withDatabase, withAPI } = options;
-  const featurePath = `src/features/${name}`;
-
-  // Create directory structure
-  await fs.mkdir(`${featurePath}/components`, { recursive: true });
-  await fs.mkdir(`${featurePath}/hooks`, { recursive: true });
-  await fs.mkdir(`${featurePath}/services`, { recursive: true });
-  await fs.mkdir(`${featurePath}/types`, { recursive: true });
-  await fs.mkdir(`${featurePath}/utils`, { recursive: true });
-
-  // Create component template
-  await fs.writeFile(
-    `${featurePath}/components/${capitalize(name)}Dashboard.tsx`,
-    generateComponentTemplate(name, description),
-  );
-
-  // Create hook template
-  await fs.writeFile(
-    `${featurePath}/hooks/use${capitalize(name)}.ts`,
-    generateHookTemplate(name),
-  );
-
-  // Create service template
-  await fs.writeFile(
-    `${featurePath}/services/${name}Service.ts`,
-    generateServiceTemplate(name, withDatabase, withAPI),
-  );
-
-  // Create types
-  await fs.writeFile(
-    `${featurePath}/types/${name}.types.ts`,
-    generateTypesTemplate(name),
-  );
-
-  // Create index
-  await fs.writeFile(`${featurePath}/index.ts`, generateIndexTemplate(name));
-
-  console.log(`✅ Feature "${name}" scaffolded successfully!`);
-}
-```
-
-**Component Template**:
-
-```typescript
-function generateComponentTemplate(name: string, description: string): string {
-  return `import React from 'react';
-import { use${capitalize(name)} } from '../hooks/use${capitalize(name)}';
-
-interface ${capitalize(name)}DashboardProps {
-  // Define props here
-}
-
-/**
- * ${description}
- *
- * @remarks
- * This component manages the main dashboard for ${name}.
- * Keep this file under 500 LOC - split into smaller components if needed.
- */
-export const ${capitalize(name)}Dashboard: React.FC<${capitalize(name)}DashboardProps> = () => {
-  const { data, loading, error } = use${capitalize(name)}();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-
-  return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">${capitalize(name)} Dashboard</h1>
-      {/* Add your UI here */}
-    </div>
-  );
-};
-`;
-}
-```
-
-**Hook Template**:
-
-```typescript
-function generateHookTemplate(name: string): string {
-  return `import { useState, useEffect } from 'react';
-import { ${name}Service } from '../services/${name}Service';
-import type { ${capitalize(name)}Data } from '../types/${name}.types';
-
-interface Use${capitalize(name)}Result {
-  data: ${capitalize(name)}Data | null;
-  loading: boolean;
-  error: Error | null;
-}
-
-/**
- * Custom hook for managing ${name} data
- *
- * @returns ${capitalize(name)} data, loading state, and error
- *
- * @example
- * const { data, loading, error } = use${capitalize(name)}();
- */
-export function use${capitalize(name)}(): Use${capitalize(name)}Result {
-  const [data, setData] = useState<${capitalize(name)}Data | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    const fetchData = async (): Promise<void> => {
-      try {
-        setLoading(true);
-        const result = await ${name}Service.getData();
-        setData(result);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Unknown error'));
-        setData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void fetchData();
-  }, []);
-
-  return { data, loading, error };
-}
-`;
-}
-```
-
-### 6. Integration Patterns
-
-**With Database** (LibSQL/Turso):
-
-```typescript
-// services/featureService.ts
-import { db } from '@/lib/db';
-import type { Feature } from '../types/feature.types';
-
-export const featureService = {
-  async getAll(): Promise<Feature[]> {
-    const result = await db.execute('SELECT * FROM features');
-    return result.rows as Feature[];
-  },
-
-  async create(data: Omit<Feature, 'id'>): Promise<Feature> {
-    const result = await db.execute({
-      sql: 'INSERT INTO features (name, data) VALUES (?, ?)',
-      args: [data.name, JSON.stringify(data)],
-    });
-    return { ...data, id: result.lastInsertRowid as string };
-  },
-};
-```
-
-**With AI Gateway**:
-
-```typescript
-// services/aiService.ts
-import { aiConfig } from '@/lib/ai-config';
-import type { GenerationRequest } from '../types/generation.types';
-
-export const aiService = {
-  async generate(request: GenerationRequest): Promise<string> {
-    const model = aiConfig.getDefaultModel();
-    const response = await model.generateText({
-      prompt: request.prompt,
-      maxTokens: request.maxTokens,
-    });
-    return response.text;
-  },
-};
-```
-
-**With State Management** (Zustand):
-
-```typescript
-// hooks/useFeatureStore.ts
-import { create } from 'zustand';
-import type { Feature } from '../types/feature.types';
-
-interface FeatureStore {
-  features: Feature[];
-  selectedFeature: Feature | null;
-  setFeatures: (features: Feature[]) => void;
-  selectFeature: (feature: Feature | null) => void;
-}
-
-export const useFeatureStore = create<FeatureStore>(set => ({
-  features: [],
-  selectedFeature: null,
-  setFeatures: features => set({ features }),
-  selectFeature: selectedFeature => set({ selectedFeature }),
-}));
-```
-
-## Integration Points
-
-### With typescript-guardian
-
-- Ensure strict TypeScript compliance
-- Validate type definitions
-- Check for `any` usage
-
-### With quality-engineer
-
-- Enforce quality gates (lint, test, typecheck)
-- Validate file size limits
-- Ensure test coverage
-
-### With frontend-design-system
-
-- Apply consistent UI patterns
-- Use design system components
-- Follow accessibility guidelines
-
-## Workflow
-
-### Phase 1: Planning
-
-1. Define feature scope and responsibilities
-2. Identify dependencies on other features
-3. Design public API (exports)
-4. Plan component hierarchy
-
-### Phase 2: Scaffolding
-
-1. Create feature directory structure
-2. Generate component templates
-3. Create hook and service templates
-4. Set up type definitions
-
-### Phase 3: Implementation
-
-1. Implement components (stay under 500 LOC)
-2. Implement hooks and business logic
-3. Add database integration if needed
-4. Write tests alongside implementation
-
-### Phase 4: Integration
-
-1. Update feature index (public API)
-2. Add navigation/routing if needed
-3. Integrate with existing features
-4. Update documentation
-
-### Phase 5: Validation
-
-1. Run lint and typecheck
-2. Verify all tests pass
-3. Check file size limits
-4. Review colocation compliance
-
-## Quality Gates
-
-### Pre-Implementation
-
-- [ ] Feature requirements documented
-- [ ] Directory structure planned
-- [ ] Public API designed
-- [ ] Dependencies identified
-
-### During Implementation
-
-- [ ] Each file <500 LOC
-- [ ] Colocation principle followed
-- [ ] Tests written alongside code
-- [ ] TypeScript strict mode compliant
-
-### Post-Implementation
-
-- [ ] All lint checks pass
-- [ ] All tests pass
-- [ ] File size limits enforced
-- [ ] Documentation updated
-
-## Success Metrics
-
-- **File Size Compliance**: 100% of files <500 LOC
-- **Colocation**: All related files in feature folder
-- **Test Coverage**: >80% coverage per feature
-- **Type Safety**: 0 `any` types, strict mode compliant
-
-## Examples
-
-### Example 1: Scaffold New Feature
-
-```bash
-# Create new feature: content-timeline
-npm run create-feature content-timeline \
-  --description "Timeline view of content versions" \
-  --with-database \
-  --with-api
-```
-
-**Result**:
-
-```
-src/features/content-timeline/
-├── components/
-│   ├── TimelineView.tsx (150 LOC)
-│   └── TimelineEvent.tsx (100 LOC)
-├── hooks/
-│   └── useTimeline.ts (120 LOC)
-├── services/
-│   └── timelineService.ts (180 LOC)
-├── types/
-│   └── timeline.types.ts (80 LOC)
-└── index.ts (20 LOC)
-```
-
-### Example 2: Refactor Large Component
-
-**Before** (ProjectDashboard.tsx - 650 LOC):
-
-```typescript
-export const ProjectDashboard: React.FC = () => {
-  // 150 LOC state/hooks
-  // 200 LOC handlers
-  // 300 LOC JSX
-};
-```
-
-**After** (split into 4 files, each <500 LOC):
-
-```typescript
-// components/ProjectDashboard.tsx (120 LOC)
+// ProjectDashboard.tsx (150 LOC)
 export const ProjectDashboard: React.FC = () => {
   const state = useProjectDashboard();
+  const handlers = createHandlers(state.projects);
+  return <div>{/* JSX */}</div>;
+};
+```
+
+## Colocation Principle
+
+Keep related code together:
+
+✅ **Good** - Feature-specific code within feature:
+
+```
+src/features/ai-generation/
+├── components/GenerationForm.tsx
+├── hooks/useGeneration.ts          # Only used by GenerationForm
+└── types/generation.types.ts        # Only used by this feature
+```
+
+❌ **Bad** - Scattered across global directories:
+
+```
+src/
+├── components/GenerationForm.tsx
+├── hooks/useGeneration.ts           # Generic hooks directory
+└── types/generation.types.ts        # Generic types directory
+```
+
+## Public API Pattern
+
+Each feature exports a public API via `index.ts`:
+
+```typescript
+// src/features/ai-generation/index.ts
+export { GenerationForm } from './components/GenerationForm';
+export { useGeneration } from './hooks/useGeneration';
+export type {
+  GenerationRequest,
+  GenerationResponse,
+} from './types/generation.types';
+
+// Keep internal utilities private (don't export)
+```
+
+**Usage by other features**:
+
+```typescript
+// ✅ Import from feature public API
+import { GenerationForm, useGeneration } from '@/features/ai-generation';
+
+// ❌ Import from internal paths (breaks encapsulation)
+import { GenerationForm } from '@/features/ai-generation/components/GenerationForm';
+```
+
+## Component Organization
+
+### Small Components (<100 LOC)
+
+Keep component and styles together:
+
+```typescript
+// Button.tsx (80 LOC)
+export const Button: React.FC<ButtonProps> = ({ children, ...props }) => {
   return (
-    <>
-      <ProjectHeader {...state} />
-      <ProjectGrid projects={state.projects} />
-      <ProjectActions {...state} />
-    </>
+    <button
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      {...props}
+    >
+      {children}
+    </button>
   );
 };
+```
 
-// hooks/useProjectDashboard.ts (180 LOC)
-export function useProjectDashboard() {
-  // State and logic
+### Large Components (>100 LOC)
+
+Extract hooks and handlers:
+
+```typescript
+// useProjectForm.ts
+export function useProjectForm(initialValues: Project) {
+  const [values, setValues] = useState(initialValues);
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (field: string, value: any) => {
+    setValues(prev => ({ ...prev, [field]: value }));
+  };
+
+  return { values, errors, handleChange };
 }
 
-// components/ProjectGrid.tsx (200 LOC)
-export const ProjectGrid: React.FC<Props> = ({ projects }) => {
-  // Grid display
+// ProjectForm.tsx (<150 LOC)
+export const ProjectForm: React.FC<ProjectFormProps> = ({ initialValues }) => {
+  const { values, errors, handleChange } = useProjectForm(initialValues);
+
+  return (
+    <form>
+      {/* JSX using values, errors, handleChange */}
+    </form>
+  );
 };
+```
 
-// components/ProjectActions.tsx (150 LOC)
-export const ProjectActions: React.FC<Props> = (props) => {
-  // Action buttons and handlers
+## Scaffolding Checklist
+
+When creating a new feature:
+
+- [ ] Create feature directory: `src/features/{feature-name}/`
+- [ ] Add `components/` with index.ts
+- [ ] Add `hooks/` with index.ts (if needed)
+- [ ] Add `services/` with index.ts
+- [ ] Add `types/` with index.ts
+- [ ] Add `utils/` with index.ts (if needed)
+- [ ] Create root `index.ts` with public API exports
+- [ ] Add test files next to implementation files
+- [ ] Verify no file exceeds 500 LOC
+- [ ] Update feature integration points
+
+## Common Patterns
+
+### Service Pattern
+
+```typescript
+// src/features/projects/services/projectService.ts
+import { db } from '@/lib/database';
+import type { Project } from '../types/project.types';
+
+export const projectService = {
+  async getAll(): Promise<Project[]> {
+    return db.select().from('projects');
+  },
+
+  async getById(id: string): Promise<Project | null> {
+    const result = await db.select().from('projects').where('id', id);
+    return result[0] ?? null;
+  },
+
+  async create(data: Omit<Project, 'id'>): Promise<Project> {
+    const id = crypto.randomUUID();
+    await db.insert({ id, ...data }).into('projects');
+    return { id, ...data };
+  },
 };
 ```
 
-### Example 3: Create Feature Index
+### Hook Pattern
 
 ```typescript
-// src/features/content-timeline/index.ts
-/**
- * Content Timeline Feature
- *
- * Provides timeline view of content versions and changes.
- *
- * @packageDocumentation
- */
+// src/features/projects/hooks/useProjects.ts
+import { useQuery } from '@tanstack/react-query';
+import { projectService } from '../services/projectService';
 
-// Components
-export { TimelineView } from './components/TimelineView';
-export { TimelineEvent } from './components/TimelineEvent';
-
-// Hooks
-export { useTimeline } from './hooks/useTimeline';
-
-// Types
-export type {
-  TimelineData,
-  TimelineEvent,
-  TimelineFilter,
-} from './types/timeline.types';
-
-// Services (only if needed externally)
-export { getTimeline, filterTimeline } from './services/timelineService';
+export function useProjects() {
+  return useQuery({
+    queryKey: ['projects'],
+    queryFn: () => projectService.getAll(),
+  });
+}
 ```
 
-## Best Practices
-
-### 1. One Responsibility Per File
+### Type Pattern
 
 ```typescript
-// ✅ GOOD: ProjectCard.tsx - only renders project card
-export const ProjectCard: React.FC<Props> = ({ project }) => { ... };
-
-// ❌ BAD: ProjectComponents.tsx - multiple components
-export const ProjectCard = ...;
-export const ProjectList = ...;
-export const ProjectForm = ...;
-```
-
-### 2. Test Files Colocated
-
-```
-✅ src/features/project-management/components/ProjectCard.tsx
-✅ src/features/project-management/components/ProjectCard.test.tsx
-
-❌ src/tests/components/ProjectCard.test.tsx (far from source)
-```
-
-### 3. Clear Type Definitions
-
-```typescript
-// ✅ GOOD: Explicit, documented types
-interface Project {
-  /** Unique identifier */
+// src/features/projects/types/project.types.ts
+export interface Project {
   id: string;
-  /** Project title */
   title: string;
-  /** Creation timestamp (Unix ms) */
+  description?: string;
+  genre: ProjectGenre;
   createdAt: number;
+  updatedAt: number;
 }
 
-// ❌ BAD: Implicit, unclear types
-type Project = {
-  id: any;
-  title: string;
-  createdAt: unknown;
-};
-```
+export type ProjectGenre = 'fantasy' | 'scifi' | 'mystery' | 'romance';
 
-## Common Issues & Solutions
-
-### Issue: Component exceeds 500 LOC
-
-**Solution**: Split into smaller components + extract hook
-
-```typescript
-// Split large component into:
-// 1. Container component (uses hook, renders children)
-// 2. Custom hook (logic)
-// 3. Child components (UI pieces)
-```
-
-### Issue: Feature dependencies create circular imports
-
-**Solution**: Extract shared code to `src/shared/` or use dependency injection
-
-```typescript
-// Instead of direct import:
-import { userService } from '@/features/user-management';
-
-// Use injection:
-interface FeatureProps {
-  getUserData: () => Promise<User>;
+export interface ProjectMetadata {
+  wordCount: number;
+  chapterCount: number;
 }
 ```
 
-### Issue: Feature index exports too much
+## Success Criteria
 
-**Solution**: Only export public API, keep internals private
-
-```typescript
-// Only export what other features need
-export { MainComponent } from './components/MainComponent';
-export type { PublicType } from './types';
-
-// Don't export utils, helpers, internal components
-```
+- All files under 500 LOC
+- Feature code colocated within feature directory
+- Public API clearly defined in root `index.ts`
+- Test files next to implementation files
+- Consistent directory structure across features
+- No cross-feature internal imports
 
 ## References
 
-- Feature Examples: `src/features/` directory (11 existing features)
-- AGENTS.md: Colocation and 500 LOC rules
-- Architecture: Feature-based architecture with strict boundaries
-
-## Invocation
-
-Use this skill when:
-
-- Creating a new feature module
-- Refactoring large files (>500 LOC)
-- Reorganizing scattered code into features
-- Establishing feature boundaries
-- Scaffolding standardized structure
-
-**Example Usage**:
-
-```
-Please create a new feature module for "export-management" using the feature-module-architect skill.
-Include database integration and follow the 500 LOC file limit.
-```
+- AGENTS.md - Colocation principle and file size limits
+- Existing features in `src/features/` - Reference implementations
