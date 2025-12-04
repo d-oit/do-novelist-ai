@@ -166,5 +166,72 @@ export const setupGeminiMock = async (page: Page): Promise<void> => {
     });
   });
 
-  console.log('[mock-ai-gateway] Mock setup complete - all routes configured');
+  // Intercept brainstorm API endpoints
+  await page.route('**/api/ai/brainstorm', async route => {
+    const request = route.request();
+    const postData = request.postDataJSON();
+    const { context, field } = postData || {};
+
+    let mockContent = 'Mock brainstorming response for testing purposes.';
+
+    if (field === 'title') {
+      mockContent = 'Test Novel Title - A Story Worth Telling';
+    } else if (field === 'style') {
+      mockContent = 'Literary Fiction';
+    } else if (context) {
+      mockContent = `Enhanced concept based on: ${context.substring(0, 100)}...`;
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ text: mockContent }),
+    });
+  });
+
+  // Intercept generate API endpoints
+  await page.route('**/api/ai/generate', async route => {
+    const request = route.request();
+    const postData = request.postDataJSON();
+
+    const mockResponse = {
+      id: `gen-mock-${Date.now()}`,
+      object: 'text_completion',
+      created: Math.floor(Date.now() / 1000),
+      model: postData?.model || 'mistral-medium-latest',
+      choices: [
+        {
+          index: 0,
+          text: 'Mocked AI generation response for testing purposes.',
+          finish_reason: 'stop',
+        },
+      ],
+      usage: {
+        prompt_tokens: 25,
+        completion_tokens: 100,
+        total_tokens: 125,
+      },
+    };
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(mockResponse),
+    });
+  });
+
+  // Add error simulation for testing error handling
+  await page.addInitScript(() => {
+    if (typeof window !== 'undefined' && !window.aiGatewayTestConfig) {
+      window.aiGatewayTestConfig = {
+        enableNetworkErrors: false,
+        enableTimeoutErrors: false,
+        mockDelay: 0,
+      };
+    }
+  });
+
+  console.log(
+    '[mock-ai-gateway] Enhanced mock setup complete - all routes configured with error handling',
+  );
 };
