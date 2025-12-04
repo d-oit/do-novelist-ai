@@ -115,7 +115,7 @@ async function setupTestProject(page: Page) {
   const projectId = await page.evaluate(() => {
     // The project ID should be visible in the localStorage keys or in the current app state
     const keys = Object.keys(localStorage).filter(k => k.startsWith('project_'));
-    if (keys.length > 0) {
+    if (keys.length > 0 && keys[0]) {
       return keys[0].replace('project_', '');
     }
     return `test_proj_${Date.now()}`;

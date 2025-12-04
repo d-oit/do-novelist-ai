@@ -192,14 +192,17 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
     const actionsToExecute = Math.min(visibleCards.length, 3);
 
     for (let i = 0; i < actionsToExecute; i++) {
-      await visibleCards[i].click();
-      await page.waitForTimeout(2000);
+      const card = visibleCards[i];
+      if (card) {
+        await card.click();
+        await page.waitForTimeout(2000);
 
-      // Look for any response
-      const consoleArea = page.locator('.bg-black\\/40, [data-testid*="console"], [data-testid*="output"]');
-      if (await consoleArea.isVisible({ timeout: 3000 }).catch(() => false)) {
-        // Just verify it's visible, content may vary
-        await expect(consoleArea).toBeVisible();
+        // Look for any response
+        const consoleArea = page.locator('.bg-black\\/40, [data-testid*="console"], [data-testid*="output"]');
+        if (await consoleArea.isVisible({ timeout: 3000 }).catch(() => false)) {
+          // Just verify it's visible, content may vary
+          await expect(consoleArea).toBeVisible();
+        }
       }
     }
   });
