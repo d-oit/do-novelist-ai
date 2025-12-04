@@ -190,7 +190,9 @@ jobs:
             ~/.cache/ms-playwright/firefox-*
             ~/.cache/ms-playwright/webkit-*
           key: >-
-            ${{ runner.os }}-playwright-browsers-${{ hashFiles('**/pnpm-lock.yaml', 'package.json') }}-${{ matrix.shard }}
+            ${{ runner.os }}-playwright-browsers-${{
+              hashFiles('**/pnpm-lock.yaml', 'package.json')
+            }}-${{ matrix.shard }}
           restore-keys: |
             ${{ runner.os }}-playwright-browsers-${{
               hashFiles('**/pnpm-lock.yaml', 'package.json') }}-
@@ -210,8 +212,9 @@ jobs:
         run: |
           echo "🔍 Verifying Playwright installation..."
           pnpm exec playwright --version
-          echo "📦 Available browsers:"
-          ls -la ~/.cache/ms-playwright/ 2>/dev/null || echo "No browser cache found"
+          echo "📦 Browsers cache:"
+          ls -la ~/.cache/ms-playwright/ 2>/dev/null ||
+          echo "No browser cache found"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v6
@@ -249,14 +252,14 @@ jobs:
               echo "❌ Tests failed or timed out"
               echo "📊 Collecting debug information..."
               echo "🐍 Browser processes:"
-              ps aux | grep -E "(chromium|firefox|webkit)" || 
+              ps aux | grep -E "(chromium|firefox|webkit)" ||
               echo "No browser processes found"
               echo "💾 Disk space:"
               df -h
               echo "🧠 Memory usage:"
               free -h
               echo "📁 Playwright cache contents:"
-              ls -la ~/.cache/ms-playwright/ 2>/dev/null || 
+              ls -la ~/.cache/ms-playwright/ 2>/dev/null ||
               echo "No cache directory"
               exit 1
             }
@@ -290,9 +293,9 @@ jobs:
       always() &&
       (needs.build-and-test.result == 'success') &&
       (needs.codeql-analysis.result == 'success') &&
-      (needs.dependency-review.result == 'success' || 
+      (needs.dependency-review.result == 'success' ||
        needs.dependency-review.result == 'skipped') &&
-      (github.event_name == 'pull_request' || 
+      (github.event_name == 'pull_request' ||
        needs.e2e-tests.result == 'success') &&
       github.ref == 'refs/heads/main'
     steps:
