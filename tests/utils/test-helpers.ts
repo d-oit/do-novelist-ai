@@ -69,16 +69,15 @@ export async function waitForRole(
 export class ReactTestHelpers {
   /**
    * Wait for React application to be fully hydrated
-   * Checks for React fiber hydration completion and network idle state
+   * Checks for DOM readiness and app content availability
    */
   static async waitForReactHydration(page: Page): Promise<void> {
     await page.waitForLoadState('networkidle');
 
-    // Wait for React to be loaded and DOM to be ready
+    // Wait for DOM to be ready and no loading indicators
     await page.waitForFunction(
       () => {
         return (
-          window.React &&
           document.readyState === 'complete' &&
           !document.querySelector('[data-loading]') &&
           !document.querySelector('[aria-busy="true"]')
@@ -86,6 +85,20 @@ export class ReactTestHelpers {
       },
       { timeout: 15000 },
     );
+  }
+
+  /**
+   * Setup React application with proper hydration and navigation readiness
+   */
+  static async setupReactApp(page: Page): Promise<void> {
+    await page.goto('/');
+    await ReactTestHelpers.waitForReactHydration(page);
+
+    // Wait for main navigation to be ready
+    await page.waitForSelector('nav, [role="navigation"]', { timeout: 10000 });
+
+    // Wait for app content to be loaded
+    await page.waitForSelector('[data-testid], h1, h2, main', { timeout: 10000 });
   }
 
   /**

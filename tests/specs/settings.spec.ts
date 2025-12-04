@@ -6,58 +6,50 @@ test.describe('Settings Panel E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
 
-    // Navigate with robust error handling
-    await page.goto('/', {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000,
-    });
+    // Navigate and wait for app to be ready
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
 
     // Wait for navigation to be ready
-    await page.waitForLoadState('networkidle').catch(() => {
-      console.log('Network idle timeout, continuing with test');
-    });
-
-    // Wait for key elements with role-based selectors
     await expect(page.getByRole('navigation')).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
   });
 
   test('should access settings view', async ({ page }) => {
-    // Navigation test with debugging
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    // Direct navigation test with fallback strategies
+    const strategies = [
+      () => page.getByTestId('nav-settings'),
+      () => page.getByRole('button', { name: /settings/i }),
+      () => page.getByText('Settings'),
+    ];
 
-    // Check if settings button is available
-    const settingsButton = page.getByTestId('nav-settings');
-    await expect(settingsButton).toBeVisible();
-
-    // Navigate to settings and wait for any changes
-    await settingsButton.click();
-    await page.waitForTimeout(3000);
-
-    // Check for settings view with extended timeout
-    try {
-      await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
-    } catch (error) {
-      // If settings view doesn't appear, check if it's a navigation issue
-      console.log('Settings view not found, checking alternative selectors...');
-
-      // Check if Settings heading exists (indicating successful navigation)
+    let settingsButton = null;
+    for (const strategy of strategies) {
       try {
-        await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible({ timeout: 2000 });
-        console.log('Settings heading found, navigation likely successful');
-      } catch {
-        throw error;
+        settingsButton = strategy();
+        await settingsButton.click({ timeout: 3000 });
+        break;
+      } catch (_error) {
+        continue;
       }
     }
 
-    // Verify main heading is present if settings view exists
-    try {
-      await expect(page.getByRole('heading', { name: 'Settings', exact: true }).first()).toBeVisible();
-    } catch {
-      // Fallback: just check if any heading exists
-      await expect(page.getByRole('heading').first()).toBeVisible();
+    if (!settingsButton) {
+      // Try alternative approach - look for Settings button in header
+      const headerSettingsButton = page.locator('header').getByText('Settings');
+      if (await headerSettingsButton.isVisible()) {
+        await headerSettingsButton.click();
+      } else {
+        throw new Error('Settings navigation button not found');
+      }
     }
+
+    // Wait for navigation and settings view to appear
+    await page.waitForTimeout(2000);
+    await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 15000 });
+
+    // Verify main heading is present
+    await expect(page.getByRole('heading', { name: 'Settings', exact: true }).first()).toBeVisible();
   });
 
   test('should display database persistence section', async ({ page }) => {
