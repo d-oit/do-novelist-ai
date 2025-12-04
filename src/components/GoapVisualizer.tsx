@@ -1,5 +1,6 @@
 import { Check, Circle, Loader2, Zap } from 'lucide-react';
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 import { Project, AgentAction } from '../types';
 import { PublishStatus } from '../shared/types';
@@ -47,13 +48,14 @@ const GoapVisualizer: React.FC<GoapVisualizerProps> = ({ project, currentAction 
           return (
             <div key={stage.id} className='z-10 flex flex-col items-center gap-2 bg-card px-1'>
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-500 ${
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-500',
                   isActive
                     ? 'scale-110 border-primary bg-background text-primary shadow-[0_0_15px_rgba(59,130,246,0.4)]'
                     : isCompleted
                       ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border bg-secondary text-muted-foreground'
-                } `}
+                      : 'border-border bg-secondary text-muted-foreground',
+                )}
               >
                 {isActive && currentAction ? (
                   <Loader2 className='h-4 w-4 animate-spin' />
@@ -64,7 +66,10 @@ const GoapVisualizer: React.FC<GoapVisualizerProps> = ({ project, currentAction 
                 )}
               </div>
               <span
-                className={`text-[10px] font-bold uppercase tracking-wide ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+                className={cn(
+                  'text-[10px] font-bold uppercase tracking-wide',
+                  isActive ? 'text-primary' : 'text-muted-foreground',
+                )}
               >
                 {stage.label}
               </span>

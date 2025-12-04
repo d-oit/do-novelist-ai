@@ -1,6 +1,7 @@
 import { LogEntry } from '@shared/types';
 import { Terminal, CheckCircle2, AlertTriangle, Info, Brain } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
+import { cn } from '@/lib/utils';
 
 interface AgentConsoleProps {
   logs: LogEntry[];
@@ -72,7 +73,10 @@ const AgentConsole: React.FC<AgentConsoleProps> = ({ logs }) => {
               </div>
               <div>
                 <span
-                  className={`mr-2 font-bold ${log.type === 'thought' ? 'text-purple-400' : 'text-primary'}`}
+                  className={cn(
+                    'mr-2 font-bold',
+                    log.type === 'thought' ? 'text-purple-400' : 'text-primary',
+                  )}
                 >
                   [{log.agentName}]
                 </span>

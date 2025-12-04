@@ -12,11 +12,11 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import { useScrollLock } from '../../lib/hooks/useScrollLock';
-import { cn } from '../../lib/utils';
-import { zIndex } from '../../lib/z-index.config';
+import { useScrollLock } from '@/lib/hooks/useScrollLock';
+import { cn } from '@/lib/utils';
+import { zIndex } from '@/lib/z-index.config';
 
-interface HeaderProps {
+export interface HeaderProps {
   projectTitle: string;
   onNewProject: () => void;
   currentView: 'dashboard' | 'projects' | 'settings' | 'world-building';
@@ -99,7 +99,6 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
           'transition-all duration-300',
         )}
         role='banner'
-        aria-label='Main application header'
         style={{ '--header-height': '4rem' } as React.CSSProperties}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -112,26 +111,27 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           {/* Logo & Brand */}
-          <button
-            className='group flex cursor-pointer items-center gap-3 transition-transform duration-200 hover:scale-[0.98] active:scale-95'
+          <motion.button
+            className='group flex cursor-pointer items-center gap-3 transition-transform duration-200'
             onClick={() => handleNav('dashboard')}
+            role='button'
+            tabIndex={0}
             aria-label='Go to dashboard'
-            type='button'
+            whileHover={{ scale: 0.98 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <motion.div
+            <div
               className={cn(
                 'rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 p-2.5',
                 'transition-all duration-200 group-hover:shadow-lg group-hover:shadow-primary/20',
                 'ring-1 ring-primary/10',
               )}
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
             >
               <Database className='h-5 w-5 text-primary' aria-hidden='true' />
-            </motion.div>
+            </div>
             <div className='hidden md:block'>
               <div className='flex items-center gap-2'>
                 <h1 className='text-shadow-sm bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-lg font-bold leading-none text-transparent'>
@@ -143,13 +143,12 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                 GOAP Engine v0.5.0
               </span>
             </div>
-          </button>
+          </motion.button>
 
           {/* Desktop Navigation */}
-          <motion.nav
+          <motion.div
             className='hidden items-center gap-2 md:flex'
-            role='navigation'
-            aria-label='Main navigation'
+            role='menubar'
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
@@ -158,7 +157,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
             <NavLink view='projects' icon={Folder} label='Projects' />
             <NavLink view='world-building' icon={Map} label='World Building' />
             <NavLink view='settings' icon={Settings} label='Settings' />
-          </motion.nav>
+          </motion.div>
 
           {/* Project Info & Actions */}
           <div className='hidden items-center gap-4 md:flex'>
@@ -231,7 +230,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
             />
 
             {/* Mobile Menu */}
-            <motion.nav
+            <motion.div
               className={cn(
                 'fixed left-0 right-0 top-16 md:hidden',
                 zIndex('MODAL'),
@@ -239,9 +238,8 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                 'border-t border-border/40',
                 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]',
               )}
-              role='navigation'
+              role='menu'
               aria-label='Mobile navigation menu'
-              id='navigation'
               initial={{ y: -10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -10, opacity: 0 }}
@@ -295,7 +293,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                   </button>
                 </div>
               </div>
-            </motion.nav>
+            </motion.div>
           </>
         )}
       </AnimatePresence>

@@ -2,6 +2,23 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
+import { configureAxe } from 'jest-axe';
+
+// Configure axe-core for testing
+const axeConfig = {
+  runOnly: {
+    type: 'tag' as const,
+    values: [
+      'wcag2a', // WCAG 2.0 Level A
+      'wcag2aa', // WCAG 2.0 Level AA
+      'wcag21aa', // WCAG 2.1 Level AA
+      'best-practice',
+    ],
+  },
+};
+
+// Configure jest-axe with the basic config
+configureAxe(axeConfig);
 
 afterEach(() => {
   cleanup();

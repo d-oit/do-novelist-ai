@@ -12,6 +12,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 import { translateContent } from '../../../lib/ai';
 import { generateEpub } from '../../../lib/epub';
@@ -224,7 +225,10 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
               </div>
               <div className='h-2 overflow-hidden rounded-full border border-border/50 bg-secondary'>
                 <div
-                  className={`h-full transition-all duration-1000 ${progress >= 100 ? 'bg-green-500' : 'bg-primary'}`}
+                  className={cn(
+                    'h-full transition-all duration-1000',
+                    progress >= 100 ? 'bg-green-500' : 'bg-primary',
+                  )}
                   style={{ width: `${progress}%` }}
                 />
               </div>

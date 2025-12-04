@@ -59,11 +59,23 @@ export default defineConfig(({ mode }) => {
             'vendor-db': ['@libsql/client'],
             'vendor-utils': ['zod', 'zustand', 'jszip'],
           },
+          // Optimize chunk file names for better caching
+          chunkFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]',
         },
       },
-      chunkSizeWarningLimit: 600,
+      target: 'esnext',
+      chunkSizeWarningLimit: 500,
       cssCodeSplit: true,
-      minify: true,
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+          pure_funcs: ['console.log', 'console.info'],
+        },
+      },
+      sourcemap: false,
     },
   };
 });

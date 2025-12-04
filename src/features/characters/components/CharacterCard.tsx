@@ -55,7 +55,7 @@ const CHARACTER_ROLE_COLORS: Record<CharacterRole, string> = {
   'comic-relief': 'text-green-500',
 };
 
-export const CharacterCard: React.FC<CharacterCardProps> = ({
+const CharacterCardComponent: React.FC<CharacterCardProps> = ({
   character,
   isSelected,
   onSelect,
@@ -185,3 +185,24 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
     </motion.div>
   );
 };
+
+// Custom comparison function for CharacterCard - only re-render when meaningful props change
+const areEqual = (prevProps: CharacterCardProps, nextProps: CharacterCardProps): boolean => {
+  return (
+    prevProps.character.id === nextProps.character.id &&
+    prevProps.character.name === nextProps.character.name &&
+    prevProps.character.role === nextProps.character.role &&
+    prevProps.character.motivation === nextProps.character.motivation &&
+    prevProps.character.arc === nextProps.character.arc &&
+    prevProps.character.imageUrl === nextProps.character.imageUrl &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.onSelect === nextProps.onSelect &&
+    prevProps.onToggleSelection === nextProps.onToggleSelection &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onDelete === nextProps.onDelete
+  );
+};
+
+export const CharacterCard = React.memo(CharacterCardComponent, areEqual);
+
+CharacterCard.displayName = 'CharacterCard';

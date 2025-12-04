@@ -1,5 +1,6 @@
 import { Image, Wand2, Loader2, RefreshCcw, Download } from 'lucide-react';
 import React, { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 import { generateCoverImage } from '../../../lib/ai';
 import { Project } from '../../../types';
@@ -46,7 +47,10 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
       {/* Cover Preview Area */}
       <div className='group relative'>
         <div
-          className={`relative flex h-[400px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-card shadow-2xl transition-all ${project.coverImage == null ? 'hover:border-primary/50' : 'border-transparent'} `}
+          className={cn(
+            'relative flex h-[400px] w-[300px] flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-card shadow-2xl transition-all',
+            project.coverImage == null ? 'hover:border-primary/50' : 'border-transparent',
+          )}
         >
           {project.coverImage != null ? (
             <img

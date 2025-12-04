@@ -229,10 +229,9 @@ describe('useProjects - Error Handling', () => {
   it('handles concurrent operations without race conditions', async () => {
     const { result } = renderHook(() => useProjects());
 
-    // Simulate concurrent operations
-    const operations = [result.current.loadAll(), result.current.loadAll(), result.current.loadAll()];
-
+    // Simulate concurrent operations - wrap each loadAll call in act
     await act(async () => {
+      const operations = [result.current.loadAll(), result.current.loadAll(), result.current.loadAll()];
       await Promise.all(operations);
     });
 

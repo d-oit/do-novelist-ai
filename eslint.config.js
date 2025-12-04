@@ -78,6 +78,15 @@ export default tseslint.config(
     rules: {
       'no-console': 'off',
       'no-undef': 'off',
+      // Prevent template literal className patterns - use cn() utility instead
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXAttribute[name.name="className"] TemplateLiteral',
+          message:
+            'Do not use template literals for className. Use the cn() utility from @/lib/utils instead. Example: className={cn("base-class", condition && "conditional-class")}',
+        },
+      ],
       // Client-side security rules - less strict for development
       'security/detect-object-injection': 'off',
       'security/detect-non-literal-fs-filename': 'off',
