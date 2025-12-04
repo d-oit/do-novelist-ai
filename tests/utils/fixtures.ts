@@ -250,13 +250,17 @@ export class TestDataFactory {
    * Create test user with specified preferences
    */
   static createTestUser(overrides: Partial<TestUser> = {}): TestUser {
+    const baseUser = TEST_USERS[0];
+    if (!baseUser) {
+      throw new Error('No base test user available');
+    }
     return {
-      ...TEST_USERS[0],
+      ...baseUser,
       id: `test-user-${Date.now()}`,
       name: overrides.name || 'Test User',
       email: overrides.email || `test${Date.now()}@example.com`,
       preferences: {
-        ...TEST_USERS[0].preferences,
+        ...baseUser.preferences,
         ...overrides.preferences,
       },
     };

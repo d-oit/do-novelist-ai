@@ -65,20 +65,6 @@ export class ReactTestHelpers {
   }
 
   /**
-   * Setup React application with proper hydration and navigation readiness
-   */
-  static async setupReactApp(page: Page): Promise<void> {
-    await page.goto('/');
-    await ReactTestHelpers.waitForReactHydration(page);
-
-    // Wait for main navigation to be ready
-    await page.waitForSelector('nav, [role="navigation"]', { timeout: 10000 });
-
-    // Wait for app content to be loaded
-    await page.waitForSelector('[data-testid], h1, h2, main', { timeout: 10000 });
-  }
-
-  /**
    * Navigate to settings view with reliable navigation
    */
   static async navigateToSettings(page: Page): Promise<void> {

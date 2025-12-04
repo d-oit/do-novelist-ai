@@ -1,6 +1,16 @@
 import { Page } from '@playwright/test';
 import { setupAISDKMock } from './mock-ai-sdk';
 
+declare global {
+  interface Window {
+    aiGatewayTestConfig?: {
+      enableNetworkErrors?: boolean;
+      enableTimeoutErrors?: boolean;
+      mockDelay?: number;
+    };
+  }
+}
+
 // Mock AI responses for E2E tests
 const MOCK_RESPONSES = {
   generateOutline: {
