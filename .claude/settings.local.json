@@ -86,7 +86,10 @@
       "Bash(killall:*)",
       "Bash(wc:*)",
       "Bash(find:*)",
-      "Bash(npm run preview:*)"
+      "Bash(npm run preview:*)",
+      "Bash(for file in tests/specs/*.spec.ts)",
+      "Bash(done)",
+      "Bash(xargs cat:*)"
     ],
     "deny": [],
     "ask": []

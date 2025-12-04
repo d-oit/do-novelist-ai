@@ -23,13 +23,13 @@ const logger = {
 
 // Make logger available globally (works in both Node.js and browser)
 if (typeof globalThis !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (globalThis as any).m = logger;
 }
 
 // Also set on window for browser environments
 if (typeof window !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).m = logger;
 }
 

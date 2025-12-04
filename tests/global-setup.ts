@@ -7,12 +7,12 @@ import path from 'path';
 
 async function globalSetup(_config: FullConfig): Promise<void> {
   // Ensure AI SDK logger is available globally before any tests run
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globalAny = globalThis as any;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
   if (typeof globalAny.m === 'undefined' || typeof globalAny.m?.log !== 'function') {
     console.warn('AI SDK logger not properly initialized, setting up fallback');
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
     globalAny.m = {
       log: (...args: unknown[]): void => {
         console.log('[AI SDK Logger]', ...args);

@@ -1,8 +1,8 @@
 # GOAP Plan: Codebase Improvement & Technical Debt
 
-**Analysis Date:** 2025-12-01 **Current State:** 462 tests passing (100%), 0
-lint errors, build successful **Goal:** Improve code quality, maintainability,
-and developer experience
+**Analysis Date:** 2025-12-01 **Last Updated:** 2025-12-04 **Current State:**
+462 tests passing (100%), 0 lint errors, build successful, CI/CD optimized
+**Goal:** Improve code quality, maintainability, and developer experience
 
 ---
 
@@ -34,11 +34,11 @@ architecture, testing, performance, and developer experience.
 
 ## Prerequisites
 
-> [!IMPORTANT] Before implementing the improvements in this plan, first fix the
-> failing E2E tests in GitHub Actions. See
-> **[E2E-FIX-GOAP-ORCHESTRATOR.md](file:///d:/git/do-novelist-ai/plans/E2E-FIX-GOAP-ORCHESTRATOR.md)**
-> for the orchestrator plan to resolve 5 failing E2E tests. A stable CI/CD
-> pipeline is essential for validating all improvements.
+> [!IMPORTANT] E2E tests and CI/CD pipeline have been optimized and are now
+> stable. See
+> **[plans/completed/GOAP-EXECUTION-SUMMARY.md](file:///d:/git/do-novelist-ai/plans/completed/GOAP-EXECUTION-SUMMARY.md)**
+> for completed CI optimization work. The pipeline is ready for validating
+> improvements.
 
 ---
 
@@ -46,38 +46,41 @@ architecture, testing, performance, and developer experience.
 
 ### Action 1.1: Add Missing Test Coverage
 
-**Goal State:** `test_coverage >= 85%` **Current State:** Tests exist but
-coverage metrics not tracked
+**Goal State:** `test_coverage >= 85%` **Current State:** Coverage reporting
+configured with thresholds (lines: 80, branches: 75)
 
 **Preconditions:**
 
 - Test framework configured ✅
 - Vitest installed ✅
+- Coverage reporting configured ✅
 
 **Steps:**
 
-1. Add coverage reporting to vitest.config.ts
+1. ✅ Add coverage reporting to vitest.config.ts (COMPLETED)
 2. Identify untested files in:
    - `src/features/publishing/services/publishingAnalyticsService.ts`
    - `src/lib/character-validation.ts`
    - `src/lib/epub.ts`
 3. Write unit tests for critical paths
-4. Set coverage threshold in CI
+4. Set coverage threshold in CI (already configured)
 
-**Estimated Effort:** 8-12 hours
+**Estimated Effort:** 6-10 hours (reduced from 8-12)
 
 ### Action 1.2: Fix React Testing Warnings
 
-**Goal State:** `react_test_warnings = 0` **Current State:** Framer Motion props
-warnings in tests
+**Goal State:** `react_test_warnings = 0` **Current State:** Framer Motion mocks
+implemented, warnings likely resolved
 
 **Preconditions:**
 
 - Tests passing ✅
+- Framer Motion test files identified ✅
 
 **Steps:**
 
-1. Mock Framer Motion in test setup to suppress DOM warnings
+1. ✅ Mock Framer Motion in test setup to suppress DOM warnings (PARTIALLY
+   COMPLETE)
 2. Update `src/test/setup.ts` with proper motion mocks
 3. Fix `act()` warnings in async tests
 
@@ -85,27 +88,28 @@ warnings in tests
 
 - `src/test/setup.ts`
 - `src/features/analytics/components/AnalyticsDashboard.test.tsx`
+- 5 other test files using Framer Motion
 
-**Estimated Effort:** 2-3 hours
+**Estimated Effort:** 1-2 hours (reduced from 2-3)
 
 ### Action 1.3: Consolidate Duplicate Error Boundary Components
 
-**Goal State:** `error_boundary_files = 1` **Current State:** Two error boundary
-files exist
+**Goal State:** `error_boundary_files = 1` **Current State:** Single
+error-boundary.tsx exists (consolidated)
 
 **Preconditions:**
 
-- Both files identified ✅
+- ✅ Consolidation completed (only error-boundary.tsx exists)
 
 **Steps:**
 
-1. Audit `src/components/error-boundary.tsx` vs
-   `src/components/ErrorBoundary.tsx`
-2. Merge into single canonical implementation
-3. Update all imports
-4. Delete duplicate file
+1. ✅ Audit `src/components/error-boundary.tsx` vs
+   `src/components/ErrorBoundary.tsx` (COMPLETED)
+2. ✅ Merge into single canonical implementation (COMPLETED)
+3. ✅ Update all imports (COMPLETED)
+4. ✅ Delete duplicate file (COMPLETED)
 
-**Estimated Effort:** 1-2 hours
+**Estimated Effort:** 0 hours (COMPLETED)
 
 ---
 

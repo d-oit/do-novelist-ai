@@ -50,3 +50,4 @@ test_*.txt
 
 .eslintcache
 .factory/config.json
+playwright-results.json
