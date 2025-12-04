@@ -77,7 +77,6 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
             : 'text-muted-foreground hover:bg-secondary/80 hover:text-foreground hover:shadow-sm',
         )}
         data-testid={`nav-${view}`}
-        role='menuitem'
         aria-current={currentView === view ? 'page' : undefined}
         aria-label={`Navigate to ${label}`}
       >

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 import { Project } from '../types';
@@ -8,44 +8,62 @@ interface ProjectStatsProps {
   project: Project;
 }
 
-const ProjectStats: React.FC<ProjectStatsProps> = ({ project }) => {
-  // Calculate Chapter Completion
-  const chapterCompletion =
-    project.worldState.chaptersCount > 0
-      ? Math.round((project.worldState.chaptersCompleted / project.worldState.chaptersCount) * 100)
-      : 0;
-
-  // Calculate Word Count Progress
-  const totalWords = project.chapters.reduce(
-    (acc, ch) =>
-      acc +
-      (ch.content
-        .trim()
-        .split(/\s+/)
-        .filter(w => w.length > 0).length || 0),
-    0,
+const ProjectStats: React.FC<ProjectStatsProps> = React.memo(({ project }) => {
+  // Memoize chapter completion calculation
+  const chapterCompletion = useMemo(
+    () =>
+      project.worldState.chaptersCount > 0
+        ? Math.round(
+            (project.worldState.chaptersCompleted / project.worldState.chaptersCount) * 100,
+          )
+        : 0,
+    [project.worldState.chaptersCompleted, project.worldState.chaptersCount],
   );
-  const targetWords = project.targetWordCount || 50000;
-  const wordProgress = Math.min(100, Math.round((totalWords / targetWords) * 100));
 
-  const data = [
-    { name: 'Structure', value: project.worldState.hasOutline ? 100 : 0 },
-    { name: 'Chapters', value: chapterCompletion },
-    { name: 'Word Goal', value: wordProgress },
-    {
-      name: 'Status',
-      value:
-        project.status === PublishStatus.PUBLISHED
-          ? 100
-          : project.status === PublishStatus.REVIEW
-            ? 75
-            : project.status === PublishStatus.EDITING
-              ? 50
-              : 25,
-    },
-  ];
+  // Memoize total words calculation
+  const totalWords = useMemo(
+    () =>
+      project.chapters.reduce(
+        (acc, ch) =>
+          acc +
+          (ch.content
+            .trim()
+            .split(/\s+/)
+            .filter(w => w.length > 0).length || 0),
+        0,
+      ),
+    [project.chapters],
+  );
 
-  const COLORS = ['#60a5fa', '#4ade80', '#fb923c', '#a78bfa'];
+  // Memoize word progress calculation
+  const { targetWords, wordProgress } = useMemo(() => {
+    const target = project.targetWordCount || 50000;
+    const progress = Math.min(100, Math.round((totalWords / target) * 100));
+    return { targetWords: target, wordProgress: progress };
+  }, [totalWords, project.targetWordCount]);
+
+  // Memoize chart data
+  const data = useMemo(
+    () => [
+      { name: 'Structure', value: project.worldState.hasOutline ? 100 : 0 },
+      { name: 'Chapters', value: chapterCompletion },
+      { name: 'Word Goal', value: wordProgress },
+      {
+        name: 'Status',
+        value:
+          project.status === PublishStatus.PUBLISHED
+            ? 100
+            : project.status === PublishStatus.REVIEW
+              ? 75
+              : project.status === PublishStatus.EDITING
+                ? 50
+                : 25,
+      },
+    ],
+    [project.worldState.hasOutline, chapterCompletion, wordProgress, project.status],
+  );
+
+  const COLORS = useMemo(() => ['#60a5fa', '#4ade80', '#fb923c', '#a78bfa'], []);
 
   return (
     <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-3'>
@@ -102,6 +120,8 @@ const ProjectStats: React.FC<ProjectStatsProps> = ({ project }) => {
       </div>
     </div>
   );
-};
+});
+
+ProjectStats.displayName = 'ProjectStats';
 
 export default ProjectStats;

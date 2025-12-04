@@ -1,5 +1,5 @@
 import { Check, Circle, Loader2, Zap } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 import { Project, AgentAction } from '../types';
@@ -10,24 +10,34 @@ interface GoapVisualizerProps {
   currentAction: AgentAction | null;
 }
 
-const GoapVisualizer: React.FC<GoapVisualizerProps> = ({ project, currentAction }) => {
+const GoapVisualizer: React.FC<GoapVisualizerProps> = React.memo(({ project, currentAction }) => {
   const { worldState } = project;
 
-  // Determine Active Stage
-  let activeStage = 0;
-  if (worldState.hasOutline) activeStage = 1;
-  if (worldState.hasOutline && worldState.chaptersCompleted > 0) activeStage = 2;
-  if (worldState.chaptersCompleted === worldState.chaptersCount && worldState.chaptersCount > 0)
-    activeStage = 3;
-  if (project.status === PublishStatus.PUBLISHED) activeStage = 4;
+  // Memoize active stage calculation
+  const activeStage = useMemo(() => {
+    if (project.status === PublishStatus.PUBLISHED) return 4;
+    if (worldState.chaptersCompleted === worldState.chaptersCount && worldState.chaptersCount > 0)
+      return 3;
+    if (worldState.hasOutline && worldState.chaptersCompleted > 0) return 2;
+    if (worldState.hasOutline) return 1;
+    return 0;
+  }, [
+    worldState.hasOutline,
+    worldState.chaptersCompleted,
+    worldState.chaptersCount,
+    project.status,
+  ]);
 
-  const stages = [
-    { id: 0, label: 'Concept', icon: Zap },
-    { id: 1, label: 'Outline', icon: Circle },
-    { id: 2, label: 'Drafting', icon: Circle },
-    { id: 3, label: 'Refining', icon: Circle },
-    { id: 4, label: 'Publish', icon: Check },
-  ];
+  const stages = useMemo(
+    () => [
+      { id: 0, label: 'Concept', icon: Zap },
+      { id: 1, label: 'Outline', icon: Circle },
+      { id: 2, label: 'Drafting', icon: Circle },
+      { id: 3, label: 'Refining', icon: Circle },
+      { id: 4, label: 'Publish', icon: Check },
+    ],
+    [],
+  );
 
   return (
     <div className='mb-4 rounded-lg border border-border bg-card p-4 shadow-sm'>
@@ -97,6 +107,8 @@ const GoapVisualizer: React.FC<GoapVisualizerProps> = ({ project, currentAction 
       )}
     </div>
   );
-};
+});
+
+GoapVisualizer.displayName = 'GoapVisualizer';
 
 export default GoapVisualizer;

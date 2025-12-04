@@ -8,7 +8,7 @@ interface AgentConsoleProps {
   logs: LogEntry[];
 }
 
-const LogIcon = ({ type }: { type: LogEntry['type'] }): React.ReactElement => {
+const LogIcon = React.memo<{ type: LogEntry['type'] }>(({ type }) => {
   switch (type) {
     case 'success':
       return <CheckCircle2 className='h-3 w-3 text-green-500' />;
@@ -21,9 +21,11 @@ const LogIcon = ({ type }: { type: LogEntry['type'] }): React.ReactElement => {
     default:
       return <Info className='h-3 w-3 text-blue-500' />;
   }
-};
+});
 
-const AgentConsole: React.FC<AgentConsoleProps> = ({ logs }) => {
+LogIcon.displayName = 'LogIcon';
+
+const AgentConsole: React.FC<AgentConsoleProps> = React.memo(({ logs }) => {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -93,6 +95,8 @@ const AgentConsole: React.FC<AgentConsoleProps> = ({ logs }) => {
       </div>
     </div>
   );
-};
+});
+
+AgentConsole.displayName = 'AgentConsole';
 
 export default AgentConsole;

@@ -55,9 +55,30 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
     );
 
     const results = await runA11yTests(container);
-    const criticalViolations = groupViolationsBySeverity(results.violations).critical || [];
+    const grouped = groupViolationsBySeverity(results.violations);
+    const criticalViolations = grouped.critical || [];
 
     console.log(`Header: ${results.violations.length} violations, ${criticalViolations.length} critical`);
+
+    // Log detailed violation information
+    if (criticalViolations.length > 0) {
+      console.log('\n=== CRITICAL VIOLATIONS IN HEADER ===');
+      criticalViolations.forEach((v, index) => {
+        console.log(`\n${index + 1}. [${v.id}] ${v.help}`);
+        console.log(`   Description: ${v.description}`);
+        console.log(`   Help URL: ${v.helpUrl}`);
+        console.log(`   Affected elements:`);
+        v.nodes.forEach((node, nodeIndex) => {
+          console.log(`     ${nodeIndex + 1}. Target: ${node.target.join(' > ')}`);
+          console.log(`        HTML: ${node.html.substring(0, 200)}...`);
+          if (node.failureSummary) {
+            console.log(`        Issue: ${node.failureSummary}`);
+          }
+        });
+      });
+      console.log('\n');
+    }
+
     expect(criticalViolations).toHaveLength(0);
   });
 
@@ -211,11 +232,20 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
         }),
       );
 
-      // Check for navigation buttons - only if visible (not hidden on mobile)
-      const navLinks = container.querySelectorAll('[role="menuitem"]');
-      navLinks.forEach(link => {
+      // Check for navigation buttons by their test IDs
+      const navButtons = [
+        container.querySelector('[data-testid="nav-dashboard"]'),
+        container.querySelector('[data-testid="nav-projects"]'),
+        container.querySelector('[data-testid="nav-world-building"]'),
+        container.querySelector('[data-testid="nav-settings"]'),
+      ].filter(Boolean);
+
+      // At least some navigation buttons should be present
+      expect(navButtons.length).toBeGreaterThan(0);
+
+      navButtons.forEach(button => {
         // Check that navigation links have accessibility attributes
-        const hasAriaLabel = link.hasAttribute('aria-label') || link.hasAttribute('aria-labelledby');
+        const hasAriaLabel = button?.hasAttribute('aria-label') || button?.hasAttribute('aria-labelledby');
         expect(hasAriaLabel).toBe(true);
       });
     });

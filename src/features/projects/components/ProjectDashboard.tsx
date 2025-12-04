@@ -5,7 +5,7 @@ import { Project } from '@shared/types';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
-export const ProjectDashboard: React.FC = () => {
+export const ProjectDashboard: React.FC = React.memo(() => {
   const { projects, isLoading, error } = useProjects();
 
   if (isLoading) {
@@ -45,6 +45,8 @@ export const ProjectDashboard: React.FC = () => {
       )}
     </div>
   );
-};
+});
+
+ProjectDashboard.displayName = 'ProjectDashboard';
 
 export default ProjectDashboard;
