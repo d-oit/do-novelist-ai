@@ -3,7 +3,7 @@ import React from 'react';
 
 import BookViewer from '../features/editor/components/BookViewerRefactored';
 import { GoapEngine } from '../features/editor/hooks/useGoapEngine';
-import { Project, Chapter, RefineOptions } from '../types';
+import { Chapter, Project, RefineOptions } from '../types';
 
 import ActionCard from './ActionCard';
 import AgentConsole from './AgentConsole';
@@ -33,7 +33,10 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
   onSettingsClick,
 }) => {
   return (
-    <div className='animate-in fade-in mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>
+    <div
+      data-testid='project-dashboard'
+      className='animate-in fade-in mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'
+    >
       {/* Left Column: Planner & Controls */}
       <div className='group/sidebar flex w-full flex-col gap-6 md:w-1/3'>
         <div className='flex flex-col gap-6 transition-opacity duration-300 md:sticky md:top-20'>
