@@ -57,7 +57,7 @@ export default defineConfig({
       ? 'rm -rf node_modules/.vite dist && npm run dev -- --force'
       : 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI, // Different logic for CI vs local
+    reuseExistingServer: false, // Force restart to ensure fresh code
     timeout: 120000, // 2 minutes for server startup
     stdout: 'pipe',
     stderr: 'pipe',

@@ -14,21 +14,26 @@ export function cn(...inputs: ClassValue[]): string {
  * Used for AI settings and other user-specific features
  */
 export function getUserId(): string {
-  const userId = localStorage.getItem('novelist_user_id');
-  if (userId == null || userId === '') {
-    // Use crypto.getRandomValues for cryptographically secure random values
-    const randomBytes = new Uint8Array(8);
-    crypto.getRandomValues(randomBytes);
-    const randomString = Array.from(randomBytes)
-      .map(b => b.toString(36))
-      .join('')
-      .slice(0, 10);
+  try {
+    const userId = localStorage.getItem('novelist_user_id');
+    if (userId == null || userId === '') {
+      // Use crypto.getRandomValues for cryptographically secure random values
+      const randomBytes = new Uint8Array(8);
+      crypto.getRandomValues(randomBytes);
+      const randomString = Array.from(randomBytes)
+        .map(b => b.toString(36))
+        .join('')
+        .slice(0, 10);
 
-    const newUserId = `user_${Date.now()}_${randomString}`;
-    localStorage.setItem('novelist_user_id', newUserId);
-    return newUserId;
+      const newUserId = `user_${Date.now()}_${randomString}`;
+      localStorage.setItem('novelist_user_id', newUserId);
+      return newUserId;
+    }
+    return userId;
+  } catch (_e) {
+    // Fallback for when localStorage is not available (e.g. server-side or restricted)
+    return `user_temp_${Date.now()}`;
   }
-  return userId;
 }
 
 /**

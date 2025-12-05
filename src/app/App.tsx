@@ -1,6 +1,8 @@
-import { Settings, Loader2 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { Loader2, Settings } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
+import Navbar from '../components/Navbar';
+import { ProjectsErrorBoundary } from '../components/error-boundary';
 import {
   ActionCard,
   AgentConsole,
@@ -9,12 +11,11 @@ import {
 } from '../features/generation/components';
 import { useGoapEngine } from '../features/generation/hooks';
 import { ProjectStats, ProjectWizard, ProjectsView } from '../features/projects/components';
-import Navbar from '../components/Navbar';
 import { db } from '../features/projects/services';
 import { SettingsView } from '../features/settings/components';
-import { Project, Chapter, ChapterStatus, PublishStatus } from '../shared/types';
-import { RefineOptions } from '../types';
+import { Chapter, ChapterStatus, Project, PublishStatus } from '../shared/types';
 import { createChapter } from '../shared/utils';
+import { RefineOptions } from '../types';
 
 // --- Initial Data ---
 
@@ -301,14 +302,16 @@ const App: React.FC = () => {
 
         {currentView === 'projects' && (
           <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
-            <ProjectsView
-              currentProject={project}
-              onNewProject={() => setShowWizard(true)}
-              onLoadProject={(id: string): void => {
-                void handleLoadProject(id);
-              }}
-              onNavigate={setCurrentView}
-            />
+            <ProjectsErrorBoundary>
+              <ProjectsView
+                currentProject={project}
+                onNewProject={() => setShowWizard(true)}
+                onLoadProject={(id: string): void => {
+                  void handleLoadProject(id);
+                }}
+                onNavigate={setCurrentView}
+              />
+            </ProjectsErrorBoundary>
           </div>
         )}
 
