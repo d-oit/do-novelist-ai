@@ -34,6 +34,6 @@ describe('Navbar', () => {
   it('highlights the current view', () => {
     render(<Navbar {...defaultProps} />);
     const dashboardLink = screen.getByTestId('nav-dashboard');
-    expect(dashboardLink).toHaveClass('bg-primary/20 text-primary-foreground');
+    expect(dashboardLink).toHaveClass('bg-primary text-primary-foreground');
   });
 });
