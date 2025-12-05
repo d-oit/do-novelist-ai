@@ -4,7 +4,7 @@
  */
 
 import { Settings } from 'lucide-react';
-import React, { Suspense, lazy } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { GoapEngine } from '../features/editor/hooks/useGoapEngine';
 import { Project, Chapter, RefineOptions } from '../types';
@@ -15,8 +15,8 @@ import GoapVisualizer from './GoapVisualizer';
 import PlannerControl from './PlannerControl';
 import ProjectStats from './ProjectStats';
 
-// Dynamic imports for code splitting
-const BookViewer = lazy(() => import('../features/editor/components/BookViewerRefactored'));
+// Import BookViewer directly to avoid lazy loading issues in tests
+import BookViewer from '../features/editor/components/BookViewer';
 
 interface ProjectDashboardProps {
   project: Project;
@@ -29,90 +29,114 @@ interface ProjectDashboardProps {
   onSettingsClick: () => void;
 }
 
-const LoadingBookViewer: React.FC = () => (
-  <div className='flex h-64 items-center justify-center rounded-lg border border-border/50 bg-card/30'>
-    <div className='flex items-center gap-3 text-muted-foreground'>
-      <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent' />
-      <span>Loading editor...</span>
-    </div>
-  </div>
-);
+const ProjectDashboardOptimized: React.FC<ProjectDashboardProps> = React.memo(
+  ({
+    project,
+    engine,
+    selectedChapterId,
+    onSelectChapter,
+    onUpdateChapter,
+    onUpdateProject,
+    onAddChapter,
+    onSettingsClick,
+  }) => {
+    // Memoize callback handlers
+    const handleTogglePlanner = useCallback(() => {
+      engine.setAutoPilot(!engine.autoPilot);
+    }, [engine]);
 
-const ProjectDashboardOptimized: React.FC<ProjectDashboardProps> = ({
-  project,
-  engine,
-  selectedChapterId,
-  onSelectChapter,
-  onUpdateChapter,
-  onUpdateProject,
-  onAddChapter,
-  onSettingsClick,
-}) => {
-  return (
-    <div className='animate-in fade-in mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>
-      {/* Left Column: Planner & Controls */}
-      <div className='group/sidebar flex w-full flex-col gap-6 md:w-1/3'>
-        <div className='flex flex-col gap-6 transition-opacity duration-300 md:sticky md:top-20'>
-          <PlannerControl
-            isPlannerRunning={engine.autoPilot}
-            isGenerating={project.isGenerating}
-            isStyleDefined={project.worldState.styleDefined}
-            onTogglePlanner={() => engine.setAutoPilot(!engine.autoPilot)}
-          />
+    const handleRefineChapter = useCallback(
+      (chapterId: string, options: RefineOptions) => {
+        void engine.handleRefineChapter(chapterId, options);
+      },
+      [engine],
+    );
 
-          <GoapVisualizer project={project} currentAction={engine.currentAction} />
+    const handleContinueChapter = useCallback(
+      (chapterId: string) => {
+        void engine.handleContinueChapter(chapterId);
+      },
+      [engine],
+    );
 
-          <ProjectStats project={project} />
+    // Memoize action availability check
+    const actionItems = useMemo(() => {
+      return engine.availableActions.map(action => ({
+        action,
+        isActive: engine.currentAction?.name === action.name,
+        disabled: !engine.isActionAvailable(action) || project.isGenerating,
+      }));
+    }, [
+      engine.availableActions,
+      engine.currentAction,
+      engine.isActionAvailable,
+      project.isGenerating,
+    ]);
 
-          <div className='space-y-3'>
-            <div className='flex items-center justify-between'>
-              <h2 className='text-sm font-bold uppercase tracking-wider text-muted-foreground'>
-                Manual Actions
-              </h2>
-              <Settings
-                className='h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground'
-                onClick={onSettingsClick}
-              />
-            </div>
+    return (
+      <div className='animate-in fade-in mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>
+        {/* Left Column: Planner & Controls */}
+        <div className='group/sidebar flex w-full flex-col gap-6 md:w-1/3'>
+          <div className='flex flex-col gap-6 transition-opacity duration-300 md:sticky md:top-20'>
+            <PlannerControl
+              isPlannerRunning={engine.autoPilot}
+              isGenerating={project.isGenerating}
+              isStyleDefined={project.worldState.styleDefined}
+              onTogglePlanner={handleTogglePlanner}
+            />
 
-            <div className='grid gap-3'>
-              {engine.availableActions.map(action => (
-                <ActionCard
-                  key={action.name}
-                  action={action}
-                  isActive={engine.currentAction?.name === action.name}
-                  disabled={!engine.isActionAvailable(action) || project.isGenerating}
-                  onClick={() => void engine.executeAction(action)}
+            <GoapVisualizer project={project} currentAction={engine.currentAction} />
+
+            <ProjectStats project={project} />
+
+            <div className='space-y-3'>
+              <div className='flex items-center justify-between'>
+                <h2 className='text-sm font-bold uppercase tracking-wider text-muted-foreground'>
+                  Manual Actions
+                </h2>
+                <Settings
+                  className='h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground'
+                  onClick={onSettingsClick}
                 />
-              ))}
-            </div>
-          </div>
+              </div>
 
-          <div className='h-[300px] min-h-[300px]'>
-            <AgentConsole logs={engine.logs} />
+              <div className='grid gap-3'>
+                {actionItems.map(({ action, isActive, disabled }) => (
+                  <ActionCard
+                    key={action.name}
+                    action={action}
+                    isActive={isActive}
+                    disabled={disabled}
+                    onClick={() => void engine.executeAction(action)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className='h-[300px] min-h-[300px]'>
+              <AgentConsole logs={engine.logs} />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Right Column: Book Viewer with Code Splitting */}
-      <div className='flex min-h-[600px] w-full flex-col md:w-2/3'>
-        <Suspense fallback={<LoadingBookViewer />}>
+        {/* Right Column: Book Viewer */}
+        <div className='flex min-h-[600px] w-full flex-col md:w-2/3'>
           <BookViewer
             project={project}
             selectedChapterId={selectedChapterId}
             onSelectChapter={onSelectChapter}
-            onRefineChapter={(chapterId: string, options: RefineOptions) => {
-              void engine.handleRefineChapter(chapterId, options);
-            }}
+            onRefineChapter={handleRefineChapter}
             onUpdateChapter={onUpdateChapter}
             onUpdateProject={onUpdateProject}
             onAddChapter={onAddChapter}
-            onContinueChapter={chapterId => void engine.handleContinueChapter(chapterId)}
+            onContinueChapter={handleContinueChapter}
           />
-        </Suspense>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  },
+);
+
+ProjectDashboardOptimized.displayName = 'ProjectDashboardOptimized';
 
 export default ProjectDashboardOptimized;

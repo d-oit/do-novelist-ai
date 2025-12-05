@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Zap, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { loadUserPreferences, saveUserPreferences } from '@/services/ai-config-service';
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 
@@ -95,11 +96,12 @@ export const ProviderSelector = ({
                     {getStatusIcon(provider)}
                     <span className='capitalize'>{provider}</span>
                     <span
-                      className={`ml-2 rounded px-2 py-1 text-xs ${
+                      className={cn(
+                        'ml-2 rounded px-2 py-1 text-xs',
                         providerConfig.enabled
                           ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-500'
-                      }`}
+                          : 'bg-gray-100 text-gray-500',
+                      )}
                     >
                       {providerConfig.enabled ? 'Enabled' : 'Not Configured'}
                     </span>
@@ -113,13 +115,14 @@ export const ProviderSelector = ({
                           providerConfig.enabled && void handleProviderSelect(provider, model)
                         }
                         disabled={!providerConfig.enabled}
-                        className={`w-full rounded border p-3 text-left text-sm transition-colors ${
+                        className={cn(
+                          'w-full rounded border p-3 text-left text-sm transition-colors',
                           isSelected && selectedModel === model
                             ? 'border-blue-200 bg-blue-50 text-blue-900'
                             : providerConfig.enabled
                               ? 'border-gray-200 hover:bg-gray-50'
-                              : 'cursor-not-allowed border-gray-100 opacity-50'
-                        }`}
+                              : 'cursor-not-allowed border-gray-100 opacity-50',
+                        )}
                       >
                         <div className='flex items-center justify-between'>
                           <span className='font-medium'>{model}</span>

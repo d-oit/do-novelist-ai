@@ -10,9 +10,17 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
+    isolate: true,
+    mockReset: true,
+    restoreMocks: true,
+    clearMocks: true,
+    testTimeout: 10000,
+    hookTimeout: 10000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
+      reportOnFailure: true,
       exclude: [
         'node_modules/',
         'src/test/',
@@ -20,6 +28,7 @@ export default defineConfig({
         '**/*.config.*',
         '**/mockData.ts',
         'tests/**',
+        '**/types/**',
       ],
       thresholds: {
         lines: 80,
@@ -27,11 +36,17 @@ export default defineConfig({
         branches: 75,
         statements: 80,
       },
+      skipFull: false,
     },
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@/components': path.resolve(__dirname, './src/components'),
+      '@/features': path.resolve(__dirname, './src/features'),
+      '@/lib': path.resolve(__dirname, './src/lib'),
+      '@/types': path.resolve(__dirname, './src/types'),
+      '@shared': path.resolve(__dirname, './src/shared'),
     },
   },
 });

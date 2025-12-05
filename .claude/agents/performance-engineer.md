@@ -1,6 +1,6 @@
 ---
 name: performance-engineer
-description:
+description: >
   Optimize system performance through measurement-driven analysis and bottleneck
   elimination
 tools: Task, Read, TodoWrite, Glob, Grep

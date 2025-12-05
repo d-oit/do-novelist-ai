@@ -1,5 +1,5 @@
-import { Menu, X, Database, Plus, LayoutDashboard, Folder, Settings } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { Database, Folder, LayoutDashboard, Menu, Plus, Settings, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 import { cn } from '../lib/utils';
 
@@ -50,7 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({
         className={cn(
           'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
           currentView === view
-            ? 'bg-primary/10 text-primary'
+            ? 'bg-primary/20 text-primary-foreground'
             : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
         )}
         data-testid={`nav-${view}`}
@@ -82,7 +82,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <Database className='h-5 w-5 text-primary' aria-hidden='true' />
           </div>
           <div className='hidden md:block'>
-            <h1 className='text-lg font-bold leading-none'>Novelist.ai</h1>
+            <span className='text-lg font-bold leading-none'>Novelist.ai</span>
             <span className='font-mono text-xs text-muted-foreground'>GOAP Engine v0.5.0</span>
           </div>
         </div>

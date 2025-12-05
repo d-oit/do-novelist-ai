@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description:
+description: >
   Review code for quality, security, performance, and maintainability. Invoke
   when conducting PR reviews, quality audits, security assessments, performance
   analysis, technical debt evaluation, or pre-commit checks.

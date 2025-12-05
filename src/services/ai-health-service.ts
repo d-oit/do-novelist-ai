@@ -190,6 +190,8 @@ async function performHealthCheck(
       model: providerInstance(modelName),
       prompt: TEST_PROMPT,
       maxOutputTokens: 5,
+      // Disable AI SDK logging to prevent "m.log is not a function" error
+      experimental_telemetry: { isEnabled: false },
     });
 
     await Promise.race([checkPromise, timeoutPromise]);

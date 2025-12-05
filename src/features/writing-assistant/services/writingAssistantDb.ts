@@ -6,8 +6,8 @@
 // import { db } from '../../../lib/db'; // Will be used when implementing actual DB queries
 import {
   type ContentAnalysis,
-  type WritingSuggestion,
   type WritingAssistantConfig,
+  type WritingSuggestion,
 } from '../types';
 
 // Database schema types for Writing Assistant
@@ -86,23 +86,33 @@ class WritingAssistantDb {
   }
 
   private getOrCreateDeviceId(): string {
-    let deviceId = localStorage.getItem('novelist_device_id');
-    if (deviceId == null) {
-      deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('novelist_device_id', deviceId);
+    try {
+      let deviceId = localStorage.getItem('novelist_device_id');
+      if (deviceId == null) {
+        deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('novelist_device_id', deviceId);
+      }
+      return deviceId;
+    } catch (_e) {
+      console.warn('LocalStorage access denied, using temporary device ID');
+      return `temp_device_${Date.now()}`;
     }
-    return deviceId;
   }
 
   private initializeUserId(): void {
     // In a real app, this would come from authentication
     // For now, create a persistent anonymous user ID
-    let userId = localStorage.getItem('novelist_user_id');
-    if (userId == null) {
-      userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('novelist_user_id', userId);
+    try {
+      let userId = localStorage.getItem('novelist_user_id');
+      if (userId == null) {
+        userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('novelist_user_id', userId);
+      }
+      this.userId = userId;
+    } catch (_e) {
+      console.warn('LocalStorage access denied, using temporary user ID');
+      this.userId = `temp_user_${Date.now()}`;
     }
-    this.userId = userId;
   }
 
   /**

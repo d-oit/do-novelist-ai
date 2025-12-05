@@ -173,6 +173,8 @@ class WritingAssistantService {
         model: this.genAI,
         prompt,
         temperature: 0.7,
+        // Disable AI SDK logging to prevent "m.log is not a function" error
+        experimental_telemetry: { isEnabled: false },
       });
 
       return this.parseAISuggestions(result.text, config);

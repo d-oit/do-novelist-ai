@@ -10,6 +10,7 @@ import {
   type UsageStats,
 } from '@/lib/db/index';
 import { type AIProvider } from '@/lib/ai-config';
+import { loadUserPreferences } from './ai-config-service';
 
 /**
  * Enhanced usage stats with computed properties
@@ -203,7 +204,6 @@ export async function getUsageStats(
  */
 export async function getBudgetInfo(userId: string): Promise<BudgetInfo> {
   try {
-    const { loadUserPreferences } = await import('./ai-config-service');
     const prefs = await loadUserPreferences(userId);
 
     const startDate = new Date();

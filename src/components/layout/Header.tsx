@@ -1,5 +1,15 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Database, Plus, LayoutDashboard, Folder, Settings, Sparkles, Map } from 'lucide-react';
+import {
+  Menu,
+  X,
+  Database,
+  Plus,
+  LayoutDashboard,
+  Folder,
+  Settings,
+  Sparkles,
+  Map,
+} from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import { useScrollLock } from '../../lib/hooks/useScrollLock';
@@ -67,7 +77,6 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
             : 'text-muted-foreground hover:bg-secondary/80 hover:text-foreground hover:shadow-sm',
         )}
         data-testid={`nav-${view}`}
-        role='menuitem'
         aria-current={currentView === view ? 'page' : undefined}
         aria-label={`Navigate to ${label}`}
       >
@@ -89,6 +98,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
           'transition-all duration-300',
         )}
         role='banner'
+        aria-label='Main application header'
         style={{ '--header-height': '4rem' } as React.CSSProperties}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -101,44 +111,44 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           {/* Logo & Brand */}
-          <motion.button
-            className='group flex cursor-pointer items-center gap-3 transition-transform duration-200'
+          <button
+            className='group flex cursor-pointer items-center gap-3 transition-transform duration-200 hover:scale-[0.98] active:scale-95'
             onClick={() => handleNav('dashboard')}
-            role='button'
-            tabIndex={0}
             aria-label='Go to dashboard'
-            whileHover={{ scale: 0.98 }}
-            whileTap={{ scale: 0.95 }}
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
+            type='button'
           >
-            <div
+            <motion.div
               className={cn(
                 'rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 p-2.5',
                 'transition-all duration-200 group-hover:shadow-lg group-hover:shadow-primary/20',
                 'ring-1 ring-primary/10',
               )}
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Database className='h-5 w-5 text-primary' aria-hidden='true' />
-            </div>
+            </motion.div>
             <div className='hidden md:block'>
               <div className='flex items-center gap-2'>
-                <h1 className='text-shadow-sm bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-lg font-bold leading-none text-transparent'>
+                <span className='text-shadow-sm bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-lg font-bold leading-none text-transparent'>
                   Novelist.ai
-                </h1>
+                </span>
                 <Sparkles className='h-4 w-4 text-primary/70' aria-hidden='true' />
               </div>
               <span className='font-mono text-xs tracking-wide text-muted-foreground'>
                 GOAP Engine v0.5.0
               </span>
             </div>
-          </motion.button>
+          </button>
 
           {/* Desktop Navigation */}
-          <motion.div
+          <motion.nav
             className='hidden items-center gap-2 md:flex'
-            role='menubar'
+            role='navigation'
+            aria-label='Main navigation'
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
@@ -147,7 +157,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
             <NavLink view='projects' icon={Folder} label='Projects' />
             <NavLink view='world-building' icon={Map} label='World Building' />
             <NavLink view='settings' icon={Settings} label='Settings' />
-          </motion.div>
+          </motion.nav>
 
           {/* Project Info & Actions */}
           <div className='hidden items-center gap-4 md:flex'>
@@ -220,7 +230,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
             />
 
             {/* Mobile Menu */}
-            <motion.div
+            <motion.nav
               className={cn(
                 'fixed left-0 right-0 top-16 md:hidden',
                 zIndex('MODAL'),
@@ -228,8 +238,9 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                 'border-t border-border/40',
                 'shadow-[0_8px_30px_rgb(0,0,0,0.12)]',
               )}
-              role='menu'
+              role='navigation'
               aria-label='Mobile navigation menu'
+              id='navigation'
               initial={{ y: -10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -10, opacity: 0 }}
@@ -283,7 +294,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </motion.nav>
           </>
         )}
       </AnimatePresence>

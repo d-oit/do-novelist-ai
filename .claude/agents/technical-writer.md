@@ -1,6 +1,6 @@
 ---
 name: technical-writer
-description:
+description: >
   Create clear, comprehensive technical documentation tailored to specific
   audiences with focus on usability and accessibility
 tools: Task, Read, TodoWrite, Glob, Grep

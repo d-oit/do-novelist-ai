@@ -283,7 +283,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
                     ? 'bg-primary/10 font-medium text-primary'
                     : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
                 )}
-                data-testid={`chapter-item-${chapter.id}`}
+                data-testid={`chapter-item-order-${chapter.orderIndex}`}
               >
                 {getStatusIcon(chapter.status)}
                 <span className='flex-1 truncate'>
@@ -346,9 +346,9 @@ const BookViewer: React.FC<BookViewerProps> = ({
           >
             <div className='mb-8 flex flex-col items-start justify-between gap-4 border-b border-border pb-4 md:flex-row md:items-center'>
               <div>
-                <h1 className='font-serif text-2xl font-bold text-foreground md:text-3xl'>
+                <h2 className='font-serif text-2xl font-bold text-foreground md:text-3xl'>
                   {project.title}
-                </h1>
+                </h2>
                 <p className='mt-1 text-sm text-muted-foreground'>{project.style}</p>
               </div>
             </div>
@@ -358,7 +358,10 @@ const BookViewer: React.FC<BookViewerProps> = ({
                 <h4 className='mb-2 text-xs font-bold uppercase text-muted-foreground'>
                   Core Idea
                 </h4>
-                <p className='whitespace-pre-wrap font-mono text-sm text-foreground'>
+                <p
+                  className='whitespace-pre-wrap font-mono text-sm text-foreground'
+                  data-testid='project-idea-content'
+                >
                   {project.idea}
                 </p>
               </section>
@@ -427,7 +430,10 @@ const BookViewer: React.FC<BookViewerProps> = ({
                     data-testid='save-status-indicator'
                   >
                     <div
-                      className={`h-1.5 w-1.5 rounded-full transition-colors ${hasUnsavedChanges ? 'animate-pulse bg-yellow-500' : 'bg-green-500/50'}`}
+                      className={cn(
+                        'h-1.5 w-1.5 rounded-full transition-colors',
+                        hasUnsavedChanges ? 'animate-pulse bg-yellow-500' : 'bg-green-500/50',
+                      )}
                     />
                     <span className='hidden text-[10px] uppercase tracking-wider opacity-70 md:inline'>
                       {hasUnsavedChanges ? 'Saving' : 'Saved'}
@@ -435,14 +441,17 @@ const BookViewer: React.FC<BookViewerProps> = ({
                   </div>
                 </div>
               </div>
-              <h1 className='border-b border-border pb-4 font-serif text-2xl font-bold text-foreground md:text-3xl'>
+              <h2 className='border-b border-border pb-4 font-serif text-2xl font-bold text-foreground md:text-3xl'>
                 {selectedChapter.title}
-              </h1>
+              </h2>
             </div>
 
             <div className='flex flex-1 flex-col gap-6'>
               <div
-                className={`group transition-all duration-500 ${isFocusMode ? 'hidden' : 'block'}`}
+                className={cn(
+                  'group transition-all duration-500',
+                  isFocusMode ? 'hidden' : 'block',
+                )}
               >
                 <label className='mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground opacity-70'>
                   Summary / Goal
@@ -553,7 +562,12 @@ const BookViewer: React.FC<BookViewerProps> = ({
                   </label>
                 )}
                 <textarea
-                  className={`w-full flex-1 resize-y rounded-md bg-transparent p-4 font-serif text-lg leading-relaxed text-foreground transition-all focus:outline-none ${isFocusMode ? 'min-h-[80vh] border-none text-xl shadow-none ring-0' : 'min-h-[400px] border border-border/50 shadow-inner hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20'}`}
+                  className={cn(
+                    'w-full flex-1 resize-y rounded-md bg-transparent p-4 font-serif text-lg leading-relaxed text-foreground transition-all focus:outline-none',
+                    isFocusMode
+                      ? 'min-h-[80vh] border-none text-xl shadow-none ring-0'
+                      : 'min-h-[400px] border border-border/50 shadow-inner hover:border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20',
+                  )}
                   value={content}
                   onChange={handleContentChange}
                   placeholder='Start writing or wait for the AI...'

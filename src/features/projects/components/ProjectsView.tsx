@@ -1,5 +1,5 @@
 import { Project } from '@shared/types';
-import { Folder, Clock, MoreVertical, FileText, Star, Trash2, Loader2, Plus } from 'lucide-react';
+import { Clock, FileText, Folder, Loader2, MoreVertical, Plus, Star, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { db } from '../../../lib/db';
@@ -53,50 +53,12 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
 
   return (
     <div className='min-h-screen bg-white dark:bg-gray-950'>
-      {/* Header/Navbar */}
-      <header className='sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/80'>
-        <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
-          <div className='flex h-16 items-center justify-between'>
-            <div className='flex items-center'>
-              <h1 className='text-xl font-semibold text-gray-900 dark:text-white'>Novelist.ai</h1>
-            </div>
-            <nav className='hidden space-x-8 md:flex'>
-              <button
-                onClick={() => onNavigate('dashboard')}
-                className='px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={() => onNavigate('projects')}
-                className='border-b-2 border-blue-500 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white'
-              >
-                Projects
-              </button>
-              <button
-                onClick={() => onNavigate('settings')}
-                className='px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-              >
-                Settings
-              </button>
-            </nav>
-            <button
-              onClick={onNewProject}
-              className='inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95'
-            >
-              <Plus className='mr-2 h-4 w-4' />
-              New Project
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
         {/* Hero Section */}
         <div className='mb-12 text-center'>
-          <h1 className='text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl'>
+          <h2 className='text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl'>
             My Projects
-          </h1>
+          </h2>
           <p className='mx-auto mt-3 max-w-2xl text-xl text-gray-500 dark:text-gray-400'>
             Manage your ongoing manuscripts and generated ebooks.
           </p>
@@ -225,7 +187,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
             </section>
           </>
         )}
-      </main>
+      </div>
     </div>
   );
 };

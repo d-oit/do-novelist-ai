@@ -1,6 +1,6 @@
 ---
 name: codebase-pattern-finder
-description:
+description: >
   codebase-pattern-finder is a useful subagent_type for finding similar
   implementations, usage examples, or existing patterns that can be modeled
   after. It will give you concrete code examples based on what you're looking

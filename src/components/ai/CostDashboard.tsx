@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Activity, CheckCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   getUsageStats,
   getBudgetInfo,
@@ -109,13 +110,14 @@ export const CostDashboard = ({ userId }: CostDashboardProps): React.JSX.Element
             </div>
             <div className='h-2 w-full rounded-full bg-gray-200'>
               <div
-                className={`h-2 rounded-full ${
+                className={cn(
+                  'h-2 rounded-full',
                   budgetInfo.isOverLimit
                     ? 'bg-red-500'
                     : budgetInfo.isNearLimit
                       ? 'bg-yellow-500'
-                      : 'bg-green-500'
-                }`}
+                      : 'bg-green-500',
+                )}
                 style={{ width: `${Math.min(budgetInfo.usagePercentage, 100)}%` }}
               />
             </div>

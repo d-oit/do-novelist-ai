@@ -138,7 +138,7 @@ export const PageErrorBoundary: React.FC<Props> = ({ children, componentName }):
     componentName={componentName ?? 'Page'}
     fallback={({ error, retry }) => (
       <div className='flex min-h-[400px] flex-col items-center justify-center p-12'>
-        <h1 className='mb-4 text-2xl font-bold text-destructive'>Page Error</h1>
+        <h2 className='mb-4 text-2xl font-bold text-destructive'>Page Error</h2>
         <p className='mb-6 max-w-lg text-center text-muted-foreground'>
           We encountered an unexpected error. Our team has been notified.
         </p>
