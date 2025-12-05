@@ -95,7 +95,7 @@ jobs:
           <body>
             <div class="container">
               <h1>📊 Novelist.ai Performance Dashboard</h1>
-              
+
               <div class="metrics-grid">
                 <div class="metric-card">
                   <div class="metric-value" id="bundle-size">--</div>
@@ -104,7 +104,7 @@ jobs:
                     Main Bundle Size
                   </div>
                 </div>
-                
+
                 <div class="metric-card">
                   <div class="metric-value" id="total-size">--</div>
                   <div class="metric-label">
@@ -112,7 +112,7 @@ jobs:
                     Total Build Size
                   </div>
                 </div>
-                
+
                 <div class="metric-card">
                   <div class="metric-value" id="chunk-count">--</div>
                   <div class="metric-label">
@@ -120,7 +120,7 @@ jobs:
                     JavaScript Chunks
                   </div>
                 </div>
-                
+
                 <div class="metric-card">
                   <div class="metric-value" id="performance-score">A+</div>
                   <div class="metric-label">
@@ -129,19 +129,19 @@ jobs:
                   </div>
                 </div>
               </div>
-              
+
               <div class="charts-grid">
                 <div class="chart-container">
                   <h3>Bundle Size Trend</h3>
                   <canvas id="bundleTrendChart"></canvas>
                 </div>
-                
+
                 <div class="chart-container">
                   <h3>Build Metrics Distribution</h3>
                   <canvas id="metricsChart"></canvas>
                 </div>
               </div>
-              
+
               <div class="last-updated" id="last-updated">
                 Last updated: Loading...
               </div>
@@ -153,7 +153,7 @@ jobs:
                 try {
                   const response = await fetch('./trends.json');
                   const data = await response.json();
-                  
+
                   // Format bytes to human readable
                   function formatBytes(bytes) {
                     if (bytes === 0) return '0 B';
@@ -162,41 +162,47 @@ jobs:
                     const i = Math.floor(Math.log(bytes) / Math.log(k));
                     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
                   }
-                  
+
                   // Get status class based on thresholds
                   function getStatus(value, threshold, isReverse = false) {
                     if (isReverse) {
-                      return value <= threshold ? 'status-good' : value <= threshold * 1.5 ? 'status-warning' : 'status-error';
+                      return value <= threshold ? 'status-good' :
+                        value <= threshold * 1.5 ? 'status-warning' : 'status-error';
                     }
-                    return value >= threshold ? 'status-good' : value >= threshold * 0.8 ? 'status-warning' : 'status-error';
+                    return value >= threshold ? 'status-good' :
+                      value >= threshold * 0.8 ? 'status-warning' : 'status-error';
                   }
-                  
+
                   // Update metrics display
                   const bundleSize = parseInt(data.metrics.bundleSize);
                   const totalSize = parseInt(data.metrics.totalSize);
                   const chunkCount = parseInt(data.metrics.chunkCount);
-                  
+
                   document.getElementById('bundle-size').textContent = formatBytes(bundleSize);
                   document.getElementById('total-size').textContent = formatBytes(totalSize);
                   document.getElementById('chunk-count').textContent = chunkCount;
-                  
+
                   // Update status indicators
-                  document.getElementById('bundle-status').className = 'status-indicator ' + getStatus(bundleSize, 200 * 1024, true);
-                  document.getElementById('total-status').className = 'status-indicator ' + getStatus(totalSize, 3 * 1024 * 1024, true);
-                  document.getElementById('chunk-status').className = 'status-indicator ' + getStatus(chunkCount, 10);
-                  
+                  document.getElementById('bundle-status').className =
+                    'status-indicator ' + getStatus(bundleSize, 200 * 1024, true);
+                  document.getElementById('total-status').className =
+                    'status-indicator ' + getStatus(totalSize, 3 * 1024 * 1024, true);
+                  document.getElementById('chunk-status').className =
+                    'status-indicator ' + getStatus(chunkCount, 10);
+
                   // Update timestamp
-                  document.getElementById('last-updated').textContent = 'Last updated: ' + new Date(data.lastUpdated).toLocaleString();
-                  
+                  document.getElementById('last-updated').textContent =
+                    'Last updated: ' + new Date(data.lastUpdated).toLocaleString();
+
                   // Create charts
                   createBundleTrendChart();
                   createMetricsChart(bundleSize, totalSize, chunkCount);
-                  
+
                 } catch (error) {
                   console.error('Failed to load metrics:', error);
                 }
               }
-              
+
               function createBundleTrendChart() {
                 const ctx = document.getElementById('bundleTrendChart').getContext('2d');
                 new Chart(ctx, {
@@ -226,7 +232,7 @@ jobs:
                   }
                 });
               }
-              
+
               function createMetricsChart(bundleSize, totalSize, chunkCount) {
                 const ctx = document.getElementById('metricsChart').getContext('2d');
                 new Chart(ctx, {
@@ -253,7 +259,7 @@ jobs:
                   }
                 });
               }
-              
+
               // Load metrics on page load
               loadMetrics();
             </script>
