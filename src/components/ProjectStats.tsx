@@ -88,8 +88,8 @@ const ProjectStats: React.FC<ProjectStatsProps> = React.memo(({ project }) => {
         <div className='mb-4 text-xs uppercase tracking-widest text-muted-foreground'>
           Project Metrics
         </div>
-        <div className='h-24 w-full'>
-          <ResponsiveContainer width='100%' height='100%'>
+        <div className='h-24 min-h-[96px] w-full'>
+          <ResponsiveContainer width='100%' height={96} minHeight={96}>
             <BarChart layout='vertical' data={data} barSize={12}>
               <XAxis type='number' hide domain={[0, 100]} />
               <YAxis
