@@ -22,15 +22,24 @@ const logger = {
 };
 
 // Make logger available globally (works in both Node.js and browser)
+// Use try-catch to handle cases where properties are read-only (e.g., browser extensions)
 if (typeof globalThis !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (globalThis as any).m = logger;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).m = logger;
+  } catch {
+    // Property is read-only, skip assignment
+  }
 }
 
 // Also set on window for browser environments
 if (typeof window !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).m = logger;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).m = logger;
+  } catch {
+    // Property is read-only (e.g., React DevTools), skip assignment
+  }
 }
 
 // Export for module usage

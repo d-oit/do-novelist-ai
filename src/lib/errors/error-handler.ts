@@ -3,10 +3,10 @@
  * Based on 2024-2025 best practices
  */
 
-import { logger } from './logging';
 import type { AppError } from './error-types';
-import { toAppError, getErrorMessage } from './error-types';
-import { type Result, retry as retryResult, tryCatch, tryCatchAsync, isErr, err } from './result';
+import { getErrorMessage, toAppError } from './error-types';
+import { logger } from './logging';
+import { err, isErr, retry as retryResult, tryCatch, tryCatchAsync, type Result } from './result';
 
 export interface RetryOptions {
   maxAttempts?: number;
@@ -77,14 +77,17 @@ export class ErrorHandler {
     if (this.config.enableGlobalHandlers) {
       window.addEventListener('error', event => {
         const error = toAppError(event.error ?? event.message, 'global-error');
-        this.handle(error, { source: 'window.onerror', fatal: true });
+        // Don't set fatal: true here - global handlers should log, not re-throw
+        // Re-throwing in a global error handler causes an infinite cascade
+        this.handle(error, { source: 'window.onerror', fatal: false });
       });
 
       // Unhandled promise rejections
       if (this.config.enableUnhandledRejectionHandler) {
         window.addEventListener('unhandledrejection', event => {
           const error = toAppError(event.reason, 'unhandledrejection');
-          this.handle(error, { source: 'unhandledrejection', fatal: true });
+          // Don't set fatal: true here - global handlers should log, not re-throw
+          this.handle(error, { source: 'unhandledrejection', fatal: false });
         });
       }
     }
