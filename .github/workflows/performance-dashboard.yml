@@ -208,7 +208,8 @@ jobs:
                 new Chart(ctx, {
                   type: 'line',
                   data: {
-                    labels: ['1 week ago', '6 days ago', '5 days ago', '4 days ago', '3 days ago', '2 days ago', 'Yesterday', 'Today'],
+                    labels: ['1 week ago', '6 days ago', '5 days ago', '4 days ago',
+                      '3 days ago', '2 days ago', 'Yesterday', 'Today'],
                     datasets: [{
                       label: 'Bundle Size (KB)',
                       data: [120, 115, 108, 95, 93, 92, 92, 92],
@@ -313,8 +314,10 @@ jobs:
             <title>Novelist.ai - Performance Monitoring</title>
             <style>
               body { font-family: system-ui; padding: 40px; text-align: center; }
-              .card { max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-              a { display: inline-block; margin: 10px; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; }
+              .card { max-width: 400px; margin: 0 auto; padding: 30px; border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              a { display: inline-block; margin: 10px; padding: 12px 24px; background: #3b82f6;
+                color: white; text-decoration: none; border-radius: 6px; }
             </style>
           </head>
           <body>
