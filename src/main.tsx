@@ -8,6 +8,8 @@ import './index.css';
 // This must be imported before any AI SDK code runs
 import './lib/ai-sdk-logger-patch';
 
+import { UserProvider } from './contexts/UserContext';
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error('Could not find root element to mount to');
@@ -16,6 +18,8 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <UserProvider>
+      <App />
+    </UserProvider>
   </React.StrictMode>,
 );
