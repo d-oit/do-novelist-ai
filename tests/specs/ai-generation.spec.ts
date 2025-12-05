@@ -127,14 +127,14 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
     // Wait for navigation to settle
     await page.waitForLoadState('domcontentloaded');
 
-    // Navigate to settings using role-based selector
-    await page.getByRole('button', { name: /settings/i }).click();
+    // Navigate to settings using test ID for reliability
+    await page.getByTestId('nav-settings').click();
 
     // Wait for settings view to load with intelligent polling
     await expect(page.getByTestId('settings-view')).toBeVisible();
 
     // Navigate back to dashboard
-    await page.getByRole('button', { name: /dashboard/i }).click();
+    await page.getByTestId('nav-dashboard').click();
     await expect(page.getByTestId('nav-dashboard')).toBeVisible();
   });
 });

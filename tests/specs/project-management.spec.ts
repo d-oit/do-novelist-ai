@@ -39,12 +39,12 @@ test.describe('Project Management E2E Tests', () => {
     await page.waitForLoadState('domcontentloaded');
     await expect(page.getByTestId('nav-dashboard')).toBeVisible();
 
-    // Settings using role-based selector
-    await page.getByRole('button', { name: /settings/i }).click();
+    // Settings using test ID for reliability
+    await page.getByTestId('nav-settings').click();
     await expect(page.getByTestId('settings-view')).toBeVisible();
 
     // Back to dashboard
-    await page.getByRole('button', { name: /dashboard/i }).click();
+    await page.getByTestId('nav-dashboard').click();
     await expect(page.getByTestId('nav-dashboard')).toBeVisible();
   });
 });
