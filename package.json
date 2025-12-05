@@ -19,7 +19,13 @@
     "lint:clear-cache": "rm -f .eslintcache",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "perf:monitor": "node scripts/performance-monitor.cjs",
+    "perf:build": "npm run build && npm run perf:monitor",
+    "perf:lighthouse": "lhci autorun --config=lighthouserc.js",
+    "perf:full": "npm run perf:build && npm run perf:lighthouse",
+    "ci:quality": "npm run lint:ci && npm run test && npm run coverage",
+    "ci:performance": "npm run perf:build && npm run test:e2e"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.50",

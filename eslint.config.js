@@ -34,6 +34,23 @@ export default tseslint.config(
       'src/index.css', // Exclude Tailwind CSS files with @apply directives
     ],
   },
+
+  // Configuration files that need CommonJS/Node.js globals
+  {
+    files: ['**/*.cjs', 'lighthouserc.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        module: 'readonly',
+        require: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-undef': 'off',
+    },
+  },
+
   js.configs.recommended,
   // Disable type-aware linting for performance
   ...tseslint.configs.recommended,
