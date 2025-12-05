@@ -85,7 +85,7 @@ jobs:
 
           ## 🎯 Performance Targets
           - Main bundle: < 200KB ✓
-          - Total size: < 2MB ✓  
+          - Total size: < 2MB ✓
           - Chunks: 5-20 for optimal caching ✓
           EOF
 
@@ -318,7 +318,7 @@ jobs:
             const comment = `${icon} **Bundle Size Impact Analysis**
 
             | Metric | Base | PR | Change |
-            |--------|------|----|---------| 
+            |--------|------|----|---------|
             | Total Size | ${formatBytes(baseSize)} | ${formatBytes(prSize)} | ${sizeDiff >= 0 ? '+' : ''}${formatBytes(sizeDiff)} (${sizeDiffPercent >= 0 ? '+' : ''}${sizeDiffPercent}%) |
 
             ${status} **Status:** ${Math.abs(sizeDiffPercent) > 10 ? 'Significant size change detected' : 'Size change within acceptable range'}

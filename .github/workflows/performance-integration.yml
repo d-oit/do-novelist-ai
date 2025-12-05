@@ -58,7 +58,8 @@ jobs:
         id: changes
         run: |
           # Check if changes might impact performance
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '\.(tsx?|jsx?|css|scss)$|vite\.config|package\.json'; then
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | \
+            grep -E '\.(tsx?|jsx?|css|scss)$|vite\.config|package\.json'; then
             echo "should-run=true" >> $GITHUB_OUTPUT
             echo "Performance-impacting changes detected"
           else
@@ -264,7 +265,7 @@ jobs:
             const fs = require('fs');
             if (fs.existsSync('performance-report.md')) {
               const report = fs.readFileSync('performance-report.md', 'utf8');
-              
+
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
