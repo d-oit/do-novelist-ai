@@ -10,9 +10,9 @@
  * @see https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright
  */
 
-import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { ReactTestHelpers, AccessibilityHelpers } from '../utils/test-helpers';
+import { expect, test } from '@playwright/test';
+import { AccessibilityHelpers, ReactTestHelpers } from '../utils/test-helpers';
 
 // WCAG 2.1 AA violation types we're targeting
 const CRITICAL_VIOLATIONS = [

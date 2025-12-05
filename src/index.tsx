@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './app/App';
 import './assets/styles.css';
 import './index.css';
-import { preloadCriticalResources, addResourceHints } from './lib/performance';
+import { addResourceHints, preloadCriticalResources } from './lib/performance';
 
 // Load AI SDK logger patch to prevent "m.log is not a function" errors
 // This must be imported before any AI SDK code runs
