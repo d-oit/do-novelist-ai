@@ -50,7 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({
         className={cn(
           'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
           currentView === view
-            ? 'bg-primary/10 text-primary'
+            ? 'bg-primary/20 text-primary-foreground'
             : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
         )}
         data-testid={`nav-${view}`}
