@@ -53,7 +53,9 @@ export default defineConfig({
 
   // Optimized web server configuration for React applications
   webServer: {
-    command: process.env.CI ? 'rm -rf node_modules/.vite && npm run dev' : 'npm run dev',
+    command: process.env.CI
+      ? 'rm -rf node_modules/.vite dist && npm run dev -- --force'
+      : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI, // Different logic for CI vs local
     timeout: 120000, // 2 minutes for server startup
