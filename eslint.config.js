@@ -7,7 +7,7 @@ import security from 'eslint-plugin-security';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default [
   {
     ignores: [
       'dist/**',
@@ -15,8 +15,6 @@ export default tseslint.config(
       '.claude/**',
       '.opencode/**',
       '.factory/**',
-      '*.config.js',
-      '*.config.ts',
       'coverage/**',
       '.nyc_output/**',
       '.vscode/**',
@@ -27,10 +25,9 @@ export default tseslint.config(
       'public/**',
       'playwright-report/**',
       'test-results/**',
-      'index.tsx', // Exclude root index.tsx to avoid project service conflict
-      'types.ts', // Exclude root types.ts to avoid project service conflict
-      'src/assets/styles.css', // Exclude Tailwind CSS files with @apply directives
-      'src/index.css', // Exclude Tailwind CSS files with @apply directives
+      'types.ts',
+      'src/assets/styles.css',
+      'src/index.css',
     ],
   },
 
@@ -51,119 +48,10 @@ export default tseslint.config(
   },
 
   js.configs.recommended,
-  // Disable type-aware linting for performance
   ...tseslint.configs.recommended,
   prettierConfig,
-  {
-    files: ['**/*.{ts,tsx}'],
-    plugins: {
-      security,
-      react: pluginReact,
-      'react-hooks': pluginReactHooks,
-      'react-refresh': pluginReactRefresh,
-    },
-    languageOptions: {
-      parserOptions: {
-        // Disable type-aware linting for performance
-        project: false,
-        tsconfigRootDir: import.meta.dirname,
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-      globals: {
-        ...globals.browser,
-        ...globals.es2022,
-        React: true,
-        JSX: true,
-      },
-    },
-    settings: {
-      'import-x/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.json',
-        },
-      },
-      react: {
-        version: 'detect',
-      },
-    },
-    rules: {
-      'no-console': 'off',
-      'no-undef': 'off',
-      // Prevent template literal className patterns - use cn() utility instead
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: 'JSXAttribute[name.name="className"] TemplateLiteral',
-          message:
-            'Do not use template literals for className. Use the cn() utility from @/lib/utils instead. Example: className={cn("base-class", condition && "conditional-class")}',
-        },
-      ],
-      // Client-side security rules - less strict for development
-      'security/detect-object-injection': 'off',
-      'security/detect-non-literal-fs-filename': 'off',
-      'security/detect-non-literal-regexp': 'off',
-      'security/detect-unsafe-regex': 'off',
-      'security/detect-buffer-noassert': 'off',
-      'security/detect-child-process': 'off',
-      'security/detect-disable-mustache-escape': 'off',
-      'security/detect-eval-with-expression': 'error',
-      'security/detect-no-csrf-before-method-override': 'off',
-      'security/detect-non-literal-require': 'off',
-      'security/detect-possible-timing-attacks': 'off',
-      'security/detect-pseudoRandomBytes': 'off',
-      // Basic TypeScript rules (non-type-aware)
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-          args: 'after-used',
-          vars: 'all',
-          ignoreRestSiblings: true,
-        },
-      ],
-      '@typescript-eslint/no-explicit-any': 'error',
-      'no-case-declarations': 'off',
-      'no-useless-escape': 'off',
-      'no-control-regex': 'off',
-      // React-specific rules
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-uses-react': 'off',
-      'react/jsx-uses-vars': 'error',
-      'react/jsx-key': 'error',
-      'react/jsx-no-duplicate-props': 'error',
-      'react/jsx-no-undef': 'error',
-      'react/jsx-pascal-case': 'error',
-      'react/no-children-prop': 'error',
-      'react/no-danger-with-children': 'error',
-      'react/no-deprecated': 'warn',
-      'react/no-direct-mutation-state': 'error',
-      'react/no-find-dom-node': 'error',
-      'react/no-is-mounted': 'error',
-      'react/no-render-return-value': 'error',
-      'react/no-string-refs': 'error',
-      'react/no-unknown-property': 'error',
-      'react/require-render-return': 'error',
-      'react/self-closing-comp': 'warn',
-      'react/function-component-definition': [
-        'error',
-        {
-          namedComponents: 'arrow-function',
-          unnamedComponents: 'arrow-function',
-        },
-      ],
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'off',
-      'react-refresh/only-export-components': 'off',
-    },
-  },
-  // Configuration for Node.js files
+
+  // Configuration for Node.js files (before general TypeScript rules)
   {
     files: [
       '**/*.config.{js,ts}',
@@ -196,6 +84,208 @@ export default tseslint.config(
       '@typescript-eslint/no-require-imports': 'off',
     },
   },
+
+  // Configuration for TypeScript source files
+  {
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    plugins: {
+      security,
+      react: pluginReact,
+      'react-hooks': pluginReactHooks,
+      'react-refresh': pluginReactRefresh,
+    },
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: process.cwd(),
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.es2022,
+        React: true,
+        JSX: true,
+      },
+    },
+    settings: {
+      'import-x/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
+        },
+      },
+      react: {
+        version: 'detect',
+      },
+    },
+    rules: {
+      'no-console': 'off',
+      'no-undef': 'off',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXAttribute[name.name="className"] TemplateLiteral',
+          message:
+            'Do not use template literals for className. Use the cn() utility from @/lib/utils instead.',
+        },
+      ],
+      'security/detect-object-injection': 'off',
+      'security/detect-non-literal-fs-filename': 'off',
+      'security/detect-non-literal-regexp': 'off',
+      'security/detect-unsafe-regex': 'off',
+      'security/detect-buffer-noassert': 'off',
+      'security/detect-child-process': 'off',
+      'security/detect-disable-mustache-escape': 'off',
+      'security/detect-eval-with-expression': 'error',
+      'security/detect-no-csrf-before-method-override': 'off',
+      'security/detect-non-literal-require': 'off',
+      'security/detect-possible-timing-attacks': 'off',
+      'security/detect-pseudoRandomBytes': 'off',
+      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'separate-type-imports',
+        },
+      ],
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+      'no-case-declarations': 'off',
+      'no-useless-escape': 'off',
+      'no-control-regex': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-react': 'off',
+      'react/jsx-uses-vars': 'error',
+      'react/jsx-key': 'error',
+      'react/jsx-no-duplicate-props': 'error',
+      'react/jsx-no-undef': 'error',
+      'react/jsx-pascal-case': 'error',
+      'react/jsx-no-target-blank': 'error',
+      'react/no-children-prop': 'error',
+      'react/no-danger-with-children': 'error',
+      'react/no-deprecated': 'warn',
+      'react/no-direct-mutation-state': 'error',
+      'react/no-find-dom-node': 'error',
+      'react/no-is-mounted': 'error',
+      'react/no-render-return-value': 'error',
+      'react/no-string-refs': 'error',
+      'react/no-unknown-property': 'error',
+      'react/require-render-return': 'error',
+      'react/self-closing-comp': 'warn',
+      'react/hook-use-state': 'warn',
+      'react/function-component-definition': [
+        'error',
+        {
+          namedComponents: 'arrow-function',
+          unnamedComponents: 'arrow-function',
+        },
+      ],
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+
+  // Configuration for JavaScript source files
+  {
+    files: ['src/**/*.js', 'src/**/*.jsx'],
+    plugins: {
+      security,
+      react: pluginReact,
+      'react-hooks': pluginReactHooks,
+      'react-refresh': pluginReactRefresh,
+    },
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.es2022,
+        React: true,
+        JSX: true,
+      },
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    rules: {
+      'no-console': 'off',
+      'no-undef': 'off',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXAttribute[name.name="className"] TemplateLiteral',
+          message:
+            'Do not use template literals for className. Use the cn() utility from @/lib/utils instead.',
+        },
+      ],
+      'security/detect-object-injection': 'off',
+      'security/detect-non-literal-fs-filename': 'off',
+      'security/detect-non-literal-regexp': 'off',
+      'security/detect-unsafe-regex': 'off',
+      'security/detect-buffer-noassert': 'off',
+      'security/detect-child-process': 'off',
+      'security/detect-disable-mustache-escape': 'off',
+      'security/detect-eval-with-expression': 'error',
+      'security/detect-no-csrf-before-method-override': 'off',
+      'security/detect-non-literal-require': 'off',
+      'security/detect-possible-timing-attacks': 'off',
+      'security/detect-pseudoRandomBytes': 'off',
+      'no-unused-vars': 'error',
+      'no-explicit-any': 'off',
+      'no-floating-promises': 'error',
+      'await-thenable': 'error',
+      'no-misused-promises': 'error',
+      'no-case-declarations': 'off',
+      'no-useless-escape': 'off',
+      'no-control-regex': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-react': 'off',
+      'react/jsx-uses-vars': 'error',
+      'react/jsx-key': 'error',
+      'react/jsx-no-duplicate-props': 'error',
+      'react/jsx-no-undef': 'error',
+      'react/jsx-pascal-case': 'error',
+      'react/jsx-no-target-blank': 'error',
+      'react/no-children-prop': 'error',
+      'react/no-danger-with-children': 'error',
+      'react/no-deprecated': 'warn',
+      'react/no-direct-mutation-state': 'error',
+      'react/no-find-dom-node': 'error',
+      'react/no-is-mounted': 'error',
+      'react/no-render-return-value': 'error',
+      'react/no-string-refs': 'error',
+      'react/no-unknown-property': 'error',
+      'react/require-render-return': 'error',
+      'react/self-closing-comp': 'warn',
+      'react/hook-use-state': 'warn',
+      'react/function-component-definition': [
+        'error',
+        {
+          namedComponents: 'arrow-function',
+          unnamedComponents: 'arrow-function',
+        },
+      ],
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+
   // Configuration for test files
   {
     files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
@@ -225,17 +315,11 @@ export default tseslint.config(
       'security/detect-non-literal-regexp': 'off',
       'security/detect-unsafe-regex': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-          args: 'after-used',
-          vars: 'all',
-          ignoreRestSiblings: true,
-        },
-      ],
+      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
       'no-empty': 'off',
       'no-empty-function': 'off',
       'no-magic-numbers': 'off',
@@ -251,6 +335,7 @@ export default tseslint.config(
       complexity: 'off',
     },
   },
+
   // Configuration for Playwright E2E test files
   {
     files: ['tests/**/*.spec.ts', 'tests/**/*.spec.js'],
@@ -278,17 +363,11 @@ export default tseslint.config(
       'security/detect-non-literal-regexp': 'off',
       'security/detect-unsafe-regex': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-          args: 'after-used',
-          vars: 'all',
-          ignoreRestSiblings: true,
-        },
-      ],
+      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
       'no-empty': 'off',
       'no-empty-function': 'off',
       'no-magic-numbers': 'off',
@@ -301,6 +380,7 @@ export default tseslint.config(
       'prefer-promise-reject-errors': 'off',
     },
   },
+
   // Configuration for test setup and utility files
   {
     files: [
@@ -325,17 +405,11 @@ export default tseslint.config(
       'no-console': 'off',
       'no-undef': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-          args: 'after-used',
-          vars: 'all',
-          ignoreRestSiblings: true,
-        },
-      ],
+      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
     },
   },
-);
+];
