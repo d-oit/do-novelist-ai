@@ -89,7 +89,8 @@ class WritingAssistantDb {
     try {
       let deviceId = localStorage.getItem('novelist_device_id');
       if (deviceId == null) {
-        deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const randomSuffix = window.crypto.getRandomValues(new Uint32Array(2)).reduce((acc, val) => acc + val.toString(36), "");
+        deviceId = `device_${Date.now()}_${randomSuffix}`;
         localStorage.setItem('novelist_device_id', deviceId);
       }
       return deviceId;
@@ -105,7 +106,8 @@ class WritingAssistantDb {
     try {
       let userId = localStorage.getItem('novelist_user_id');
       if (userId == null) {
-        userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const randomSuffix = window.crypto.getRandomValues(new Uint32Array(2)).reduce((acc, val) => acc + val.toString(36), "");
+        userId = `user_${Date.now()}_${randomSuffix}`;
         localStorage.setItem('novelist_user_id', userId);
       }
       this.userId = userId;
