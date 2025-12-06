@@ -15,7 +15,6 @@ concurrency:
 
 env:
   FORCE_COLOR: 1
-  NODE_ENV: production
 
 jobs:
   bundle-analysis:
