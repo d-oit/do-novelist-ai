@@ -27,23 +27,23 @@ jobs:
 
       - name: Analyze workflow performance
         run: |
-          echo "🔍 Analyzing workflow performance..."
+          echo "[SEARCH] Analyzing workflow performance..."
 
           # Count workflow files
           WORKFLOW_COUNT=$(find .github/workflows -name "*.yml" -o -name "*.yaml" | wc -l)
           echo "Total workflow files: $WORKFLOW_COUNT"
 
           # Analyze workflow execution times (if available)
-          echo "📊 Workflow Statistics:"
+          echo "[STATS] Workflow Statistics:"
           echo "======================"
 
           # Check for potential optimizations
           {
-            echo "# 🔧 Workflow Optimization Report"
+            echo "# [FIX] Workflow Optimization Report"
             echo ""
             echo "**Generated**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo ""
-            echo "## 📊 Current Setup"
+            echo "## [STATS] Current Setup"
             echo ""
             echo "- **Total Workflows**: $WORKFLOW_COUNT"
             echo "- **Workflows Found**:"
@@ -53,37 +53,37 @@ jobs:
             done
 
             echo ""
-            echo "## 🎯 Optimization Opportunities"
+            echo "## [TARGET] Optimization Opportunities"
             echo ""
 
             # Check for caching opportunities
             echo "### Caching Optimization"
             if grep -r "actions/cache" .github/workflows/ > /dev/null; then
-              echo "✅ Caching is implemented"
+              echo "[OK] Caching is implemented"
             else
-              echo "⚠️ No caching found - consider adding dependency caching"
+              echo "[WARN] No caching found - consider adding dependency caching"
             fi
 
             # Check for concurrency settings
             echo ""
             echo "### Concurrency Control"
             if grep -r "concurrency:" .github/workflows/ > /dev/null; then
-              echo "✅ Concurrency control implemented"
+              echo "[OK] Concurrency control implemented"
             else
-              echo "⚠️ No concurrency control found - consider adding to prevent redundant runs"
+              echo "[WARN] No concurrency control found - consider adding to prevent redundant runs"
             fi
 
             # Check for matrix builds
             echo ""
             echo "### Matrix Builds"
             if grep -r "strategy:" .github/workflows/ > /dev/null; then
-              echo "✅ Matrix builds implemented"
+              echo "[OK] Matrix builds implemented"
             else
-              echo "ℹ️ No matrix builds - consider for parallel execution"
+              echo " No matrix builds - consider for parallel execution"
             fi
 
             echo ""
-            echo "## 🚀 Recommended Actions"
+            echo "## [DEPLOY] Recommended Actions"
             echo ""
             echo "1. **Dependency Caching**: Implement caching for npm/pnpm dependencies"
             echo "2. **Parallel Execution**: Use matrix strategies for faster builds"
@@ -96,7 +96,7 @@ jobs:
 
       - name: Check for workflow best practices
         run: |
-          echo "🔍 Checking for best practices compliance..."
+          echo "[SEARCH] Checking for best practices compliance..."
 
           # Check YAML syntax
           for file in .github/workflows/*.yml .github/workflows/*.yaml; do
@@ -110,12 +110,12 @@ jobs:
               try:
                 with open('$file', 'r') as f:
                   yaml.safe_load(f)
-                print('✅ Valid YAML')
+                print('[OK] Valid YAML')
               except yaml.YAMLError as e:
-                print('❌ YAML Error:', e)
+                print('[FAIL] YAML Error:', e)
                 sys.exit(1)
               " || {
-                echo "❌ Invalid YAML in $(basename "$file")"
+                echo "[FAIL] Invalid YAML in $(basename "$file")"
                 exit 1
               }
             fi
@@ -126,7 +126,7 @@ jobs:
           # Analyze workflow patterns and suggest improvements
           cat >> workflow-optimization-report.md << 'EOF'
 
-          ## 📈 Performance Metrics
+          ## [UP] Performance Metrics
 
           ### Execution Time Optimizations
           - Use `needs: []` for parallel job execution
@@ -143,7 +143,7 @@ jobs:
           - Implement secret scanning
           - Add dependency vulnerability checks
 
-          ## 🔧 Implementation Checklist
+          ## [FIX] Implementation Checklist
 
           - [ ] Add dependency caching to all build jobs
           - [ ] Implement concurrency groups
@@ -154,7 +154,7 @@ jobs:
           - [ ] Implement deployment gating
           - [ ] Set up notification systems
 
-          ## 📊 Success Metrics
+          ## [STATS] Success Metrics
 
           Monitor these KPIs:
           - **Build Time**: Target < 10 minutes for CI pipeline
@@ -184,35 +184,35 @@ jobs:
 
       - name: Security analysis of workflows
         run: |
-          echo "🔒 Analyzing workflow security..."
+          echo "[SECURE] Analyzing workflow security..."
 
           # Check for potential security issues
           {
-            echo "# 🔒 Workflow Security Analysis"
+            echo "# [SECURE] Workflow Security Analysis"
             echo ""
             echo "**Analysis Date**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo ""
 
-            echo "## 🛡️ Security Findings"
+            echo "## [SHIELD] Security Findings"
             echo ""
 
             # Check for overly permissive permissions
             echo "### Permissions Analysis"
             if grep -r "permissions:" .github/workflows/ > /dev/null; then
-              echo "✅ Explicit permissions found"
+              echo "[OK] Explicit permissions found"
             else
-              echo "⚠️ No explicit permissions - using default GitHub permissions"
+              echo "[WARN] No explicit permissions - using default GitHub permissions"
             fi
 
             # Check for hardcoded secrets
             echo ""
             echo "### Secret Management"
             if grep -r "secrets\." .github/workflows/ > /dev/null; then
-              echo "✅ Secret references found"
+              echo "[OK] Secret references found"
               echo "Detected secrets:"
               grep -r "secrets\." .github/workflows/ | head -5 || echo "No hardcoded secrets detected"
             else
-              echo "ℹ️ No secret references found"
+              echo " No secret references found"
             fi
 
             # Check for potentially unsafe commands
@@ -221,9 +221,9 @@ jobs:
             UNSAFE_COMMANDS=$(grep -r "curl\|wget\|eval" .github/workflows/ | wc -l)
             echo "Potentially unsafe commands: $UNSAFE_COMMANDS"
             if [ $UNSAFE_COMMANDS -gt 0 ]; then
-              echo "⚠️ Review commands for security implications"
+              echo "[WARN] Review commands for security implications"
             else
-              echo "✅ No obviously unsafe commands detected"
+              echo "[OK] No obviously unsafe commands detected"
             fi
 
           } > security-analysis.md
@@ -253,7 +253,7 @@ jobs:
 
       - name: Check for outdated dependencies
         run: |
-          echo "📦 Checking for dependency updates..."
+          echo "[PACKAGE] Checking for dependency updates..."
 
           # Install pnpm if needed
           npm install -g pnpm
@@ -262,27 +262,28 @@ jobs:
           npx npm-check-updates --target minor --json > outdated.json || echo "No outdated packages"
 
           if [ -s outdated.json ] && [ $(wc -c < outdated.json) -gt 10 ]; then
-            echo "⚠️ Outdated dependencies found:"
+            echo "[WARN] Outdated dependencies found:"
             cat outdated.json
 
             # Create update summary
             {
-              echo "# 📦 Dependency Update Summary"
+              echo "# [PACKAGE] Dependency Update Summary"
               echo ""
               echo "**Check Date**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
               echo ""
-              echo "## 🔄 Available Updates"
+              echo "## [REFRESH] Available Updates"
               echo ""
 
               # Parse JSON and create readable summary
               if command -v jq >/dev/null 2>&1; then
-                jq -r 'to_entries[] | "- **\(.key)**: \(.value.current) → \(.value.latest)"' outdated.json || cat outdated.json
+                jq -r 'to_entries[] | "- **\(.key)**: \(.value.current)  \(.value.latest)"' \
+                outdated.json || cat outdated.json
               else
                 cat outdated.json
               fi
 
               echo ""
-              echo "## 📋 Recommendations"
+              echo "## [LIST] Recommendations"
               echo ""
               echo "1. Review updates for breaking changes"
               echo "2. Test updates in staging environment"
@@ -290,13 +291,13 @@ jobs:
               echo "4. Monitor security advisories"
             } > dependency-update-summary.md
           else
-            echo "✅ All dependencies are up to date"
+            echo "[OK] All dependencies are up to date"
             {
-              echo "# 📦 Dependency Update Summary"
+              echo "# [PACKAGE] Dependency Update Summary"
               echo ""
               echo "**Check Date**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
               echo ""
-              echo "## ✅ Status: All Up to Date"
+              echo "## [OK] Status: All Up to Date"
               echo ""
               echo "No dependency updates available at this time."
             } > dependency-update-summary.md
@@ -321,16 +322,16 @@ jobs:
 
       - name: Simulate workflow performance test
         run: |
-          echo "⚡ Benchmarking workflow performance..."
+          echo "[FAST] Benchmarking workflow performance..."
 
           # Create performance test results
           {
-            echo "# ⚡ Workflow Performance Benchmark"
+            echo "# [FAST] Workflow Performance Benchmark"
             echo ""
             echo "**Benchmark Date**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo ""
 
-            echo "## 📊 Performance Metrics"
+            echo "## [STATS] Performance Metrics"
             echo ""
 
             # Estimate workflow execution time
@@ -345,7 +346,7 @@ jobs:
             echo "| Target Parallel Jobs | 3-5 |"
             echo ""
 
-            echo "## 🚀 Optimization Targets"
+            echo "## [DEPLOY] Optimization Targets"
             echo ""
             echo "### Time Optimizations"
             echo "- **Total CI Time**: < 15 minutes"
@@ -360,7 +361,7 @@ jobs:
             echo "- **Network I/O**: Optimize with caching"
             echo ""
 
-            echo "## 📈 Current Recommendations"
+            echo "## [UP] Current Recommendations"
             echo ""
             echo "1. **Implement smart caching** for dependencies"
             echo "2. **Use matrix builds** for parallel execution"
@@ -392,13 +393,13 @@ jobs:
       - name: Generate comprehensive optimization report
         run: |
           {
-            echo "# 🔧 Workflow Optimization Summary"
+            echo "# [FIX] Workflow Optimization Summary"
             echo ""
             echo "**Report Generated**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "**Repository**: ${{ github.repository }}"
             echo ""
 
-            echo "## 📋 Optimization Reports"
+            echo "## [LIST] Optimization Reports"
             echo ""
             echo "- [Workflow Audit](./workflow-optimization-report-${{ github.sha }}.md)"
             echo "- [Security Analysis](./security-analysis-${{ github.sha }}.md)"
@@ -406,7 +407,7 @@ jobs:
             echo "- [Performance Benchmark](./performance-benchmark-${{ github.sha }}.md)"
             echo ""
 
-            echo "## 🎯 Action Items"
+            echo "## [TARGET] Action Items"
             echo ""
             echo "### Immediate Actions (High Priority)"
             echo "1. Review security findings and fix any issues"
@@ -424,7 +425,7 @@ jobs:
             echo "3. Set up automated workflow optimization"
             echo ""
 
-            echo "## 📊 Success Metrics to Monitor"
+            echo "## [STATS] Success Metrics to Monitor"
             echo ""
             echo "- **CI Pipeline Duration**: Target < 15 minutes"
             echo "- **Test Success Rate**: Target > 98%"
@@ -446,7 +447,7 @@ jobs:
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: '🔧 Weekly Workflow Optimization Report',
+                title: '[FIX] Weekly Workflow Optimization Report',
                 body: summary,
                 labels: ['optimization', 'ci-cd', 'maintenance']
               });

@@ -15,7 +15,6 @@ on:
     secrets:
       DEPLOYMENT_TOKEN:
         required: false
-        type: string
         description: "Custom deployment token (optional)"
 
   workflow_dispatch:
@@ -61,10 +60,10 @@ jobs:
 
           case "$ENV" in
             staging|production)
-              echo "✅ Environment validation passed"
+              echo "[OK] Environment validation passed"
               ;;
             *)
-              echo "❌ Invalid environment: $ENV"
+              echo "[FAIL] Invalid environment: $ENV"
               echo "Must be one of: staging, production"
               exit 1
               ;;
@@ -78,36 +77,37 @@ jobs:
 
           # Check if this is from repository dispatch (CI pipeline)
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            echo "🔄 Deployment triggered by CI pipeline"
+            echo "[REFRESH] Deployment triggered by CI pipeline"
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-            echo "✅ CI pipeline deployment approved"
+            echo "[OK] CI pipeline deployment approved"
           elif [ "$FORCE" = "true" ]; then
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-            echo "⚡ Force deployment enabled"
+            echo "[FAST] Force deployment enabled"
           elif [ "$REF" != "refs/heads/main" ]; then
             echo "should_deploy=false" >> "$GITHUB_OUTPUT"
-            echo "❌ Only main branch can be deployed"
+            echo "[FAIL] Only main branch can be deployed"
           else
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-            echo "✅ Main branch deployment approved"
+            echo "[OK] Main branch deployment approved"
           fi
 
       - name: Find latest build artifact
         id: find-artifact
         run: |
           # Check client payload from repository dispatch
-          if [ "${{ github.event_name }}" = "repository_dispatch" ] && [ -n "${{ github.event.client_payload.build_artifact }}" ]; then
+          if [ "${{ github.event_name }}" = "repository_dispatch" ] && \
+             [ -n "${{ github.event.client_payload.build_artifact }}" ]; then
             ARTIFACT="${{ github.event.client_payload.build_artifact }}"
             echo "artifact_name=$ARTIFACT" >> "$GITHUB_OUTPUT"
-            echo "📦 Using artifact from CI payload: $ARTIFACT"
+            echo "[PACKAGE] Using artifact from CI payload: $ARTIFACT"
           elif [ -n "${{ inputs.artifact_name }}" ]; then
             echo "artifact_name=${{ inputs.artifact_name }}" >> "$GITHUB_OUTPUT"
-            echo "📦 Using provided artifact name: ${{ inputs.artifact_name }}"
+            echo "[PACKAGE] Using provided artifact name: ${{ inputs.artifact_name }}"
           else
             # Try multiple possible artifact names
-            echo "🔍 Searching for build artifacts..."
+            echo "[SEARCH] Searching for build artifacts..."
             echo "artifact_name=build-artifacts-${{ github.sha }}" >> "$GITHUB_OUTPUT"
-            echo "📦 Using default artifact pattern: build-artifacts-${{ github.sha }}"
+            echo "[PACKAGE] Using default artifact pattern: build-artifacts-${{ github.sha }}"
           fi
 
   download-artifacts:
@@ -140,23 +140,25 @@ jobs:
       - name: Verify artifacts
         run: |
           if [ ! -f "dist/index.html" ]; then
-            echo "❌ Build artifacts not found or invalid"
-            echo "📁 Contents of dist/:"
+            echo "[FAIL] Build artifacts not found or invalid"
+            echo " Contents of dist/:"
             ls -la dist/ 2>/dev/null || echo "dist/ directory does not exist"
-            echo "🔍 Available artifacts:"
+            echo "[SEARCH] Available artifacts:"
             if command -v gh &> /dev/null; then
-              gh api repos/${{ github.repository }}/actions/artifacts --jq '.artifacts[] | select(.name | contains("build")) | "\(.name): \(.expired)"' 2>/dev/null || echo "Unable to list artifacts"
+              gh api repos/${{ github.repository }}/actions/artifacts \
+                --jq '.artifacts[] | select(.name | contains("build")) | "\(.name): \(.expired)"' \
+                2>/dev/null || echo "Unable to list artifacts"
             fi
             exit 1
           fi
 
           # Check build manifest if available
           if [ -f "dist/build-manifest.json" ]; then
-            echo "📋 Build manifest found:"
+            echo "[LIST] Build manifest found:"
             cat dist/build-manifest.json
           fi
 
-          echo "✅ Build artifacts verified successfully"
+          echo "[OK] Build artifacts verified successfully"
 
   deploy-staging:
     name: Deploy to Staging
@@ -199,7 +201,7 @@ jobs:
       - name: Create deployment record
         run: |
           {
-            echo "## 🚀 Staging Deployment Complete"
+            echo "## [DEPLOY] Staging Deployment Complete"
             echo ""
             echo "- **Environment**: Staging"
             echo "- **Commit**: ${{ github.sha }}"
@@ -256,7 +258,7 @@ jobs:
       - name: Create deployment record
         run: |
           {
-            echo "## 🚀 Production Deployment Complete"
+            echo "## [DEPLOY] Production Deployment Complete"
             echo ""
             echo "- **Environment**: Production"
             echo "- **Commit**: ${{ github.sha }}"
@@ -286,7 +288,7 @@ jobs:
 
       - name: Validate deployment
         run: |
-          echo "## 📋 Deployment Summary"
+          echo "## [LIST] Deployment Summary"
           echo ""
           cat deployment-summary.md 2>/dev/null || echo "No deployment summary found"
           echo ""
@@ -296,9 +298,9 @@ jobs:
 
           if [ "${{ needs.deploy-staging.result }}" = "success" ] || \
              [ "${{ needs.deploy-production.result }}" = "success" ]; then
-            echo "✅ At least one deployment succeeded"
+            echo "[OK] At least one deployment succeeded"
           else
-            echo "❌ All deployments failed"
+            echo "[FAIL] All deployments failed"
             exit 1
           fi
 
@@ -313,7 +315,7 @@ jobs:
 
       - name: Notify deployment failure
         run: |
-          echo "## ⚠️ Deployment Failed"
+          echo "## [WARN] Deployment Failed"
           echo ""
           echo "- **Environment**: ${{ inputs.environment || github.event.inputs.environment }}"
           echo "- **Commit**: ${{ github.sha }}"
@@ -328,7 +330,7 @@ jobs:
       - name: Create rollback record
         run: |
           {
-            echo "## 🔄 Rollback Record"
+            echo "## [REFRESH] Rollback Record"
             echo ""
             echo "- **Environment**: ${{ inputs.environment || github.event.inputs.environment }}"
             echo "- **Failed Commit**: ${{ github.sha }}"

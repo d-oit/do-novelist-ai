@@ -88,7 +88,7 @@ jobs:
           mkdir -p fuzzing/input
           mkdir -p fuzzing/output
           mkdir -p fuzzing/corpus
-          echo "✅ Fuzzing environment setup complete"
+          echo "[OK] Fuzzing environment setup complete"
 
   dependency-security-scan:
     name: Dependency Security Scan
@@ -111,7 +111,7 @@ jobs:
 
       - name: Run comprehensive security audit
         run: |
-          echo "🔍 Running security scans..."
+          echo "[SEARCH] Running security scans..."
 
           # Install security tools
           npm install -g audit-ci license-checker
@@ -126,7 +126,7 @@ jobs:
           # Check for outdated packages with security issues
           npx npm-check-updates --target minor --json > outdated.json || true
           if [ -s outdated.json ]; then
-            echo "⚠️ Outdated packages detected:"
+            echo "[WARN] Outdated packages detected:"
             cat outdated.json
           fi
 
@@ -136,7 +136,7 @@ jobs:
 
       - name: License compliance check
         run: |
-          echo "📋 Running license compliance check..."
+          echo "[LIST] Running license compliance check..."
           # Install license checker
           npm install -g license-checker
 
@@ -168,7 +168,7 @@ jobs:
 
       - name: Instrument application for fuzzing
         run: |
-          echo "🎯 Instrumenting application for fuzzing..."
+          echo "[TARGET] Instrumenting application for fuzzing..."
 
           # Create instrumented build for fuzzing
           cat > fuzzing/instrumented-build.js << 'EOF'
@@ -184,13 +184,13 @@ jobs:
             );
           };
 
-          console.log('✅ Instrumentation setup complete');
+          console.log('[OK] Instrumentation setup complete');
           EOF
 
       - name: Run coverage-guided fuzzing
         run: |
           DURATION="${{ github.event.inputs.fuzz_duration || 30 }}"
-          echo "🧪 Starting fuzzing for ${DURATION} minutes..."
+          echo "[TEST] Starting fuzzing for ${DURATION} minutes..."
 
           # Create sample input corpus
           echo '{"text":"sample text","type":"editor"}' > fuzzing/input/editor-1.json
@@ -216,7 +216,11 @@ jobs:
               node -e "
                 const ai = require(\"./src/features/ai-generation\");
                 const inputs = require(\"./fuzzing/input/ai-$((i % 3 + 1)).json\");
-                try { ai.generate(inputs.prompt, inputs.model); } catch(e) { console.log(\"AI fuzz error:\", e.message); }
+                try {
+                  ai.generate(inputs.prompt, inputs.model);
+                } catch(e) {
+                  console.log(\"AI fuzz error:\", e.message);
+                }
               "
 
               sleep 1
@@ -227,7 +231,7 @@ jobs:
 
       - name: Collect fuzzing results
         run: |
-          echo "📊 Fuzzing Results Summary"
+          echo "[STATS] Fuzzing Results Summary"
           echo "=========================="
 
           # Count inputs generated
@@ -240,7 +244,7 @@ jobs:
 
           # Create results summary
           {
-            echo "## 🧪 Fuzzing Results"
+            echo "## [TEST] Fuzzing Results"
             echo ""
             echo "- **Duration**: ${{ github.event.inputs.fuzz_duration || 30 }} minutes"
             echo "- **Inputs generated**: $INPUT_COUNT"
@@ -248,9 +252,9 @@ jobs:
             echo "- **Timestamp**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo ""
             if [ "$CRASH_COUNT" -gt 0 ]; then
-              echo "⚠️ **Action Required**: Review crash logs for security issues"
+              echo "[WARN] **Action Required**: Review crash logs for security issues"
             else
-              echo "✅ No crashes detected during fuzzing"
+              echo "[OK] No crashes detected during fuzzing"
             fi
           } > fuzzing-results.md
 
@@ -338,7 +342,7 @@ jobs:
 
       - name: Run property-based tests
         run: |
-          echo "🏗️ Running property-based tests..."
+          echo "[BUILD] Running property-based tests..."
           pnpm test tests/fuzzing/property-tests.spec.ts || echo "Property tests completed with findings"
 
   mutation-testing:
@@ -393,7 +397,7 @@ jobs:
 
       - name: Run mutation testing
         run: |
-          echo "🧬 Running mutation testing..."
+          echo "[DNA] Running mutation testing..."
           timeout 1800 stryker run || echo "Mutation testing timeout reached"
 
       - name: Upload mutation results
@@ -420,14 +424,14 @@ jobs:
       - name: Generate comprehensive fuzzing report
         run: |
           {
-            echo "# 🧪 Comprehensive Fuzzing & Security Report"
+            echo "# [TEST] Comprehensive Fuzzing & Security Report"
             echo ""
             echo "**Generated**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "**Commit**: ${{ github.sha }}"
             echo "**Branch**: ${{ github.ref_name }}"
             echo ""
 
-            echo "## 📊 Test Results Summary"
+            echo "## [STATS] Test Results Summary"
             echo ""
             echo "| Test Type | Status |"
             echo "|-----------|--------|"
@@ -438,13 +442,13 @@ jobs:
             echo ""
 
             if [ -f fuzzing-results.md ]; then
-              echo "## 🧪 Fuzzing Details"
+              echo "## [TEST] Fuzzing Details"
               echo ""
               cat fuzzing-results.md
               echo ""
             fi
 
-            echo "## 🔍 Recommendations"
+            echo "## [SEARCH] Recommendations"
             echo ""
             echo "- Review dependency vulnerabilities regularly"
             echo "- Run fuzzing tests on every major release"
@@ -452,7 +456,7 @@ jobs:
             echo "- Set up automated daily fuzzing schedules"
             echo ""
 
-            echo "## 📋 Next Steps"
+            echo "## [LIST] Next Steps"
             echo ""
             echo "1. Address any security vulnerabilities found"
             echo "2. Improve test coverage based on mutation testing results"

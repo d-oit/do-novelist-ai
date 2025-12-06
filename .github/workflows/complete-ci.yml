@@ -294,9 +294,6 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
         run: pnpm exec playwright install --with-deps
 
       - name: Download build artifacts
