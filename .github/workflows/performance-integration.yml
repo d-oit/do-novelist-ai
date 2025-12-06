@@ -204,12 +204,7 @@ jobs:
             \"chunkCount\": $(find dist/assets -name '*.js' -type f | wc -l)
           }" > .performance-baseline/latest.json
 
-      # Security and dependency checks
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
+  # Security and dependency checks
   security-audit:
     name: Security & Dependency Audit
     runs-on: ubuntu-latest
