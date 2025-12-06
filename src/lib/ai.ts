@@ -10,7 +10,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateText, type LanguageModel } from 'ai';
 
-import { Chapter, RefineOptions } from '../types/index';
+import type { Chapter, RefineOptions } from '../types/index';
 
 import { getAIConfig, getEnabledProviders, getModelForTask, type AIProvider } from './ai-config';
 import { withCache } from './cache';
@@ -622,8 +622,11 @@ export const brainstormProject = async (
  * Returns a base64-encoded image for use in the frontend
  */
 export const generateCoverImage = (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _title: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _style: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _idea: string,
 ): string | null => {
   try {
@@ -650,8 +653,11 @@ export const generateCoverImage = (
  * Returns a base64-encoded image for use in the frontend
  */
 export const generateChapterIllustration = (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _title: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _summary: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _style: string,
 ): string | null => {
   try {
