@@ -27,29 +27,7 @@ afterEach(() => {
 vi.mock('framer-motion', () => {
   const createMotionComponent = (elementType: string) => {
     return ({ children, ...props }: any) => {
-      // Filter out Framer Motion specific props that cause React warnings
-      const {
-        whileHover,
-        whileTap,
-        whileFocus,
-        whileInView,
-        initial,
-        animate,
-        exit,
-        transition,
-        variants,
-        layout,
-        layoutId,
-        drag,
-        dragConstraints,
-        dragElastic,
-        onDragStart,
-        onDrag,
-        onDragEnd,
-        ...domProps
-      } = props;
-
-      return React.createElement(elementType, domProps, children);
+      return React.createElement(elementType, props, children);
     };
   };
 
@@ -223,7 +201,7 @@ const createIndexedDBMock = () => {
   };
 
   global.indexedDB = {
-    open: vi.fn().mockImplementation((_name: string, _version: number) => {
+    open: vi.fn().mockImplementation(() => {
       const request = mockIDBRequest(mockDatabase);
 
       // Simulate async success to allow callbacks to be set

@@ -178,6 +178,7 @@ export function validateProviderModel(
 export function getOptimalModel(
   provider: AIProvider,
   taskType: 'fast' | 'standard' | 'advanced',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _prefs: ProviderPreferenceData,
 ): string {
   const aiConfig = getAIConfig();

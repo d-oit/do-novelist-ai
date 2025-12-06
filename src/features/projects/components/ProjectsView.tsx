@@ -1,4 +1,4 @@
-import { Project } from '@shared/types';
+import type { Project } from '@shared/types';
 import { Clock, FileText, Folder, Loader2, MoreVertical, Plus, Star, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 

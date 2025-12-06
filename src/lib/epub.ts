@@ -1,4 +1,4 @@
-import { Project } from '../types';
+import type { Project } from '../types';
 
 /**
  * Generates a standard EPUB 3.0 file from the project data.

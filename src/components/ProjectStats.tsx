@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-import { Project } from '../types';
+import type { Project } from '../types';
 import { PublishStatus } from '../shared/types';
 
 interface ProjectStatsProps {

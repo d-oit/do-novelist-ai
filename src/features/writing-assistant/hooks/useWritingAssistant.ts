@@ -78,7 +78,6 @@ export function useWritingAssistant(
 ): UseWritingAssistantReturn {
   const {
     autoAnalyze = true,
-    analysisDelay: _analysisDelay = 1500,
     chapterId = '',
     projectId = '',
     characterContext = [],
@@ -548,8 +547,8 @@ export function useWritingAssistant(
   const learningInsights = {
     preferredCategories: Object.entries(
       Array.from(suggestionInteractions.current.entries())
-        .filter(([_, interaction]) => interaction.action === 'applied')
-        .map(([suggestionId, _]) => {
+        .filter(([, interaction]) => interaction.action === 'applied')
+        .map(([suggestionId]) => {
           const suggestion = state.suggestions.find(s => s.id === suggestionId);
           return suggestion?.category ?? 'unknown';
         })
@@ -560,7 +559,7 @@ export function useWritingAssistant(
     )
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
-      .map(([category, _]) => category),
+      .map(([category]) => category),
 
     improvementTrends: {
       readability: currentAnalysis?.readabilityScore ?? 0,

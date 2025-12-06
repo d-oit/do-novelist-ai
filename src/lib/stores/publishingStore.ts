@@ -13,7 +13,7 @@ import {
   type ReaderFeedback,
   type ReaderInsights,
 } from '../../features/publishing/types';
-import { Project } from '../../types';
+import type { Project } from '../../types';
 
 // Store State
 interface PublishingState {

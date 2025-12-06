@@ -6,8 +6,8 @@
 import { Settings } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 
-import { GoapEngine } from '../features/editor/hooks/useGoapEngine';
-import { Project, Chapter, RefineOptions } from '../types';
+import type { GoapEngine } from '../features/editor/hooks/useGoapEngine';
+import type { Project, Chapter, RefineOptions } from '../types';
 
 import ActionCard from './ActionCard';
 import AgentConsole from './AgentConsole';
@@ -70,6 +70,7 @@ const ProjectDashboardOptimized: React.FC<ProjectDashboardProps> = React.memo(
       engine.availableActions,
       engine.currentAction,
       engine.isActionAvailable,
+      engine,
       project.isGenerating,
     ]);
 

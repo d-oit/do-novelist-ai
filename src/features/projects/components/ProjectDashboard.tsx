@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useProjects } from '../hooks/useProjects';
-import { Project } from '@shared/types';
+import type { Project } from '@shared/types';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Activity, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -19,11 +19,7 @@ export const CostDashboard = ({ userId }: CostDashboardProps): React.JSX.Element
   const [budgetInfo, setBudgetInfo] = useState<BudgetInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    void loadData();
-  }, [userId]);
-
-  const loadData = async (): Promise<void> => {
+  const loadData = useCallback(async (): Promise<void> => {
     try {
       const [stats, budget] = await Promise.all([getUsageStats(userId), getBudgetInfo(userId)]);
 
@@ -34,7 +30,11 @@ export const CostDashboard = ({ userId }: CostDashboardProps): React.JSX.Element
       console.error('Failed to load dashboard data:', error);
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   if (loading) {
     return (

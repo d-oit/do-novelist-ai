@@ -5,7 +5,7 @@
  * without complex browser setup to avoid context conflicts.
  */
 
-import { FullConfig } from '@playwright/test';
+import type { FullConfig } from '@playwright/test';
 
 async function globalSetup(config: FullConfig): Promise<void> {
   console.log('🚀 Setting up Playwright test environment...');

@@ -1,11 +1,5 @@
-import {
-  Project,
-  AgentAction,
-  Chapter,
-  ChapterStatus,
-  ProcessedAction,
-  ActionResult,
-} from '@shared/types';
+import type { Project, AgentAction, Chapter, ProcessedAction, ActionResult } from '@shared/types';
+import { ChapterStatus } from '@shared/types';
 import { createChapter } from '@shared/utils';
 
 import { analyzeConsistency, generateOutline, writeChapterContent } from '../../../lib/ai';
@@ -126,7 +120,7 @@ export function postprocessAction(
   if (action.name === 'create_outline') {
     handleCreateOutlinePostprocess(actionResult, project, setProject);
   } else if (action.name === 'write_chapter_parallel' && pendingChapters) {
-    handleWriteChaptersPostprocess(actionResult, project, setProject, pendingChapters);
+    handleWriteChaptersPostprocess(actionResult, project, setProject);
   }
   // editor_review doesn't require postprocessing
 }
@@ -293,7 +287,6 @@ function handleWriteChaptersPostprocess(
   actionResult: ActionResult,
   _project: Project,
   setProject: React.Dispatch<React.SetStateAction<Project>>,
-  _pendingChapters: Chapter[],
 ): void {
   const results = actionResult.data as Array<
     PromiseSettledResult<{
@@ -371,7 +364,6 @@ function handleWriteChaptersPostprocess(
  */
 export function createActionSummary(
   action: AgentAction,
-  _pendingChapters: Chapter[],
   actionResult: ActionResult,
 ): { message: string; type: 'success' | 'warning' } {
   if (action.name === 'write_chapter_parallel' && actionResult.data != null) {

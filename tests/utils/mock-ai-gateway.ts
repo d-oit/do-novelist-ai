@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
 import { setupAISDKMock } from './mock-ai-sdk';
 
 declare global {
@@ -95,7 +95,7 @@ export const setupGeminiMock = async (page: Page): Promise<void> => {
   console.log('[mock-ai-gateway] Gemini AI Gateway mock configured for E2E tests');
 
   // Intercept chat completions (character development, dialogue polish, etc.)
-  await page.route('**/v1/chat/completions', async (route: import('@playwright/test').Route) => {
+  await page.route('**/v1/chat/completions', async (route: Route) => {
     // Respond immediately with no artificial delay for fast test execution
     const request = route.request();
     const postData = request.postDataJSON();
@@ -156,7 +156,7 @@ export const setupGeminiMock = async (page: Page): Promise<void> => {
   });
 
   // Intercept image generation (cover generator) - immediate response
-  await page.route('**/v1/images/generations', async (route: import('@playwright/test').Route) => {
+  await page.route('**/v1/images/generations', async (route: Route) => {
     // Use 1x1 transparent PNG for fast mock image
     const transparentPNG =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
@@ -177,7 +177,7 @@ export const setupGeminiMock = async (page: Page): Promise<void> => {
   });
 
   // Intercept brainstorm API endpoints
-  await page.route('**/api/ai/brainstorm', async (route: import('@playwright/test').Route) => {
+  await page.route('**/api/ai/brainstorm', async (route: Route) => {
     const request = route.request();
     const postData = request.postDataJSON();
     const { context, field } = postData || {};
@@ -200,7 +200,7 @@ export const setupGeminiMock = async (page: Page): Promise<void> => {
   });
 
   // Intercept generate API endpoints
-  await page.route('**/api/ai/generate', async (route: import('@playwright/test').Route) => {
+  await page.route('**/api/ai/generate', async (route: Route) => {
     const request = route.request();
     const postData = request.postDataJSON();
 

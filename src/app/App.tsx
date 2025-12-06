@@ -13,9 +13,10 @@ import { useGoapEngine } from '../features/generation/hooks';
 import { ProjectStats, ProjectWizard, ProjectsView } from '../features/projects/components';
 import { db } from '../features/projects/services';
 import { SettingsView } from '../features/settings/components';
-import { Chapter, ChapterStatus, Project, PublishStatus } from '../shared/types';
+import type { Chapter, Project } from '../shared/types';
+import { ChapterStatus, PublishStatus } from '../shared/types';
 import { createChapter } from '../shared/utils';
-import { RefineOptions } from '../types';
+import type { RefineOptions } from '../types';
 
 // --- Initial Data ---
 

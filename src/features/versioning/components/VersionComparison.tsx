@@ -19,7 +19,7 @@ import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { cn, iconButtonTarget } from '../../../lib/utils';
 import { useVersioning } from '../hooks/useVersioning';
-import { ChapterVersion, VersionCompareResult } from '../types';
+import type { ChapterVersion, VersionCompareResult } from '../types';
 
 interface VersionComparisonProps {
   version1: ChapterVersion;

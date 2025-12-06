@@ -3,6 +3,7 @@ import path from 'path';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
@@ -14,6 +15,10 @@ export default defineConfig(({ mode }) => {
   const defaultModel = env.VITE_DEFAULT_AI_MODEL || 'mistral/mistral-small-latest';
 
   return {
+    // Ensure TypeScript checking during build
+    esbuild: {
+      logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    },
     server: {
       port: 3000,
       host: '0.0.0.0',
@@ -26,7 +31,7 @@ export default defineConfig(({ mode }) => {
           server.middlewares.use(async (req, res, next) => {
             // Only handle /api/ai/* routes
             if (!req.url?.startsWith('/api/ai/')) {
-              return next();
+              return void next();
             }
 
             // Parse request body
@@ -128,6 +133,7 @@ export default defineConfig(({ mode }) => {
 
                 if (!response.ok) {
                   const errorText = await response.text();
+                  console.error('AI Gateway error:', response.status, errorText);
                   res.statusCode = response.status;
                   res.setHeader('Content-Type', 'application/json');
                   res.end(
@@ -158,6 +164,8 @@ export default defineConfig(({ mode }) => {
           });
         },
       },
+      // Enable TypeScript path mapping from tsconfig.json
+      tsconfigPaths(),
       react({
         // Configure JSX runtime for React 17+
         jsxRuntime: 'automatic',

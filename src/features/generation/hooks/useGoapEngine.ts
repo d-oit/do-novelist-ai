@@ -1,6 +1,8 @@
-import { Project, AgentAction, AgentMode, LogEntry, Chapter, ChapterStatus } from '@shared/types';
+import type { Project, AgentAction, LogEntry, Chapter } from '@shared/types';
+import { AgentMode, ChapterStatus } from '@shared/types';
 import { createChapter } from '@shared/utils';
-import React, { useState, useEffect, useCallback } from 'react';
+import type React from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import {
   generateOutline,
@@ -66,7 +68,7 @@ export const useGoapEngine = (
   isActionAvailable: (action: AgentAction) => boolean;
 } => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [availableActions] = useState<AgentAction[]>(INITIAL_ACTIONS);
+  const availableActions = useMemo(() => INITIAL_ACTIONS, []);
   const [currentAction, setCurrentAction] = useState<AgentAction | null>(null);
   const [autoPilot, setAutoPilot] = useState(false);
 

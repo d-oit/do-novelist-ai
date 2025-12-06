@@ -1,7 +1,8 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { Project, ChapterStatus, PublishStatus } from '../../../types';
+import type { Project } from '../../../types';
+import { ChapterStatus, PublishStatus } from '../../../types';
 import { useAnalytics } from '../hooks/useAnalytics';
 
 import AnalyticsDashboard from './AnalyticsDashboard';
@@ -13,9 +14,7 @@ const mockUseAnalytics = vi.mocked(useAnalytics);
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, whileHover, initial, animate, exit, transition, ...props }: any) => (
-      <div {...props}>{children}</div>
-    ),
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
     circle: ({ children, ...props }: any) => <circle {...props}>{children}</circle>,
     button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
   },

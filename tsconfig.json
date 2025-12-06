@@ -58,6 +58,6 @@
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": false
   },
-  "include": ["src/**/*", "tests/**/*", "**/*.ts", "**/*.tsx"],
+  "include": ["src/**/*", "src/index.tsx", "tests/**/*", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "dist", "build", "coverage"]
 }

@@ -1,4 +1,5 @@
-import React, { ReactNode, createContext, useContext, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface UserContextType {
   userId: string;
@@ -26,7 +27,7 @@ function generateUserId(): string {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [userId, setUserIdState] = useState<string>(() => {
+  const [userId, setUserId] = useState<string>(() => {
     // Initialize with existing userId or generate new one
     const storedUserId = localStorage.getItem(STORAGE_KEY);
     if (storedUserId !== null && storedUserId !== '') {
@@ -36,12 +37,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     localStorage.setItem(STORAGE_KEY, newUserId);
     return newUserId;
   });
-
-  // Save userId to localStorage whenever it changes
-  const setUserId = (newUserId: string): void => {
-    setUserIdState(newUserId);
-    localStorage.setItem(STORAGE_KEY, newUserId);
-  };
 
   const value: UserContextType = {
     userId,

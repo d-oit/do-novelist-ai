@@ -1,4 +1,5 @@
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 import { cn } from '../../lib/utils';
 
@@ -29,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         'hidden md:flex', // Hidden on mobile by default
         isCollapsed ? 'w-16' : width,
         position === 'right' && 'border-l border-r-0 border-border/40',
-        className
+        className,
       )}
       style={{
         width: isCollapsed ? '4rem' : width,
@@ -44,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             className={cn(
               'flex w-full items-center justify-center p-2',
               'rounded-lg transition-colors hover:bg-secondary/50',
-              'text-muted-foreground hover:text-foreground'
+              'text-muted-foreground hover:text-foreground',
             )}
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >

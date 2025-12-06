@@ -9,6 +9,7 @@ import {
   type WritingAssistantConfig,
   type WritingSuggestion,
 } from '../types';
+import { generateSecureId } from '../../../lib/secure-random';
 
 // Database schema types for Writing Assistant
 export interface AnalysisHistory {
@@ -89,11 +90,11 @@ class WritingAssistantDb {
     try {
       let deviceId = localStorage.getItem('novelist_device_id');
       if (deviceId == null) {
-        deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        deviceId = `device_${Date.now()}_${generateSecureId()}`;
         localStorage.setItem('novelist_device_id', deviceId);
       }
       return deviceId;
-    } catch (_e) {
+    } catch {
       console.warn('LocalStorage access denied, using temporary device ID');
       return `temp_device_${Date.now()}`;
     }
@@ -105,11 +106,11 @@ class WritingAssistantDb {
     try {
       let userId = localStorage.getItem('novelist_user_id');
       if (userId == null) {
-        userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        userId = `user_${Date.now()}_${generateSecureId()}`;
         localStorage.setItem('novelist_user_id', userId);
       }
       this.userId = userId;
-    } catch (_e) {
+    } catch {
       console.warn('LocalStorage access denied, using temporary user ID');
       this.userId = `temp_user_${Date.now()}`;
     }
@@ -128,7 +129,7 @@ class WritingAssistantDb {
 
     try {
       const analysisRecord: Omit<AnalysisHistory, 'createdAt'> = {
-        id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `analysis_${Date.now()}_${generateSecureId()}`,
         userId: this.userId,
         chapterId: analysis.chapterId,
         projectId,
@@ -149,7 +150,7 @@ class WritingAssistantDb {
       this.insertAnalysisHistory(analysisRecord);
 
       // Update daily progress metrics
-      this.updateDailyProgress(projectId, analysis);
+      this.updateDailyProgress();
     } catch (error) {
       console.error('Failed to save analysis history:', error);
       // Fail gracefully - don't break the user experience
@@ -170,7 +171,7 @@ class WritingAssistantDb {
 
     try {
       const feedback: SuggestionFeedback = {
-        id: `feedback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `feedback_${Date.now()}_${generateSecureId()}`,
         userId: this.userId,
         suggestionType: suggestion.type,
         suggestionCategory: suggestion.category,
@@ -361,7 +362,7 @@ class WritingAssistantDb {
     };
   }
 
-  private updateDailyProgress(_projectId: string, _analysis: ContentAnalysis): void {
+  private updateDailyProgress(): void {
     // This would be actual database operations
     // For now, we'll implement mock versions
   }

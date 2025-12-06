@@ -1,7 +1,7 @@
 // CRITICAL: Import AI SDK logger patch for consistency
 import '../src/lib/ai-sdk-logger-patch';
 
-import { FullConfig } from '@playwright/test';
+import type { FullConfig } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';

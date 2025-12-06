@@ -2,9 +2,9 @@ import { Settings } from 'lucide-react';
 import React, { useCallback } from 'react';
 
 import BookViewer from '../features/editor/components/BookViewerRefactored';
-import { GoapEngine } from '../features/editor/hooks/useGoapEngine';
-import { AgentAction } from '../types/schemas';
-import { Chapter, Project, RefineOptions } from '../types';
+import type { GoapEngine } from '../features/editor/hooks/useGoapEngine';
+import type { AgentAction } from '../types/schemas';
+import type { Chapter, Project, RefineOptions } from '../types';
 
 import ActionCard from './ActionCard';
 import AgentConsole from './AgentConsole';

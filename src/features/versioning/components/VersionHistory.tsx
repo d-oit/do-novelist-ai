@@ -19,9 +19,9 @@ import React, { useState, useMemo } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { cn } from '../../../lib/utils';
-import { Chapter } from '../../../types';
+import type { Chapter } from '../../../types';
 import { useVersioning } from '../hooks/useVersioning';
-import { ChapterVersion, VersionFilter, SortOrder } from '../types';
+import type { ChapterVersion, VersionFilter, SortOrder } from '../types';
 
 interface VersionHistoryProps {
   chapter: Chapter;

@@ -19,7 +19,7 @@ import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { cn, iconButtonTarget } from '../../../lib/utils';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { WritingGoals } from '../types';
+import type { WritingGoals } from '../types';
 
 interface GoalsManagerProps {
   projectId?: string;

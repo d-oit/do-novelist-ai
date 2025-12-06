@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 import { createProjectId } from '../../types/guards';
 import type { Project } from '../../types';

@@ -257,7 +257,7 @@ describe('useProjects - Error Handling', () => {
     await act(async () => {
       try {
         await result.current.update(project.id, { title: 'Updated' });
-      } catch (_error) {
+      } catch {
         // Expected error
       }
     });

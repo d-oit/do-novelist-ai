@@ -1,12 +1,7 @@
-import { Client, createClient } from '@libsql/client/web';
-import {
-  ChapterStatus,
-  Project,
-  ProjectSettings,
-  PublishStatus,
-  WorldState,
-  WritingStyle,
-} from '@shared/types';
+import type { Client } from '@libsql/client/web';
+import { createClient } from '@libsql/client/web';
+import type { Project, ProjectSettings, WorldState, WritingStyle } from '@shared/types';
+import { ChapterStatus, PublishStatus } from '@shared/types';
 import { parseChapterStatus, parsePublishStatus } from '../../../shared/utils/validation';
 import { isLanguage } from '../../../types/guards';
 import { ProjectSchema } from '../../../types/schemas';
@@ -115,24 +110,24 @@ export const db = {
         // Attempt to add columns for existing tables (ignoring errors if they exist)
         try {
           await client.execute("ALTER TABLE projects ADD COLUMN status TEXT DEFAULT 'Draft'");
-        } catch (_e) {
+        } catch {
           // Column already exists
         }
         try {
           await client.execute("ALTER TABLE projects ADD COLUMN language TEXT DEFAULT 'en'");
-        } catch (_e) {
+        } catch {
           // Column already exists
         }
         try {
           await client.execute(
             'ALTER TABLE projects ADD COLUMN target_word_count INTEGER DEFAULT 50000',
           );
-        } catch (_e) {
+        } catch {
           // Column already exists
         }
         try {
           await client.execute('ALTER TABLE projects ADD COLUMN settings TEXT');
-        } catch (_e) {
+        } catch {
           // Column already exists
         }
 

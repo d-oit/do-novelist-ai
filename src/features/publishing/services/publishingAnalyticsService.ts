@@ -1,5 +1,5 @@
-import { Project } from '../../../types';
-import {
+import type { Project } from '../../../types';
+import type {
   Publication,
   PublishedInstance,
   PlatformAnalytics,

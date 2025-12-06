@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { createChapter } from '../../shared/utils';
-import { Project, PublishStatus, ChapterStatus } from '../../types';
+import type { Project } from '../../types';
+import { PublishStatus, ChapterStatus } from '../../types';
 import { db, getStoredConfig, saveStoredConfig } from '../db';
 
 // Mock @libsql/client/web

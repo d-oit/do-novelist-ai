@@ -13,6 +13,7 @@ const Loading = (): React.JSX.Element => {
 };
 
 // Placeholder lazy-loaded component for recharts
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LazyRecharts = (_props: LazyRechartsProps): React.JSX.Element => {
   return (
     <Suspense fallback={<Loading />}>

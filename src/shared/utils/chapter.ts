@@ -3,7 +3,8 @@
  * Provides helper functions to create Chapter objects with all required fields
  */
 
-import { Chapter, ChapterStatus } from '../types';
+import type { Chapter } from '../types';
+import { ChapterStatus } from '../types';
 
 /**
  * Creates a complete Chapter object with all required properties
@@ -23,7 +24,7 @@ import { Chapter, ChapterStatus } from '../types';
  * ```
  */
 export function createChapter(
-  partial: Partial<Chapter> & Pick<Chapter, 'id' | 'orderIndex' | 'title'>
+  partial: Partial<Chapter> & Pick<Chapter, 'id' | 'orderIndex' | 'title'>,
 ): Chapter {
   const now = new Date();
 

@@ -187,7 +187,7 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
           await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
           settingsNavigated = true;
           break;
-        } catch (_error) {
+        } catch {
           continue;
         }
       }
@@ -241,7 +241,7 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
           await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
           settingsNavigated = true;
           break;
-        } catch (_error) {
+        } catch {
           continue;
         }
       }

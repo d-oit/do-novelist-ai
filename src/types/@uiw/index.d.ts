@@ -1,5 +1,5 @@
 declare module '@uiw/react-md-editor' {
-  import * as React from 'react';
+  import type * as React from 'react';
 
   interface MDEditorProps extends React.HTMLAttributes<HTMLDivElement> {
     value?: string;

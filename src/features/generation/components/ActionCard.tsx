@@ -1,4 +1,5 @@
-import { AgentAction, AgentMode } from '@shared/types';
+import type { AgentAction } from '@shared/types';
+import { AgentMode } from '@shared/types';
 import { Play, Activity, Users, Zap, BrainCircuit } from 'lucide-react';
 import React from 'react';
 import { cn } from '@/lib/utils';

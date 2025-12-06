@@ -6,7 +6,7 @@
 import React from 'react';
 
 import { cn } from '../../../lib/utils';
-import { Project } from '../../../types';
+import type { Project } from '../../../types';
 
 import GoalsProgress from './GoalsProgress';
 import ProductivityChart from './ProductivityChart';

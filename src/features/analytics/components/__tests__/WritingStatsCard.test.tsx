@@ -9,26 +9,7 @@ vi.mock('framer-motion', () => {
   const createMotionComponent = (elementType: string) => {
     return ({ children, ...props }: any) => {
       // Filter out Framer Motion specific props that cause React warnings
-      const {
-        whileHover,
-        whileTap,
-        whileFocus,
-        whileInView,
-        initial,
-        animate,
-        exit,
-        transition,
-        variants,
-        layout,
-        layoutId,
-        drag,
-        dragConstraints,
-        dragElastic,
-        onDragStart,
-        onDrag,
-        onDragEnd,
-        ...domProps
-      } = props;
+      const { ...domProps } = props;
 
       return React.createElement(elementType, { ...domProps, 'data-testid': 'motion-div' }, children);
     };
