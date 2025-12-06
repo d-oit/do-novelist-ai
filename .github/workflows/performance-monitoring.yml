@@ -47,8 +47,6 @@ jobs:
 
       - name: Build for analysis
         run: npm run analyze
-        env:
-          NODE_ENV: production
 
       - name: Analyze bundle size
         id: bundle-analysis
@@ -267,15 +265,14 @@ jobs:
       - name: Run performance E2E tests
         run: |
           npm run test:e2e -- --project=${{ matrix.browser }} \
-            tests/specs/debug.spec.ts --reporter=json \
-            --output-file=perf-${{ matrix.browser }}.json
+            tests/specs/debug.spec.ts --reporter=line
 
       - name: Upload cross-browser results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cross-browser-perf-${{ matrix.browser }}-${{ github.sha }}
-          path: perf-${{ matrix.browser }}.json
+          path: test-results/
           retention-days: 30
 
   performance-regression-check:
@@ -304,7 +301,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
 
       - name: Build base branch
         run: |
