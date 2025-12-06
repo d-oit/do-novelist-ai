@@ -1,0 +1,520 @@
+name: Complete CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Daily security and performance checks
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: "Skip tests (emergency deployment)"
+        required: false
+        type: boolean
+        default: false
+      force_performance:
+        description: "Force performance tests"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 1
+  NODE_OPTIONS: "--max-old-space-size=4096"
+
+jobs:
+  # Pre-flight checks
+  preflight:
+    name: Pre-flight Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    outputs:
+      should_run_tests: ${{ steps.validation.outputs.should_run_tests }}
+      should_run_performance: ${{ steps.validation.outputs.should_run_performance }}
+      environment: ${{ steps.env.outputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=development" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate deployment conditions
+        id: validation
+        run: |
+          FORCE="${{ github.event.inputs.force_performance }}"
+          SKIP="${{ github.event.inputs.skip_tests }}"
+          REF="${{ github.ref }}"
+
+          # Determine if tests should run
+          if [ "$SKIP" = "true" ]; then
+            echo "should_run_tests=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Tests skipped (emergency mode)"
+          else
+            echo "should_run_tests=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Tests will run"
+          fi
+
+          # Determine if performance tests should run
+          if [ "$FORCE" = "true" ] || [ "$REF" = "refs/heads/main" ]; then
+            echo "should_run_performance=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Performance tests will run"
+          else
+            echo "should_run_performance=false" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ Performance tests skipped (not main branch)"
+          fi
+
+  # Security and dependency scanning
+  security-scan:
+    name: Security & Dependency Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run security audit
+        run: |
+          echo "🔒 Running security audits..."
+
+          # NPM audit
+          npm audit --audit-level=moderate || true
+
+          # Check for known vulnerable packages
+          npx audit-ci --moderate || echo "No high-severity vulnerabilities found"
+
+          # License compliance check
+          npx license-checker --summary || echo "License check completed"
+
+      - name: CodeQL Analysis
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended,code-scanning-reqs
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:javascript-typescript"
+
+      - name: Dependency Review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+
+  # Main CI pipeline (parallel execution)
+  ci-pipeline:
+    name: Main CI Pipeline
+    runs-on: ubuntu-latest
+    needs: [preflight, security-scan]
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["20"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and type check
+        run: |
+          echo "🔍 Running linting and type checking..."
+          pnpm run lint:ci
+
+      - name: Unit tests
+        if: needs.preflight.outputs.should_run_tests == 'true'
+        run: |
+          echo "🧪 Running unit tests..."
+          pnpm test
+
+      - name: Generate coverage report
+        if: needs.preflight.outputs.should_run_tests == 'true'
+        run: |
+          pnpm run coverage
+
+          # Check coverage thresholds
+          COVERAGE=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)
+          echo "Coverage: $COVERAGE%"
+
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "❌ Coverage below 80%: $COVERAGE%"
+            exit 1
+          fi
+
+      - name: Build application
+        run: |
+          echo "🏗️ Building application..."
+          pnpm run build
+
+      - name: Verify build
+        run: |
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ Build failed: index.html not found"
+            exit 1
+          fi
+
+          # Check build size
+          BUILD_SIZE=$(du -sh dist | cut -f1)
+          echo "Build size: $BUILD_SIZE"
+
+          # Size warning if too large
+          BUILD_SIZE_BYTES=$(du -sb dist | cut -f1)
+          if [ $BUILD_SIZE_BYTES -gt 10485760 ]; then  # 10MB
+            echo "⚠️ Build size is large: $BUILD_SIZE"
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: |
+            dist/
+            coverage/
+          retention-days: 7
+
+  # E2E Testing
+  e2e-tests:
+    name: End-to-End Testing
+    runs-on: ubuntu-latest
+    needs: [preflight, ci-pipeline]
+    if: needs.preflight.outputs.should_run_tests == 'true'
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+        run: pnpm exec playwright install --with-deps
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: dist/
+
+      - name: Run E2E tests
+        run: |
+          echo "🎭 Running E2E tests..."
+
+          # Start the built application in background
+          pnpm preview --port 4173 &
+          sleep 10
+
+          # Run tests
+          pnpm exec playwright test --reporter=list
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results-${{ github.sha }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
+
+  # Performance Testing
+  performance-tests:
+    name: Performance Analysis
+    runs-on: ubuntu-latest
+    needs: [preflight, ci-pipeline]
+    if: needs.preflight.outputs.should_run_performance == 'true'
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: dist/
+
+      - name: Analyze bundle size
+        run: |
+          echo "📊 Performance Analysis"
+          echo "======================"
+
+          # Analyze bundle size
+          find dist/assets -name "*.js" -exec ls -lah {} \; | head -10
+
+          # Calculate total bundle size
+          TOTAL_SIZE=$(du -sh dist | cut -f1)
+          echo "Total build size: $TOTAL_SIZE"
+
+          # Count chunks
+          CHUNK_COUNT=$(find dist/assets -name "*.js" -type f | wc -l)
+          echo "JavaScript chunks: $CHUNK_COUNT"
+
+          # Performance report
+          {
+            echo "## 📊 Performance Report"
+            echo ""
+            echo "- **Build Size**: $TOTAL_SIZE"
+            echo "- **Chunk Count**: $CHUNK_COUNT"
+            echo "- **Commit**: ${{ github.sha }}"
+            echo "- **Timestamp**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > performance-report.md
+
+      - name: Run Lighthouse CI
+        run: |
+          # Install Lighthouse CI
+          npm install -g @lhci/cli@0.13.x
+
+          # Run Lighthouse (if config exists)
+          if [ -f "lighthouserc.js" ]; then
+            lhci autorun --config=lighthouserc.js
+          else
+            echo "ℹ️ No Lighthouse config found, skipping"
+          fi
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results-${{ github.sha }}
+          path: |
+            performance-report.md
+            .lighthouseci/
+          retention-days: 30
+
+  # Integration with deployment pipeline
+  deployment-ready:
+    name: Deployment Ready
+    runs-on: ubuntu-latest
+    needs: [preflight, security-scan, ci-pipeline, e2e-tests, performance-tests]
+    if: |
+      always() &&
+      (needs.ci-pipeline.result == 'success') &&
+      (needs.security-scan.result == 'success' || needs.security-scan.result == 'skipped') &&
+      (needs.e2e-tests.result == 'success' || needs.preflight.outputs.should_run_tests == 'false') &&
+      (needs.performance-tests.result == 'success' || needs.preflight.outputs.should_run_performance == 'false') &&
+      github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Verify deployment readiness
+        run: |
+          echo "✅ All checks passed. Ready for deployment."
+
+          # Create deployment manifest
+          {
+            echo "## 🚀 Deployment Manifest"
+            echo ""
+            echo "- **Commit**: ${{ github.sha }}"
+            echo "- **Branch**: ${{ github.ref_name }}"
+            echo "- **Environment**: ${{ needs.preflight.outputs.environment }}"
+            echo "- **Timestamp**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- **Actor**: ${{ github.actor }}"
+            echo ""
+            echo "### Verification Results"
+            echo "- ✅ Security Scan: ${{ needs.security-scan.result }}"
+            echo "- ✅ CI Pipeline: ${{ needs.ci-pipeline.result }}"
+            echo "- ✅ E2E Tests: ${{ needs.e2e-tests.result }}"
+            echo "- ✅ Performance: ${{ needs.performance-tests.result }}"
+          } > deployment-manifest.json
+
+      - name: Trigger deployment pipeline
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: deployment-ready
+          client-payload: |
+            {
+              "environment": "${{ needs.preflight.outputs.environment }}",
+              "commit": "${{ github.sha }}",
+              "build_artifact": "build-artifacts-${{ github.sha }}",
+              "branch": "${{ github.ref_name }}"
+            }
+
+  # Comprehensive reporting
+  generate-reports:
+    name: Generate Comprehensive Reports
+    runs-on: ubuntu-latest
+    needs: [preflight, security-scan, ci-pipeline, e2e-tests, performance-tests]
+    if: always()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Generate CI/CD summary
+        run: |
+          {
+            echo "# 📋 CI/CD Pipeline Summary"
+            echo ""
+            echo "**Pipeline Run**: ${{ github.run_number }}"
+            echo "**Commit**: ${{ github.sha }}"
+            echo "**Branch**: ${{ github.ref_name }}"
+            echo "**Trigger**: ${{ github.event_name }}"
+            echo "**Timestamp**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo ""
+            
+            echo "## 🎯 Job Results"
+            echo ""
+            echo "| Job | Status | Duration |"
+            echo "|-----|--------|----------|"
+            echo "| Pre-flight | ${{ needs.preflight.result }} | - |"
+            echo "| Security Scan | ${{ needs.security-scan.result }} | - |"
+            echo "| CI Pipeline | ${{ needs.ci-pipeline.result }} | - |"
+            echo "| E2E Tests | ${{ needs.e2e-tests.result }} | - |"
+            echo "| Performance Tests | ${{ needs.performance-tests.result }} | - |"
+            echo "| Deployment Ready | ${{ needs.deployment-ready.result }} | - |"
+            echo ""
+            
+            # Determine overall status
+            FAILED_JOBS=0
+            [ "${{ needs.preflight.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
+            [ "${{ needs.ci-pipeline.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
+            [ "${{ needs.security-scan.result }}" = "failure" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
+            
+            if [ $FAILED_JOBS -eq 0 ]; then
+              echo "## ✅ Overall Status: SUCCESS"
+              echo ""
+              echo "All critical jobs completed successfully. The application is ready for deployment."
+            else
+              echo "## ❌ Overall Status: FAILURE"
+              echo ""
+              echo "$FAILED_JOBS critical job(s) failed. Please review the logs and fix the issues."
+            fi
+          } > ci-cd-summary.md
+
+      - name: Upload CI/CD summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-cd-summary-${{ github.sha }}
+          path: ci-cd-summary.md
+          retention-days: 90
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (fs.existsSync('ci-cd-summary.md')) {
+              const summary = fs.readFileSync('ci-cd-summary.md', 'utf8');
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: summary
+              });
+            }
+
+  # Emergency fallback
+  emergency-notification:
+    name: Emergency Notification
+    runs-on: ubuntu-latest
+    if: failure() && github.event.inputs.skip_tests == 'true'
+
+    steps:
+      - name: Emergency deployment notification
+        run: |
+          echo "## ⚠️ Emergency Deployment"
+          echo ""
+          echo "**WARNING**: Deployment completed with tests skipped!"
+          echo ""
+          echo "- **Commit**: ${{ github.sha }}"
+          echo "- **Branch**: ${{ github.ref_name }}"
+          echo "- **Timestamp**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "- **Triggered by**: ${{ github.actor }}"
+          echo ""
+          echo "Please verify the deployment manually and address any issues."

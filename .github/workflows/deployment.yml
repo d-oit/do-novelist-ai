@@ -1,0 +1,307 @@
+name: Deployment Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: "Deployment environment (staging, production)"
+      artifact_name:
+        required: true
+        type: string
+        description: "Name of the build artifact to deploy"
+    secrets:
+      DEPLOYMENT_TOKEN:
+        required: false
+        type: string
+        description: "Custom deployment token (optional)"
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [staging, production]
+        required: true
+        description: "Environment to deploy to"
+      force_deploy:
+        type: boolean
+        required: false
+        default: false
+        description: "Force deployment even if tests failed"
+
+concurrency:
+  group: deployment-${{ inputs.environment || github.event.inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  NODE_OPTIONS: "--max-old-space-size=4096"
+
+jobs:
+  pre-deployment-check:
+    name: Pre-deployment Validation
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.validation.outputs.should_deploy }}
+      build_artifact: ${{ steps.find-artifact.outputs.artifact_name }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Validate environment
+        id: validate
+        run: |
+          ENV="${{ inputs.environment || github.event.inputs.environment }}"
+          echo "Validating deployment to: $ENV"
+
+          case "$ENV" in
+            staging|production)
+              echo "✅ Environment validation passed"
+              ;;
+            *)
+              echo "❌ Invalid environment: $ENV"
+              echo "Must be one of: staging, production"
+              exit 1
+              ;;
+          esac
+
+      - name: Check deployment conditions
+        id: validation
+        run: |
+          FORCE="${{ github.event.inputs.force_deploy }}"
+          REF="${{ github.ref }}"
+
+          if [ "$FORCE" = "true" ]; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "⚡ Force deployment enabled"
+          elif [ "$REF" != "refs/heads/main" ]; then
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "❌ Only main branch can be deployed"
+          else
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Main branch deployment approved"
+          fi
+
+      - name: Find latest build artifact
+        id: find-artifact
+        run: |
+          # Find the most recent successful build
+          if [ -n "${{ inputs.artifact_name }}" ]; then
+            echo "artifact_name=${{ inputs.artifact_name }}" >> "$GITHUB_OUTPUT"
+          else
+            # Look for build artifacts from the latest commit
+            echo "artifact_name=build-artifacts-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Using artifact: ${{ steps.find-artifact.outputs.artifact_name }}"
+
+  download-artifacts:
+    name: Download Build Artifacts
+    runs-on: ubuntu-latest
+    needs: pre-deployment-check
+    if: needs.pre-deployment-check.outputs.should_deploy == 'true'
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.pre-deployment-check.outputs.build_artifact }}
+          path: dist/
+
+      - name: Verify artifacts
+        run: |
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ Build artifacts not found or invalid"
+            ls -la dist/ || echo "dist/ directory does not exist"
+            exit 1
+          fi
+          echo "✅ Build artifacts verified"
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [pre-deployment-check, download-artifacts]
+    if: |
+      needs.pre-deployment-check.outputs.should_deploy == 'true' &&
+      (inputs.environment == 'staging' || github.event.inputs.environment == 'staging')
+    environment:
+      name: staging
+      url: https://staging.novelist.ai
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.pre-deployment-check.outputs.build_artifact }}
+          path: _site/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Create deployment record
+        run: |
+          {
+            echo "## 🚀 Staging Deployment Complete"
+            echo ""
+            echo "- **Environment**: Staging"
+            echo "- **Commit**: ${{ github.sha }}"
+            echo "- **Deployed by**: ${{ github.actor }}"
+            echo "- **URL**: ${{ steps.deployment.outputs.page_url }}"
+            echo "- **Time**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > deployment-summary.md
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-deployment-${{ github.sha }}
+          path: deployment-summary.md
+          retention-days: 30
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [pre-deployment-check, download-artifacts]
+    if: |
+      needs.pre-deployment-check.outputs.should_deploy == 'true' &&
+      (inputs.environment == 'production' || github.event.inputs.environment == 'production')
+    environment:
+      name: production
+      url: https://novelist.ai
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.pre-deployment-check.outputs.build_artifact }}
+          path: _site/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Create deployment record
+        run: |
+          {
+            echo "## 🚀 Production Deployment Complete"
+            echo ""
+            echo "- **Environment**: Production"
+            echo "- **Commit**: ${{ github.sha }}"
+            echo "- **Deployed by**: ${{ github.actor }}"
+            echo "- **URL**: ${{ steps.deployment.outputs.page_url }}"
+            echo "- **Time**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > deployment-summary.md
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-deployment-${{ github.sha }}
+          path: deployment-summary.md
+          retention-days: 90
+
+  post-deployment:
+    name: Post-deployment Validation
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+
+    steps:
+      - name: Download deployment summaries
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Validate deployment
+        run: |
+          echo "## 📋 Deployment Summary"
+          echo ""
+          cat deployment-summary.md 2>/dev/null || echo "No deployment summary found"
+          echo ""
+          echo "### Deployment Status:"
+          echo "- Staging: ${{ needs.deploy-staging.result }}"
+          echo "- Production: ${{ needs.deploy-production.result }}"
+
+          if [ "${{ needs.deploy-staging.result }}" = "success" ] || \
+             [ "${{ needs.deploy-production.result }}" = "success" ]; then
+            echo "✅ At least one deployment succeeded"
+          else
+            echo "❌ All deployments failed"
+            exit 1
+          fi
+
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: failure() && github.event.inputs.force_deploy != 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Notify deployment failure
+        run: |
+          echo "## ⚠️ Deployment Failed"
+          echo ""
+          echo "- **Environment**: ${{ inputs.environment || github.event.inputs.environment }}"
+          echo "- **Commit**: ${{ github.sha }}"
+          echo "- **Failed at**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo ""
+          echo "Please check the deployment logs and resolve the issues before retrying."
+          echo ""
+          echo "To force deployment (not recommended):"
+          echo "1. Go to Actions tab"
+          echo "2. Re-run the workflow with 'Force deploy' enabled"
+
+      - name: Create rollback record
+        run: |
+          {
+            echo "## 🔄 Rollback Record"
+            echo ""
+            echo "- **Environment**: ${{ inputs.environment || github.event.inputs.environment }}"
+            echo "- **Failed Commit**: ${{ github.sha }}"
+            echo "- **Rollback Time**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- **Rollback Reason**: Deployment validation failed"
+          } > rollback-summary.md
+
+      - name: Upload rollback artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-${{ github.sha }}
+          path: rollback-summary.md
+          retention-days: 30

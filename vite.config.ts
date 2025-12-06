@@ -264,7 +264,28 @@ export default defineConfig(({ mode }) => {
               return 'feature-world';
             }
 
-            // All other node_modules
+            // Utility libraries (additional)
+            if (id.includes('dayjs') || id.includes('lodash') || id.includes('uuid')) {
+              return 'vendor-utils';
+            }
+
+            // Date/time libraries
+            if (id.includes('date-fns') || id.includes('dayjs')) {
+              return 'vendor-date';
+            }
+
+            // Small, commonly used utilities
+            if (
+              id.includes('lodash.get') ||
+              id.includes('lodash.set') ||
+              id.includes('lodash.has') ||
+              id.includes('tiny-invariant') ||
+              id.includes('is-hotkey')
+            ) {
+              return 'vendor-small-utils';
+            }
+
+            // All other node_modules (should be much smaller now)
             if (id.includes('node_modules')) {
               return 'vendor-misc';
             }
