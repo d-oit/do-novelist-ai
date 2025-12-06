@@ -135,23 +135,23 @@ jobs:
           echo "✅ Security audit completed successfully"
 
       - name: CodeQL Analysis
-        uses: github/codeql-action/init@v5
+        uses: github/codeql-action/init@v4
         with:
           languages: javascript-typescript
           queries: security-and-quality,security-extended
           config-file: .github/codeql/codeql-config.yml
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v5
+        uses: github/codeql-action/autobuild@v4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v5
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:javascript-typescript"
 
       - name: Dependency Review
         if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v5
+        uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: moderate
           comment-summary-in-pr: always
