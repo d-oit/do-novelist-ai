@@ -45,10 +45,18 @@ test_*.txt
 
 
 .claude/settings.json
+.claude/settings.local.json
 
-
+# Test coverage
+coverage/
 
 .eslintcache
 .factory/config.json
 playwright-results.json
 .performance-metrics/
+
+# Lighthouse CI
+.lighthouseci/
+
+# Plans (local development notes)
+plans/
