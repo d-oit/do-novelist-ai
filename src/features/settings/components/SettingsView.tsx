@@ -14,7 +14,8 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import { useUser } from '../../../contexts/UserContext';
-import { DbConfig, db, getStoredConfig, saveStoredConfig } from '../../../lib/db';
+import type { DbConfig } from '../../../lib/db';
+import { db, getStoredConfig, saveStoredConfig } from '../../../lib/db';
 import { cn } from '../../../lib/utils';
 import { GamificationPanel } from '../../gamification';
 import { AISettingsPanel } from './AISettingsPanel';

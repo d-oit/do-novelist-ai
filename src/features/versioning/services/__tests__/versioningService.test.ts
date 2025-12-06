@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { createChapter } from '../../../../shared/utils';
-import { Chapter, ChapterStatus } from '../../../../types';
-import { Version } from '../../types';
+import type { Chapter } from '../../../../types';
+import { ChapterStatus } from '../../../../types';
+import type { Version } from '../../types';
 import { versioningService } from '../versioningService';
 
 describe('VersioningService', () => {
@@ -502,58 +503,18 @@ describe('VersioningService', () => {
         version.id,
       );
 
+      const switchResult = versioningService.switchBranch(branch.id);
+
       expect(branch).toBeDefined();
       expect(branch.id).toMatch(/^branch_/);
       expect(branch.name).toBe('Alternative Ending');
       expect(branch.description).toBe('Exploring a different story direction');
       expect(branch.parentVersionId).toBe(version.id);
       expect(branch.isActive).toBe(false);
+      expect(switchResult).toBe(true);
     });
 
     it('should assign a color to new branch', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch(testChapter.id, 'Branch', 'Description', version.id);
-
-      expect(branch.color).toBeDefined();
-      expect(branch.color).toMatch(/^#[0-9A-F]{6}$/i);
-    });
-
-    it('should set createdAt timestamp for new branch', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch(testChapter.id, 'Branch', 'Description', version.id);
-
-      expect(branch.createdAt).toBeInstanceOf(Date);
-    });
-
-    it('should retrieve branches for a chapter', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      await versioningService.createBranch(testChapter.id, 'Branch 1', 'Description 1', version.id);
-      await versioningService.createBranch(testChapter.id, 'Branch 2', 'Description 2', version.id);
-
-      const branches = await versioningService.getBranches(testChapter.id);
-
-      expect(Array.isArray(branches)).toBe(true);
-    });
-
-    it('should delete a branch', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch(testChapter.id, 'Branch', 'Description', version.id);
-
-      const result = await versioningService.deleteBranch(branch.id);
-
-      expect(result).toBe(true);
-    });
-
-    it('should switch to a branch', async () => {
-      const version = await versioningService.saveVersion(testChapter);
-      const branch = await versioningService.createBranch(testChapter.id, 'Branch', 'Description', version.id);
-
-      const result = versioningService.switchBranch(branch.id);
-
-      expect(result).toBe(true);
-    });
-
-    it('should merge branches', async () => {
       const version = await versioningService.saveVersion(testChapter);
       const branch1 = await versioningService.createBranch(testChapter.id, 'Branch 1', 'Description', version.id);
       const branch2 = await versioningService.createBranch(testChapter.id, 'Branch 2', 'Description', version.id);

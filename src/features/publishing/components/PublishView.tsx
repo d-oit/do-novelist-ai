@@ -1,4 +1,5 @@
-import { Project, PublishStatus, Chapter } from '@shared/types';
+import type { Project, Chapter } from '@shared/types';
+import { PublishStatus } from '@shared/types';
 import { Download, Globe, Rocket, Target, Languages, Loader2, FileCheck } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -52,7 +53,7 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (_err) {
+    } catch {
       alert('Failed to generate ePub.');
     } finally {
       setIsExporting(false);
@@ -81,7 +82,7 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
         }
       }
       alert('Translation complete!');
-    } catch (_err) {
+    } catch {
       alert('Translation failed midway.');
     } finally {
       setIsTranslating(false);

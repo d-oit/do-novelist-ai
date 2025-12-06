@@ -77,6 +77,7 @@ export interface ButtonProps
  * ```
  */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ({ className, variant, size, asChild: _asChild = false, ...props }, ref) => {
     return (
       <motion.button

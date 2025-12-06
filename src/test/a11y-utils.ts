@@ -7,8 +7,9 @@
  * @see https://github.com/dequelabs/axe-core-npm
  */
 
-import { render, RenderResult } from '@testing-library/react';
-import { ReactElement } from 'react';
+import type { RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import axe, { type AxeResults } from 'axe-core';
 
 /**

@@ -3,7 +3,8 @@
  * Based on 2024-2025 best practices
  */
 
-import React, { Component, ErrorInfo, ReactNode, ComponentType } from 'react';
+import type { ErrorInfo, ReactNode, ComponentType } from 'react';
+import React, { Component } from 'react';
 import { Button } from './ui/Button';
 import { errorHandler } from '../lib/errors/error-handler';
 import { logger } from '../lib/errors/logging';

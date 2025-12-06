@@ -19,10 +19,11 @@ export interface ChapterVersion extends Version {
   title: string;
   summary: string;
   content: string;
-  status: import('../../../types/index').ChapterStatus;
+  status: ChapterStatus;
 }
 
-import { WorldState, ProjectSettings } from '../../../types/schemas';
+import type { ChapterStatus } from '../../../types';
+import type { WorldState, ProjectSettings } from '../../../types/schemas';
 
 export interface ProjectVersion extends Version {
   projectId: string;

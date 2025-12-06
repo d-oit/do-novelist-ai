@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { BarChart3, Eye, EyeOff, Download, RefreshCw } from 'lucide-react';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import { Project } from '../../../types';
+import type { Project } from '../../../types';
 import { useAnalytics } from '../hooks/useAnalytics';
 
 import GoalsProgress from './GoalsProgress';
@@ -24,19 +24,19 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = React.memo(
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showAllStats, setShowAllStats] = useState(true);
 
-    useEffect(() => {
-      const loadData = async (): Promise<void> => {
-        await Promise.all([
-          analytics.loadProjectAnalytics(project),
-          analytics.loadWeeklyStats(),
-          analytics.loadInsights(),
-          analytics.loadWordCountChart(project.id),
-        ]);
-        analytics.loadProductivityChart();
-      };
+    const loadData = useCallback(async (): Promise<void> => {
+      await Promise.all([
+        analytics.loadProjectAnalytics(project),
+        analytics.loadWeeklyStats(),
+        analytics.loadInsights(),
+        analytics.loadWordCountChart(project.id),
+      ]);
+      analytics.loadProductivityChart();
+    }, [project, analytics]);
 
+    useEffect(() => {
       void loadData();
-    }, [project.id]);
+    }, [loadData]);
 
     const refreshData = async (): Promise<void> => {
       setIsRefreshing(true);

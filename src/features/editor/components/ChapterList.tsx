@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import { Project, Chapter } from '../../../types';
+import type { Project, Chapter } from '../../../types';
 import { ChapterStatus } from '../../../shared/types';
 
 interface ChapterListProps {

@@ -5,7 +5,7 @@
  * to ensure each test runs in a clean environment, especially during parallel execution.
  */
 
-import { Page, BrowserContext } from '@playwright/test';
+import type { Page, BrowserContext } from '@playwright/test';
 
 /**
  * Complete state reset for a page/context

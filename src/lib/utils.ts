@@ -30,7 +30,7 @@ export function getUserId(): string {
       return newUserId;
     }
     return userId;
-  } catch (_e) {
+  } catch {
     // Fallback for when localStorage is not available (e.g. server-side or restricted)
     return `user_temp_${Date.now()}`;
   }

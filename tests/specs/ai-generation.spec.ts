@@ -1,4 +1,5 @@
-import { Page, expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
 

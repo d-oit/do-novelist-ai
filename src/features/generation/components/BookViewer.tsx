@@ -1,4 +1,5 @@
-import { Project, Chapter, ChapterStatus } from '@shared/types';
+import type { Project, Chapter } from '@shared/types';
+import { ChapterStatus } from '@shared/types';
 import {
   BookOpen,
   CheckCircle2,
@@ -93,7 +94,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false);
     }
-  }, [selectedChapter?.id]);
+  }, [selectedChapter?.id, selectedChapter?.summary, selectedChapter?.content, selectedChapter]);
 
   // Only update from props if the change didn't originate from local edit (avoid cursor jumping/overwrite)
   // But we do need to catch AI generation updates.
@@ -114,7 +115,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
         lastSavedContent.current = selectedChapter.content ?? '';
       }
     }
-  }, [selectedChapter?.summary, selectedChapter?.content]);
+  }, [selectedChapter?.summary, selectedChapter?.content, selectedChapter, summary, content]);
 
   useEffect((): (() => void) => {
     if (
@@ -154,7 +155,7 @@ const BookViewer: React.FC<BookViewerProps> = ({
         onUpdateChapter(chapterId, { summary: finalSummary, content: finalContent });
       }
     };
-  }, [selectedChapterId]);
+  }, [selectedChapterId, onUpdateChapter]);
 
   const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     setSummary(e.target.value);

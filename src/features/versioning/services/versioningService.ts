@@ -1,6 +1,6 @@
 import { createChapter } from '../../../shared/utils';
-import { Chapter } from '../../../types';
-import { ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
+import type { Chapter } from '../../../types';
+import type { ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
 
 class VersioningService {
   private static instance: VersioningService;
@@ -30,11 +30,11 @@ class VersioningService {
   }
 
   public async init(): Promise<void> {
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
 
       request.onerror = (): void =>
-        _reject(new Error(request.error?.message ?? 'Database operation failed'));
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
       request.onsuccess = (): void => {
         this.db = request.result;
         resolve();
@@ -86,14 +86,14 @@ class VersioningService {
       charCount: chapter.content.length,
     };
 
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const transaction = db.transaction(['versions'], 'readwrite');
       const store = transaction.objectStore('versions');
       const request = store.add(version);
 
       request.onsuccess = (): void => resolve(version);
       request.onerror = (): void =>
-        _reject(new Error(request.error?.message ?? 'Database operation failed'));
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -102,7 +102,7 @@ class VersioningService {
     if (!this.db) throw new Error('Database not initialized');
 
     const db = this.db;
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const transaction = db.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const index = store.index('chapterId');
@@ -115,7 +115,7 @@ class VersioningService {
         resolve(versions);
       };
       request.onerror = (): void =>
-        _reject(new Error(request.error?.message ?? 'Database operation failed'));
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -124,7 +124,7 @@ class VersioningService {
     if (!this.db) throw new Error('Database not initialized');
 
     const db = this.db;
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const transaction = db.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const request = store.get(versionId);
@@ -146,7 +146,7 @@ class VersioningService {
         }
       };
       request.onerror = (): void =>
-        _reject(new Error(request.error?.message ?? 'Database operation failed'));
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -161,7 +161,7 @@ class VersioningService {
       return false;
     }
 
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const transaction = db.transaction(['versions'], 'readwrite');
       const store = transaction.objectStore('versions');
       const request = store.delete(versionId);
@@ -169,7 +169,7 @@ class VersioningService {
       request.onsuccess = (): void => resolve(true);
       request.onerror = (): void => {
         console.error('Failed to delete version:', request.error);
-        resolve(false);
+        reject(new Error(request.error?.message ?? 'Failed to delete version'));
       };
     });
   }
@@ -226,14 +226,14 @@ class VersioningService {
       color: this.generateBranchColor(),
     };
 
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const transaction = db.transaction(['branches'], 'readwrite');
       const store = transaction.objectStore('branches');
       const request = store.add(branch);
 
       request.onsuccess = (): void => resolve(branch);
       request.onerror = (): void =>
-        _reject(new Error(request.error?.message ?? 'Database operation failed'));
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
@@ -242,7 +242,7 @@ class VersioningService {
     if (!this.db) throw new Error('Database not initialized');
 
     const db = this.db;
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const transaction = db.transaction(['branches'], 'readonly');
       const store = transaction.objectStore('branches');
       const request = store.getAll();
@@ -252,17 +252,19 @@ class VersioningService {
         resolve(branches);
       };
       request.onerror = (): void =>
-        _reject(new Error(request.error?.message ?? 'Database operation failed'));
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 
-  public switchBranch(_branchId: string): boolean {
+  public switchBranch(branchId: string): boolean {
     // Implementation for switching branches
+    console.log(`Switching to branch: ${branchId}`);
     return true;
   }
 
-  public mergeBranch(_sourceBranchId: string, _targetBranchId: string): boolean {
+  public mergeBranch(sourceBranchId: string, targetBranchId: string): boolean {
     // Implementation for merging branches
+    console.log(`Merging branch ${sourceBranchId} into ${targetBranchId}`);
     return true;
   }
 
@@ -270,14 +272,17 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
+    console.log(`Deleting branch: ${branchId}`);
+
     const db = this.db;
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const transaction = db.transaction(['branches'], 'readwrite');
       const store = transaction.objectStore('branches');
       const request = store.delete(branchId);
 
       request.onsuccess = (): void => resolve(true);
-      request.onerror = (): void => resolve(false);
+      request.onerror = (): void =>
+        reject(new Error(request.error?.message ?? 'Failed to delete branch'));
     });
   }
 
@@ -307,14 +312,14 @@ class VersioningService {
     if (!this.db) throw new Error('Database not initialized');
 
     const db = this.db;
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const transaction = db.transaction(['versions'], 'readonly');
       const store = transaction.objectStore('versions');
       const request = store.get(versionId);
 
       request.onsuccess = (): void => resolve((request.result as ChapterVersion | null) ?? null);
       request.onerror = (): void =>
-        _reject(new Error(request.error?.message ?? 'Database operation failed'));
+        reject(new Error(request.error?.message ?? 'Database operation failed'));
     });
   }
 

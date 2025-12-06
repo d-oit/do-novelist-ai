@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { setupWorker } from 'msw/browser';
 import { handlers } from './msw-handlers';
 
@@ -40,7 +41,7 @@ export const mswWorker = setupWorker(...handlers);
  * Alternative approach: Start MSW directly in the page
  * This registers the worker and sets up request interception
  */
-export async function startMSW(page: import('@playwright/test').Page): Promise<void> {
+export async function startMSW(page: Page): Promise<void> {
   await page.goto('about:blank');
   await page.addInitScript(async () => {
     // @ts-expect-error - MSW types aren't available in this context

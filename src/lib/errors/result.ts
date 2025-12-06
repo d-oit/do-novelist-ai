@@ -284,6 +284,7 @@ export const safeSync = <T>(operation: () => T, context?: string): Result<T, App
  */
 export const withContext = <T, E extends AppError>(
   result: Result<T, E>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _context: Record<string, unknown>,
 ): Result<T, E> => {
   // Context is read-only in BaseError, so we just return the result

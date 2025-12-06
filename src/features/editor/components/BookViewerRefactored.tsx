@@ -5,7 +5,7 @@
 
 import React from 'react';
 
-import { Project, Chapter, RefineOptions } from '../../../types';
+import type { Project, Chapter, RefineOptions } from '../../../types';
 
 import ChapterEditor from './ChapterEditor';
 import ChapterList from './ChapterList';

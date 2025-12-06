@@ -1,8 +1,14 @@
 import { useEffect } from 'react';
 
 import { useVersioningStore } from '../../../lib/stores/versioningStore';
-import { Chapter } from '../../../types';
-import { ChapterVersion, Branch, VersionCompareResult, VersionFilter, SortOrder } from '../types';
+import type { Chapter } from '../../../types';
+import type {
+  ChapterVersion,
+  Branch,
+  VersionCompareResult,
+  VersionFilter,
+  SortOrder,
+} from '../types';
 
 export interface UseVersioningReturn {
   // State

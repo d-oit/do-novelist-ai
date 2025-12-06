@@ -29,7 +29,7 @@ test.describe('Settings Panel E2E Tests', () => {
         settingsButton = strategy();
         await settingsButton.click({ timeout: 3000 });
         break;
-      } catch (_error) {
+      } catch {
         continue;
       }
     }

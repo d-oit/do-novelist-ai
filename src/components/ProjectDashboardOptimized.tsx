@@ -6,8 +6,8 @@
 import { Settings } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 
-import { GoapEngine } from '../features/editor/hooks/useGoapEngine';
-import { Project, Chapter, RefineOptions } from '../types';
+import type { GoapEngine } from '../features/editor/hooks/useGoapEngine';
+import type { Project, Chapter, RefineOptions } from '../types';
 
 import ActionCard from './ActionCard';
 import AgentConsole from './AgentConsole';
@@ -66,12 +66,7 @@ const ProjectDashboardOptimized: React.FC<ProjectDashboardProps> = React.memo(
         isActive: engine.currentAction?.name === action.name,
         disabled: !engine.isActionAvailable(action) || project.isGenerating,
       }));
-    }, [
-      engine.availableActions,
-      engine.currentAction,
-      engine.isActionAvailable,
-      project.isGenerating,
-    ]);
+    }, [engine, project.isGenerating]);
 
     return (
       <div className='animate-in fade-in mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>

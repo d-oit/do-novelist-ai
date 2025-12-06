@@ -2,7 +2,8 @@ import { Play, Activity, Users, Zap, BrainCircuit } from 'lucide-react';
 import React, { useCallback } from 'react';
 
 import { cn } from '@/lib/utils';
-import { AgentAction, AgentMode } from '@shared/types';
+import type { AgentAction } from '@shared/types';
+import { AgentMode } from '@shared/types';
 
 interface ActionCardProps {
   action: AgentAction;

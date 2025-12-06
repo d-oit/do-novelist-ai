@@ -2,7 +2,8 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { createChapter } from '../../../shared/utils';
-import { Chapter, ChapterStatus } from '../../../types';
+import type { Chapter } from '../../../types';
+import { ChapterStatus } from '../../../types';
 import { versioningService } from '../services/versioningService';
 
 import { useVersioning } from './useVersioning';

@@ -1,4 +1,4 @@
-import { Project } from '@shared/types';
+import type { Project } from '@shared/types';
 import { Image, Wand2, Loader2, RefreshCcw, Download } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -24,7 +24,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
       } else {
         setError('Failed to generate image. Please try again.');
       }
-    } catch (_err) {
+    } catch {
       setError('An error occurred during generation.');
     } finally {
       setIsGenerating(false);

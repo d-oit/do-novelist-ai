@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import { Project } from '../../../types';
+import type { Project } from '../../../types';
 import { usePublishingAnalytics } from '../hooks/usePublishingAnalytics';
 
 import { AlertsSection } from './AlertsSection';
@@ -38,7 +38,7 @@ const PublishingDashboard: React.FC<PublishingDashboardProps> = ({
       const days = selectedTimeframe === '7d' ? 7 : selectedTimeframe === '30d' ? 30 : 90;
       void analytics.loadTrends(publicationId, days);
     }
-  }, [publicationId, selectedTimeframe]);
+  }, [publicationId, selectedTimeframe, analytics]);
 
   const refreshData = async (): Promise<void> => {
     if (publicationId == null || publicationId.length === 0) return;
@@ -62,7 +62,7 @@ const PublishingDashboard: React.FC<PublishingDashboardProps> = ({
       filtered = analytics.searchFeedback(searchQuery);
     }
     return filtered;
-  }, [analytics.feedback, feedbackFilter, searchQuery, analytics]);
+  }, [feedbackFilter, searchQuery, analytics]);
 
   if (!analytics.analytics) {
     return (

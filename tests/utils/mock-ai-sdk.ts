@@ -1,7 +1,7 @@
 // CRITICAL: Import AI SDK logger patch FIRST
 import '../../src/lib/ai-sdk-logger-patch';
 
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 /**
  * Ensures AI SDK logger is properly initialized in the browser context
@@ -12,7 +12,7 @@ async function ensureLoggerInitializedInBrowser(page: Page): Promise<void> {
   await page.addInitScript(() => {
     // Create a minimal logger that satisfies AI SDK expectations
     const mockLogger = {
-      log: (..._args: unknown[]): void => {
+      log: (): void => {
         // Silent no-op in tests to avoid console pollution
         // Uncomment for debugging: console.log('[AI SDK]', ...args);
       },

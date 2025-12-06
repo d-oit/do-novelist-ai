@@ -1,4 +1,5 @@
-import { Project, PublishStatus, Chapter } from '@shared/types';
+import type { Project, Chapter } from '@shared/types';
+import { PublishStatus } from '@shared/types';
 import {
   Download,
   Globe,
@@ -64,7 +65,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (_err) {
+    } catch {
       alert('Failed to generate ePub.');
     } finally {
       setIsExporting(false);
@@ -93,7 +94,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
         }
       }
       alert('Translation complete!');
-    } catch (_err) {
+    } catch {
       alert('Translation failed midway.');
     } finally {
       setIsTranslating(false);

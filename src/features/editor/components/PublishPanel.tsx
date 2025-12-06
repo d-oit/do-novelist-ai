@@ -16,7 +16,8 @@ import { cn } from '@/lib/utils';
 
 import { translateContent } from '../../../lib/ai';
 import { generateEpub } from '../../../lib/epub';
-import { Project, PublishStatus, Chapter, ProjectSettings } from '../../../types';
+import type { Project, Chapter, ProjectSettings } from '../../../types';
+import { PublishStatus } from '../../../types';
 import { usePublishingAnalytics } from '../../publishing';
 import PublishingDashboard from '../../publishing/components/PublishingDashboard';
 import PublishingSetup from '../../publishing/components/PublishingSetup';
@@ -79,7 +80,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (_err) {
+    } catch {
       alert('Failed to generate ePub.');
     } finally {
       setIsExporting(false);
@@ -111,7 +112,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
         }
       }
       alert('Translation complete!');
-    } catch (_err) {
+    } catch {
       alert('Translation failed midway.');
     } finally {
       setIsTranslating(false);

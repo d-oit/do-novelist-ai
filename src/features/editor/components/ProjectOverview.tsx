@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import { Project } from '../../../types';
+import type { Project } from '../../../types';
 import { ChapterStatus } from '../../../shared/types';
 
 interface ProjectOverviewProps {

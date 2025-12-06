@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 
 import { versioningService } from '../../features/versioning/services/versioningService';
-import {
+import type {
   Branch,
   ChapterVersion,
   SortOrder,
   VersionCompareResult,
   VersionFilter,
 } from '../../features/versioning/types';
-import { Chapter } from '../../types';
+import type { Chapter } from '../../types';
 
 interface VersioningState {
   // State

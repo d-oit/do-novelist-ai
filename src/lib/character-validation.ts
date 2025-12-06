@@ -3,7 +3,7 @@
  * Business logic validation and management for character entities
  */
 
-import { z } from 'zod';
+import type { z } from 'zod';
 
 import {
   type ProjectId,

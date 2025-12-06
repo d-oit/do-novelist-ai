@@ -58,5 +58,3 @@ playwright-results.json
 # Lighthouse CI
 .lighthouseci/
 
-# Plans (local development notes)
-plans/

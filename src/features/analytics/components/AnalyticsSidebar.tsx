@@ -8,7 +8,8 @@ import { BarChart3, TrendingUp, Target, Clock } from 'lucide-react';
 import React from 'react';
 
 import { cn } from '../../../lib/utils';
-import { Project, ChapterStatus } from '../../../shared/types';
+import type { Project } from '../../../shared/types';
+import { ChapterStatus } from '../../../shared/types';
 
 interface AnalyticsSidebarProps {
   project: Project;

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { usePublishingStore } from '../../../lib/stores/publishingStore';
-import { Project } from '../../../types';
+import type { Project } from '../../../types';
 import { publishingAnalyticsService } from '../services/publishingAnalyticsService';
-import {
+import type {
   EngagementMetrics,
   PlatformAnalytics,
   Publication,
@@ -238,7 +238,14 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
         newAlerts.forEach(alert => store.addAlert(alert));
       }
     }
-  }, [store.analytics, store.engagement, store.currentPublication, store.alerts, store.addAlert]);
+  }, [
+    store.analytics,
+    store.engagement,
+    store.currentPublication,
+    store.alerts,
+    store.addAlert,
+    store,
+  ]);
 
   return {
     // State from Store

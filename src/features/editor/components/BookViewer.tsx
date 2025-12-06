@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 
-import { Project, Chapter, ChapterStatus, RefineOptions } from '../../../types/index';
-import { AIModel } from '../types';
+import type { Project, Chapter, RefineOptions } from '../../../types/index';
+import { ChapterStatus } from '../../../types/index';
+import type { AIModel } from '../types';
 
 // ...
 
@@ -157,12 +158,35 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
       }
       if (window.innerWidth < 768) actions.toggleSidebar(); // Close sidebar on mobile
     }, [
+      selectedChapter,
       selectedChapter?.id,
       selectedChapter?.content,
       selectedChapter?.summary,
       project.id,
       analytics.isTracking,
-    ]); // Removed analytics from dependency to avoid loops if analytics changes often
+      analytics.startSession,
+      analytics.endSession,
+      analytics,
+      actions,
+    ]);
+
+    // Save version function - moved before useEffect that uses it
+    const saveVersion = useCallback(
+      (type: 'manual' | 'auto' | 'ai-generated' | 'restore' = 'manual', message?: string): void => {
+        if (!selectedChapter) return;
+
+        const currentChapter: Chapter = {
+          ...selectedChapter,
+          summary: state.summary,
+          content: state.content,
+        };
+
+        versioning.saveVersion(currentChapter, message, type).catch(error => {
+          console.error('Failed to save version:', error);
+        });
+      },
+      [selectedChapter, state.summary, state.content, versioning],
+    );
 
     // Auto-save logic
     useEffect(() => {
@@ -190,7 +214,15 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
         }
       }, 3000);
       return (): void => clearTimeout(timer);
-    }, [state.summary, state.content, selectedChapterId, onUpdateChapter]);
+    }, [
+      state.summary,
+      state.content,
+      selectedChapterId,
+      onUpdateChapter,
+      actions,
+      selectedChapter,
+      saveVersion,
+    ]);
 
     // Save on unmount/change chapter
     useEffect((): (() => void) => {
@@ -209,7 +241,7 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
           onUpdateChapter(chapterId, { summary, content });
         }
       };
-    }, [selectedChapterId]);
+    }, [selectedChapterId, onUpdateChapter]);
 
     const handleSummaryChange = useCallback(
       (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
@@ -264,23 +296,6 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
         actions.setGeneratingImage(false);
       }
     }, [selectedChapter, onUpdateChapter, actions, project.style]);
-
-    const saveVersion = useCallback(
-      (type: 'manual' | 'auto' | 'ai-generated' | 'restore' = 'manual', message?: string): void => {
-        if (!selectedChapter) return;
-
-        const currentChapter: Chapter = {
-          ...selectedChapter,
-          summary: state.summary,
-          content: state.content,
-        };
-
-        versioning.saveVersion(currentChapter, message, type).catch(error => {
-          console.error('Failed to save version:', error);
-        });
-      },
-      [selectedChapter, state.summary, state.content, versioning],
-    );
 
     const handleRestoreVersion = useCallback(
       (restoredChapter: Chapter): void => {
