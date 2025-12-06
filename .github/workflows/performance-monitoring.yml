@@ -76,8 +76,10 @@ jobs:
 
           | Metric | Value | Status |
           |--------|-------|--------|
-          | Main Bundle Size | ${MAIN_SIZE_KB}KB | $([ "$MAIN_SIZE_KB" -lt 200 ] && echo "✅ Good" || echo "⚠️ Large") |
-          | Total Build Size | ${TOTAL_SIZE_KB}KB | $([ "$TOTAL_SIZE_KB" -lt 2000 ] && echo "✅ Good" || echo "⚠️ Large") |
+          | Main Bundle Size | ${MAIN_SIZE_KB}KB | $([ "$MAIN_SIZE_KB" -lt 200 ] &&
+            echo "✅ Good" || echo "⚠️ Large") |
+          | Total Build Size | ${TOTAL_SIZE_KB}KB | $([ "$TOTAL_SIZE_KB" -lt 2000 ] &&
+            echo "✅ Good" || echo "⚠️ Large") |
           | Chunk Count | ${CHUNK_COUNT} | $([ "$CHUNK_COUNT" -gt 5 ] &&
             echo "✅ Well Split" || echo "ℹ️ Consider splitting") |
 
