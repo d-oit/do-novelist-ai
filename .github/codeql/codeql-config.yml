@@ -1,3 +1,4 @@
+---
 name: "CodeQL Security Configuration"
 
 disable-default-queries: false

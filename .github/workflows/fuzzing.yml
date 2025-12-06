@@ -1,3 +1,4 @@
+---
 name: Fuzzing & Security Testing
 
 on:
@@ -199,28 +200,28 @@ jobs:
           # Start fuzzing with timeout
           timeout $((DURATION * 60)) bash -c '
             echo "Fuzzing started at $(date)"
-            
+
             # Simulate fuzzing process
             for i in {1..100}; do
               echo "Fuzzing iteration $i"
-              
+
               # Fuzz editor component
               node -e "
                 const editor = require(\"./src/features/editor\");
                 const inputs = require(\"./fuzzing/input/editor-$((i % 3 + 1)).json\");
                 try { editor.handleInput(inputs.text); } catch(e) { console.log(\"Editor fuzz error:\", e.message); }
               "
-              
+
               # Fuzz AI generation
               node -e "
                 const ai = require(\"./src/features/ai-generation\");
                 const inputs = require(\"./fuzzing/input/ai-$((i % 3 + 1)).json\");
                 try { ai.generate(inputs.prompt, inputs.model); } catch(e) { console.log(\"AI fuzz error:\", e.message); }
               "
-              
+
               sleep 1
             done
-            
+
             echo "Fuzzing completed at $(date)"
           ' || echo "Fuzzing timeout reached"
 
@@ -425,7 +426,7 @@ jobs:
             echo "**Commit**: ${{ github.sha }}"
             echo "**Branch**: ${{ github.ref_name }}"
             echo ""
-            
+
             echo "## 📊 Test Results Summary"
             echo ""
             echo "| Test Type | Status |"
@@ -435,14 +436,14 @@ jobs:
             echo "| Property-Based Testing | ${{ needs.property-based-testing.result }} |"
             echo "| Mutation Testing | ${{ needs.mutation-testing.result }} |"
             echo ""
-            
+
             if [ -f fuzzing-results.md ]; then
               echo "## 🧪 Fuzzing Details"
               echo ""
               cat fuzzing-results.md
               echo ""
             fi
-            
+
             echo "## 🔍 Recommendations"
             echo ""
             echo "- Review dependency vulnerabilities regularly"
@@ -450,7 +451,7 @@ jobs:
             echo "- Monitor mutation testing score trends"
             echo "- Set up automated daily fuzzing schedules"
             echo ""
-            
+
             echo "## 📋 Next Steps"
             echo ""
             echo "1. Address any security vulnerabilities found"
@@ -467,7 +468,7 @@ jobs:
             const fs = require('fs');
             if (fs.existsSync('comprehensive-fuzzing-report.md')) {
               const report = fs.readFileSync('comprehensive-fuzzing-report.md', 'utf8');
-              
+
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,

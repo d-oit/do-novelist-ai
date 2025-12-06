@@ -1,3 +1,4 @@
+---
 name: CI/CD Pipeline
 
 on:
@@ -244,18 +245,22 @@ jobs:
           echo "  - Timeout: 90s per test"
           echo "  - CI Mode: Enabled"
 
+          # Create test results directory
+          mkdir -p test-results playwright-report
+
           # Set enhanced environment variables for CI stability
           export CI=true
           export PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright
           export DEBUG=pw:browser
           export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
           export NODE_ENV=test
+          export GITHUB_SHA=${{ github.sha }}
 
           # Run tests with automatic retries and better error reporting
           timeout 2400 pnpm exec playwright test \
             --shard=${{ matrix.shard }}/3 \
             --workers=1 \
-            --reporter=list \
+            --reporter=list,junit,json \
             --output=test-results \
             --max-failures=5 \
             || {
@@ -271,6 +276,10 @@ jobs:
               echo "📁 Playwright cache contents:"
               ls -la ~/.cache/ms-playwright/ 2>/dev/null ||
               echo "No cache directory"
+              echo "📁 Test results directory:"
+              ls -la test-results/ 2>/dev/null || echo "No test results"
+              echo "📁 Playwright report directory:"
+              ls -la playwright-report/ 2>/dev/null || echo "No report directory"
               exit 1
             }
 
@@ -293,6 +302,26 @@ jobs:
             test-results/results.json
             test-results/junit.xml
           retention-days: 7
+
+      - name: Verify test results were generated
+        if: always()
+        run: |
+          echo "🔍 Verifying test result files..."
+          if [ -f "test-results/results.json" ]; then
+            echo "✅ results.json found"
+            echo "📊 Test summary:"
+            cat test-results/results.json | head -50
+          else
+            echo "❌ results.json not found"
+          fi
+
+          if [ -f "test-results/junit.xml" ]; then
+            echo "✅ junit.xml found"
+            echo "📋 JUnit summary:"
+            grep -E "(tests|failures|time)" test-results/junit.xml | head -10
+          else
+            echo "❌ junit.xml not found"
+          fi
 
   # Deployment gate (only for main branch)
   deployment-gate:

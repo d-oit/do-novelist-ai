@@ -1,3 +1,4 @@
+---
 name: CI Pipeline
 
 # NOTE: Label management has been moved to .github/workflows/github-labels.yml

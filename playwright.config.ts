@@ -8,22 +8,24 @@ export default defineConfig({
   timeout: 30000,
   expect: { timeout: 5000 },
 
-  // Execution strategy for stability
+  // Execution strategy for stability with CI optimization
   fullyParallel: false,
   forbidOnly: process.env.CI ? true : false,
   retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : 2,
+  shard: process.env.CI ? (process.env.GITHUB_SHA ? undefined : undefined) : undefined,
 
-  // Production reporting with strategic diagnostics
+  // Production reporting with comprehensive test result generation
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
     ['json', { outputFile: 'test-results/results.json' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
     ['list'],
   ],
 
   // Global settings with strategic diagnostic collection
   use: {
-    baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000',
+    baseURL: process.env.CI ? 'http://localhost:3000' : 'http://localhost:3000',
     actionTimeout: 10000,
     navigationTimeout: 30000,
     trace: 'on-first-retry',
@@ -57,7 +59,25 @@ export default defineConfig({
 
   // Optimized web server configuration for React applications
   webServer: process.env.CI
-    ? undefined // In CI, use built application
+    ? {
+        command: 'npm run preview -- --port 3000 --host 0.0.0.0',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120000,
+        stdout: 'pipe',
+        stderr: 'pipe',
+        env: {
+          NODE_ENV: 'production',
+          PLAYWRIGHT_TEST: 'true',
+          VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
+          VITE_DEFAULT_AI_PROVIDER: 'mistral',
+          VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
+          VITE_TURSO_DATABASE_URL: 'test-url',
+          VITE_TURSO_AUTH_TOKEN: 'test-token',
+          VITE_DISABLE_AI_SDK: 'true',
+          DISABLE_AI_SDK: 'true',
+        },
+      }
     : {
         command: 'npm run dev',
         url: 'http://localhost:3000',

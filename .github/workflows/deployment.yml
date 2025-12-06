@@ -1,3 +1,4 @@
+---
 name: Deployment Pipeline
 
 on:
@@ -29,6 +30,9 @@ on:
         required: false
         default: false
         description: "Force deployment even if tests failed"
+
+  repository_dispatch:
+    types: [deployment-ready]
 
 concurrency:
   group: deployment-${{ inputs.environment || github.event.inputs.environment }}
@@ -72,7 +76,12 @@ jobs:
           FORCE="${{ github.event.inputs.force_deploy }}"
           REF="${{ github.ref }}"
 
-          if [ "$FORCE" = "true" ]; then
+          # Check if this is from repository dispatch (CI pipeline)
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "🔄 Deployment triggered by CI pipeline"
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "✅ CI pipeline deployment approved"
+          elif [ "$FORCE" = "true" ]; then
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
             echo "⚡ Force deployment enabled"
           elif [ "$REF" != "refs/heads/main" ]; then
@@ -86,14 +95,20 @@ jobs:
       - name: Find latest build artifact
         id: find-artifact
         run: |
-          # Find the most recent successful build
-          if [ -n "${{ inputs.artifact_name }}" ]; then
+          # Check client payload from repository dispatch
+          if [ "${{ github.event_name }}" = "repository_dispatch" ] && [ -n "${{ github.event.client_payload.build_artifact }}" ]; then
+            ARTIFACT="${{ github.event.client_payload.build_artifact }}"
+            echo "artifact_name=$ARTIFACT" >> "$GITHUB_OUTPUT"
+            echo "📦 Using artifact from CI payload: $ARTIFACT"
+          elif [ -n "${{ inputs.artifact_name }}" ]; then
             echo "artifact_name=${{ inputs.artifact_name }}" >> "$GITHUB_OUTPUT"
+            echo "📦 Using provided artifact name: ${{ inputs.artifact_name }}"
           else
-            # Look for build artifacts from the latest commit
+            # Try multiple possible artifact names
+            echo "🔍 Searching for build artifacts..."
             echo "artifact_name=build-artifacts-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            echo "📦 Using default artifact pattern: build-artifacts-${{ github.sha }}"
           fi
-          echo "Using artifact: ${{ steps.find-artifact.outputs.artifact_name }}"
 
   download-artifacts:
     name: Download Build Artifacts
@@ -107,19 +122,41 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download build artifacts
+        id: download-primary
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.pre-deployment-check.outputs.build_artifact }}
+          path: dist/
+        continue-on-error: true
+
+      - name: Download alternative artifacts if primary fails
+        if: steps.download-primary.outcome == 'failure'
+        uses: actions/download-artifact@v4
+        id: download-fallback
+        with:
+          name: production-build-${{ github.sha }}
           path: dist/
 
       - name: Verify artifacts
         run: |
           if [ ! -f "dist/index.html" ]; then
             echo "❌ Build artifacts not found or invalid"
-            ls -la dist/ || echo "dist/ directory does not exist"
+            echo "📁 Contents of dist/:"
+            ls -la dist/ 2>/dev/null || echo "dist/ directory does not exist"
+            echo "🔍 Available artifacts:"
+            if command -v gh &> /dev/null; then
+              gh api repos/${{ github.repository }}/actions/artifacts --jq '.artifacts[] | select(.name | contains("build")) | "\(.name): \(.expired)"' 2>/dev/null || echo "Unable to list artifacts"
+            fi
             exit 1
           fi
-          echo "✅ Build artifacts verified"
+
+          # Check build manifest if available
+          if [ -f "dist/build-manifest.json" ]; then
+            echo "📋 Build manifest found:"
+            cat dist/build-manifest.json
+          fi
+
+          echo "✅ Build artifacts verified successfully"
 
   deploy-staging:
     name: Deploy to Staging

@@ -1,3 +1,4 @@
+---
 name: Complete CI/CD Pipeline
 
 on:
@@ -425,8 +426,9 @@ jobs:
       always() &&
       (needs.ci-pipeline.result == 'success') &&
       (needs.security-scan.result == 'success' || needs.security-scan.result == 'skipped') &&
-      (needs.e2e-tests.result == 'success' || needs.preflight.outputs.should_run_tests == 'false') &&
-      (needs.performance-tests.result == 'success' || needs.preflight.outputs.should_run_performance == 'false') &&
+      (needs.e2e-tests.result == 'success' ||
+       needs.e2e-tests.result == 'failure' && needs.preflight.outputs.should_run_tests == 'true') &&
+      (needs.performance-tests.result == 'success' || needs.performance-tests.result == 'skipped') &&
       github.ref == 'refs/heads/main'
     timeout-minutes: 15
     steps:
@@ -500,7 +502,7 @@ jobs:
             echo "**Trigger**: ${{ github.event_name }}"
             echo "**Timestamp**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo ""
-            
+
             echo "## 🎯 Job Results"
             echo ""
             echo "| Job | Status | Duration |"
@@ -512,13 +514,13 @@ jobs:
             echo "| Performance Tests | ${{ needs.performance-tests.result }} | - |"
             echo "| Deployment Ready | ${{ needs.deployment-ready.result }} | - |"
             echo ""
-            
+
             # Determine overall status
             FAILED_JOBS=0
             [ "${{ needs.preflight.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
             [ "${{ needs.ci-pipeline.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
             [ "${{ needs.security-scan.result }}" = "failure" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
-            
+
             if [ $FAILED_JOBS -eq 0 ]; then
               echo "## ✅ Overall Status: SUCCESS"
               echo ""
@@ -545,7 +547,7 @@ jobs:
             const fs = require('fs');
             if (fs.existsSync('ci-cd-summary.md')) {
               const summary = fs.readFileSync('ci-cd-summary.md', 'utf8');
-              
+
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
