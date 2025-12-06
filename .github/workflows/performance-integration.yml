@@ -159,8 +159,8 @@ jobs:
 
       - name: Run Lighthouse CI
         run: lhci autorun --config=lighthouserc.js
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        # env:
+        #  LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
       - name: Full E2E test suite
         run: npm run test:e2e
