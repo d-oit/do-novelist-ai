@@ -92,7 +92,8 @@
       "Bash(xargs cat:*)",
       "WebFetch(domain:platform.claude.com)",
       "Bash(pnpm run lint:ci:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

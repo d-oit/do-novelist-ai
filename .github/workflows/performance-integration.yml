@@ -151,20 +151,19 @@ jobs:
       - name: Performance metrics collection
         run: |
           # Extract key metrics from build
-          echo "## 📊 Performance Metrics" > performance-summary.md
-          echo "" >> performance-summary.md
-
-          # Bundle analysis
-          echo "### Bundle Analysis" >> performance-summary.md
-          ls -lah dist/assets/ | grep -E '\.(js|css)$' | head -10 >> performance-summary.md
-          echo "" >> performance-summary.md
-
-          # Size summary
           TOTAL_SIZE=$(du -sh dist | cut -f1)
           CHUNK_COUNT=$(ls dist/assets/*.js | wc -l)
-          echo "- Total build size: $TOTAL_SIZE" >> performance-summary.md
-          echo "- JavaScript chunks: $CHUNK_COUNT" >> performance-summary.md
-          echo "- Generated: $(date)" >> performance-summary.md
+
+          {
+            echo "## 📊 Performance Metrics"
+            echo ""
+            echo "### Bundle Analysis"
+            ls -lah dist/assets/ | grep -E '\.(js|css)$' | head -10
+            echo ""
+            echo "- Total build size: $TOTAL_SIZE"
+            echo "- JavaScript chunks: $CHUNK_COUNT"
+            echo "- Generated: $(date)"
+          } > performance-summary.md
 
       - name: Upload comprehensive results
         uses: actions/upload-artifact@v4
@@ -243,18 +242,18 @@ jobs:
 
       - name: Generate performance report
         run: |
-          echo "# 🚀 Performance Report - $(date)" > performance-report.md
-          echo "" >> performance-report.md
-
-          if [ -f performance-summary.md ]; then
-            cat performance-summary.md >> performance-report.md
-          fi
-
-          echo "" >> performance-report.md
-          echo "## 🔗 Resources" >> performance-report.md
-          echo "- [Bundle Analyzer](./stats.html)" >> performance-report.md
-          echo "- [Lighthouse Report](./.lighthouseci/)" >> performance-report.md
-          echo "- [Test Results](./test-results/)" >> performance-report.md
+          {
+            echo "# 🚀 Performance Report - $(date)"
+            echo ""
+            if [ -f performance-summary.md ]; then
+              cat performance-summary.md
+            fi
+            echo ""
+            echo "## 🔗 Resources"
+            echo "- [Bundle Analyzer](./stats.html)"
+            echo "- [Lighthouse Report](./.lighthouseci/)"
+            echo "- [Test Results](./test-results/)"
+          } > performance-report.md
 
       - name: Comment performance summary
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
