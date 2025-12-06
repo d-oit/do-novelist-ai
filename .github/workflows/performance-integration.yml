@@ -58,12 +58,14 @@ jobs:
         id: changes
         run: |
           # Check if changes might impact performance
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | \
+          BEFORE="${{ github.event.before }}"
+          SHA="${{ github.sha }}"
+          if git diff --name-only "$BEFORE" "$SHA" | \
             grep -E '\.(tsx?|jsx?|css|scss)$|vite\.config|package\.json'; then
-            echo "should-run=true" >> $GITHUB_OUTPUT
+            echo "should-run=true" >> "$GITHUB_OUTPUT"
             echo "Performance-impacting changes detected"
           else
-            echo "should-run=false" >> $GITHUB_OUTPUT
+            echo "should-run=false" >> "$GITHUB_OUTPUT"
             echo "No performance-impacting changes detected"
           fi
 
@@ -152,13 +154,13 @@ jobs:
         run: |
           # Extract key metrics from build
           TOTAL_SIZE=$(du -sh dist | cut -f1)
-          CHUNK_COUNT=$(ls dist/assets/*.js | wc -l)
+          CHUNK_COUNT=$(find dist/assets -name '*.js' -type f | wc -l)
 
           {
             echo "## 📊 Performance Metrics"
             echo ""
             echo "### Bundle Analysis"
-            ls -lah dist/assets/ | grep -E '\.(js|css)$' | head -10
+            find dist/assets -type f \( -name '*.js' -o -name '*.css' \) -exec ls -lah {} \; | head -10
             echo ""
             echo "- Total build size: $TOTAL_SIZE"
             echo "- JavaScript chunks: $CHUNK_COUNT"
@@ -184,7 +186,7 @@ jobs:
             \"timestamp\": \"$(date -Iseconds)\",
             \"commit\": \"${{ github.sha }}\",
             \"totalSize\": $(du -sb dist | cut -f1),
-            \"chunkCount\": $(ls dist/assets/*.js | wc -l)
+            \"chunkCount\": $(find dist/assets -name '*.js' -type f | wc -l)
           }" > .performance-baseline/latest.json
 
   # Security and dependency checks

@@ -53,7 +53,8 @@ jobs:
           echo "Analyzing bundle output..."
 
           # Get main bundle size
-          MAIN_SIZE=$(ls -la dist/assets/index-*.js | awk '{print $5}')
+          MAIN_SIZE=$(find dist/assets -name 'index-*.js' -type f -exec stat -f%z {} \; 2>/dev/null || \
+            find dist/assets -name 'index-*.js' -type f -exec stat -c%s {} \;)
           MAIN_SIZE_KB=$((MAIN_SIZE / 1024))
 
           # Get total dist size
@@ -61,7 +62,7 @@ jobs:
           TOTAL_SIZE_KB=$((TOTAL_SIZE / 1024))
 
           # Count chunks
-          CHUNK_COUNT=$(ls dist/assets/*.js | wc -l)
+          CHUNK_COUNT=$(find dist/assets -name '*.js' -type f | wc -l)
 
           {
             echo "main_size_kb=$MAIN_SIZE_KB"
@@ -75,15 +76,15 @@ jobs:
 
           | Metric | Value | Status |
           |--------|-------|--------|
-          | Main Bundle Size | ${MAIN_SIZE_KB}KB | $([ $MAIN_SIZE_KB -lt 200 ] && echo "✅ Good" || echo "⚠️ Large") |
-          | Total Build Size | ${TOTAL_SIZE_KB}KB | $([ $TOTAL_SIZE_KB -lt 2000 ] && echo "✅ Good" || echo "⚠️ Large") |
-          | Chunk Count | ${CHUNK_COUNT} | $([ $CHUNK_COUNT -gt 5 ] &&
+          | Main Bundle Size | ${MAIN_SIZE_KB}KB | $([ "$MAIN_SIZE_KB" -lt 200 ] && echo "✅ Good" || echo "⚠️ Large") |
+          | Total Build Size | ${TOTAL_SIZE_KB}KB | $([ "$TOTAL_SIZE_KB" -lt 2000 ] && echo "✅ Good" || echo "⚠️ Large") |
+          | Chunk Count | ${CHUNK_COUNT} | $([ "$CHUNK_COUNT" -gt 5 ] &&
             echo "✅ Well Split" || echo "ℹ️ Consider splitting") |
 
           ## 📊 Detailed Analysis
 
           \`\`\`
-          $(ls -lah dist/assets/ | grep -E '\.(js|css)$' | head -20)
+          $(find dist/assets -type f \( -name '*.js' -o -name '*.css' \) -exec ls -lah {} \; | head -20)
           \`\`\`
 
           ## 🎯 Performance Targets
@@ -284,7 +285,7 @@ jobs:
           npm ci
           npm run build
           BASE_SIZE=$(du -sb dist | cut -f1)
-          echo "BASE_SIZE=$BASE_SIZE" >> $GITHUB_ENV
+          echo "BASE_SIZE=$BASE_SIZE" >> "$GITHUB_ENV"
 
       - name: Build PR branch
         run: |
@@ -292,7 +293,7 @@ jobs:
           npm ci
           npm run build
           PR_SIZE=$(du -sb dist | cut -f1)
-          echo "PR_SIZE=$PR_SIZE" >> $GITHUB_ENV
+          echo "PR_SIZE=$PR_SIZE" >> "$GITHUB_ENV"
 
       - name: Calculate size difference
         id: size-diff
@@ -300,8 +301,10 @@ jobs:
           SIZE_DIFF=$((PR_SIZE - BASE_SIZE))
           SIZE_DIFF_PERCENT=$(echo "scale=2; $SIZE_DIFF * 100.0 / $BASE_SIZE" | bc)
 
-          echo "size_diff=$SIZE_DIFF" >> $GITHUB_OUTPUT
-          echo "size_diff_percent=$SIZE_DIFF_PERCENT" >> $GITHUB_OUTPUT
+          {
+            echo "size_diff=$SIZE_DIFF"
+            echo "size_diff_percent=$SIZE_DIFF_PERCENT"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Comment size difference
         uses: actions/github-script@v7
