@@ -166,7 +166,7 @@ jobs:
           EOF
 
       - name: Upload optimization report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: workflow-optimization-report-${{ github.sha }}
           path: workflow-optimization-report.md
@@ -229,7 +229,7 @@ jobs:
           } > security-analysis.md
 
       - name: Upload security analysis
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: security-analysis-${{ github.sha }}
           path: security-analysis.md
@@ -304,7 +304,7 @@ jobs:
           fi
 
       - name: Upload dependency analysis
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dependency-analysis-${{ github.sha }}
           path: dependency-update-summary.md
@@ -372,7 +372,7 @@ jobs:
           } > performance-benchmark.md
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: performance-benchmark-${{ github.sha }}
           path: performance-benchmark.md
@@ -454,7 +454,7 @@ jobs:
             }
 
       - name: Upload comprehensive optimization report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: comprehensive-optimization-report-${{ github.sha }}
           path: optimization-summary.md
