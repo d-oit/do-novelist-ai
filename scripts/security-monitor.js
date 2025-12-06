@@ -7,8 +7,6 @@
 
 const { execSync } = require('child_process');
 const fs = require('fs');
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const path = require('path');
 
 class SecurityMonitor {
   constructor() {
@@ -69,8 +67,7 @@ class SecurityMonitor {
           count: vulnerabilityCounts.high,
         });
       }
-    } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch {
       this.log('Vulnerability check failed', 'warning');
     }
   }
@@ -94,14 +91,11 @@ class SecurityMonitor {
         });
       }
 
-      // Check for major version updates
-      const majorUpdates = Object.entries(outdatedData).filter(
-        ([/* eslint-disable-next-line @typescript-eslint/no-unused-vars */ _pkg, info]) => {
-          return info.latest.startsWith(
-            info.current.replace(/^\d+\.\d+\.\d+/, '').split('.')[0] + '.0.0',
-          );
-        },
-      );
+      const majorUpdates = Object.entries(outdatedData).filter(([, info]) => {
+        return info.latest.startsWith(
+          info.current.replace(/^\d+\.\d+\.\d+/, '').split('.')[0] + '.0.0',
+        );
+      });
 
       if (majorUpdates.length > 5) {
         this.alerts.push({
@@ -111,7 +105,7 @@ class SecurityMonitor {
           count: majorUpdates.length,
         });
       }
-    } catch (/* eslint-disable-next-line @typescript-eslint/no-unused-vars */ error) {
+    } catch {
       this.log('Dependency age check failed', 'warning');
     }
   }
@@ -152,7 +146,7 @@ class SecurityMonitor {
           details: recentAdvisories,
         });
       }
-    } catch (/* eslint-disable-next-line @typescript-eslint/no-unused-vars */ error) {
+    } catch {
       this.log('Security advisory check failed', 'warning');
     }
   }
@@ -200,7 +194,7 @@ class SecurityMonitor {
           details: problematicLicenses,
         });
       }
-    } catch (/* eslint-disable-next-line @typescript-eslint/no-unused-vars */ error) {
+    } catch {
       this.log('Vulnerability check failed', 'warning');
     }
   }

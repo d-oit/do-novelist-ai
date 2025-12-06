@@ -7,7 +7,6 @@
 
 const { execSync } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
 class SecurityScanner {
   constructor() {
@@ -68,7 +67,7 @@ class SecurityScanner {
       } else {
         this.log('No npm vulnerabilities found', 'success');
       }
-    } catch (error) {
+    } catch {
       this.log('npm audit failed', 'warning');
     }
 
