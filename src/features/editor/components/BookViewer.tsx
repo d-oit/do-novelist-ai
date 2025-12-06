@@ -158,6 +158,7 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
       }
       if (window.innerWidth < 768) actions.toggleSidebar(); // Close sidebar on mobile
     }, [
+      selectedChapter,
       selectedChapter?.id,
       selectedChapter?.content,
       selectedChapter?.summary,

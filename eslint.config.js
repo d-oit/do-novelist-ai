@@ -31,6 +31,21 @@ export default [
     ],
   },
 
+  // Shared configuration for React files
+  {
+    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    plugins: {
+      react: pluginReact,
+      'react-hooks': pluginReactHooks,
+      'react-refresh': pluginReactRefresh,
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+  },
+
   // Configuration files that need CommonJS/Node.js globals
   {
     files: ['**/*.cjs', 'lighthouserc.js'],
@@ -79,25 +94,22 @@ export default [
       'no-console': 'off',
       'no-undef': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-require-imports': 'off',
     },
   },
 
-  // Configuration for TypeScript source files
+  // Configuration for TypeScript source files (excluding bootstrap files)
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
+    ignores: ['src/index.tsx', 'src/index.ts'],
     plugins: {
       security,
-      react: pluginReact,
-      'react-hooks': pluginReactHooks,
-      'react-refresh': pluginReactRefresh,
     },
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',
-        tsconfigRootDir: process.cwd(),
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: {
@@ -117,9 +129,6 @@ export default [
           alwaysTryTypes: true,
           project: './tsconfig.json',
         },
-      },
-      react: {
-        version: 'detect',
       },
     },
     rules: {
@@ -193,14 +202,11 @@ export default [
     },
   },
 
-  // Configuration for JavaScript source files
+  // Configuration for bootstrap files (no type-aware linting)
   {
-    files: ['src/**/*.js', 'src/**/*.jsx'],
+    files: ['src/index.tsx', 'src/index.ts'],
     plugins: {
       security,
-      react: pluginReact,
-      'react-hooks': pluginReactHooks,
-      'react-refresh': pluginReactRefresh,
     },
     languageOptions: {
       parserOptions: {
@@ -217,11 +223,63 @@ export default [
         JSX: true,
       },
     },
-    settings: {
-      react: {
-        version: 'detect',
+    rules: {
+      'no-console': 'off',
+      'no-undef': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-react': 'off',
+      'react/jsx-uses-vars': 'error',
+      'react/jsx-key': 'error',
+      'react/jsx-no-duplicate-props': 'error',
+      'react/jsx-no-undef': 'error',
+      'react/jsx-pascal-case': 'error',
+      'react/jsx-no-target-blank': 'error',
+      'react/no-children-prop': 'error',
+      'react/no-danger-with-children': 'error',
+      'react/no-deprecated': 'warn',
+      'react/no-direct-mutation-state': 'error',
+      'react/no-find-dom-node': 'error',
+      'react/no-is-mounted': 'error',
+      'react/no-render-return-value': 'error',
+      'react/no-string-refs': 'error',
+      'react/no-unknown-property': 'error',
+      'react/require-render-return': 'error',
+      'react/self-closing-comp': 'warn',
+      'react/function-component-definition': [
+        'error',
+        {
+          namedComponents: 'arrow-function',
+          unnamedComponents: 'arrow-function',
+        },
+      ],
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+
+  // Configuration for JavaScript source files
+  {
+    files: ['src/**/*.js', 'src/**/*.jsx'],
+    plugins: {
+      security,
+    },
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.es2022,
+        React: true,
+        JSX: true,
       },
     },
+
     rules: {
       'no-console': 'off',
       'no-undef': 'off',

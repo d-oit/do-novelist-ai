@@ -66,13 +66,7 @@ const ProjectDashboardOptimized: React.FC<ProjectDashboardProps> = React.memo(
         isActive: engine.currentAction?.name === action.name,
         disabled: !engine.isActionAvailable(action) || project.isGenerating,
       }));
-    }, [
-      engine.availableActions,
-      engine.currentAction,
-      engine.isActionAvailable,
-      engine,
-      project.isGenerating,
-    ]);
+    }, [engine, project.isGenerating]);
 
     return (
       <div className='animate-in fade-in mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>

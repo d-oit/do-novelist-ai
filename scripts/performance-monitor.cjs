@@ -154,7 +154,7 @@ function saveMetrics(metrics) {
   if (fs.existsSync(historyPath)) {
     try {
       history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
-    } catch (e) {
+    } catch {
       console.warn('Could not parse history file, starting fresh');
     }
   }
@@ -245,8 +245,8 @@ function compareWithPrevious(currentMetrics) {
     });
     
     console.log('');
-  } catch (e) {
-    console.warn('Could not compare with previous metrics:', e.message);
+  } catch (_e) {
+    console.warn('Could not compare with previous metrics:', _e.message);
   }
 }
 

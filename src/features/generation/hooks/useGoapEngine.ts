@@ -88,105 +88,108 @@ export const useGoapEngine = (
     [],
   );
 
-  const executeAction = async (action: AgentAction): Promise<void> => {
-    if (project.isGenerating) return;
+  const executeAction = useCallback(
+    async (action: AgentAction): Promise<void> => {
+      if (project.isGenerating) return;
 
-    setProject(p => ({ ...p, isGenerating: true }));
-    setCurrentAction(action);
+      setProject(p => ({ ...p, isGenerating: true }));
+      setCurrentAction(action);
 
-    try {
-      if (action.name === 'create_outline') {
-        addLog('Planner', 'Selected Strategy: Architect (Single Agent Mode)', 'thought');
-        addLog('Architect', `Analyzing Idea: "${project.idea.substring(0, 100)}..."`, 'info');
+      try {
+        if (action.name === 'create_outline') {
+          addLog('Planner', 'Selected Strategy: Architect (Single Agent Mode)', 'thought');
+          addLog('Architect', `Analyzing Idea: "${project.idea.substring(0, 100)}..."`, 'info');
 
-        const result = await generateOutline(project.idea, project.style);
+          const result = await generateOutline(project.idea, project.style);
 
-        addLog(
-          'Architect',
-          `Outline generated with ${result.chapters.length} chapters.`,
-          'success',
-        );
+          addLog(
+            'Architect',
+            `Outline generated with ${result.chapters.length} chapters.`,
+            'success',
+          );
 
-        // FIX: Unique Chapter IDs based on Project ID to prevent collisions in DB
-        const newChapters: Chapter[] = result.chapters.map((c: Partial<Chapter>) =>
-          createChapter({
-            id: `${project.id}_ch_${c.orderIndex ?? 0}`,
-            orderIndex: c.orderIndex ?? 0,
-            title: c.title ?? '',
-            summary: c.summary ?? '',
-            status: ChapterStatus.PENDING,
-          }),
-        );
+          // FIX: Unique Chapter IDs based on Project ID to prevent collisions in DB
+          const newChapters: Chapter[] = result.chapters.map((c: Partial<Chapter>) =>
+            createChapter({
+              id: `${project.id}_ch_${c.orderIndex ?? 0}`,
+              orderIndex: c.orderIndex ?? 0,
+              title: c.title ?? '',
+              summary: c.summary ?? '',
+              status: ChapterStatus.PENDING,
+            }),
+          );
 
-        setProject(prev => ({
-          ...prev,
-          title: result.title,
-          chapters: newChapters,
-          worldState: {
-            ...prev.worldState,
-            hasOutline: true,
-            chaptersCount: newChapters.length,
-          },
-        }));
-      } else if (action.name === 'write_chapter_parallel') {
-        const pendingChapter = project.chapters.find(c => c.status === ChapterStatus.PENDING);
-        if (!pendingChapter) {
-          addLog('Planner', 'No pending chapters found.', 'warning');
-          setProject(p => ({ ...p, isGenerating: false }));
-          setCurrentAction(null);
-          return;
+          setProject(prev => ({
+            ...prev,
+            title: result.title,
+            chapters: newChapters,
+            worldState: {
+              ...prev.worldState,
+              hasOutline: true,
+              chaptersCount: newChapters.length,
+            },
+          }));
+        } else if (action.name === 'write_chapter_parallel') {
+          const pendingChapter = project.chapters.find(c => c.status === ChapterStatus.PENDING);
+          if (!pendingChapter) {
+            addLog('Planner', 'No pending chapters found.', 'warning');
+            setProject(p => ({ ...p, isGenerating: false }));
+            setCurrentAction(null);
+            return;
+          }
+
+          addLog(
+            'Planner',
+            `Delegating Chapter ${pendingChapter.orderIndex} to Writer Agent.`,
+            'thought',
+          );
+          setProject(prev => ({
+            ...prev,
+            chapters: prev.chapters.map(c =>
+              c.id === pendingChapter.id ? { ...c, status: ChapterStatus.DRAFTING } : c,
+            ),
+          }));
+          setSelectedChapterId(pendingChapter.id);
+          addLog('Writer', `Drafting "${pendingChapter.title}"...`, 'info');
+
+          const prevIndex = pendingChapter.orderIndex - 2;
+          const prevSummary = prevIndex >= 0 ? project.chapters[prevIndex]?.summary : undefined;
+          const content = await writeChapterContent(
+            pendingChapter.title,
+            pendingChapter.summary,
+            project.style,
+            prevSummary,
+          );
+
+          addLog(
+            'Writer',
+            `Chapter ${pendingChapter.orderIndex} completed (${content.length} chars).`,
+            'success',
+          );
+          setProject(prev => ({
+            ...prev,
+            chapters: prev.chapters.map(c =>
+              c.id === pendingChapter.id ? { ...c, content, status: ChapterStatus.COMPLETE } : c,
+            ),
+            worldState: {
+              ...prev.worldState,
+              chaptersCompleted: prev.worldState.chaptersCompleted + 1,
+            },
+          }));
+        } else if (action.name === 'editor_review') {
+          addLog('Planner', 'Selected Strategy: Editor (Consistency Check)', 'thought');
+          const analysis = await analyzeConsistency(project.chapters, project.style);
+          addLog('Editor', `Analysis Report:\n${analysis}`, 'success');
         }
-
-        addLog(
-          'Planner',
-          `Delegating Chapter ${pendingChapter.orderIndex} to Writer Agent.`,
-          'thought',
-        );
-        setProject(prev => ({
-          ...prev,
-          chapters: prev.chapters.map(c =>
-            c.id === pendingChapter.id ? { ...c, status: ChapterStatus.DRAFTING } : c,
-          ),
-        }));
-        setSelectedChapterId(pendingChapter.id);
-        addLog('Writer', `Drafting "${pendingChapter.title}"...`, 'info');
-
-        const prevIndex = pendingChapter.orderIndex - 2;
-        const prevSummary = prevIndex >= 0 ? project.chapters[prevIndex]?.summary : undefined;
-        const content = await writeChapterContent(
-          pendingChapter.title,
-          pendingChapter.summary,
-          project.style,
-          prevSummary,
-        );
-
-        addLog(
-          'Writer',
-          `Chapter ${pendingChapter.orderIndex} completed (${content.length} chars).`,
-          'success',
-        );
-        setProject(prev => ({
-          ...prev,
-          chapters: prev.chapters.map(c =>
-            c.id === pendingChapter.id ? { ...c, content, status: ChapterStatus.COMPLETE } : c,
-          ),
-          worldState: {
-            ...prev.worldState,
-            chaptersCompleted: prev.worldState.chaptersCompleted + 1,
-          },
-        }));
-      } else if (action.name === 'editor_review') {
-        addLog('Planner', 'Selected Strategy: Editor (Consistency Check)', 'thought');
-        const analysis = await analyzeConsistency(project.chapters, project.style);
-        addLog('Editor', `Analysis Report:\n${analysis}`, 'success');
+      } catch (err) {
+        addLog('System', `Action Failed: ${(err as Error).message}`, 'error');
+      } finally {
+        setProject(p => ({ ...p, isGenerating: false }));
+        setCurrentAction(null);
       }
-    } catch (err) {
-      addLog('System', `Action Failed: ${(err as Error).message}`, 'error');
-    } finally {
-      setProject(p => ({ ...p, isGenerating: false }));
-      setCurrentAction(null);
-    }
-  };
+    },
+    [project, setProject, setSelectedChapterId, addLog],
+  );
 
   const handleRefineChapter = async (
     chapterId: string,
@@ -276,7 +279,14 @@ export const useGoapEngine = (
       }
     }, 1500);
     return () => clearTimeout(timer);
-  }, [autoPilot, project.isGenerating, project.worldState, availableActions]);
+  }, [
+    autoPilot,
+    project.isGenerating,
+    project.worldState,
+    availableActions,
+    addLog,
+    executeAction,
+  ]);
 
   const isActionAvailable = (action: AgentAction): boolean => {
     if (

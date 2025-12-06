@@ -64,7 +64,7 @@ function isWithinWorkspace(inputPath, workspaceRoot = process.cwd()) {
 
     // If relative path starts with .. or is absolute, it's outside workspace
     return !relative.startsWith('..') && !path.isAbsolute(relative);
-  } catch (error) {
+  } catch {
     return false;
   }
 }

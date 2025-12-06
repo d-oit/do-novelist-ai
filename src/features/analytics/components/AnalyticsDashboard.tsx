@@ -32,16 +32,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = React.memo(
         analytics.loadWordCountChart(project.id),
       ]);
       analytics.loadProductivityChart();
-    }, [
-      project,
-      project.id,
-      analytics.loadProjectAnalytics,
-      analytics.loadWeeklyStats,
-      analytics.loadInsights,
-      analytics.loadWordCountChart,
-      analytics.loadProductivityChart,
-      analytics,
-    ]);
+    }, [project, analytics]);
 
     useEffect(() => {
       void loadData();

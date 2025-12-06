@@ -238,7 +238,14 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
         newAlerts.forEach(alert => store.addAlert(alert));
       }
     }
-  }, [store.analytics, store.engagement, store.currentPublication, store.alerts, store.addAlert]);
+  }, [
+    store.analytics,
+    store.engagement,
+    store.currentPublication,
+    store.alerts,
+    store.addAlert,
+    store,
+  ]);
 
   return {
     // State from Store

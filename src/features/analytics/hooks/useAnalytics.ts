@@ -35,7 +35,7 @@ export interface UseAnalyticsReturn {
   loadWeeklyStats: (weekStart?: Date) => Promise<void>;
   loadInsights: (filter?: AnalyticsFilter) => Promise<void>;
   createGoal: (goal: Omit<WritingGoals, 'id' | 'current'>) => Promise<WritingGoals>;
-  updateGoal: (goalId: string) => Promise<void>;
+  updateGoal: (goalId: string, data: Partial<WritingGoals>) => Promise<void>;
 
   // Chart Data Loaders
   loadWordCountChart: (projectId: string, days?: number) => Promise<void>;
@@ -205,12 +205,11 @@ export const useAnalytics = (): UseAnalyticsReturn => {
     // Actions from Store
     startSession,
     endSession,
-    loadProjectAnalytics: project => store.loadProjectAnalytics(project),
-
+    loadProjectAnalytics: store.loadProjectAnalytics,
     loadWeeklyStats: store.loadWeeklyStats,
     loadInsights: store.loadInsights,
     createGoal: store.createGoal,
-    updateGoal: id => store.updateGoal(id, {}), // Simplified for now
+    updateGoal: store.updateGoal,
     loadWordCountChart: store.loadWordCountChart,
     loadProductivityChart: store.loadProductivityChart,
 

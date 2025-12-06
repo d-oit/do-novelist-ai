@@ -66,7 +66,6 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
   className,
 }) => {
   const {
-    versions,
     isLoading,
     error,
     restoreVersion,
@@ -88,7 +87,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
       : getFilteredVersions(selectedFilter, selectedSort);
 
     return result;
-  }, [versions, searchQuery, selectedFilter, selectedSort, searchVersions, getFilteredVersions]);
+  }, [searchQuery, selectedFilter, selectedSort, searchVersions, getFilteredVersions]);
 
   const handleRestoreVersion = async (version: ChapterVersion): Promise<void> => {
     try {
