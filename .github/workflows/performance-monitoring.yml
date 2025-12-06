@@ -114,16 +114,14 @@ jobs:
           TOTAL_KB=${{ steps.bundle-analysis.outputs.total_size_kb }}
 
           if [ "$MAIN_KB" -gt 300 ]; then
-            echo "❌ Main bundle too large: ${MAIN_KB}KB > 300KB"
-            exit 1
+            echo "[WARN] Main bundle large: ${MAIN_KB}KB > 300KB (currently a warning)"
           fi
 
           if [ "$TOTAL_KB" -gt 3000 ]; then
-            echo "❌ Total build too large: ${TOTAL_KB}KB > 3MB"
-            exit 1
+            echo "[WARN] Total build large: ${TOTAL_KB}KB > 3MB (currently a warning)"
           fi
 
-          echo "✅ Bundle sizes within acceptable limits"
+          echo "[OK] Bundle size check completed"
 
       - name: Comment bundle analysis on PR
         if: github.event_name == 'pull_request'

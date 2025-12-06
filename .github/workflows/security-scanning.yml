@@ -309,7 +309,7 @@ jobs:
             [ "${{ needs.vulnerability-assessment.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
             [ "${{ needs.license-compliance.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
 
-            if [ $FAILED_JOBS -eq 0 ]; then
+            if [ "$FAILED_JOBS" -eq 0 ]; then
               echo "[OK] **All security checks passed!** The application meets security standards."
             else
               echo "[WARN] **$FAILED_JOBS security check(s) failed.** Please review the details below."

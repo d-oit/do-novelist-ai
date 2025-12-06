@@ -89,6 +89,10 @@ jobs:
     name: Security & Dependency Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -248,8 +252,8 @@ jobs:
 
           # Size warning if too large
           BUILD_SIZE_BYTES=$(du -sb dist | cut -f1)
-          if [ $BUILD_SIZE_BYTES -gt 10485760 ]; then  # 10MB
-            echo "⚠️ Build size is large: $BUILD_SIZE"
+          if [ "$BUILD_SIZE_BYTES" -gt 10485760 ]; then  # 10MB
+            echo "[WARN] Build size is large: $BUILD_SIZE"
           fi
 
       - name: Upload build artifacts
@@ -517,7 +521,7 @@ jobs:
             [ "${{ needs.ci-pipeline.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
             [ "${{ needs.security-scan.result }}" = "failure" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
 
-            if [ $FAILED_JOBS -eq 0 ]; then
+            if [ "$FAILED_JOBS" -eq 0 ]; then
               echo "## ✅ Overall Status: SUCCESS"
               echo ""
               echo "All critical jobs completed successfully. The application is ready for deployment."
