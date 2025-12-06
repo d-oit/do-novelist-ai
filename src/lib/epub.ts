@@ -1,5 +1,3 @@
-import JSZip from 'jszip';
-
 import { Project } from '../types';
 
 /**
@@ -9,6 +7,8 @@ import { Project } from '../types';
  * @returns A Promise resolving to a Blob containing the .epub file
  */
 export const generateEpub = async (project: Project, enableDropCaps = false): Promise<Blob> => {
+  // Dynamic import - only loads JSZip when needed (~45KB savings on initial load)
+  const JSZip = (await import('jszip')).default;
   const zip = new JSZip();
 
   // 1. mimetype (must be first, uncompressed)

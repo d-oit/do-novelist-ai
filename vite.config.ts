@@ -216,9 +216,13 @@ export default defineConfig(({ mode }) => {
               return 'vendor-db';
             }
 
-            // UI and animation libraries
+            // Animation library (large, can be lazy loaded)
+            if (id.includes('framer-motion')) {
+              return 'vendor-animation';
+            }
+
+            // UI utilities (small, always needed)
             if (
-              id.includes('framer-motion') ||
               id.includes('lucide-react') ||
               id.includes('class-variance-authority') ||
               id.includes('clsx') ||
