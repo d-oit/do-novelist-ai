@@ -1,0 +1,50 @@
+name: GitHub Labels Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      delete_existing:
+        description: "Delete all existing labels before creating new ones"
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC to ensure labels are maintained
+    - cron: "0 2 * * 0"
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  manage-labels:
+    name: Initialize GitHub Labels
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh jq
+
+      - name: Ensure script is executable
+        run: |
+          chmod +x scripts/gh-labels-creator.sh
+
+      - name: Run label initialization
+        run: |
+          ./scripts/gh-labels-creator.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DELETE_EXISTING: ${{ github.event.inputs.delete_existing || 'false' }}
+
+      - name: Report label status
+        run: |
+          echo "Label management completed successfully"
+          echo "Total labels:"
+          gh label list --json name --jq 'length'

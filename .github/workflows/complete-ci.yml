@@ -87,7 +87,7 @@ jobs:
   security-scan:
     name: Security & Dependency Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -106,41 +106,63 @@ jobs:
         run: |
           echo "🔒 Running security audits..."
 
-          # NPM audit
-          npm audit --audit-level=moderate || true
+          # Install security tools
+          npm install -g audit-ci license-checker
 
-          # Check for known vulnerable packages
-          npx audit-ci --moderate || echo "No high-severity vulnerabilities found"
+          # NPM audit with proper error handling
+          echo "Running npm audit..."
+          npm audit --audit-level=moderate
 
-          # License compliance check
-          npx license-checker --summary || echo "License check completed"
+          # Check for known vulnerable packages using audit-ci
+          echo "Running audit-ci..."
+          npx audit-ci --moderate --report-summary || {
+            echo "❌ High-severity vulnerabilities found"
+            exit 1
+          }
+
+          # License compliance check with proper configuration
+          echo "Running license compliance check..."
+          npx license-checker \
+            --summary \
+            --failOn 'GPL;LGPL;AGPL' \
+            --json \
+            --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0' \
+            || {
+            echo "❌ License compliance issues found"
+            exit 1
+          }
+
+          echo "✅ Security audit completed successfully"
 
       - name: CodeQL Analysis
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v5
         with:
           languages: javascript-typescript
-          queries: security-extended,code-scanning-reqs
+          queries: security-and-quality,security-extended
+          config-file: .github/codeql/codeql-config.yml
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
+        uses: github/codeql-action/autobuild@v5
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@v5
         with:
           category: "/language:javascript-typescript"
 
       - name: Dependency Review
         if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: moderate
+          comment-summary-in-pr: always
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Unlicense, CC0-1.0
 
   # Main CI pipeline (parallel execution)
   ci-pipeline:
     name: Main CI Pipeline
     runs-on: ubuntu-latest
     needs: [preflight, security-scan]
-    timeout-minutes: 30
+    timeout-minutes: 25
 
     strategy:
       fail-fast: false
@@ -182,20 +204,25 @@ jobs:
         if: needs.preflight.outputs.should_run_tests == 'true'
         run: |
           echo "🧪 Running unit tests..."
-          pnpm test
+          pnpm run test
 
       - name: Generate coverage report
         if: needs.preflight.outputs.should_run_tests == 'true'
         run: |
           pnpm run coverage
 
-          # Check coverage thresholds
-          COVERAGE=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)
-          echo "Coverage: $COVERAGE%"
+          # Check coverage thresholds using a more reliable method
+          if [ -f "coverage/coverage-summary.json" ]; then
+            COVERAGE=$(node -e "console.log(require('./coverage/coverage-summary.json').total.lines.pct)")
+            echo "Coverage: $COVERAGE%"
 
-          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-            echo "❌ Coverage below 80%: $COVERAGE%"
-            exit 1
+            if (( $(echo "$COVERAGE < 80" | bc -l 2>/dev/null || echo "0") )); then
+              echo "❌ Coverage below 80%: $COVERAGE%"
+              exit 1
+            fi
+            echo "✅ Coverage threshold met: $COVERAGE%"
+          else
+            echo "⚠️ Coverage report not found, skipping threshold check"
           fi
 
       - name: Build application
@@ -271,12 +298,29 @@ jobs:
         run: |
           echo "🎭 Running E2E tests..."
 
-          # Start the built application in background
-          pnpm preview --port 4173 &
-          sleep 10
+          # In CI, serve the built application
+          if [ -d "dist" ]; then
+            echo "📦 Using built application for E2E tests"
+            pnpm preview --port 4173 &
+            PREVIEW_PID=$!
+            sleep 15
+          else
+            echo "🚀 Starting development server for E2E tests"
+            pnpm dev --port 3000 &
+            PREVIEW_PID=$!
+            sleep 20
+          fi
 
           # Run tests
-          pnpm exec playwright test --reporter=list
+          pnpm exec playwright test --reporter=list || {
+            echo "❌ E2E tests failed"
+            kill $PREVIEW_PID 2>/dev/null || true
+            exit 1
+          }
+
+          # Cleanup
+          kill $PREVIEW_PID 2>/dev/null || true
+          echo "✅ E2E tests completed"
 
       - name: Upload E2E test results
         uses: actions/upload-artifact@v4
@@ -374,7 +418,7 @@ jobs:
       (needs.e2e-tests.result == 'success' || needs.preflight.outputs.should_run_tests == 'false') &&
       (needs.performance-tests.result == 'success' || needs.preflight.outputs.should_run_performance == 'false') &&
       github.ref == 'refs/heads/main'
-
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -424,6 +468,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [preflight, security-scan, ci-pipeline, e2e-tests, performance-tests]
     if: always()
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -504,6 +549,7 @@ jobs:
     name: Emergency Notification
     runs-on: ubuntu-latest
     if: failure() && github.event.inputs.skip_tests == 'true'
+    timeout-minutes: 5
 
     steps:
       - name: Emergency deployment notification

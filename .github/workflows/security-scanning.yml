@@ -1,0 +1,383 @@
+name: 🔒 Security Scanning & Analysis
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Daily security scan at 3 AM UTC
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      scan_level:
+        description: "Security scan level (basic|comprehensive)"
+        required: false
+        default: "comprehensive"
+        type: choice
+        options:
+          - basic
+          - comprehensive
+      fail_on_severity:
+        description: "Fail on severity level (low|moderate|high|critical)"
+        required: false
+        default: "moderate"
+        type: choice
+        options:
+          - low
+          - moderate
+          - high
+          - critical
+
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_OPTIONS: "--max-old-space-size=4096"
+  SECURITY_SCAN_LEVEL: ${{ github.event.inputs.scan_level || 'comprehensive' }}
+  FAIL_ON_SEVERITY: ${{ github.event.inputs.fail_on_severity || 'moderate' }}
+
+jobs:
+  preflight-security:
+    name: Security Pre-flight Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    outputs:
+      scan_level: ${{ steps.determine-scan.outputs.scan_level }}
+      environment: ${{ steps.env.outputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=development" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine scan level
+        id: determine-scan
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "scan_level=comprehensive" >> "$GITHUB_OUTPUT"
+          else
+            echo "scan_level=${{ env.SECURITY_SCAN_LEVEL }}" >> "$GITHUB_OUTPUT"
+          fi
+
+  codeql-security-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    needs: preflight-security
+    timeout-minutes: 25
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v5
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality,security-extended
+          config-file: .github/codeql/codeql-config.yml
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v5
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v5
+        with:
+          category: "/language:javascript-typescript"
+
+      - name: CodeQL Security Summary
+        if: always()
+        run: |
+          echo "## 🔍 CodeQL Security Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Analysis completed for commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Scan level: ${{ needs.preflight-security.outputs.scan_level }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f codeql/sarif-results.sarif ]; then
+            echo "✅ CodeQL analysis completed successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ CodeQL analysis completed - no results file generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  dependency-security-scan:
+    name: Dependency Security Analysis
+    runs-on: ubuntu-latest
+    needs: preflight-security
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run custom security scanner
+        run: |
+          echo "🔍 Running comprehensive security scanner..."
+          node scripts/security-scanner.js
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-report-${{ github.sha }}
+          path: security-report.json
+          retention-days: 30
+
+      - name: Dependency Review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: ${{ env.FAIL_ON_SEVERITY }}
+          comment-summary-in-pr: always
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Unlicense, CC0-1.0
+
+  vulnerability-assessment:
+    name: Vulnerability Assessment
+    runs-on: ubuntu-latest
+    needs: preflight-security
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install security tools
+        run: |
+          npm install -g audit-ci nsp snyk
+
+      - name: NPM Security Audit
+        run: |
+          echo "📦 Running NPM security audit..."
+          npm audit --audit-level=${{ env.FAIL_ON_SEVERITY }}
+
+      - name: Audit-CI Vulnerability Check
+        run: |
+          echo "🔍 Running audit-ci vulnerability check..."
+          npx audit-ci --config audit-ci.json --severity=${{ env.FAIL_ON_SEVERITY }}
+
+      - name: Check for outdated packages with security updates
+        run: |
+          echo "📅 Checking for outdated packages..."
+          npx npm-check-updates --target patch --json > outdated.json || true
+          if [ -s outdated.json ]; then
+            echo "⚠️ Found outdated packages that may need security updates:"
+            cat outdated.json
+          else
+            echo "✅ All packages are up to date"
+          fi
+
+      - name: Security Advisory Check
+        run: |
+          echo "🛡️ Checking security advisories..."
+          # Check for known security advisories
+          npm audit --json | jq -r '.advisories | to_entries[] | "\(.key): \(.value.title)"' 2>/dev/null || echo "No specific security advisories found"
+
+  license-compliance:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    needs: preflight-security
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install license checker
+        run: npm install -g license-checker
+
+      - name: Check license compliance
+        run: |
+          echo "📋 Checking license compliance..."
+
+          # Check against allowed licenses
+          npx license-checker \
+            --summary \
+            --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0' \
+            --json > license-report.json
+
+          # Count packages by license
+          echo "📊 License distribution:" >> $GITHUB_STEP_SUMMARY
+          cat license-report.json | jq -r 'to_entries | group_by(.value.licenses) | map({license: .[0].key, count: length})' 2>/dev/null >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: license-report-${{ github.sha }}
+          path: license-report.json
+          retention-days: 30
+
+  security-summary:
+    name: Security Summary & Reporting
+    runs-on: ubuntu-latest
+    needs:
+      [
+        preflight-security,
+        codeql-security-analysis,
+        dependency-security-scan,
+        vulnerability-assessment,
+        license-compliance,
+      ]
+    if: always()
+    timeout-minutes: 10
+
+    steps:
+      - name: Download all security artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Generate comprehensive security report
+        run: |
+          {
+            echo "# 🔒 Comprehensive Security Report"
+            echo ""
+            echo "**Generated**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "**Commit**: ${{ github.sha }}"
+            echo "**Branch**: ${{ github.ref_name }}"
+            echo "**Scan Level**: ${{ needs.preflight-security.outputs.scan_level }}"
+            echo "**Environment**: ${{ needs.preflight-security.outputs.environment }}"
+            echo ""
+            
+            echo "## 📊 Security Check Results"
+            echo ""
+            echo "| Security Check | Status |"
+            echo "|----------------|--------|"
+            echo "| CodeQL Analysis | ${{ needs.codeql-security-analysis.result }} |"
+            echo "| Dependency Scan | ${{ needs.dependency-security-scan.result }} |"
+            echo "| Vulnerability Assessment | ${{ needs.vulnerability-assessment.result }} |"
+            echo "| License Compliance | ${{ needs.license-compliance.result }} |"
+            echo ""
+            
+            echo "## 📋 Summary"
+            echo ""
+            FAILED_JOBS=0
+            [ "${{ needs.codeql-security-analysis.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
+            [ "${{ needs.dependency-security-scan.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
+            [ "${{ needs.vulnerability-assessment.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
+            [ "${{ needs.license-compliance.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
+            
+            if [ $FAILED_JOBS -eq 0 ]; then
+              echo "✅ **All security checks passed!** The application meets security standards."
+            else
+              echo "⚠️ **$FAILED_JOBS security check(s) failed.** Please review the details below."
+            fi
+            
+            echo ""
+            echo "## 🔍 Detailed Results"
+            echo ""
+            
+            # Include security report if available
+            if [ -f security-report.json ]; then
+              echo "### Dependency Security Report"
+              echo ""
+              echo '```json'
+              cat security-report.json
+              echo '```'
+              echo ""
+            fi
+            
+            # Include license report if available
+            if [ -f license-report.json ]; then
+              echo "### License Compliance Report"
+              echo ""
+              echo '```json'
+              cat license-report.json
+              echo '```'
+              echo ""
+            fi
+            
+            echo "## 🎯 Recommendations"
+            echo ""
+            echo "1. **Regular Updates**: Keep dependencies updated with security patches"
+            echo "2. **Code Review**: Review all security findings before merging"
+            echo "3. **Monitoring**: Set up continuous security monitoring"
+            echo "4. **Incident Response**: Have a plan for security incidents"
+            echo ""
+            
+            echo "## 📞 Contact"
+            echo ""
+            echo "For security-related questions, contact: security@novelist.ai"
+            
+          } > security-summary.md
+
+      - name: Comment on PR (if applicable)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (fs.existsSync('security-summary.md')) {
+              const summary = fs.readFileSync('security-summary.md', 'utf8');
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: summary
+              });
+            }
+
+      - name: Upload comprehensive security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-security-report-${{ github.sha }}
+          path: security-summary.md
+          retention-days: 90
+
+      - name: Security check summary
+        run: |
+          if [ -f security-summary.md ]; then
+            cat security-summary.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail on critical security issues
+        if: failure() && (needs.vulnerability-assessment.result == 'failure' || needs.dependency-security-scan.result == 'failure')
+        run: |
+          echo "❌ Critical security issues detected. Failing the build."
+          exit 1

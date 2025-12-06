@@ -1,8 +1,7 @@
 /**
- * Minimal Playwright Global Setup for Novelist.ai
+ * Playwright Global Setup for Novelist.ai
  *
- * This setup provides basic test environment initialization
- * without complex browser setup to avoid context conflicts.
+ * Simplified setup to avoid configuration conflicts
  */
 
 import type { FullConfig } from '@playwright/test';
@@ -19,6 +18,12 @@ async function globalSetup(config: FullConfig): Promise<void> {
   console.log(
     `🎯 Configured projects: ${config.projects.map((p: { name: string }) => p.name).join(', ')}`,
   );
+
+  // In CI, ensure we have the necessary environment
+  if (process.env.CI) {
+    console.log('✅ CI environment detected');
+  }
+
   console.log('✅ Test environment setup complete');
 }
 

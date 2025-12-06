@@ -14,10 +14,19 @@ export default defineConfig(({ mode }) => {
   // Get default model from environment (format: "provider/model" e.g., "mistral/mistral-medium")
   const defaultModel = env.VITE_DEFAULT_AI_MODEL || 'mistral/mistral-small-latest';
 
+  // CI-specific optimizations
+  const isCI = process.env.CI === 'true';
+
   return {
     // Ensure TypeScript checking during build
     esbuild: {
       logOverride: { 'this-is-undefined-in-esm': 'silent' },
+      // Optimize for CI builds
+      minifyIdentifiers: isCI,
+      minifySyntax: isCI,
+      minifyWhitespace: isCI,
+      // Reduce memory usage in CI
+      keepNames: !isCI,
     },
     server: {
       port: 3000,
@@ -197,6 +206,10 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      // Optimize for CI environment
+      outDir: 'dist',
+      assetsDir: 'assets',
+      assetsInlineLimit: 4096, // 4kb threshold for inline assets
       rollupOptions: {
         output: {
           manualChunks(id) {
@@ -297,6 +310,12 @@ export default defineConfig(({ mode }) => {
           chunkFileNames: 'assets/[name]-[hash].js',
           assetFileNames: 'assets/[name]-[hash].[ext]',
         },
+        // Optimize rollup options for CI
+        onwarn(warning, warn) {
+          // Skip certain warnings in CI to reduce noise
+          if (warning.code === 'UNUSED_EXTERNAL_IMPORT' && isCI) return;
+          warn(warning);
+        },
       },
       target: 'esnext',
       chunkSizeWarningLimit: 300, // More aggressive chunk size limit
@@ -304,12 +323,26 @@ export default defineConfig(({ mode }) => {
       minify: 'terser',
       terserOptions: {
         compress: {
-          drop_console: true,
+          drop_console: isCI, // Drop console logs in CI
           drop_debugger: true,
-          pure_funcs: ['console.log', 'console.info'],
+          pure_funcs: isCI
+            ? ['console.log', 'console.info', 'console.debug']
+            : ['console.log', 'console.info'],
+          // Reduce memory usage
+          keep_infinity: !isCI,
+          hoist_funs: isCI,
+          hoist_vars: isCI,
+        },
+        mangle: isCI, // Optimize variable names in CI
+        format: {
+          comments: isCI ? false : 'some',
         },
       },
       sourcemap: false,
+      // Optimize for CI build performance
+      reportCompressedSize: !isCI, // Skip size report in CI for speed
+      // Increase chunk size warning limit for large AI dependencies
+      chunkSizeWarningLimit: 500,
     },
   };
 });

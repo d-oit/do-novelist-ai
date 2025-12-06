@@ -1,0 +1,34 @@
+name: "CodeQL Security Configuration"
+
+disable-default-queries: false
+
+query-filters:
+  - include:
+      kind: problem
+      precision: high
+  - include:
+      kind: path-problem
+      precision: high
+
+paths:
+  - "src"
+  - "tests"
+
+paths-ignore:
+  - "**/*.d.ts"
+  - "**/*.test.*"
+  - "**/*.spec.*"
+  - "**/__tests__/**"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/coverage/**"
+
+queries:
+  - uses: security-and-quality
+  - uses: security-extended
+
+configuration:
+  security:
+    severity: "high,critical"
+  additional-queries:
+    - uses: advanced-security/codeql-queries/javascript-typescript

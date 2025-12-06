@@ -1,0 +1,66 @@
+{
+  "licenses": {
+    "MIT": {
+      "status": "allowed",
+      "notes": "MIT License - permissive license"
+    },
+    "Apache-2.0": {
+      "status": "allowed",
+      "notes": "Apache License 2.0 - permissive license"
+    },
+    "BSD-2-Clause": {
+      "status": "allowed",
+      "notes": "BSD 2-Clause License - permissive license"
+    },
+    "BSD-3-Clause": {
+      "status": "allowed",
+      "notes": "BSD 3-Clause License - permissive license"
+    },
+    "ISC": {
+      "status": "allowed",
+      "notes": "ISC License - permissive license"
+    },
+    "Unlicense": {
+      "status": "allowed",
+      "notes": "Unlicense - public domain"
+    },
+    "CC0-1.0": {
+      "status": "allowed",
+      "notes": "Creative Commons Zero - public domain"
+    },
+    "GPL-3.0": {
+      "status": "forbidden",
+      "notes": "GNU General Public License v3.0 - copyleft license"
+    },
+    "LGPL-3.0": {
+      "status": "forbidden",
+      "notes": "GNU Lesser General Public License v3.0 - copyleft license"
+    },
+    "AGPL-3.0": {
+      "status": "forbidden",
+      "notes": "GNU Affero General Public License v3.0 - copyleft license"
+    }
+  },
+  "licenseOverrides": {
+    "fsevents": {
+      "license": "MIT",
+      "notes": "macOS-specific dependency, allowed under MIT"
+    },
+    "sharp": {
+      "license": "Apache-2.0",
+      "notes": "Image processing library, allowed under Apache-2.0"
+    },
+    "playwright": {
+      "license": "Apache-2.0",
+      "notes": "Browser automation library, allowed under Apache-2.0"
+    }
+  },
+  "severity": {
+    "forbidden": "error",
+    "unknown": "warning"
+  },
+  "filter": {
+    "whitelist": [],
+    "blacklist": []
+  }
+}

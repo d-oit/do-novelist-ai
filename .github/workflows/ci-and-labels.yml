@@ -1,4 +1,7 @@
-name: CI + Labels Setup
+name: CI Pipeline
+
+# NOTE: Label management has been moved to .github/workflows/github-labels.yml
+# Run that workflow manually or on schedule to manage GitHub labels
 
 on:
   push:
@@ -18,28 +21,9 @@ env:
   NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
-  labels:
-    name: Initialize GitHub Labels
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Ensure script is executable
-        run: |
-          chmod +x scripts/gh-labels-creator.sh
-
-      - name: Run label initialization
-        run: |
-          ./scripts/gh-labels-creator.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   setup-and-cache:
     name: Setup Environment & Dependencies
     runs-on: ubuntu-latest
-    needs: labels
     timeout-minutes: 15
 
     steps:

@@ -8,18 +8,22 @@ export default defineConfig({
   timeout: 30000,
   expect: { timeout: 5000 },
 
-  // Critical: Execution strategy for context isolation
-  fullyParallel: false, // Disable for cross-browser stability
+  // Execution strategy for stability
+  fullyParallel: false,
   forbidOnly: process.env.CI ? true : false,
   retries: process.env.CI ? 2 : 1,
-  workers: process.env.CI ? 1 : 2, // Limit workers for cross-browser testing
+  workers: process.env.CI ? 1 : 2,
 
   // Production reporting with strategic diagnostics
-  reporter: [['html'], ['json', { outputFile: 'test-results/results.json' }]],
+  reporter: [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ['list'],
+  ],
 
   // Global settings with strategic diagnostic collection
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:3000',
     actionTimeout: 10000,
     navigationTimeout: 30000,
     trace: 'on-first-retry',
@@ -52,33 +56,29 @@ export default defineConfig({
       ],
 
   // Optimized web server configuration for React applications
-  webServer: {
-    command: process.env.CI
-      ? 'rm -rf node_modules/.vite dist && npm run dev -- --force'
-      : 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: false, // Force restart to ensure fresh code
-    timeout: 120000, // 2 minutes for server startup
-    stdout: 'pipe',
-    stderr: 'pipe',
-    env: {
-      // Test environment configuration
-      NODE_ENV: process.env.CI ? 'test' : 'development',
-      PLAYWRIGHT_TEST: process.env.CI ? 'true' : 'false',
+  webServer: process.env.CI
+    ? undefined // In CI, use built application
+    : {
+        command: 'npm run dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120000,
+        stdout: 'pipe',
+        stderr: 'pipe',
+        env: {
+          NODE_ENV: 'development',
+          PLAYWRIGHT_TEST: 'true',
+          VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
+          VITE_DEFAULT_AI_PROVIDER: 'mistral',
+          VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
+          VITE_TURSO_DATABASE_URL: 'test-url',
+          VITE_TURSO_AUTH_TOKEN: 'test-token',
+          VITE_DISABLE_AI_SDK: 'true',
+          DISABLE_AI_SDK: 'true',
+        },
+      },
 
-      // React application specific settings
-      VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
-      VITE_DEFAULT_AI_PROVIDER: 'mistral',
-      VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
-      VITE_TURSO_DATABASE_URL: 'test-url',
-      VITE_TURSO_AUTH_TOKEN: 'test-token',
-
-      // AI SDK configuration for tests
-      VITE_DISABLE_AI_SDK: 'true',
-      DISABLE_AI_SDK: 'true',
-
-      // Enhanced debugging for CI
-      ...(process.env.CI && { DEBUG: 'pw:browser*' }),
-    },
-  },
+  // Global setup and teardown
+  globalSetup: require.resolve('./tests/global-setup.ts'),
+  globalTeardown: require.resolve('./tests/global-teardown.ts'),
 });

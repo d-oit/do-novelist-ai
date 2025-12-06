@@ -7,7 +7,7 @@ import security from 'eslint-plugin-security';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   {
     ignores: [
       'dist/**',
@@ -470,4 +470,4 @@ export default [
       '@typescript-eslint/ban-ts-comment': 'off',
     },
   },
-];
+);

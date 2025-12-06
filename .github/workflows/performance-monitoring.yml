@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -37,7 +37,7 @@ jobs:
           version: 9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -46,7 +46,7 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build for analysis
-        run: npm run analyze
+        run: pnpm run analyze
 
       - name: Analyze bundle size
         id: bundle-analysis
@@ -146,7 +146,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -154,7 +154,7 @@ jobs:
           version: 9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -163,16 +163,16 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build application
-        run: npm run build
+        run: pnpm run build
 
       - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli@0.13.x
+        run: pnpm add -g @lhci/cli@0.13.x
 
       - name: Start preview server
         run: |
-          npm run preview &
+          pnpm run preview &
           # Wait for server to be ready
-          npx wait-on http://localhost:4173 --timeout 60000
+          pnpm exec wait-on http://localhost:4173 --timeout 60000
         env:
           NODE_ENV: production
 
@@ -195,7 +195,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -203,7 +203,7 @@ jobs:
           version: 9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -213,7 +213,7 @@ jobs:
 
       - name: Run accessibility tests
         run: |
-          npm run test -- --reporter=json --outputFile=accessibility-results.json src/test/accessibility-audit.test.ts
+          pnpm run test -- --reporter=json --outputFile=accessibility-results.json src/test/accessibility-audit.test.ts
 
       - name: Check accessibility compliance
         run: |
@@ -243,7 +243,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -251,7 +251,7 @@ jobs:
           version: 9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -260,11 +260,11 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Install Playwright browsers
-        run: npx playwright install ${{ matrix.browser }} --with-deps
+        run: pnpm exec playwright install ${{ matrix.browser }} --with-deps
 
       - name: Run performance E2E tests
         run: |
-          npm run test:e2e -- --project=${{ matrix.browser }} \
+          pnpm run test:e2e -- --project=${{ matrix.browser }} \
             tests/specs/debug.spec.ts --reporter=line
 
       - name: Upload cross-browser results
@@ -282,13 +282,13 @@ jobs:
 
     steps:
       - name: Checkout base branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.base_ref }}
           path: base
 
       - name: Checkout PR branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: pr
 
@@ -298,7 +298,7 @@ jobs:
           version: 9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
 
