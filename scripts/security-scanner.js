@@ -87,7 +87,7 @@ class SecurityScanner {
           'warning',
         );
       }
-    } catch (error) {
+    } catch {
       // audit-ci might not find vulnerabilities or might fail, that's okay
       this.log('audit-ci check completed', 'info');
     }
@@ -143,7 +143,7 @@ class SecurityScanner {
           message: 'Add .env to .gitignore to prevent accidental credential commits',
         });
       }
-    } catch (error) {
+    } catch {
       // .gitignore doesn't exist
       recommendations.push({
         category: 'security',
@@ -160,7 +160,7 @@ class SecurityScanner {
           message: 'Avoid using HTTP proxies in production - use HTTPS only',
         });
       }
-    } catch (error) {
+    } catch {
       // Package.json not found or invalid
     }
 

@@ -318,7 +318,6 @@ export default defineConfig(({ mode }) => {
         },
       },
       target: 'esnext',
-      chunkSizeWarningLimit: 300, // More aggressive chunk size limit
       cssCodeSplit: true,
       minify: 'terser',
       terserOptions: {
