@@ -16,7 +16,9 @@ async function globalSetup(config: FullConfig): Promise<void> {
     throw new Error('No test projects configured');
   }
 
-  console.log(`🎯 Configured projects: ${config.projects.map(p => p.name).join(', ')}`);
+  console.log(
+    `🎯 Configured projects: ${config.projects.map((p: { name: string }) => p.name).join(', ')}`,
+  );
   console.log('✅ Test environment setup complete');
 }
 

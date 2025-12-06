@@ -1,0 +1,376 @@
+name: Performance Monitoring & Bundle Analysis
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run performance analysis weekly
+    - cron: "0 2 * * 1" # Every Monday at 2 AM UTC
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  bundle-analysis:
+    name: Bundle Size Analysis & Monitoring
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build for analysis
+        run: npm run analyze
+
+      - name: Analyze bundle size
+        id: bundle-analysis
+        run: |
+          # Extract bundle sizes and create analysis
+          echo "Analyzing bundle output..."
+
+          # Get main bundle size
+          MAIN_SIZE=$(find dist/assets -name 'index-*.js' -type f -exec stat -f%z {} \; 2>/dev/null || \
+            find dist/assets -name 'index-*.js' -type f -exec stat -c%s {} \;)
+          MAIN_SIZE_KB=$((MAIN_SIZE / 1024))
+
+          # Get total dist size
+          TOTAL_SIZE=$(du -sb dist | cut -f1)
+          TOTAL_SIZE_KB=$((TOTAL_SIZE / 1024))
+
+          # Count chunks
+          CHUNK_COUNT=$(find dist/assets -name '*.js' -type f | wc -l)
+
+          {
+            echo "main_size_kb=$MAIN_SIZE_KB"
+            echo "total_size_kb=$TOTAL_SIZE_KB"
+            echo "chunk_count=$CHUNK_COUNT"
+          } >> "$GITHUB_OUTPUT"
+
+          # Create bundle report
+          cat > bundle-report.md << EOF
+          # 📦 Bundle Analysis Report
+
+          | Metric | Value | Status |
+          |--------|-------|--------|
+          | Main Bundle Size | ${MAIN_SIZE_KB}KB | $([ "$MAIN_SIZE_KB" -lt 200 ] &&
+            echo "✅ Good" || echo "⚠️ Large") |
+          | Total Build Size | ${TOTAL_SIZE_KB}KB | $([ "$TOTAL_SIZE_KB" -lt 2000 ] &&
+            echo "✅ Good" || echo "⚠️ Large") |
+          | Chunk Count | ${CHUNK_COUNT} | $([ "$CHUNK_COUNT" -gt 5 ] &&
+            echo "✅ Well Split" || echo "ℹ️ Consider splitting") |
+
+          ## 📊 Detailed Analysis
+
+          \`\`\`
+          $(find dist/assets -type f \( -name '*.js' -o -name '*.css' \) -exec ls -lah {} \; | head -20)
+          \`\`\`
+
+          ## 🎯 Performance Targets
+          - Main bundle: < 200KB ✓
+          - Total size: < 2MB ✓
+          - Chunks: 5-20 for optimal caching ✓
+          EOF
+
+      - name: Upload bundle analysis artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis-${{ github.sha }}
+          path: |
+            dist/stats.html
+            bundle-report.md
+            dist/assets/
+          retention-days: 30
+
+      - name: Bundle size check
+        run: |
+          MAIN_KB=${{ steps.bundle-analysis.outputs.main_size_kb }}
+          TOTAL_KB=${{ steps.bundle-analysis.outputs.total_size_kb }}
+
+          if [ "$MAIN_KB" -gt 300 ]; then
+            echo "❌ Main bundle too large: ${MAIN_KB}KB > 300KB"
+            exit 1
+          fi
+
+          if [ "$TOTAL_KB" -gt 3000 ]; then
+            echo "❌ Total build too large: ${TOTAL_KB}KB > 3MB"
+            exit 1
+          fi
+
+          echo "✅ Bundle sizes within acceptable limits"
+
+      - name: Comment bundle analysis on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('bundle-report.md', 'utf8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+  performance-tests:
+    name: Performance & Core Web Vitals
+    runs-on: ubuntu-latest
+    needs: bundle-analysis
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build application
+        run: npm run build
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: Start preview server
+        run: |
+          npm run preview &
+          # Wait for server to be ready
+          npx wait-on http://localhost:4173 --timeout 60000
+        env:
+          NODE_ENV: production
+
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-results-${{ github.sha }}
+          path: .lighthouseci/
+          retention-days: 30
+
+  accessibility-audit:
+    name: Accessibility Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Run accessibility tests
+        run: |
+          npm run test -- --reporter=json --outputFile=accessibility-results.json src/test/accessibility-audit.test.ts
+
+      - name: Check accessibility compliance
+        run: |
+          # Check if there are any accessibility violations
+          if grep -q '"violations":' accessibility-results.json && \
+             ! grep -q '"violations":[]' accessibility-results.json; then
+            echo "❌ Accessibility violations found"
+            exit 1
+          fi
+          echo "✅ No accessibility violations detected"
+
+      - name: Upload accessibility results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-results-${{ github.sha }}
+          path: accessibility-results.json
+          retention-days: 30
+
+  cross-browser-performance:
+    name: Cross-Browser Performance Check
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Install Playwright browsers
+        run: npx playwright install ${{ matrix.browser }} --with-deps
+
+      - name: Run performance E2E tests
+        run: |
+          npm run test:e2e -- --project=${{ matrix.browser }} \
+            tests/specs/debug.spec.ts --reporter=line
+
+      - name: Upload cross-browser results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cross-browser-perf-${{ matrix.browser }}-${{ github.sha }}
+          path: test-results/
+          retention-days: 30
+
+  performance-regression-check:
+    name: Performance Regression Analysis
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          path: pr
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build base branch
+        run: |
+          cd base
+          pnpm install --frozen-lockfile
+          pnpm run build
+          BASE_SIZE=$(du -sb dist | cut -f1)
+          echo "BASE_SIZE=$BASE_SIZE" >> "$GITHUB_ENV"
+
+      - name: Build PR branch
+        run: |
+          cd pr
+          pnpm install --frozen-lockfile
+          pnpm run build
+          PR_SIZE=$(du -sb dist | cut -f1)
+          echo "PR_SIZE=$PR_SIZE" >> "$GITHUB_ENV"
+
+      - name: Calculate size difference
+        id: size-diff
+        run: |
+          SIZE_DIFF=$((PR_SIZE - BASE_SIZE))
+          SIZE_DIFF_PERCENT=$(echo "scale=2; $SIZE_DIFF * 100.0 / $BASE_SIZE" | bc)
+
+          {
+            echo "size_diff=$SIZE_DIFF"
+            echo "size_diff_percent=$SIZE_DIFF_PERCENT"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment size difference
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sizeDiff = ${{ steps.size-diff.outputs.size_diff }};
+            const sizeDiffPercent = ${{ steps.size-diff.outputs.size_diff_percent }};
+            const baseSize = ${{ env.BASE_SIZE }};
+            const prSize = ${{ env.PR_SIZE }};
+
+            const formatBytes = (bytes) => {
+              if (bytes === 0) return '0 B';
+              const k = 1024;
+              const sizes = ['B', 'KB', 'MB'];
+              const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));
+              return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            };
+
+            const icon = sizeDiff > 0 ? '📈' : sizeDiff < 0 ? '📉' : '📊';
+            const status = Math.abs(sizeDiffPercent) > 10 ? '⚠️' : '✅';
+
+            const comment = `${icon} **Bundle Size Impact Analysis**
+
+            | Metric | Base | PR | Change |
+            |--------|------|----|---------|
+            | Total Size | ${formatBytes(baseSize)} | ${formatBytes(prSize)} |
+            ${sizeDiff >= 0 ? '+' : ''}${formatBytes(sizeDiff)}
+            (${sizeDiffPercent >= 0 ? '+' : ''}${sizeDiffPercent}%) |
+
+            ${status} **Status:** ${Math.abs(sizeDiffPercent) > 10 ?
+              'Significant size change detected' : 'Size change within acceptable range'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Fail on significant size increase
+        run: |
+          if (( $(echo "${{ steps.size-diff.outputs.size_diff_percent }} > 20" | bc -l) )); then
+            echo "❌ Bundle size increased by more than 20%"
+            exit 1
+          fi

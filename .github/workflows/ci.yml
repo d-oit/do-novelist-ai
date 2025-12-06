@@ -249,7 +249,7 @@ jobs:
               echo "❌ Tests failed or timed out"
               echo "📊 Collecting debug information..."
               echo "🐍 Browser processes:"
-              ps aux | grep -E "(chromium|firefox|webkit)" ||
+              pgrep -fa "(chromium|firefox|webkit)" ||
               echo "No browser processes found"
               echo "💾 Disk space:"
               df -h

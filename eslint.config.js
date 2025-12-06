@@ -1,12 +1,11 @@
 import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import security from 'eslint-plugin-security';
 import prettierConfig from 'eslint-config-prettier';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginReactRefresh from 'eslint-plugin-react-refresh';
+import security from 'eslint-plugin-security';
 import globals from 'globals';
-import pluginCss from '@eslint/css';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
@@ -34,6 +33,23 @@ export default tseslint.config(
       'src/index.css', // Exclude Tailwind CSS files with @apply directives
     ],
   },
+
+  // Configuration files that need CommonJS/Node.js globals
+  {
+    files: ['**/*.cjs', 'lighthouserc.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        module: 'readonly',
+        require: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-undef': 'off',
+    },
+  },
+
   js.configs.recommended,
   // Disable type-aware linting for performance
   ...tseslint.configs.recommended,
@@ -177,8 +193,7 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
   // Configuration for test files

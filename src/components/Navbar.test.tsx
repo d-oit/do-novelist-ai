@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import Navbar from './Navbar';
 
@@ -34,6 +34,6 @@ describe('Navbar', () => {
   it('highlights the current view', () => {
     render(<Navbar {...defaultProps} />);
     const dashboardLink = screen.getByTestId('nav-dashboard');
-    expect(dashboardLink).toHaveClass('bg-primary/20 text-primary-foreground');
+    expect(dashboardLink).toHaveClass('bg-primary text-primary-foreground');
   });
 });

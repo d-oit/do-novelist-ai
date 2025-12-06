@@ -90,7 +90,10 @@
       "Bash(for file in tests/specs/*.spec.ts)",
       "Bash(done)",
       "Bash(xargs cat:*)",
-      "WebFetch(domain:platform.claude.com)"
+      "WebFetch(domain:platform.claude.com)",
+      "Bash(pnpm run lint:ci:*)",
+      "Bash(grep:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

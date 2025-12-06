@@ -9,10 +9,10 @@ export default defineConfig({
   expect: { timeout: 5000 },
 
   // Critical: Execution strategy for context isolation
-  fullyParallel: true,
+  fullyParallel: false, // Disable for cross-browser stability
   forbidOnly: process.env.CI ? true : false,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: process.env.CI ? 2 : 1,
+  workers: process.env.CI ? 1 : 2, // Limit workers for cross-browser testing
 
   // Production reporting with strategic diagnostics
   reporter: [['html'], ['json', { outputFile: 'test-results/results.json' }]],

@@ -191,19 +191,78 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom'],
-            'vendor-ui': [
-              'framer-motion',
-              'lucide-react',
-              'class-variance-authority',
-              'clsx',
-              'tailwind-merge',
-            ],
-            'vendor-charts': ['recharts'],
-            'vendor-ai': ['@google/genai'],
-            'vendor-db': ['@libsql/client'],
-            'vendor-utils': ['zod', 'zustand', 'jszip'],
+          manualChunks(id) {
+            // React ecosystem
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+              return 'vendor-react';
+            }
+
+            // AI-related dependencies
+            if (
+              id.includes('@google/genai') ||
+              id.includes('@ai-sdk') ||
+              id.includes('node_modules/ai')
+            ) {
+              return 'vendor-ai';
+            }
+
+            // Chart libraries
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+
+            // Database and storage
+            if (id.includes('@libsql/client') || id.includes('node_modules/libsql')) {
+              return 'vendor-db';
+            }
+
+            // Animation library (large, can be lazy loaded)
+            if (id.includes('framer-motion')) {
+              return 'vendor-animation';
+            }
+
+            // UI utilities (small, always needed)
+            if (
+              id.includes('lucide-react') ||
+              id.includes('class-variance-authority') ||
+              id.includes('clsx') ||
+              id.includes('tailwind-merge')
+            ) {
+              return 'vendor-ui';
+            }
+
+            // Utility libraries
+            if (id.includes('zod') || id.includes('zustand') || id.includes('jszip')) {
+              return 'vendor-utils';
+            }
+
+            // Large feature chunks - split by major features
+            if (id.includes('src/features/analytics')) {
+              return 'feature-analytics';
+            }
+
+            if (id.includes('src/features/editor') || id.includes('src/features/generation')) {
+              return 'feature-editor';
+            }
+
+            if (id.includes('src/features/publishing')) {
+              return 'feature-publishing';
+            }
+
+            if (
+              id.includes('src/features/world-building') ||
+              id.includes('src/features/characters')
+            ) {
+              return 'feature-world';
+            }
+
+            // All other node_modules
+            if (id.includes('node_modules')) {
+              return 'vendor-misc';
+            }
+
+            // Return undefined for application code to go into main bundle
+            return undefined;
           },
           // Optimize chunk file names for better caching
           chunkFileNames: 'assets/[name]-[hash].js',
@@ -211,7 +270,7 @@ export default defineConfig(({ mode }) => {
         },
       },
       target: 'esnext',
-      chunkSizeWarningLimit: 500,
+      chunkSizeWarningLimit: 300, // More aggressive chunk size limit
       cssCodeSplit: true,
       minify: 'terser',
       terserOptions: {
