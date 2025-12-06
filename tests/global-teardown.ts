@@ -60,7 +60,7 @@ function globalTeardown(config: FullConfig): void {
         workers: config.workers,
         retries: (config as ConfigWithRetries).retries,
         timeout: (config as ConfigWithRetries).timeout,
-        projects: config.projects?.map(p => p.name) || [],
+        projects: config.projects?.map((p: { name: string }) => p.name) || [],
       },
       directories: {
         screenshots: 'test-results/screenshots',
@@ -88,7 +88,7 @@ function globalTeardown(config: FullConfig): void {
       const countFiles = (dir: string): number => {
         try {
           const files = fs.readdirSync(dir, { withFileTypes: true });
-          return files.reduce((count, file) => {
+          return files.reduce((count: number, file: fs.Dirent) => {
             const fullPath = path.join(dir, file.name);
             if (file.isDirectory()) {
               return count + countFiles(fullPath);

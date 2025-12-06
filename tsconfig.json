@@ -4,22 +4,15 @@
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
     "module": "ESNext",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
-    "types": [
-      "node",
-      "@testing-library/jest-dom"
-    ],
+    "types": ["node", "@testing-library/jest-dom", "playwright"],
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
     "allowJs": true,
     "jsx": "react-jsx",
-    
+
     /* Enhanced Type Checking */
     "strict": true,
     "noImplicitReturns": true,
@@ -65,16 +58,6 @@
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": false
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "coverage"
-  ]
+  "include": ["src/**/*", "tests/**/*", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist", "build", "coverage"]
 }
