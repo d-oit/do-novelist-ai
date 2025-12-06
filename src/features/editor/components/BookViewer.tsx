@@ -169,6 +169,24 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
       actions,
     ]);
 
+    // Save version function - moved before useEffect that uses it
+    const saveVersion = useCallback(
+      (type: 'manual' | 'auto' | 'ai-generated' | 'restore' = 'manual', message?: string): void => {
+        if (!selectedChapter) return;
+
+        const currentChapter: Chapter = {
+          ...selectedChapter,
+          summary: state.summary,
+          content: state.content,
+        };
+
+        versioning.saveVersion(currentChapter, message, type).catch(error => {
+          console.error('Failed to save version:', error);
+        });
+      },
+      [selectedChapter, state.summary, state.content, versioning],
+    );
+
     // Auto-save logic
     useEffect(() => {
       if (
@@ -204,24 +222,6 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
       selectedChapter,
       saveVersion,
     ]);
-
-    // Save version function - moved before useEffect that uses it
-    const saveVersion = useCallback(
-      (type: 'manual' | 'auto' | 'ai-generated' | 'restore' = 'manual', message?: string): void => {
-        if (!selectedChapter) return;
-
-        const currentChapter: Chapter = {
-          ...selectedChapter,
-          summary: state.summary,
-          content: state.content,
-        };
-
-        versioning.saveVersion(currentChapter, message, type).catch(error => {
-          console.error('Failed to save version:', error);
-        });
-      },
-      [selectedChapter, state.summary, state.content, versioning],
-    );
 
     // Save on unmount/change chapter
     useEffect((): (() => void) => {
