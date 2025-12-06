@@ -211,7 +211,7 @@ jobs:
           } > deployment-summary.md
 
       - name: Upload deployment artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: staging-deployment-${{ github.sha }}
           path: deployment-summary.md
@@ -268,7 +268,7 @@ jobs:
           } > deployment-summary.md
 
       - name: Upload deployment artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: production-deployment-${{ github.sha }}
           path: deployment-summary.md
@@ -339,7 +339,7 @@ jobs:
           } > rollback-summary.md
 
       - name: Upload rollback artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rollback-${{ github.sha }}
           path: rollback-summary.md
