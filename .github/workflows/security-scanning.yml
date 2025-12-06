@@ -108,16 +108,18 @@ jobs:
       - name: CodeQL Security Summary
         if: always()
         run: |
-          echo "## [SEARCH] CodeQL Security Analysis Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Analysis completed for commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "Scan level: ${{ needs.preflight-security.outputs.scan_level }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f codeql/sarif-results.sarif ]; then
-            echo "[OK] CodeQL analysis completed successfully" >> $GITHUB_STEP_SUMMARY
-          else
-            echo " CodeQL analysis completed - no results file generated" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## [SEARCH] CodeQL Security Analysis Results"
+            echo ""
+            echo "Analysis completed for commit: ${{ github.sha }}"
+            echo "Scan level: ${{ needs.preflight-security.outputs.scan_level }}"
+            echo ""
+            if [ -f codeql/sarif-results.sarif ]; then
+              echo "[OK] CodeQL analysis completed successfully"
+            else
+              echo " CodeQL analysis completed - no results file generated"
+            fi
+          } >> $GITHUB_STEP_SUMMARY
 
   dependency-security-scan:
     name: Dependency Security Analysis
