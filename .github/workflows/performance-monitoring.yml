@@ -63,9 +63,11 @@ jobs:
           # Count chunks
           CHUNK_COUNT=$(ls dist/assets/*.js | wc -l)
 
-          echo "main_size_kb=$MAIN_SIZE_KB" >> $GITHUB_OUTPUT
-          echo "total_size_kb=$TOTAL_SIZE_KB" >> $GITHUB_OUTPUT
-          echo "chunk_count=$CHUNK_COUNT" >> $GITHUB_OUTPUT
+          {
+            echo "main_size_kb=$MAIN_SIZE_KB"
+            echo "total_size_kb=$TOTAL_SIZE_KB"
+            echo "chunk_count=$CHUNK_COUNT"
+          } >> "$GITHUB_OUTPUT"
 
           # Create bundle report
           cat > bundle-report.md << EOF
@@ -102,12 +104,12 @@ jobs:
 
       - name: Bundle size check
         run: |
-          if [ ${{ steps.bundle-analysis.outputs.main_size_kb }} -gt 300 ]; then
+          if [ "${{ steps.bundle-analysis.outputs.main_size_kb }}" -gt 300 ]; then
             echo "❌ Main bundle too large: ${{ steps.bundle-analysis.outputs.main_size_kb }}KB > 300KB"
             exit 1
           fi
 
-          if [ ${{ steps.bundle-analysis.outputs.total_size_kb }} -gt 3000 ]; then
+          if [ "${{ steps.bundle-analysis.outputs.total_size_kb }}" -gt 3000 ]; then
             echo "❌ Total build too large: ${{ steps.bundle-analysis.outputs.total_size_kb }}KB > 3MB"
             exit 1
           fi
