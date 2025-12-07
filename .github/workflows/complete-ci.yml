@@ -408,7 +408,7 @@ jobs:
 
           # Run Lighthouse (if config exists)
           if [ -f "lighthouserc.js" ]; then
-            lhci autorun --config=lighthouserc.js
+            lhci autorun --config=lighthouserc.cjs --config=lighthouserc.js
           else
             echo "ℹ️ No Lighthouse config found, skipping"
           fi
