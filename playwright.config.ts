@@ -9,16 +9,16 @@ export default defineConfig({
   testDir: './tests/specs',
   testMatch: '**/*.spec.ts',
 
-  // Timeout settings optimized for React applications
-  timeout: 30000,
-  expect: { timeout: 5000 },
+  // Timeout settings optimized for CI vs local environments
+  timeout: process.env.CI ? 30000 : 60000,
+  expect: { timeout: process.env.CI ? 5000 : 10000 },
 
-  // Execution strategy for stability with CI optimization
-  fullyParallel: false,
+  // Execution strategy optimized for parallel CI execution
+  fullyParallel: true,
   forbidOnly: process.env.CI ? true : false,
   retries: process.env.CI ? 2 : 1,
-  workers: process.env.CI ? 1 : 2,
-  shard: process.env.CI ? (process.env.GITHUB_SHA ? undefined : undefined) : undefined,
+  workers: process.env.CI ? 4 : 2,
+  shard: process.env.CI ? { current: 1, total: 3 } : undefined,
 
   // Production reporting with comprehensive test result generation
   reporter: [

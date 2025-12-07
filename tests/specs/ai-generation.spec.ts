@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { performanceMonitor } from '../utils/performance-monitor';
 
 /**
  * Check if an element exists and is visible without throwing.
@@ -18,7 +19,13 @@ async function isElementVisible(page: Page, selector: string): Promise<boolean> 
 }
 
 test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
+  test.beforeAll(async () => {
+    // Start performance monitoring for the test suite
+    performanceMonitor.startTestSuite('AI Generation E2E Tests');
+  });
+
   test.beforeEach(async ({ page }) => {
+    performanceMonitor.startTimer('Test Setup');
     // Capture console logs
     page.on('console', msg => console.log(`[Browser Console]: ${msg.text()}`));
 
@@ -38,9 +45,10 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
     // Setup AI mocks
     await setupGeminiMock(page);
 
-    // Navigate to home page and wait for app to be ready
+    // Navigate to home page and wait for app to be ready with optimized waiting
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    // Use specific element wait instead of networkidle for better performance
+    await expect(page.getByRole('navigation')).toBeVisible();
     await page.setViewportSize({ width: 1280, height: 720 });
 
     // Use role-based wait instead of hardcoded timeout
@@ -49,6 +57,9 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
   });
 
   test.afterEach(async ({ page }) => {
+    performanceMonitor.endTimer('Test Setup');
+    performanceMonitor.startTimer('Test Cleanup');
+
     // Comprehensive cleanup after each test
     await page.unroute('**/*');
     await page.evaluate(() => {
@@ -62,6 +73,20 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
     });
     await page.context().clearCookies();
     await page.goto('about:blank');
+
+    performanceMonitor.endTimer('Test Cleanup');
+  });
+
+  test.afterAll(async () => {
+    // End performance monitoring and report results
+    performanceMonitor.endTestSuite('AI Generation E2E Tests');
+    performanceMonitor.reportMetrics();
+
+    // Validate performance targets
+    const { passed } = performanceMonitor.validatePerformanceTargets();
+    if (!passed) {
+      console.warn('⚠️ Some performance targets were missed');
+    }
   });
 
   test('should access dashboard via navigation', async ({ page }) => {

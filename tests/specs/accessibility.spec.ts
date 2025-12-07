@@ -279,8 +279,8 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
         await expect(newProjectButton.first()).toBeVisible({ timeout: 3000 });
         await newProjectButton.first().click();
 
-        // Wait for navigation and content to load
-        await page.waitForLoadState('networkidle');
+        // Wait for navigation and content to load with optimized waiting
+        await expect(page.getByRole('main')).toBeVisible();
 
         // Check that new content doesn't introduce accessibility issues
         const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
@@ -327,7 +327,7 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
         await page.setViewportSize(viewport);
 
         // Wait for layout to stabilize after viewport change
-        await page.waitForLoadState('networkidle');
+        await expect(page.getByRole('main')).toBeVisible();
 
         // Run accessibility scan for each viewport
         const accessibilityScanResults = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();

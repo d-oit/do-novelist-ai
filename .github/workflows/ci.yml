@@ -138,7 +138,7 @@ jobs:
   e2e-tests:
     name: 🧪 E2E Tests [Shard ${{ matrix.shard }}/3]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     needs: build-and-test
     strategy:
       fail-fast: false
@@ -204,12 +204,13 @@ jobs:
             ~/.cache/ms-playwright/firefox-*
             ~/.cache/ms-playwright/webkit-*
           key: >-
-            ${{ runner.os }}-playwright-browsers-${{
+            ${{ runner.os }}-playwright-browsers-v1-${{
               hashFiles('**/pnpm-lock.yaml', 'package.json')
-            }}-${{ matrix.shard }}
+            }}
           restore-keys: |
-            ${{ runner.os }}-playwright-browsers-${{
-              hashFiles('**/pnpm-lock.yaml', 'package.json') }}-
+            ${{ runner.os }}-playwright-browsers-v1-${{
+              hashFiles('**/pnpm-lock.yaml', 'package.json') }}
+            ${{ runner.os }}-playwright-browsers-v1-
             ${{ runner.os }}-playwright-browsers-
 
       - name: Install dependencies
@@ -256,10 +257,9 @@ jobs:
           export NODE_ENV=test
           export GITHUB_SHA=${{ github.sha }}
 
-          # Run tests with automatic retries and better error reporting
-          timeout 2400 pnpm exec playwright test \
+          # Run tests with optimized performance settings
+          timeout 900 pnpm exec playwright test \
             --shard=${{ matrix.shard }}/3 \
-            --workers=1 \
             --reporter=list,junit,json \
             --output=test-results \
             --max-failures=5 \

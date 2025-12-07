@@ -13,9 +13,10 @@ export interface TestFixtures {
   page: Page;
 }
 
-// Basic utility functions (existing)
+// Basic utility functions (optimized for performance)
 export async function waitForAppReady(page: Page): Promise<void> {
-  await page.waitForLoadState('networkidle');
+  // Use specific element wait instead of networkidle for better performance
+  await expect(page.getByRole('navigation')).toBeVisible({ timeout: 10000 });
   await expect(page.getByTestId('nav-dashboard')).toBeVisible();
 }
 
@@ -33,10 +34,11 @@ export async function navigateToDashboard(page: Page): Promise<void> {
 export class ReactTestHelpers {
   /**
    * Wait for React application to be fully hydrated
-   * Checks for DOM readiness and app content availability
+   * Checks for DOM readiness and app content availability with optimized performance
    */
   static async waitForReactHydration(page: Page): Promise<void> {
-    await page.waitForLoadState('networkidle');
+    // Use specific element wait instead of networkidle for better performance
+    await expect(page.getByRole('navigation')).toBeVisible({ timeout: 10000 });
 
     // Wait for DOM to be ready and no loading indicators
     await page.waitForFunction(
@@ -47,7 +49,7 @@ export class ReactTestHelpers {
           !document.querySelector('[aria-busy="true"]')
         );
       },
-      { timeout: 15000 },
+      { timeout: 10000 },
     );
   }
 
@@ -225,11 +227,12 @@ export class NavigationHelpers {
   }
 
   /**
-   * Wait for navigation to complete
+   * Wait for navigation to complete with optimized performance
    */
   static async waitForNavigation(page: Page): Promise<void> {
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Additional delay for state updates
+    // Use specific element wait instead of networkidle for better performance
+    await expect(page.getByRole('main')).toBeVisible({ timeout: 5000 });
+    await page.waitForTimeout(200); // Reduced delay for state updates
   }
 }
 
