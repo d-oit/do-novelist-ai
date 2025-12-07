@@ -1,4 +1,4 @@
-import { Play, Activity, Users, Zap, BrainCircuit } from 'lucide-react';
+import { Play, ArrowLeftRight, Users, Zap, BrainCircuit } from 'lucide-react';
 import React, { useCallback } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -17,7 +17,7 @@ const ModeIcon = ({ mode }: { mode: AgentMode }): React.ReactElement => {
     case AgentMode.SINGLE:
       return <Zap className='h-4 w-4 text-primary' />;
     case AgentMode.PARALLEL:
-      return <Activity className='h-4 w-4 text-primary' />;
+      return <ArrowLeftRight className='h-4 w-4 text-primary' />;
     case AgentMode.HYBRID:
       return <Users className='h-4 w-4 text-primary' />;
     case AgentMode.SWARM:
