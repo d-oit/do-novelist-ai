@@ -100,7 +100,7 @@ class SecurityScanner {
 
     try {
       const licenseResult = execSync(
-        'npx license-checker --json --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0;MPL-2.0"',
+        'npx license-checker --json --excludePrivatePackages --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0;MPL-2.0"',
         { encoding: 'utf8' },
       );
       const licenseData = JSON.parse(licenseResult);
