@@ -127,7 +127,7 @@ jobs:
           EOF
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: production-build-${{ github.sha }}
           path: dist/
@@ -285,7 +285,7 @@ jobs:
 
       - name: Upload Playwright artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: playwright-report-shard-${{ matrix.shard }}-${{ github.sha }}
           path: |
@@ -295,7 +295,7 @@ jobs:
 
       - name: Upload test results summary
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-summary-shard-${{ matrix.shard }}-${{ github.sha }}
           path: |

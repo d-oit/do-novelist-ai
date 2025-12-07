@@ -259,7 +259,7 @@ jobs:
           } > fuzzing-results.md
 
       - name: Upload fuzzing artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: fuzzing-results-${{ github.sha }}
@@ -401,7 +401,7 @@ jobs:
           timeout 1800 stryker run || echo "Mutation testing timeout reached"
 
       - name: Upload mutation results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: mutation-results-${{ github.sha }}
@@ -482,7 +482,7 @@ jobs:
             }
 
       - name: Upload comprehensive report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: comprehensive-fuzzing-report-${{ github.sha }}
           path: comprehensive-fuzzing-report.md
