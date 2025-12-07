@@ -119,7 +119,7 @@ jobs:
             else
               echo " CodeQL analysis completed - no results file generated"
             fi
-          } >> $GITHUB_STEP_SUMMARY
+          } >> "$GITHUB_STEP_SUMMARY"
 
   dependency-security-scan:
     name: Dependency Security Analysis
@@ -261,10 +261,10 @@ jobs:
             --json > license-report.json
 
           # Count packages by license
-          echo "[STATS] License distribution:" >> $GITHUB_STEP_SUMMARY
+          echo "[STATS] License distribution:" >> "$GITHUB_STEP_SUMMARY"
           cat license-report.json | \
             jq -r 'to_entries | group_by(.value.licenses) | map({license: .[0].key, count: length})' 2>/dev/null \
-            >> $GITHUB_STEP_SUMMARY
+            >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload license report
         uses: actions/upload-artifact@v4
@@ -395,7 +395,7 @@ jobs:
       - name: Security check summary
         run: |
           if [ -f security-summary.md ]; then
-            cat security-summary.md >> $GITHUB_STEP_SUMMARY
+            cat security-summary.md >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Fail on critical security issues
