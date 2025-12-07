@@ -12,15 +12,8 @@ import {
   enhancePlot,
   polishDialogue,
 } from '../../../lib/ai';
-import type {
-  Project,
-  AgentAction,
-  LogEntry,
-  Chapter,
-  RefineOptions,
-  WorldState,
-} from '../../../types';
-import { AgentMode, ChapterStatus } from '../../../types';
+import type { Project, AgentAction, LogEntry, Chapter, RefineOptions, WorldState } from '@/types';
+import { AgentMode, ChapterStatus } from '@/types';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {

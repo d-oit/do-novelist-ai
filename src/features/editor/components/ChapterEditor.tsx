@@ -18,7 +18,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import type { Project, Chapter, RefineOptions } from '../../../types';
+import type { Project, Chapter, RefineOptions } from '@/types';
 import { WritingAssistantPanel } from '../../writing-assistant';
 
 interface ChapterEditorProps {

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import type { Project } from '../../../types';
+import type { Project } from '@/types';
 import { useAnalytics } from '../hooks/useAnalytics';
 
 import GoalsProgress from './GoalsProgress';

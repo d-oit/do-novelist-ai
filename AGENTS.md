@@ -1,5 +1,8 @@
 # AGENTS.md - Coding Guidelines for Novelist.ai
 
+Important: All plan,report,summary,proposal,design, etc. documents in plans/
+folder.
+
 ## Build/Lint/Test Commands
 
 - **Build**: `npm run build` (Vite production build)

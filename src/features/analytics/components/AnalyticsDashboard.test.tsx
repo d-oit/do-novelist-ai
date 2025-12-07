@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import type { Project } from '../../../types';
-import { ChapterStatus, PublishStatus } from '../../../types';
+import { ChapterStatus, PublishStatus } from '@/shared/types';
+import type { Project } from '@/shared/types';
 import { useAnalytics } from '../hooks/useAnalytics';
 
 import AnalyticsDashboard from './AnalyticsDashboard';

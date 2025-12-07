@@ -3,8 +3,8 @@ import { createClient } from '@libsql/client/web';
 import type { Project, ProjectSettings, WorldState, WritingStyle } from '@shared/types';
 import { ChapterStatus, PublishStatus } from '@shared/types';
 import { parseChapterStatus, parsePublishStatus } from '../../../shared/utils/validation';
-import { isLanguage } from '../../../types/guards';
-import { ProjectSchema } from '../../../types/schemas';
+import { isLanguage } from '@/types/guards';
+import { ProjectSchema } from '@/types/schemas';
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';

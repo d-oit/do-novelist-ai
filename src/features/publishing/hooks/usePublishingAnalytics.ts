@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { usePublishingStore } from '../../../lib/stores/publishingStore';
-import type { Project } from '../../../types';
+import type { Project } from '@/types';
 import { publishingAnalyticsService } from '../services/publishingAnalyticsService';
 import type {
   EngagementMetrics,

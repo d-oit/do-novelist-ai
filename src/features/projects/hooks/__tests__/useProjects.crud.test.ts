@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { type Project, type Language } from '../../../../types';
-import { PublishStatus } from '../../../../types';
+import { type Project, type Language } from '@/types';
+import { PublishStatus } from '@/types';
 import { projectService } from '../../services/projectService';
 import { type ProjectCreationData, type ProjectUpdateData } from '../../types';
 import { useProjects } from '../useProjects';

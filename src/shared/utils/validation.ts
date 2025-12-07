@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { ChapterStatus, PublishStatus } from '../../types';
+import { ChapterStatus, PublishStatus } from '@/types';
 
 // Maximum input lengths (OWASP recommendations)
 export const MAX_TITLE_LENGTH = 200;

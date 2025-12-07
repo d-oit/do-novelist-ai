@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 import { generateCoverImage } from '../../../lib/ai';
-import type { Project } from '../../../types';
+import type { Project } from '@/types';
 
 interface CoverGeneratorProps {
   project: Project;

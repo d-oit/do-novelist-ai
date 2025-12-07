@@ -17,8 +17,8 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { cn, iconButtonTarget } from '../../../lib/utils';
-import type { Project } from '../../../types';
-import { ChapterStatus } from '../../../types';
+import type { Project } from '@/types';
+import { ChapterStatus } from '@/types';
 import { usePublishingAnalytics } from '../hooks/usePublishingAnalytics';
 import type { PublishingPlatform, Publication } from '../types';
 

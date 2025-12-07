@@ -1,5 +1,5 @@
 import { createChapter } from '../../../shared/utils';
-import type { Chapter } from '../../../types';
+import type { Chapter } from '@/types';
 import type { ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
 
 class VersioningService {

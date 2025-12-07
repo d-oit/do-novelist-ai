@@ -7,7 +7,7 @@ import { Settings } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 
 import type { GoapEngine } from '../features/editor/hooks/useGoapEngine';
-import type { Project, Chapter, RefineOptions } from '../types';
+import type { Project, Chapter, RefineOptions } from '@/shared/types';
 
 import ActionCard from './ActionCard';
 import AgentConsole from './AgentConsole';

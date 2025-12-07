@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import type { Project } from '../../../types';
+import type { Project } from '@/types';
 import { usePublishingAnalytics } from '../hooks/usePublishingAnalytics';
 
 import { AlertsSection } from './AlertsSection';

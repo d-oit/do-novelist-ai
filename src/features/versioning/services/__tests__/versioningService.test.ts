@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { createChapter } from '../../../../shared/utils';
-import type { Chapter } from '../../../../types';
-import { ChapterStatus } from '../../../../types';
+import type { Chapter } from '@/types';
+import { ChapterStatus } from '@/types';
 import type { Version } from '../../types';
 import { versioningService } from '../versioningService';
 

@@ -22,8 +22,8 @@ export interface ChapterVersion extends Version {
   status: ChapterStatus;
 }
 
-import type { ChapterStatus } from '../../../types';
-import type { WorldState, ProjectSettings } from '../../../types/schemas';
+import type { ChapterStatus } from '@/types';
+import type { WorldState, ProjectSettings } from '@/types/schemas';
 
 export interface ProjectVersion extends Version {
   projectId: string;

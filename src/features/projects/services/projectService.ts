@@ -4,8 +4,8 @@
  * Handles project persistence using the database abstraction layer
  */
 
-import { PublishStatus } from '../../../types';
-import { type Project, type Language } from '../../../types';
+import { PublishStatus } from '@/types';
+import { type Project, type Language } from '@/types';
 import { type ProjectCreationData, type ProjectUpdateData } from '../types';
 import { db } from '../../../lib/db';
 

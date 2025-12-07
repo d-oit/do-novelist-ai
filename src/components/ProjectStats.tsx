@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-import type { Project } from '../types';
-import { PublishStatus } from '../shared/types';
+import { PublishStatus } from '@/shared/types';
+import type { Project } from '@/shared/types';
 
 interface ProjectStatsProps {
   project: Project;

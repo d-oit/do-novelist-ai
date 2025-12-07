@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 
-import { WritingStyleSchema } from '../../../types';
+import { WritingStyleSchema } from '@/types';
 
 /**
  * Project creation wizard step
@@ -54,7 +54,7 @@ export type ProjectCreationData = z.infer<typeof ProjectCreationSchema>;
 /**
  * Project update data
  */
-import { type WritingStyle, type PublishStatus } from '../../../types';
+import { type WritingStyle, type PublishStatus } from '@/types';
 
 export interface ProjectUpdateData {
   title?: string;

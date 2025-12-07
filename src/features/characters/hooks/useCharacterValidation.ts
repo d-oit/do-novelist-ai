@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { characterValidationService } from '../../../lib/character-validation';
-import { type Character } from '../../../types/character-schemas';
+import { type Character } from '@/types/character-schemas';
 import { type CharacterValidationResult } from '../types';
 
 export function useCharacterValidation(character: Character | null): CharacterValidationResult & {

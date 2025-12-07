@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import { PublishStatus } from '../../../../types';
+import { PublishStatus } from '@/types';
 import { type ProjectCreationData, type ProjectUpdateData } from '../../types';
 import { projectService } from '../projectService';
 

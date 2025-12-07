@@ -7,8 +7,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import { ChapterStatus, PublishStatus } from '../../../types';
-import { type Project } from '../../../types';
+import { ChapterStatus, PublishStatus } from '@/types';
+import { type Project } from '@/types';
 import { projectService } from '../services/projectService';
 import {
   type ProjectFilters,
