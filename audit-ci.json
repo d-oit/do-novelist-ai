@@ -4,7 +4,7 @@
   "high": false,
   "critical": false,
   "allowlist": [],
-  "report-type": "all",
+  "report-type": "full",
   "output-format": "json",
   "timeout": 120000,
   "no-retry": false,

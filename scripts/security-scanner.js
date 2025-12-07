@@ -13,6 +13,7 @@ class SecurityScanner {
     this.results = {
       vulnerabilities: [],
       licenses: [],
+      licenseIssues: 0,
       recommendations: [],
       errors: [],
     };
@@ -110,14 +111,17 @@ class SecurityScanner {
         package: pkg,
         license: licenseData[pkg].licenses,
       }));
+      this.results.licenseIssues = 0;
 
       this.log(`Found ${licenses.length} packages with allowed licenses`, 'success');
     } catch (error) {
+      // license-checker exits with error when disallowed licenses are found
       this.log('License check failed - some packages may have incompatible licenses', 'warning');
+      this.results.licenseIssues = 1;
       this.results.errors.push(`License check: ${error.message}`);
     }
 
-    return this.results.licenses.length > 0;
+    return this.results.licenseIssues === 0;
   }
 
   async checkBestPractices() {
@@ -175,7 +179,8 @@ class SecurityScanner {
       timestamp: new Date().toISOString(),
       summary: {
         vulnerabilities: this.results.vulnerabilities.reduce((sum, v) => sum + (v.count || 0), 0),
-        licenseIssues: this.results.licenses.length,
+        licensedPackages: this.results.licenses.length,
+        licenseIssues: this.results.licenseIssues || 0,
         recommendations: this.results.recommendations.length,
         errors: this.results.errors.length,
       },
@@ -217,6 +222,7 @@ class SecurityScanner {
     console.log('\n📋 Security Scan Summary');
     console.log('='.repeat(50));
     console.log(`Vulnerabilities: ${report.summary.vulnerabilities}`);
+    console.log(`Licensed Packages: ${report.summary.licensedPackages}`);
     console.log(`License Issues: ${report.summary.licenseIssues}`);
     console.log(`Recommendations: ${report.summary.recommendations}`);
     console.log(`Errors: ${report.summary.errors}`);
@@ -224,7 +230,7 @@ class SecurityScanner {
     if (
       report.summary.vulnerabilities === 0 &&
       report.summary.licenseIssues === 0 &&
-      report.summary.errors.length === 0
+      report.summary.errors === 0
     ) {
       console.log('\n✅ Security scan passed - no critical issues found!');
       process.exit(0);
