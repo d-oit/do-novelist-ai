@@ -1,6 +1,6 @@
 import type { AgentAction } from '@shared/types';
 import { AgentMode } from '@shared/types';
-import { Play, Activity, Users, Zap, BrainCircuit } from 'lucide-react';
+import { Play, ArrowLeftRight, Users, Zap, BrainCircuit } from 'lucide-react';
 import React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -16,7 +16,7 @@ const ModeIcon = ({ mode }: { mode: AgentMode }): React.ReactElement => {
     case AgentMode.SINGLE:
       return <Zap className='h-4 w-4 text-blue-400' />;
     case AgentMode.PARALLEL:
-      return <Activity className='h-4 w-4 text-green-400' />;
+      return <ArrowLeftRight className='h-4 w-4 text-green-400' />;
     case AgentMode.HYBRID:
       return <BrainCircuit className='h-4 w-4 text-purple-400' />;
     case AgentMode.SWARM:
