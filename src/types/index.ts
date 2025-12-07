@@ -27,8 +27,7 @@ export type {
   PublishingExport,
 } from '../features/publishing/types';
 
-// Type aliases for backward compatibility
-export type { EngagementMetrics as PublishingAnalytics } from '../features/publishing/types';
+// PublishingAnalytics is already exported from publishing/types as an interface
 
 // Use enum types from root types.ts for consistency
 export { AgentMode, ChapterStatus, PublishStatus } from '../shared/types';

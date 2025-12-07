@@ -51,8 +51,9 @@ class ProjectService {
     await this.init();
 
     const now = Date.now();
+    const projectId = crypto.randomUUID();
     const project: Project = {
-      id: crypto.randomUUID(),
+      id: projectId,
       title: data.title,
       idea: data.idea,
       style: data.style,
@@ -102,7 +103,7 @@ class ProjectService {
       changeLog: [],
       timeline: {
         id: crypto.randomUUID(),
-        projectId: crypto.randomUUID(), // Will be updated with project ID if needed, but project.id is already set above
+        projectId: projectId,
         events: [],
         eras: [],
         settings: {

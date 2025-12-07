@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import type { Project, TimelineEvent } from '@/types';
+import type { Project, TimelineEvent } from '../../../types/schemas';
 import { useTimelineStore } from '../stores/timelineStore';
 import { TimelineCanvas } from './TimelineCanvas';
 import { Button } from '@/components/ui/Button';
