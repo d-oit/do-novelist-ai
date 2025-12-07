@@ -126,6 +126,18 @@ async function runComprehensiveScan(): Promise<void> {
           },
           version: '1.0.0',
           changeLog: [],
+          timeline: {
+            id: 'test-timeline',
+            projectId: 'test',
+            events: [],
+            eras: [],
+            settings: {
+              viewMode: 'chronological',
+              zoomLevel: 1,
+              showCharacters: true,
+              showImplicitEvents: false,
+            },
+          },
         },
         currentAction: null,
       }),

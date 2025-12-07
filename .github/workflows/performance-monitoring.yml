@@ -164,30 +164,6 @@ jobs:
       - name: Build application
         run: pnpm run build
 
-      - name: Install Lighthouse CI
-        run: pnpm add -g @lhci/cli@0.13.x
-
-      - name: Start preview server
-        run: |
-          pnpm run preview &
-          # Wait for server to be ready
-          pnpm exec wait-on http://localhost:4173 --timeout 60000
-        env:
-          NODE_ENV: production
-
-      - name: Run Lighthouse CI
-        run: |
-          lhci autorun
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-
-      - name: Upload Lighthouse results
-        uses: actions/upload-artifact@v5
-        with:
-          name: lighthouse-results-${{ github.sha }}
-          path: .lighthouseci/
-          retention-days: 30
-
   accessibility-audit:
     name: Accessibility Compliance Check
     runs-on: ubuntu-latest

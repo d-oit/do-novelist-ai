@@ -272,6 +272,18 @@ export const db = {
               illustration: undefined,
             };
           }),
+          timeline: {
+            id: crypto.randomUUID(),
+            projectId: pRow.id,
+            events: [],
+            eras: [],
+            settings: {
+              viewMode: 'chronological',
+              zoomLevel: 1,
+              showCharacters: true,
+              showImplicitEvents: false,
+            },
+          },
         };
         // Validate the loaded project data
         const validationResult = ProjectSchema.safeParse(loadedProject);

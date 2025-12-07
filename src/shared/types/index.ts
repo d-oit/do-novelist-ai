@@ -139,6 +139,43 @@ export interface Project {
     changes: string[];
     timestamp: Date;
   }[];
+  // Timeline
+  timeline: Timeline;
+}
+
+export interface TimelineEvent {
+  id: string;
+  title: string;
+  description: string;
+  chronologicalIndex: number; // Absolute time order key
+  date?: string; // Narrative date (e.g. "Year 2045", "October 12")
+  relatedChapterId?: string; // Link to narrative
+  charactersInvolved: string[];
+  locationId?: string;
+  tags: string[]; // e.g., "Flashback", "Climax"
+  importance: 'major' | 'minor' | 'background';
+}
+
+export interface TimelineEra {
+  id: string;
+  name: string;
+  startRange: number; // chronologicalIndex start
+  endRange: number; // chronologicalIndex end
+  description?: string;
+  color?: string;
+}
+
+export interface Timeline {
+  id: string;
+  projectId: string;
+  events: TimelineEvent[];
+  eras: TimelineEra[];
+  settings: {
+    viewMode: 'chronological' | 'narrative';
+    zoomLevel: number;
+    showCharacters: boolean;
+    showImplicitEvents: boolean;
+  };
 }
 
 export interface AgentAction {

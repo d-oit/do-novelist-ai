@@ -378,6 +378,18 @@ describe('Schema Validation Tests', () => {
         },
         version: '1.0.0',
         changeLog: [],
+        timeline: {
+          id: '550e8400-e29b-41d4-a716-446655440003',
+          projectId: 'proj_1234567890',
+          events: [],
+          eras: [],
+          settings: {
+            viewMode: 'chronological',
+            zoomLevel: 1,
+            showCharacters: true,
+            showImplicitEvents: false,
+          },
+        },
       };
     });
 

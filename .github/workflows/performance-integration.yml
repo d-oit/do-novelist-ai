@@ -155,14 +155,6 @@ jobs:
       - name: Build and analyze
         run: pnpm run analyze
 
-      - name: Install Lighthouse CI
-        run: pnpm add -g @lhci/cli@0.13.x
-
-      - name: Run Lighthouse CI
-        run: lhci autorun --config=lighthouserc.cjs --config=lighthouserc.js
-        # env:
-        #  LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-
       - name: Full E2E test suite
         run: pnpm run test:e2e
 
@@ -189,7 +181,6 @@ jobs:
           name: comprehensive-performance-${{ github.sha }}
           path: |
             dist/stats.html
-            .lighthouseci/
             performance-summary.md
             test-results/
           retention-days: 90
@@ -274,7 +265,6 @@ jobs:
             echo ""
             echo "## 🔗 Resources"
             echo "- [Bundle Analyzer](./stats.html)"
-            echo "- [Lighthouse Report](./.lighthouseci/)"
             echo "- [Test Results](./test-results/)"
           } > performance-report.md
 

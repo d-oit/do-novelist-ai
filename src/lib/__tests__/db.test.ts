@@ -140,6 +140,18 @@ describe('Database Library', () => {
       },
       version: '1.0.0',
       changeLog: [],
+      timeline: {
+        id: 'test-timeline',
+        projectId: 'p1',
+        events: [],
+        eras: [],
+        settings: {
+          viewMode: 'chronological',
+          zoomLevel: 1,
+          showCharacters: true,
+          showImplicitEvents: false,
+        },
+      },
       chapters: [
         createChapter({
           id: 'c1',

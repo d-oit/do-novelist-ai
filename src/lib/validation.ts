@@ -108,6 +108,18 @@ export class ValidationService {
             timestamp: now,
           },
         ],
+        timeline: {
+          id: crypto.randomUUID(),
+          projectId: projectId,
+          events: [],
+          eras: [],
+          settings: {
+            viewMode: 'chronological',
+            zoomLevel: 1,
+            showCharacters: true,
+            showImplicitEvents: false,
+          },
+        },
       };
 
       // Validate the complete project

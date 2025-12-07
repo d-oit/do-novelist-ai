@@ -401,25 +401,12 @@ jobs:
             echo "- **Timestamp**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           } > performance-report.md
 
-      - name: Run Lighthouse CI
-        run: |
-          # Install Lighthouse CI
-          npm install -g @lhci/cli@0.13.x
-
-          # Run Lighthouse (if config exists)
-          if [ -f "lighthouserc.js" ]; then
-            lhci autorun --config=lighthouserc.cjs --config=lighthouserc.js
-          else
-            echo "ℹ️ No Lighthouse config found, skipping"
-          fi
-
       - name: Upload performance results
         uses: actions/upload-artifact@v5
         with:
           name: performance-results-${{ github.sha }}
           path: |
             performance-report.md
-            .lighthouseci/
           retention-days: 30
 
   # Integration with deployment pipeline

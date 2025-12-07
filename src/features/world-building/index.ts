@@ -11,8 +11,6 @@ export type {
   WorldElementType,
   Location,
   Culture,
-  Timeline,
-  TimelineEvent,
   LoreEntry,
   WorldBuildingProject,
   WorldBuildingFilters,

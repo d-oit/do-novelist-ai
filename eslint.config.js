@@ -48,7 +48,7 @@ export default tseslint.config(
 
   // Configuration files that need CommonJS/Node.js globals
   {
-    files: ['**/*.cjs', 'lighthouserc.js'],
+    files: ['**/*.cjs'],
     languageOptions: {
       globals: {
         ...globals.node,

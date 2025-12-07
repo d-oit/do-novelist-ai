@@ -60,6 +60,18 @@ const createMockProject = (overrides: Partial<Project> = {}): Project => ({
   },
   version: '1.0.0',
   changeLog: [],
+  timeline: {
+    id: crypto.randomUUID(),
+    projectId: '',
+    events: [],
+    eras: [],
+    settings: {
+      viewMode: 'chronological',
+      zoomLevel: 1,
+      showCharacters: true,
+      showImplicitEvents: false,
+    },
+  },
   ...overrides,
 });
 

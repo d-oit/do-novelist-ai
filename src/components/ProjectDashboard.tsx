@@ -1,6 +1,7 @@
 import { Settings } from 'lucide-react';
 import React, { useCallback } from 'react';
 
+import { cn } from '../lib/utils';
 import BookViewer from '../features/editor/components/BookViewerRefactored';
 import type { GoapEngine } from '../features/editor/hooks/useGoapEngine';
 import type { AgentAction } from '../types/schemas';
@@ -11,6 +12,8 @@ import AgentConsole from './AgentConsole';
 import GoapVisualizer from './GoapVisualizer';
 import PlannerControl from './PlannerControl';
 import ProjectStats from './ProjectStats';
+
+import { TimelineView } from '../features/timeline/components/TimelineView';
 
 interface ProjectDashboardProps {
   project: Project;
@@ -62,6 +65,11 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = React.memo(
       },
       [engine],
     );
+
+    const [activeTab, setActiveTab] = React.useState<'editor' | 'timeline'>('editor');
+
+    // Import dynamically or normally. Since we are inside the component, simple state is fine.
+
     return (
       <div
         data-testid='project-dashboard'
@@ -111,18 +119,52 @@ const ProjectDashboard: React.FC<ProjectDashboardProps> = React.memo(
           </div>
         </div>
 
-        {/* Right Column: Book Viewer */}
+        {/* Right Column: Book Viewer or Timeline */}
         <div className='flex min-h-[600px] w-full flex-col md:w-2/3'>
-          <BookViewer
-            project={project}
-            selectedChapterId={selectedChapterId}
-            onSelectChapter={onSelectChapter}
-            onRefineChapter={handleRefineChapter}
-            onUpdateChapter={onUpdateChapter}
-            onUpdateProject={onUpdateProject}
-            onAddChapter={onAddChapter}
-            onContinueChapter={handleContinueChapter}
-          />
+          {/* Tab Navigation */}
+          <div className='mb-4 flex w-fit items-center gap-1 rounded-lg bg-muted/30 p-1'>
+            <button
+              onClick={() => setActiveTab('editor')}
+              className={cn(
+                'rounded-md px-4 py-1.5 text-sm font-medium transition-colors',
+                activeTab === 'editor'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              Editor
+            </button>
+            <button
+              onClick={() => setActiveTab('timeline')}
+              className={cn(
+                'rounded-md px-4 py-1.5 text-sm font-medium transition-colors',
+                activeTab === 'timeline'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              Timeline
+            </button>
+          </div>
+
+          <div className='min-h-0 flex-1'>
+            {activeTab === 'editor' ? (
+              <BookViewer
+                project={project}
+                selectedChapterId={selectedChapterId}
+                onSelectChapter={onSelectChapter}
+                onRefineChapter={handleRefineChapter}
+                onUpdateChapter={onUpdateChapter}
+                onUpdateProject={onUpdateProject}
+                onAddChapter={onAddChapter}
+                onContinueChapter={handleContinueChapter}
+              />
+            ) : (
+              <div className='h-[800px]'>
+                <TimelineView project={project} onUpdateProject={onUpdateProject} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );

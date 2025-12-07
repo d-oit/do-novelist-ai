@@ -98,7 +98,20 @@ class ProjectService {
         editingRounds: 0,
       },
       version: '1.0.0',
+
       changeLog: [],
+      timeline: {
+        id: crypto.randomUUID(),
+        projectId: crypto.randomUUID(), // Will be updated with project ID if needed, but project.id is already set above
+        events: [],
+        eras: [],
+        settings: {
+          viewMode: 'chronological',
+          zoomLevel: 1,
+          showCharacters: true,
+          showImplicitEvents: false,
+        },
+      },
     };
 
     await db.saveProject(project);

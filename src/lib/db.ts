@@ -82,6 +82,7 @@ export const db = {
             language TEXT DEFAULT 'en',
             target_word_count INTEGER DEFAULT 50000,
             settings TEXT,
+            timeline TEXT,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
           )
         `);
@@ -106,6 +107,11 @@ export const db = {
         }
         try {
           await client.execute('ALTER TABLE projects ADD COLUMN settings TEXT');
+        } catch {
+          // Column already exists
+        }
+        try {
+          await client.execute('ALTER TABLE projects ADD COLUMN timeline TEXT');
         } catch {
           // Column already exists
         }
@@ -138,11 +144,11 @@ export const db = {
       try {
         // Upsert Project
         await client.execute({
-          sql: `INSERT INTO projects (id, title, idea, style, cover_image, world_state, status, language, target_word_count, settings, updated_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) 
+          sql: `INSERT INTO projects (id, title, idea, style, cover_image, world_state, status, language, target_word_count, settings, timeline, updated_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) 
                 ON CONFLICT(id) DO UPDATE SET 
                 title=excluded.title, idea=excluded.idea, style=excluded.style, cover_image=excluded.cover_image, world_state=excluded.world_state, 
-                status=excluded.status, language=excluded.language, target_word_count=excluded.target_word_count, settings=excluded.settings, updated_at=CURRENT_TIMESTAMP`,
+                status=excluded.status, language=excluded.language, target_word_count=excluded.target_word_count, settings=excluded.settings, timeline=excluded.timeline, updated_at=CURRENT_TIMESTAMP`,
           args: [
             project.id,
             project.title,
@@ -154,6 +160,7 @@ export const db = {
             project.language,
             project.targetWordCount,
             JSON.stringify(project.settings ?? {}),
+            JSON.stringify(project.timeline ?? {}),
           ],
         });
 
@@ -216,6 +223,23 @@ export const db = {
             ? (JSON.parse(s) as ProjectSettings)
             : ((s as ProjectSettings) ?? { enableDropCaps: true });
 
+        const t = (pRow as Record<string, unknown>).timeline;
+        const timelineParsed: Project['timeline'] =
+          typeof t === 'string'
+            ? JSON.parse(t)
+            : ((t as Project['timeline']) ?? {
+                id: crypto.randomUUID(),
+                projectId: (pRow.id as string) ?? '',
+                events: [],
+                eras: [],
+                settings: {
+                  viewMode: 'chronological',
+                  zoomLevel: 1,
+                  showCharacters: true,
+                  showImplicitEvents: false,
+                },
+              });
+
         const loadedProject: Project = {
           id: (pRow.id as string) ?? '',
           title: (pRow.title as string) ?? '',
@@ -239,6 +263,7 @@ export const db = {
           targetWordCount: (pRow.target_word_count as number) ?? 50000,
 
           settings: settingsParsed,
+          timeline: timelineParsed,
           chapters: cRes.rows.map(r => ({
             id: (r.id as string) ?? '',
             orderIndex: (r.order_index as number) ?? 0,
@@ -300,7 +325,20 @@ export const db = {
         status: p.status ?? PublishStatus.DRAFT,
         language: p.language ?? 'en',
         targetWordCount: p.targetWordCount ?? 50000,
+
         settings: p.settings ?? { enableDropCaps: true },
+        timeline: p.timeline ?? {
+          id: crypto.randomUUID(),
+          projectId: p.id,
+          events: [],
+          eras: [],
+          settings: {
+            viewMode: 'chronological',
+            zoomLevel: 1,
+            showCharacters: true,
+            showImplicitEvents: false,
+          },
+        },
         isGenerating: false,
       };
     }

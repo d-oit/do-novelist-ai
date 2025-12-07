@@ -58,6 +58,18 @@ const INITIAL_PROJECT: Project = {
   },
   version: '1.0.0',
   changeLog: [],
+  timeline: {
+    id: crypto.randomUUID(),
+    projectId: 'new_session',
+    events: [],
+    eras: [],
+    settings: {
+      viewMode: 'chronological',
+      zoomLevel: 1,
+      showCharacters: true,
+      showImplicitEvents: false,
+    },
+  },
 };
 
 type ViewMode = 'dashboard' | 'projects' | 'settings';

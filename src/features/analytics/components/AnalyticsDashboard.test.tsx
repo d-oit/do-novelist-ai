@@ -115,6 +115,18 @@ const mockProject: Project = {
   },
   version: '1.0.0',
   changeLog: [],
+  timeline: {
+    id: 'test-timeline',
+    projectId: 'test-project',
+    events: [],
+    eras: [],
+    settings: {
+      viewMode: 'chronological',
+      zoomLevel: 1,
+      showCharacters: true,
+      showImplicitEvents: false,
+    },
+  },
 };
 
 const mockAnalyticsData = {

@@ -191,6 +191,45 @@ export const LogEntrySchema = z.object({
 });
 
 // =============================================================================
+// TIMELINE SCHEMAS
+// =============================================================================
+
+export const TimelineEventSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  description: z.string().max(2000),
+  chronologicalIndex: z.number(),
+  date: z.string().optional(),
+  relatedChapterId: z.string().optional(),
+  charactersInvolved: z.array(z.string()).default([]),
+  locationId: z.string().optional(),
+  tags: z.array(z.string()).default([]),
+  importance: z.enum(['major', 'minor', 'background']).default('minor'),
+});
+
+export const TimelineEraSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  startRange: z.number(),
+  endRange: z.number(),
+  description: z.string().optional(),
+  color: z.string().optional(),
+});
+
+export const TimelineSchema = z.object({
+  id: z.string().uuid(),
+  projectId: z.string(), // We'll relax the regex validation here to avoid circular dependency issues or uuid vs proj_ mismatch
+  events: z.array(TimelineEventSchema).default([]),
+  eras: z.array(TimelineEraSchema).default([]),
+  settings: z.object({
+    viewMode: z.enum(['chronological', 'narrative']).default('chronological'),
+    zoomLevel: z.number().min(0.1).max(10).default(1),
+    showCharacters: z.boolean().default(true),
+    showImplicitEvents: z.boolean().default(false),
+  }),
+});
+
+// =============================================================================
 // PROJECT SCHEMA (Main Entity)
 // =============================================================================
 
@@ -266,6 +305,8 @@ export const ProjectSchema = z
         }),
       )
       .default([]),
+    // Timeline
+    timeline: TimelineSchema,
   })
   .refine(data => data.worldState.chaptersCount === data.chapters.length, {
     message: 'World state chapters count must match actual chapters length',
@@ -338,6 +379,9 @@ export type Chapter = z.infer<typeof ChapterSchema>;
 export type RefineOptions = z.infer<typeof RefineOptionsSchema>;
 export type AgentAction = z.infer<typeof AgentActionSchema>;
 export type LogEntry = z.infer<typeof LogEntrySchema>;
+export type TimelineEvent = z.infer<typeof TimelineEventSchema>;
+export type TimelineEra = z.infer<typeof TimelineEraSchema>;
+export type Timeline = z.infer<typeof TimelineSchema>;
 export type Project = z.infer<typeof ProjectSchema>;
 
 // Form types

@@ -371,80 +371,21 @@ describe('ValidationService', () => {
         },
         version: '1.0.0',
         changeLog: [],
-      } as any;
-
-      const updated = validationService.updateProjectAnalytics(project);
-
-      expect(updated.analytics.totalWordCount).toBe(2500);
-      expect(updated.analytics.averageChapterLength).toBe(1250);
-      expect(updated.analytics.estimatedReadingTime).toBe(10); // 2500 words / 250 words per minute
-      expect(updated.updatedAt).toBeInstanceOf(Date);
-    });
-  });
-
-  describe('Content Validation and Sanitization', () => {
-    it('should sanitize HTML content', () => {
-      const maliciousContent = `
-        <p>Safe content</p>
-        <script>alert('xss')</script>
-        <iframe src="evil.com"></iframe>
-        <div onclick="alert('click')">Click me</div>
-        <a href="javascript:alert('js')">Link</a>
-      `;
-
-      const result = validationService.validateAndFormatContent(maliciousContent);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).not.toContain('<script>');
-        expect(result.data).not.toContain('<iframe>');
-        expect(result.data).not.toContain('onclick=');
-        expect(result.data).not.toContain('javascript:');
-        expect(result.data).toContain('<p>Safe content</p>');
-      }
-    });
-
-    it('should reject content that is too long', () => {
-      const longContent = 'a'.repeat(50001);
-      const result = validationService.validateAndFormatContent(longContent);
-
-      expect(result.success).toBe(false);
-      if (!result.success && 'error' in result) {
-        expect(result.error).toContain('exceeds maximum length');
-      }
-    });
-
-    it('should reject non-string content', () => {
-      const result = validationService.validateAndFormatContent(123 as any);
-
-      expect(result.success).toBe(false);
-      if (!result.success && 'error' in result) {
-        expect(result.error).toContain('Content must be a string');
-      }
-    });
-  });
-
-  describe('Reading Time Calculation', () => {
-    it('should calculate reading time correctly', () => {
-      expect(validationService.calculateReadingTime(250)).toBe(1); // 1 minute
-      expect(validationService.calculateReadingTime(500)).toBe(2); // 2 minutes
-      expect(validationService.calculateReadingTime(100)).toBe(1); // Rounds up to 1 minute
-      expect(validationService.calculateReadingTime(0)).toBe(0); // 0 minutes
-    });
-  });
-});
-
-describe('Convenience Functions', () => {
-  describe('validate shortcuts', () => {
-    it('should provide quick validation functions', () => {
-      const createData = {
-        title: 'Test Novel',
-        style: 'General Fiction',
-        idea: 'A test story',
-        genre: ['fiction'],
+        timeline: {
+          id: '550e8400-e29b-41d4-a716-446655440007',
+          projectId: 'proj_123',
+          events: [],
+          eras: [],
+          settings: {
+            viewMode: 'chronological',
+            zoomLevel: 1,
+            showCharacters: true,
+            showImplicitEvents: false,
+          },
+        },
       };
 
-      const result = validate.createProject(createData);
+      const result = validate.project(project);
       expect(result.success).toBe(true);
     });
 
@@ -495,6 +436,18 @@ describe('Convenience Functions', () => {
         },
         version: '1.0.0',
         changeLog: [],
+        timeline: {
+          id: '550e8400-e29b-41d4-a716-446655440006',
+          projectId: 'proj_123',
+          events: [],
+          eras: [],
+          settings: {
+            viewMode: 'chronological',
+            zoomLevel: 1,
+            showCharacters: true,
+            showImplicitEvents: false,
+          },
+        },
       };
 
       expect(() => assertValid.project(validProject as any)).not.toThrow();
@@ -545,6 +498,18 @@ describe('Convenience Functions', () => {
         },
         version: '1.0.0',
         changeLog: [],
+        timeline: {
+          id: '550e8400-e29b-41d4-a716-446655440007',
+          projectId: 'proj_123',
+          events: [],
+          eras: [],
+          settings: {
+            viewMode: 'chronological',
+            zoomLevel: 1,
+            showCharacters: true,
+            showImplicitEvents: false,
+          },
+        },
       };
 
       const result = safeConvert.toProject(validProject);

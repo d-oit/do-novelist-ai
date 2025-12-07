@@ -2,7 +2,7 @@
  * Accessibility Audit Tests for Novelist.ai
  *
  * Basic accessibility testing for key application components
- * to achieve WCAG 2.1 AA compliance with Lighthouse score ≥90
+ * to achieve WCAG 2.1 AA compliance standards
  */
 
 import React from 'react';
@@ -159,6 +159,18 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
       },
       version: '1.0.0',
       changeLog: [],
+      timeline: {
+        id: 'test-timeline',
+        projectId: 'test-project',
+        events: [],
+        eras: [],
+        settings: {
+          viewMode: 'chronological' as const,
+          zoomLevel: 1,
+          showCharacters: true,
+          showImplicitEvents: false,
+        },
+      },
     };
 
     const { container } = render(
@@ -297,6 +309,18 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
         },
         version: '1.0.0',
         changeLog: [],
+        timeline: {
+          id: 'test-timeline',
+          projectId: 'test-project',
+          events: [],
+          eras: [],
+          settings: {
+            viewMode: 'chronological' as const,
+            zoomLevel: 1,
+            showCharacters: true,
+            showImplicitEvents: false,
+          },
+        },
       };
 
       const { container } = render(

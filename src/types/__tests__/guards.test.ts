@@ -88,6 +88,18 @@ describe('Type Guards Tests', () => {
         },
         version: '1.0.0',
         changeLog: [],
+        timeline: {
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          projectId: 'proj_123',
+          events: [],
+          eras: [],
+          settings: {
+            viewMode: 'chronological',
+            zoomLevel: 1,
+            showCharacters: true,
+            showImplicitEvents: false,
+          },
+        },
       };
 
       expect(isProject(validProject)).toBe(true);
@@ -299,6 +311,18 @@ describe('Type Guards Tests', () => {
           },
           version: '1.0.0',
           changeLog: [],
+          timeline: {
+            id: '550e8400-e29b-41d4-a716-446655440002',
+            projectId: 'proj_1',
+            events: [],
+            eras: [],
+            settings: {
+              viewMode: 'chronological',
+              zoomLevel: 1,
+              showCharacters: true,
+              showImplicitEvents: false,
+            },
+          },
         }),
       ];
 
