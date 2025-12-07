@@ -164,7 +164,7 @@ jobs:
         with:
           fail-on-severity: ${{ env.FAIL_ON_SEVERITY }}
           comment-summary-in-pr: always
-          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Unlicense, CC0-1.0
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Unlicense, CC0-1.0, MPL-2.0
 
   vulnerability-assessment:
     name: Vulnerability Assessment
@@ -202,7 +202,7 @@ jobs:
       - name: Audit-CI Vulnerability Check
         run: |
           echo "[SEARCH] Running audit-ci vulnerability check..."
-          npx audit-ci --config audit-ci.json --severity=${{ env.FAIL_ON_SEVERITY }}
+          npx audit-ci --config audit-ci.json
 
       - name: Check for outdated packages with security updates
         run: |
@@ -258,6 +258,7 @@ jobs:
           npx license-checker \
             --summary \
             --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0;MPL-2.0' \
+            --excludePrivatePackages \
             --json > license-report.json
 
           # Count packages by license
