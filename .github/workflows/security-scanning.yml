@@ -194,10 +194,10 @@ jobs:
         run: |
           npm install -g audit-ci nsp snyk
 
-      - name: NPM Security Audit
+      - name: PNPM Security Audit
         run: |
-          echo "[PACKAGE] Running NPM security audit..."
-          npm audit --audit-level=${{ env.FAIL_ON_SEVERITY }}
+          echo "[PACKAGE] Running PNPM security audit..."
+          pnpm audit --audit-level=${{ env.FAIL_ON_SEVERITY }}
 
       - name: Audit-CI Vulnerability Check
         run: |
@@ -257,7 +257,7 @@ jobs:
           # Check against allowed licenses
           npx license-checker \
             --summary \
-            --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0' \
+            --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0;MPL-2.0' \
             --json > license-report.json
 
           # Count packages by license

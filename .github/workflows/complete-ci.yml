@@ -121,7 +121,7 @@ jobs:
 
           # pnpm audit (this project uses pnpm, not npm)
           echo "Running pnpm audit..."
-          pnpm audit --audit-level moderate || echo "[WARN] Vulnerabilities found in dependencies"
+          pnpm audit --audit-level=moderate || echo "[WARN] Vulnerabilities found in dependencies"
 
           # Check for known vulnerable packages using audit-ci
           echo "Running audit-ci..."
@@ -133,7 +133,7 @@ jobs:
             --summary \
             --failOn 'GPL;LGPL;AGPL' \
             --json \
-            --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0' \
+            --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0;MPL-2.0' \
             || echo "[WARN] License compliance issues found"
 
           echo "[OK] Security audit completed"

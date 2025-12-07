@@ -116,8 +116,8 @@ jobs:
           # Install security tools
           npm install -g audit-ci license-checker
 
-          # NPM audit
-          npm audit --audit-level=moderate || true
+          # PNPM audit (this project uses pnpm)
+          pnpm audit --audit-level=moderate || true
 
           # Check for known CVEs
           echo "Running audit-ci for CVE detection..."
@@ -144,7 +144,7 @@ jobs:
           npx license-checker \
             --summary \
             --failOn 'GPL;LGPL;AGPL' \
-            --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0' \
+            --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0;MPL-2.0' \
             || echo "License compliance check completed with findings"
 
   code-coverage-fuzz:

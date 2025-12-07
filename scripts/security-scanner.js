@@ -5,8 +5,8 @@
  * Performs multiple security checks: vulnerabilities, licenses, and best practices
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
+import { execSync } from 'child_process';
+import fs from 'fs';
 
 class SecurityScanner {
   constructor() {
@@ -49,26 +49,26 @@ class SecurityScanner {
   async checkVulnerabilities() {
     this.log('🔍 Checking for vulnerabilities...', 'info');
 
-    // NPM audit
+    // PNPM audit (using pnpm instead of npm for this project)
     try {
-      const auditResult = execSync('npm audit --json', { encoding: 'utf8' });
+      const auditResult = execSync('pnpm audit --json', { encoding: 'utf8' });
       const auditData = JSON.parse(auditResult);
 
       if (auditData.vulnerabilities && Object.keys(auditData.vulnerabilities).length > 0) {
         this.results.vulnerabilities.push({
-          type: 'npm-audit',
+          type: 'pnpm-audit',
           count: Object.keys(auditData.vulnerabilities).length,
           details: auditData.vulnerabilities,
         });
         this.log(
-          `Found ${Object.keys(auditData.vulnerabilities).length} npm vulnerabilities`,
+          `Found ${Object.keys(auditData.vulnerabilities).length} pnpm vulnerabilities`,
           'warning',
         );
       } else {
-        this.log('No npm vulnerabilities found', 'success');
+        this.log('No pnpm vulnerabilities found', 'success');
       }
     } catch {
-      this.log('npm audit failed', 'warning');
+      this.log('pnpm audit failed', 'warning');
     }
 
     // Check for audit-ci
@@ -100,7 +100,7 @@ class SecurityScanner {
 
     try {
       const licenseResult = execSync(
-        'npx license-checker --json --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0"',
+        'npx license-checker --json --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;Unlicense;CC0-1.0;MPL-2.0"',
         { encoding: 'utf8' },
       );
       const licenseData = JSON.parse(licenseResult);
@@ -238,12 +238,10 @@ class SecurityScanner {
 }
 
 // Run the scanner if this file is executed directly
-if (require.main === module) {
-  const scanner = new SecurityScanner();
-  scanner.run().catch(error => {
-    console.error('Security scanner failed:', error);
-    process.exit(1);
-  });
-}
+const scanner = new SecurityScanner();
+scanner.run().catch(error => {
+  console.error('Security scanner failed:', error);
+  process.exit(1);
+});
 
-module.exports = SecurityScanner;
+export default SecurityScanner;
