@@ -42,19 +42,6 @@ jobs:
           node-version: "20"
           cache: "pnpm"
 
-      - name: Add pnpm to PATH
-        run: |
-          echo "PNPM_HOME=$HOME/.local/share/pnpm" >> "$GITHUB_ENV"
-          echo "PATH=$HOME/.local/share/pnpm:$PATH" >> "$GITHUB_ENV"
-
-      - name: Cache pnpm dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -86,11 +73,6 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-
-      - name: Add pnpm to PATH
-        run: |
-          echo "PNPM_HOME=$HOME/.local/share/pnpm" >> "$GITHUB_ENV"
-          echo "PATH=$HOME/.local/share/pnpm:$PATH" >> "$GITHUB_ENV"
 
       - name: Restore dependencies
         uses: actions/cache@v4
@@ -124,11 +106,6 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-
-      - name: Add pnpm to PATH
-        run: |
-          echo "PNPM_HOME=$HOME/.local/share/pnpm" >> "$GITHUB_ENV"
-          echo "PATH=$HOME/.local/share/pnpm:$PATH" >> "$GITHUB_ENV"
 
       - name: Restore dependencies
         uses: actions/cache@v4
@@ -169,11 +146,6 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-
-      - name: Add pnpm to PATH
-        run: |
-          echo "PNPM_HOME=$HOME/.local/share/pnpm" >> "$GITHUB_ENV"
-          echo "PATH=$HOME/.local/share/pnpm:$PATH" >> "$GITHUB_ENV"
 
       - name: Restore dependencies
         uses: actions/cache@v4
@@ -219,11 +191,6 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-
-      - name: Add pnpm to PATH
-        run: |
-          echo "PNPM_HOME=$HOME/.local/share/pnpm" >> "$GITHUB_ENV"
-          echo "PATH=$HOME/.local/share/pnpm:$PATH" >> "$GITHUB_ENV"
 
       - name: Restore dependencies
         uses: actions/cache@v4
