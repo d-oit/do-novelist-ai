@@ -99,7 +99,7 @@ jobs:
           EOF
 
       - name: Upload bundle analysis artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: bundle-analysis-${{ github.sha }}
           path: |
@@ -182,7 +182,7 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
       - name: Upload Lighthouse results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: lighthouse-results-${{ github.sha }}
           path: .lighthouseci/
@@ -225,7 +225,7 @@ jobs:
           echo "✅ No accessibility violations detected"
 
       - name: Upload accessibility results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: accessibility-results-${{ github.sha }}
@@ -270,7 +270,7 @@ jobs:
             tests/specs/debug.spec.ts --reporter=line
 
       - name: Upload cross-browser results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: cross-browser-perf-${{ matrix.browser }}-${{ github.sha }}

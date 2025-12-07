@@ -257,7 +257,7 @@ jobs:
           fi
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-artifacts-${{ github.sha }}
           path: |
@@ -334,7 +334,7 @@ jobs:
           echo "✅ E2E tests completed"
 
       - name: Upload E2E test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: e2e-test-results-${{ github.sha }}
@@ -414,7 +414,7 @@ jobs:
           fi
 
       - name: Upload performance results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: performance-results-${{ github.sha }}
           path: |
@@ -538,7 +538,7 @@ jobs:
           } > ci-cd-summary.md
 
       - name: Upload CI/CD summary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ci-cd-summary-${{ github.sha }}
           path: ci-cd-summary.md
