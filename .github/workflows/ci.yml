@@ -215,12 +215,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-       - name: Install Playwright browsers with system dependencies
-         run: |
-           # Always install Playwright browsers to ensure availability
-           # Cache should speed this up on subsequent runs
-           pnpm exec playwright install --with-deps chromium
-           echo "✅ Playwright browsers installed successfully"
+      - name: Install Playwright browsers with system dependencies
+        run: |
+          # Always install Playwright browsers to ensure availability
+          # Cache should speed this up on subsequent runs
+          pnpm exec playwright install --with-deps chromium
+          echo "✅ Playwright browsers installed successfully"
 
       - name: Verify Playwright installation
         run: |

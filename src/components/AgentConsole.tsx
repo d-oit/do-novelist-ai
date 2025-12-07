@@ -2,10 +2,20 @@ import { Terminal, CheckCircle2, AlertTriangle, Info, Brain } from 'lucide-react
 import React, { useEffect, useRef } from 'react';
 
 import { cn } from '../lib/utils';
-import type { LogEntry } from '../types';
+import type { LogEntry, ActionTraceStep, AgentDecision } from '../shared/types';
 
 interface AgentConsoleProps {
   logs: LogEntry[];
+  debugInfo?: {
+    decisions: AgentDecision[];
+    actionTraces: ActionTraceStep[];
+    performanceMetrics: {
+      totalDecisions: number;
+      averageDecisionTime: number;
+      successRate: number;
+      mostRejectedAction: string;
+    };
+  };
 }
 
 const LogIcon = React.memo<{ type: LogEntry['type'] }>(({ type }) => {

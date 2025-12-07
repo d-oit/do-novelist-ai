@@ -92,6 +92,10 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
       preconditions: {},
       effects: {},
       promptTemplate: 'Test prompt',
+      category: 'generation' as const,
+      estimatedDuration: 1000,
+      requiredPermissions: ['test'],
+      tags: ['test'],
     };
 
     const { container } = render(
@@ -373,6 +377,10 @@ export async function generateA11yReport(): Promise<void> {
           preconditions: {},
           effects: {},
           promptTemplate: 'Test',
+          category: 'generation' as const,
+          estimatedDuration: 1000,
+          requiredPermissions: ['test'],
+          tags: ['test'],
         },
         isActive: false,
         onClick: () => {},

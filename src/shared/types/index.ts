@@ -68,11 +68,11 @@ export interface WorldState {
   chaptersCompleted: number;
   styleDefined: boolean;
   isPublished: boolean;
-  hasCharacters?: boolean;
-  hasWorldBuilding?: boolean;
-  hasThemes?: boolean;
-  plotStructureDefined?: boolean;
-  targetAudienceDefined?: boolean;
+  hasCharacters: boolean;
+  hasWorldBuilding: boolean;
+  hasThemes: boolean;
+  plotStructureDefined: boolean;
+  targetAudienceDefined: boolean;
 }
 
 export interface ProjectSettings {
@@ -91,7 +91,22 @@ export interface Project {
   id: string;
   title: string;
   idea: string;
-  style: string;
+  style:
+    | 'General Fiction'
+    | 'Literary Fiction'
+    | 'Mystery & Thriller'
+    | 'Romance'
+    | 'Science Fiction'
+    | 'Fantasy'
+    | 'Horror'
+    | 'Historical Fiction'
+    | 'Young Adult'
+    | "Children's Literature"
+    | 'Non-Fiction'
+    | 'Biography & Memoir'
+    | 'Self-Help'
+    | 'Business & Economics'
+    | 'Technical Writing';
   coverImage?: string; // Base64 string from Imagen
   chapters: Chapter[];
   worldState: WorldState;
@@ -99,7 +114,7 @@ export interface Project {
 
   // Publishing Metadata
   status: PublishStatus;
-  language: string;
+  language: 'en' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ja' | 'ko' | 'zh';
   targetWordCount: number;
   settings: ProjectSettings;
 
@@ -187,6 +202,10 @@ export interface AgentAction {
   effects: Partial<WorldState>;
   agentMode: AgentMode;
   promptTemplate: string;
+  category: 'generation' | 'editing' | 'analysis' | 'publishing';
+  estimatedDuration: number; // milliseconds
+  requiredPermissions: string[];
+  tags: string[];
 }
 
 export interface LogEntry {
@@ -195,6 +214,67 @@ export interface LogEntry {
   agentName: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error' | 'thought';
+  // Enhanced logging for debugging
+  level?: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  context?: Record<string, unknown>;
+  duration?: number; // milliseconds
+  actionName?: string;
+  decisionReason?: string;
+  rejectedActions?: RejectedAction[];
+  preconditionFailures?: PreconditionFailure[];
+  actionTrace?: ActionTraceStep[];
+}
+
+export interface RejectedAction {
+  action: AgentAction;
+  reason: 'precondition_failed' | 'cost_too_high' | 'already_completed' | 'conflict';
+  details: string;
+  timestamp: Date;
+}
+
+export interface PreconditionFailure {
+  actionName: string;
+  precondition: string;
+  currentValue: unknown;
+  requiredValue: unknown;
+  timestamp: Date;
+}
+
+export interface ActionTraceStep {
+  step: number;
+  action: AgentAction;
+  timestamp: Date;
+  state: WorldState;
+  decision: 'selected' | 'rejected' | 'executed';
+  reason?: string;
+}
+
+export interface AgentDecision {
+  id: string;
+  timestamp: Date;
+  selectedAction: AgentAction | null;
+  rejectedActions: RejectedAction[];
+  preconditionFailures: PreconditionFailure[];
+  reasoning: string;
+  confidence: number; // 0-1
+  executionTime: number; // milliseconds
+}
+
+export interface GoapDebugInfo {
+  currentDecisions: AgentDecision[];
+  actionTraces: ActionTraceStep[];
+  performanceMetrics: {
+    totalDecisions: number;
+    averageDecisionTime: number;
+    successRate: number;
+    mostRejectedAction: string;
+  };
+  stateHistory: Array<{
+    timestamp: Date;
+    worldState: WorldState;
+    availableActions: AgentAction[];
+    selectedAction?: AgentAction;
+  }>;
 }
 
 export interface StatPoint {
@@ -203,8 +283,22 @@ export interface StatPoint {
 }
 
 export interface RefineOptions {
-  model: string;
+  model: 'gemini-2.5-flash' | 'gemini-2.0-flash-exp' | 'gemini-1.5-pro' | 'gemini-1.5-flash';
   temperature: number;
+  maxTokens: number;
+  topP: number;
+  focusAreas: (
+    | 'grammar'
+    | 'style'
+    | 'pacing'
+    | 'character_development'
+    | 'dialogue'
+    | 'description'
+    | 'plot_consistency'
+    | 'tone'
+  )[];
+  preserveLength: boolean;
+  targetTone?: 'formal' | 'casual' | 'dramatic' | 'humorous' | 'mysterious';
 }
 /**
  * Processed Action Types

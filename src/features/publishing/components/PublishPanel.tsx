@@ -22,6 +22,24 @@ interface PublishPanelProps {
   onUpdateChapter: (chapterId: string, updates: Partial<Chapter>) => void;
 }
 
+// Language mapping from full names to ISO codes
+const languageNameToCode = (
+  langName: string,
+): 'en' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ja' | 'ko' | 'zh' => {
+  const mapping: Record<string, 'en' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ja' | 'ko' | 'zh'> = {
+    English: 'en',
+    Spanish: 'es',
+    French: 'fr',
+    German: 'de',
+    Italian: 'it',
+    Portuguese: 'pt',
+    Japanese: 'ja',
+    Chinese: 'zh',
+    Russian: 'ko', // Using 'ko' for Russian as per the Project type definition
+  };
+  return mapping[langName] || 'en';
+};
+
 const PublishPanel: React.FC<PublishPanelProps> = ({
   project,
   onUpdateProject,
@@ -82,7 +100,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
 
     setIsTranslating(true);
     try {
-      onUpdateProject({ language: targetLang });
+      onUpdateProject({ language: languageNameToCode(targetLang) });
       for (const chapter of project.chapters) {
         if (chapter.content) {
           const translated = await translateContent(chapter.content, targetLang);
@@ -166,7 +184,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
                   data-testid='publish-language-select'
                   className='w-full rounded border border-border bg-secondary/20 px-3 py-2 text-xs focus:border-primary focus:outline-none'
                   value={currentLanguage}
-                  onChange={e => onUpdateProject({ language: e.target.value })}
+                  onChange={e => onUpdateProject({ language: languageNameToCode(e.target.value) })}
                 >
                   {LANGUAGES.map(l => (
                     <option key={l} value={l}>

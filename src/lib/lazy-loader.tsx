@@ -7,7 +7,7 @@ import {
 } from '../lib/lazy-components';
 
 // Import types for proper typing
-import type { Project, AgentAction } from '../types/schemas';
+import type { Project, AgentAction, RefineOptions } from '@/shared/types';
 
 // Lazy load heavy analytics components
 const AnalyticsDashboard = lazy(
@@ -47,7 +47,7 @@ interface LazyBookViewerProps {
   project: Project;
   selectedChapterId: string | null;
   onSelectChapter: (id: string) => void;
-  onRefineChapter: (chapterId: string, options: Record<string, unknown>) => void;
+  onRefineChapter: (chapterId: string, options: RefineOptions) => void;
   onUpdateChapter: (chapterId: string, updates: Partial<Project['chapters'][0]>) => void;
   onUpdateProject: (updates: Partial<Project>) => void;
   onAddChapter: () => void;

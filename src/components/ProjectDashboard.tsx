@@ -4,8 +4,8 @@ import React, { useCallback } from 'react';
 import { cn } from '../lib/utils';
 import BookViewer from '../features/editor/components/BookViewerRefactored';
 import type { GoapEngine } from '../features/editor/hooks/useGoapEngine';
-import type { AgentAction } from '../types/schemas';
-import type { Chapter, Project, RefineOptions } from '../types';
+import type { AgentAction } from '@/shared/types';
+import type { Chapter, Project, RefineOptions } from '@/shared/types';
 
 import ActionCard from './ActionCard';
 import AgentConsole from './AgentConsole';

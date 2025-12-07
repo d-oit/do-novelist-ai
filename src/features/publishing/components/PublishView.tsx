@@ -70,7 +70,21 @@ const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onU
 
     setIsTranslating(true);
     try {
-      onUpdateProject({ language: targetLang });
+      // Convert language name to code for Project type
+      const languageMap: Record<
+        string,
+        'en' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ja' | 'ko' | 'zh'
+      > = {
+        Spanish: 'es',
+        French: 'fr',
+        German: 'de',
+        Italian: 'it',
+        Portuguese: 'pt',
+        Japanese: 'ja',
+        Chinese: 'zh',
+        Russian: 'ko',
+      };
+      onUpdateProject({ language: languageMap[targetLang] });
       for (const chapter of project.chapters) {
         if (chapter.content) {
           const translated = await translateContent(chapter.content, targetLang);

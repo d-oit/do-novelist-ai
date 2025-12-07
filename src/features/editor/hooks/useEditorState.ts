@@ -1,6 +1,6 @@
 import { useReducer, useCallback } from 'react';
 
-import type { RefineOptions } from '../../../types';
+import type { RefineOptions } from '@/shared/types';
 import type { ChapterVersion } from '../../versioning/types';
 
 // State Interface
@@ -62,7 +62,7 @@ const initialState: EditorState = {
     temperature: 0.3,
     maxTokens: 2000,
     topP: 0.95,
-    focusAreas: [],
+    focusAreas: ['style'] as const,
     preserveLength: false,
   },
 };

@@ -2,8 +2,8 @@ import { Check, Circle, Loader2, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
-import type { Project, AgentAction } from '../types';
-import { PublishStatus } from '../shared/types';
+import type { Project, AgentAction } from '@/shared/types';
+import { PublishStatus } from '@/shared/types';
 
 interface GoapVisualizerProps {
   project: Project;

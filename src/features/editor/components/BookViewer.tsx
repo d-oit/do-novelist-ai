@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 
-import type { Project, Chapter, RefineOptions } from '../../../types/index';
-import { ChapterStatus } from '../../../types/index';
+import type { Project, Chapter, RefineOptions } from '@/shared/types';
+import { ChapterStatus } from '@/shared/types';
 import type { AIModel } from '../types';
 
 // ...

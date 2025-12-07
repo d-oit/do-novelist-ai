@@ -1,22 +1,99 @@
 import { Loader2, Settings } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 
 import Navbar from '../components/Navbar';
 import { ProjectsErrorBoundary } from '../components/error-boundary';
-import {
-  ActionCard,
-  AgentConsole,
-  BookViewer,
-  PlannerControl,
-} from '../features/generation/components';
+import { ActionCard, BookViewer, PlannerControl } from '../features/generation/components';
 import { useGoapEngine } from '../features/generation/hooks';
-import { ProjectStats, ProjectWizard, ProjectsView } from '../features/projects/components';
+import { ProjectStats, ProjectWizard } from '../features/projects/components';
 import { db } from '../features/projects/services';
-import { SettingsView } from '../features/settings/components';
-import type { Chapter, Project } from '../shared/types';
-import { ChapterStatus, PublishStatus } from '../shared/types';
+import type { Chapter, Project } from '@/shared/types';
+import { ChapterStatus, PublishStatus } from '@/shared/types';
 import { createChapter } from '../shared/utils';
-import type { RefineOptions } from '../types';
+import type { RefineOptions } from '@/shared/types';
+import { performanceMonitor } from '../utils/performance';
+
+// Lazy load heavy components for better performance
+const ProjectsView = lazy(() =>
+  import('../features/projects/components').then(module => ({ default: module.ProjectsView })),
+);
+const SettingsView = lazy(() =>
+  import('../features/settings/components').then(module => ({ default: module.SettingsView })),
+);
+const AgentConsole = lazy(() =>
+  import('../features/generation/components').then(module => ({ default: module.AgentConsole })),
+);
+
+// Loading components for Suspense boundaries
+const ProjectsLoader = () => (
+  <div className='flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background text-foreground'>
+    <Loader2 className='mb-4 h-8 w-8 animate-spin text-primary' />
+    <p className='text-muted-foreground'>Loading Projects...</p>
+  </div>
+);
+
+const SettingsLoader = () => (
+  <div className='flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background text-foreground'>
+    <Loader2 className='mb-4 h-8 w-8 animate-spin text-primary' />
+    <p className='text-muted-foreground'>Loading Settings...</p>
+  </div>
+);
+
+const ConsoleLoader = () => (
+  <div className='flex h-[300px] min-h-[300px] items-center justify-center rounded-lg border border-border bg-muted/20'>
+    <div className='flex items-center gap-2 text-muted-foreground'>
+      <Loader2 className='h-4 w-4 animate-spin' />
+      <span className='text-sm'>Loading Console...</span>
+    </div>
+  </div>
+);
+
+// Error boundary for lazy loading failures
+class LazyLoadErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback?: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): { hasError: boolean; error: Error } {
+    return { hasError: true, error };
+  }
+
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    console.error('Lazy loading error:', error, errorInfo);
+  }
+
+  override render(): React.ReactNode {
+    if (this.state.hasError) {
+      return (
+        this.props.fallback || (
+          <div className='flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background p-8 text-foreground'>
+            <div className='max-w-md text-center'>
+              <h2 className='mb-2 text-xl font-semibold text-destructive'>
+                Failed to Load Component
+              </h2>
+              <p className='mb-4 text-muted-foreground'>
+                {this.state.error?.message ||
+                  'An unexpected error occurred while loading this component.'}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className='rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90'
+              >
+                Reload Page
+              </button>
+            </div>
+          </div>
+        )
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // --- Initial Data ---
 
@@ -33,6 +110,11 @@ const INITIAL_PROJECT: Project = {
     chaptersCompleted: 0,
     styleDefined: false,
     isPublished: false,
+    hasCharacters: false,
+    hasWorldBuilding: false,
+    hasThemes: false,
+    plotStructureDefined: false,
+    targetAudienceDefined: false,
   },
   isGenerating: false,
   status: PublishStatus.DRAFT,
@@ -81,13 +163,25 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewMode>('projects');
   const [isLoading, setIsLoading] = useState(true);
 
+  // Track performance for view changes
+  useEffect(() => {
+    const timerName = `route-${currentView}`;
+    performanceMonitor.startTiming(timerName);
+
+    return () => {
+      performanceMonitor.endTiming(timerName);
+    };
+  }, [currentView]);
+
   // Initialize Engine Hook
   const engine = useGoapEngine(project, setProject, setSelectedChapterId);
 
   // App Initialization
   useEffect(() => {
     const initApp = async (): Promise<void> => {
+      performanceMonitor.startTiming('app-initialization');
       await db.init();
+      performanceMonitor.endTiming('app-initialization');
       setIsLoading(false);
     };
     void initApp();
@@ -115,7 +209,7 @@ const App: React.FC = () => {
       ...INITIAL_PROJECT,
       id: newId,
       title,
-      style,
+      style: style as Project['style'],
       idea,
       targetWordCount: targetWordCount || 50000,
       worldState: {
@@ -288,7 +382,11 @@ const App: React.FC = () => {
                 </div>
 
                 <div className='h-[300px] min-h-[300px]'>
-                  <AgentConsole logs={engine.logs} />
+                  <LazyLoadErrorBoundary>
+                    <Suspense fallback={<ConsoleLoader />}>
+                      <AgentConsole logs={engine.logs} />
+                    </Suspense>
+                  </LazyLoadErrorBoundary>
                 </div>
               </div>
             </div>
@@ -316,21 +414,29 @@ const App: React.FC = () => {
         {currentView === 'projects' && (
           <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
             <ProjectsErrorBoundary>
-              <ProjectsView
-                currentProject={project}
-                onNewProject={() => setShowWizard(true)}
-                onLoadProject={(id: string): void => {
-                  void handleLoadProject(id);
-                }}
-                onNavigate={setCurrentView}
-              />
+              <LazyLoadErrorBoundary>
+                <Suspense fallback={<ProjectsLoader />}>
+                  <ProjectsView
+                    currentProject={project}
+                    onNewProject={() => setShowWizard(true)}
+                    onLoadProject={(id: string): void => {
+                      void handleLoadProject(id);
+                    }}
+                    onNavigate={setCurrentView}
+                  />
+                </Suspense>
+              </LazyLoadErrorBoundary>
             </ProjectsErrorBoundary>
           </div>
         )}
 
         {currentView === 'settings' && (
           <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
-            <SettingsView />
+            <LazyLoadErrorBoundary>
+              <Suspense fallback={<SettingsLoader />}>
+                <SettingsView />
+              </Suspense>
+            </LazyLoadErrorBoundary>
           </div>
         )}
       </main>

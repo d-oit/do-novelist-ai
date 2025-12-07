@@ -11,7 +11,7 @@ import {
   analyzeConsistency,
   continueWriting,
 } from '@/lib/ai';
-import { type RefineOptions } from '@/types';
+import type { RefineOptions } from '@/shared/types';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {
@@ -24,6 +24,10 @@ const INITIAL_ACTIONS: AgentAction[] = [
     preconditions: { hasOutline: false },
     effects: { hasOutline: true },
     promptTemplate: '...',
+    category: 'generation',
+    estimatedDuration: 30000,
+    requiredPermissions: ['ai_generation'],
+    tags: ['outline', 'structure'],
   },
   {
     name: 'write_chapter_parallel',
@@ -34,6 +38,10 @@ const INITIAL_ACTIONS: AgentAction[] = [
     preconditions: { hasOutline: true },
     effects: { chaptersCompleted: 1 },
     promptTemplate: '...',
+    category: 'generation',
+    estimatedDuration: 60000,
+    requiredPermissions: ['ai_generation'],
+    tags: ['draft', 'writing'],
   },
   {
     name: 'editor_review',
@@ -44,6 +52,10 @@ const INITIAL_ACTIONS: AgentAction[] = [
     preconditions: { hasOutline: true },
     effects: {},
     promptTemplate: '...',
+    category: 'analysis',
+    estimatedDuration: 45000,
+    requiredPermissions: ['ai_analysis'],
+    tags: ['review', 'consistency'],
   },
 ];
 
