@@ -373,6 +373,12 @@ export async function checkProviderHealth(
 
   console.log(`[HealthService] Checking health of ${provider}...`);
 
+  // Ensure we have a valid API key for health checks
+  if (!config.gatewayApiKey) {
+    console.log(`[HealthService] Skipping ${provider} - no API key available`);
+    return;
+  }
+
   const modelName = providerConfig.models.fast; // Use fast model for health checks
   const result = await performHealthCheck(provider, modelName, config.gatewayApiKey);
 
