@@ -93,7 +93,9 @@
       "WebFetch(domain:platform.claude.com)",
       "Bash(pnpm run lint:ci:*)",
       "Bash(grep:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(xargs -I {} bash -c 'wc -l \"\"{}\"\" | awk \"\"{if(\\$1 > 500) print \\$0}\"\"')",
+      "Bash(while read f)"
     ],
     "deny": [],
     "ask": []

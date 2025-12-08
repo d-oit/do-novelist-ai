@@ -4,6 +4,8 @@
  * Uses Vercel AI Gateway for multi-provider routing
  */
 
+import { getValidatedEnv } from './env-validation';
+
 export type AIProvider = 'openai' | 'anthropic' | 'google' | 'mistral';
 
 export interface AIProviderConfig {
@@ -28,18 +30,20 @@ export interface AIServiceConfig {
 
 /**
  * Get AI service configuration from environment variables
+ * Uses validated environment variables for type safety
  */
 export function getAIConfig(): AIServiceConfig {
-  // Vercel AI Gateway API key (single key for all providers)
-  const env = import.meta.env as Record<string, string | undefined>;
-  const gatewayApiKey = env.VITE_AI_GATEWAY_API_KEY ?? '';
+  // Get validated environment variables (throws error if invalid)
+  const env = getValidatedEnv();
+
+  const gatewayApiKey = env.VITE_AI_GATEWAY_API_KEY;
 
   return {
-    defaultProvider: (env.VITE_DEFAULT_AI_PROVIDER as AIProvider) ?? 'mistral',
+    defaultProvider: env.VITE_DEFAULT_AI_PROVIDER,
     enableFallback: env.VITE_ENABLE_AUTO_FALLBACK !== 'false',
     gatewayApiKey,
-    defaultModel: env.VITE_DEFAULT_AI_MODEL ?? 'mistral:mistral-medium-latest',
-    thinkingModel: env.VITE_THINKING_AI_MODEL ?? 'mistral:mistral-medium',
+    defaultModel: env.VITE_DEFAULT_AI_MODEL,
+    thinkingModel: env.VITE_THINKING_AI_MODEL,
 
     providers: {
       mistral: {

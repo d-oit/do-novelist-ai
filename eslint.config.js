@@ -132,7 +132,7 @@ export default tseslint.config(
       },
     },
     rules: {
-      'no-console': 'off',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-undef': 'off',
       'no-restricted-syntax': [
         'error',

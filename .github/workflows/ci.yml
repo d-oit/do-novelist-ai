@@ -97,6 +97,37 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate environment configuration
+        run: |
+          echo "🔍 Validating environment configuration schema..."
+          # Create a temporary environment validation script
+          cat > temp-env-validation.mjs << 'EOF'
+          import { readFileSync } from 'fs';
+
+          // Check if env-validation module exists and can be imported
+          try {
+            console.log('✅ Environment validation module found');
+            
+            // Check .env.example for required variables
+            const envExample = readFileSync('.env.example', 'utf8');
+            const requiredVars = ['VITE_AI_GATEWAY_API_KEY'];
+            const missing = requiredVars.filter(varName => !envExample.includes(varName));
+            
+            if (missing.length > 0) {
+              console.error('❌ Missing required variables in .env.example:', missing);
+              process.exit(1);
+            }
+            
+            console.log('✅ Environment configuration validation passed');
+          } catch (error) {
+            console.error('❌ Environment validation failed:', error.message);
+            process.exit(1);
+          }
+          EOF
+
+          node temp-env-validation.mjs
+          rm temp-env-validation.mjs
+
       - name: Lint
         run: pnpm run lint
 

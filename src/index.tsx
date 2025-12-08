@@ -12,6 +12,32 @@ import './lib/ai-sdk-logger-patch';
 
 import ErrorBoundary from './components/error-boundary';
 import { UserProvider } from './contexts/UserContext';
+import { validateEnvironment } from './lib/env-validation';
+
+// Environment validation at startup
+const envValidation = validateEnvironment();
+
+if (!envValidation.success) {
+  console.error('❌ Environment validation failed:', envValidation.errors);
+
+  const root = document.getElementById('root');
+  if (root) {
+    root.innerHTML = `
+      <div style="padding: 2rem; font-family: system-ui; max-width: 800px; margin: 2rem auto;">
+        <h1 style="color: #dc2626;">⚠️ Configuration Error</h1>
+        <p>The application cannot start due to missing or invalid environment configuration:</p>
+        <ul style="color: #dc2626;">
+          ${envValidation.errors?.map(e => `<li><strong>${e.path}</strong>: ${e.message}</li>`).join('')}
+        </ul>
+        <p>Please check your <code>.env</code> file and ensure all required variables are set.</p>
+      </div>
+    `;
+  }
+
+  throw new Error('Environment validation failed');
+}
+
+console.log('✅ Environment validation passed');
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

@@ -2,7 +2,7 @@ import { screen, render } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
 import { useProjects } from '../../hooks/useProjects';
-import { ProjectDashboard } from '../ProjectDashboard';
+import { ProjectDashboard } from '../../../components/ProjectDashboard';
 
 // Mock the stores
 vi.mock('../../hooks/useProjects', () => {
@@ -15,15 +15,9 @@ vi.mock('../../hooks/useProjects', () => {
 // Mock UI components
 vi.mock('../../../../components/ui/Card', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div data-testid='card'>{children}</div>,
-  CardHeader: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid='card-header'>{children}</div>
-  ),
-  CardTitle: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid='card-title'>{children}</div>
-  ),
-  CardContent: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid='card-content'>{children}</div>
-  ),
+  CardHeader: ({ children }: { children: React.ReactNode }) => <div data-testid='card-header'>{children}</div>,
+  CardTitle: ({ children }: { children: React.ReactNode }) => <div data-testid='card-title'>{children}</div>,
+  CardContent: ({ children }: { children: React.ReactNode }) => <div data-testid='card-content'>{children}</div>,
 }));
 
 describe('ProjectDashboard', () => {
