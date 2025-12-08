@@ -82,7 +82,7 @@ export default defineConfig({
   // Optimized web server configuration for React applications
   webServer: process.env.CI
     ? {
-        command: 'pnpm exec vite preview dist/ --port 3000 --host 0.0.0.0',
+        command: 'cd dist && python3 -m http.server 3000',
         url: 'http://localhost:3000',
         reuseExistingServer: !process.env.CI,
         timeout: 120000,
