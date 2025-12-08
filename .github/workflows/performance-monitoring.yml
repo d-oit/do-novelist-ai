@@ -253,10 +253,13 @@ jobs:
           path: test-results/
           retention-days: 30
 
-  performance-regression-check:
-    name: Performance Regression Analysis
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+   performance-regression-check:
+     name: Performance Regression Analysis
+     runs-on: ubuntu-latest
+     if: github.event_name == 'pull_request'
+     permissions:
+       contents: read
+       pull-requests: write
 
     steps:
       - name: Checkout base branch
