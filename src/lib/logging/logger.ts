@@ -21,7 +21,8 @@ export interface LogEntry {
 }
 
 class Logger {
-  private minLevel: LogLevel = import.meta.env.DEV ? 'debug' : 'info';
+  private minLevel: LogLevel =
+    typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV ? 'debug' : 'info';
   private context: LogContext = {};
 
   public setContext(context: LogContext): void {
