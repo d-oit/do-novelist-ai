@@ -12,6 +12,7 @@ import type {
   PublishingAlert,
   PublishingPlatform,
 } from '../types';
+import { logger } from '@/lib/logging/logger';
 
 class PublishingAnalyticsService {
   private static instance: PublishingAnalyticsService | null = null;
@@ -758,7 +759,7 @@ class PublishingAnalyticsService {
     },
   ): void {
     try {
-      console.log(`Tracking campaign ${campaignId}:`, metrics);
+      logger.info(`Tracking campaign ${campaignId}:`, { campaignId, metrics });
       // Store metrics data - implementation would go here
     } catch (error) {
       console.error('Failed to track campaign performance:', error);

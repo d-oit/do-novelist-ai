@@ -21,6 +21,7 @@ import { PublishStatus } from '@/types';
 import { usePublishingAnalytics } from '../../publishing';
 import PublishingDashboard from '../../publishing/components/PublishingDashboard';
 import PublishingSetup from '../../publishing/components/PublishingSetup';
+import { logger } from '@/lib/logging/logger';
 
 interface PublishPanelProps {
   project: Project;
@@ -455,7 +456,7 @@ const PublishPanel: React.FC<PublishPanelProps> = ({
           <PublishingSetup
             project={project}
             onPublishingComplete={pub => {
-              console.log('Published:', pub);
+              logger.info('Published:', { publicationId: pub.id, title: pub.title });
               setShowPublishingSetup(false);
               // Refresh analytics if needed
               void publishingAnalytics.loadPublicationData(pub.id);

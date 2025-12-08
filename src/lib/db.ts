@@ -3,6 +3,7 @@ import { createClient } from '@libsql/client/web';
 import { type Project, PublishStatus, ChapterStatus } from '../types';
 import { parseChapterStatus, parsePublishStatus } from '../shared/utils/validation';
 import { ProjectSchema, type WorldState, type ProjectSettings } from '../types/schemas';
+import { logger } from './logging/logger';
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';
@@ -128,17 +129,17 @@ export const db = {
             status TEXT
           )
         `);
-        console.log('Turso DB Connection Established');
+        logger.info('Turso DB Connection Established');
       } catch (e) {
         console.error('Turso Init Error (Falling back to local):', e);
       }
     } else {
-      console.log('Using LocalStorage Persistence');
+      logger.info('Using LocalStorage Persistence');
     }
   },
 
   saveProject: async (project: Project): Promise<void> => {
-    console.log(`[DB] Saving project: ${project.title} (${project.id})`);
+    logger.info(`[DB] Saving project: ${project.title} (${project.id})`);
     const client = getClient();
     if (client) {
       try {
@@ -175,7 +176,7 @@ export const db = {
           }));
           await client.batch(stmts, 'write');
         }
-        console.log(`[DB] Cloud save complete.`);
+        logger.info(`[DB] Cloud save complete.`);
       } catch (e) {
         console.error('Failed to save to Cloud', e);
       }
@@ -187,12 +188,12 @@ export const db = {
       >;
       projects[project.id] = { ...project, updatedAt: new Date() };
       localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
-      console.log(`[DB] Local save complete.`);
+      logger.info(`[DB] Local save complete.`);
     }
   },
 
   loadProject: async (projectId: string): Promise<Project | null> => {
-    console.log(`[DB] Loading project: ${projectId}`);
+    logger.info(`[DB] Loading project: ${projectId}`);
     const client = getClient();
     if (client) {
       try {
@@ -301,7 +302,7 @@ export const db = {
         // Validate the loaded project data
         const validationResult = ProjectSchema.safeParse(loadedProject);
         if (validationResult.success) {
-          console.log(`[DB] Cloud load success: ${loadedProject.title}`);
+          logger.info(`[DB] Cloud load success: ${loadedProject.title}`);
           return validationResult.data;
         } else {
           console.error('Failed to validate loaded project:', validationResult.error);
@@ -318,7 +319,7 @@ export const db = {
       >;
       const p = projects[projectId];
       if (p == null) return null;
-      console.log(`[DB] Local load success: ${(p as { title?: string }).title ?? 'Unknown'}`);
+      logger.info(`[DB] Local load success: ${(p as { title?: string }).title ?? 'Unknown'}`);
       // Ensure structure matches Project type (handling legacy data if any)
       return {
         ...p,
@@ -382,7 +383,7 @@ export const db = {
   },
 
   deleteProject: async (projectId: string): Promise<void> => {
-    console.log(`[DB] Deleting project: ${projectId}`);
+    logger.info('Deleting project', { projectId });
     const client = getClient();
     if (client) {
       try {

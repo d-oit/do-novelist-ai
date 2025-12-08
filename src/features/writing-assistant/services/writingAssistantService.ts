@@ -21,6 +21,7 @@ import {
   type WritingSuggestionCategory,
 } from '../types';
 import { type Character } from '../../characters/types';
+import { logger } from '@/lib/logging/logger';
 
 // Raw AI response type for suggestions
 interface RawAISuggestion {
@@ -437,7 +438,9 @@ class WritingAssistantService {
     // Use provided plot context if available
     if (plotContext) {
       // Could use AI to analyze plot context for consistency
-      console.log('Analyzing plot context:', plotContext.substring(0, 100) + '...');
+      logger.info('Analyzing plot context:', {
+        plotContext: plotContext.substring(0, 100) + '...',
+      });
     }
 
     // Check for timeline inconsistencies
@@ -471,7 +474,9 @@ class WritingAssistantService {
     // Use provided character context if available
     if (characterContext && characterContext.length > 0) {
       // Could use AI to analyze character consistency with provided context
-      console.log('Analyzing', characterContext.length, 'characters for consistency');
+      logger.info('Analyzing characters for consistency', {
+        characterCount: characterContext.length,
+      });
     }
 
     return [];

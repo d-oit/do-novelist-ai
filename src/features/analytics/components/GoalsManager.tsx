@@ -20,6 +20,7 @@ import { Card } from '../../../components/ui/Card';
 import { cn, iconButtonTarget } from '../../../lib/utils';
 import { useAnalytics } from '../hooks/useAnalytics';
 import type { WritingGoals } from '../types';
+import { logger } from '@/lib/logging/logger';
 
 interface GoalsManagerProps {
   projectId?: string;
@@ -416,7 +417,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ projectId, onClose, classNa
   const handleDeleteGoal = (goalId: string): void => {
     if (window.confirm('Are you sure you want to delete this goal?')) {
       // Implementation would call analytics service to delete goal
-      console.log('Delete goal:', goalId);
+      logger.info('Delete goal:', { goalId });
     }
   };
 
