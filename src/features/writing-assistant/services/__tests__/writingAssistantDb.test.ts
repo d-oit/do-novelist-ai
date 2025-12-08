@@ -30,7 +30,21 @@ Object.defineProperty(global, 'localStorage', {
   writable: true,
 });
 
-// Import after mocking localStorage
+// Mock the logger module
+const mockLogger = {
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  setContext: vi.fn(),
+  child: vi.fn().mockReturnThis(),
+};
+
+vi.mock('@/lib/logging/logger', () => ({
+  logger: mockLogger,
+}));
+
+// Import after mocking localStorage and logger
 import type { ContentAnalysis, WritingSuggestion } from '../../types';
 
 describe('WritingAssistantDb - Secure ID Generation', () => {
@@ -115,8 +129,8 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
     it('should generate analysis record ID with correct format', async () => {
       const { writingAssistantDb } = await import('../writingAssistantDb');
 
-      // Spy on console.log to capture the generated ID
-      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      // Clear previous calls
+      mockLogger.info.mockClear();
 
       const mockAnalysis: ContentAnalysis = {
         chapterId: 'test-chapter',
@@ -181,13 +195,13 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
 
       writingAssistantDb.saveAnalysisHistory(mockAnalysis, 'test-project', 0, 0);
 
-      // Check the console.log output for the ID format
-      expect(consoleLogSpy).toHaveBeenCalledWith(
+      // Check the logger.info call for the ID format
+      expect(mockLogger.info).toHaveBeenCalledWith(
         'Saving analysis history:',
-        expect.stringMatching(/^analysis_\d+_[a-z0-9]+$/),
+        expect.objectContaining({
+          analysisId: expect.stringMatching(/^analysis_\d+_[a-z0-9]+$/),
+        }),
       );
-
-      consoleLogSpy.mockRestore();
     });
   });
 
@@ -195,8 +209,8 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
     it('should generate feedback ID with correct format', async () => {
       const { writingAssistantDb } = await import('../writingAssistantDb');
 
-      // Spy on console.log to capture the generated ID
-      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      // Clear previous calls
+      mockLogger.info.mockClear();
 
       const mockSuggestion: WritingSuggestion = {
         id: 'suggestion-1',
@@ -219,10 +233,14 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
         'Simplified text',
       );
 
-      // Check the console.log output for the ID format
-      expect(consoleLogSpy).toHaveBeenCalledWith('Recording suggestion feedback:', 'style', 'accepted');
-
-      consoleLogSpy.mockRestore();
+      // Check the logger.info output for the ID format
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Recording suggestion feedback:',
+        expect.objectContaining({
+          suggestionType: 'style',
+          action: 'accepted',
+        }),
+      );
     });
   });
 
@@ -230,7 +248,8 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
     it('should generate different IDs for multiple analysis records', async () => {
       const { writingAssistantDb } = await import('../writingAssistantDb');
 
-      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      // Clear previous calls
+      mockLogger.info.mockClear();
 
       const mockAnalysis: ContentAnalysis = {
         chapterId: 'test-chapter',
@@ -298,16 +317,16 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
       writingAssistantDb.saveAnalysisHistory(mockAnalysis, 'test-project-2', 0, 0);
       writingAssistantDb.saveAnalysisHistory(mockAnalysis, 'test-project-3', 0, 0);
 
-      // Extract the IDs from console.log calls
-      const calls = consoleLogSpy.mock.calls.filter(call => call[0] === 'Saving analysis history:');
-      const ids = calls.map(call => call[1]);
+      // Extract the IDs from logger.info calls
+      const calls = mockLogger.info.mock.calls.filter(
+        call => call[0] === 'Saving analysis history:' && call[1]?.analysisId,
+      );
+      const ids = calls.map(call => call[1].analysisId);
 
       // Verify all IDs are unique
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(ids.length);
       expect(ids.length).toBe(3);
-
-      consoleLogSpy.mockRestore();
     });
   });
 });

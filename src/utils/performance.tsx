@@ -1,5 +1,6 @@
 // Performance monitoring utilities for lazy loading and component metrics
 import React from 'react';
+import { logger } from '@/lib/logging/logger';
 
 interface PerformanceMetrics {
   routeLoadTime: Record<string, number>;
@@ -50,7 +51,7 @@ class PerformanceMonitor {
 
     // Log performance metrics in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Performance [${label}]: ${duration.toFixed(2)}ms`);
+      logger.info(`Performance [${label}]: ${duration.toFixed(2)}ms`);
     }
 
     return duration;
@@ -61,7 +62,7 @@ class PerformanceMonitor {
     this.metrics.bundleSize[label] = size;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Bundle Size [${label}]: ${(size / 1024).toFixed(2)}KB`);
+      logger.info(`Bundle Size [${label}]: ${(size / 1024).toFixed(2)}KB`);
     }
   }
 

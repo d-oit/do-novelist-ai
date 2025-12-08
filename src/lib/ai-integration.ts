@@ -4,6 +4,7 @@
  */
 
 import { startHealthMonitoring } from '@/services/ai-health-service';
+import { logger } from '@/lib/logging/logger';
 
 let healthMonitorStopper: (() => void) | null = null;
 
@@ -12,20 +13,20 @@ export function initializeAIMonitoring(userId: string = 'system'): void {
     return;
   }
 
-  console.log('[AI Integration] Initializing AI monitoring services...');
+  logger.info('Initializing AI monitoring services...', { userId });
 
   startHealthMonitoring(userId);
   healthMonitorStopper = (): void => {
     // No-op: health monitoring runs automatically
   };
 
-  console.log('[AI Integration] AI monitoring initialized');
+  logger.info('AI monitoring initialized');
 }
 
 export function stopAIMonitoring(): void {
   if (healthMonitorStopper) {
     healthMonitorStopper();
     healthMonitorStopper = null;
-    console.log('[AI Integration] AI monitoring stopped');
+    logger.info('AI monitoring stopped');
   }
 }
