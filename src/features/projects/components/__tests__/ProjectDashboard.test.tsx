@@ -2,7 +2,7 @@ import { screen, render } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
 import { useProjects } from '../../hooks/useProjects';
-import { ProjectDashboard } from '../../../components/ProjectDashboard';
+import { ProjectDashboard } from '../ProjectDashboard';
 
 // Mock the stores
 vi.mock('../../hooks/useProjects', () => {

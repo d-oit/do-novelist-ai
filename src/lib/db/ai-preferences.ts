@@ -5,6 +5,7 @@
 
 import { createClient } from '@libsql/client/web';
 
+import { logger } from '@/lib/logging/logger';
 import { type AIProvider } from '../ai-config';
 
 import {
@@ -54,12 +55,12 @@ export async function initAIPreferencesDB(): Promise<void> {
       for (const schema of ALL_AI_SCHEMAS) {
         await client.execute(schema);
       }
-      console.log('AI Preferences DB tables initialized');
+      logger.info('AI Preferences DB tables initialized');
     } catch (e) {
-      console.error('Failed to initialize AI Preferences DB:', e);
+      logger.error('Failed to initialize AI Preferences DB', { error: e });
     }
   } else {
-    console.log('Using LocalStorage for AI Preferences');
+    logger.info('Using LocalStorage for AI Preferences');
   }
 }
 
