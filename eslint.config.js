@@ -470,4 +470,13 @@ export default tseslint.config(
       '@typescript-eslint/ban-ts-comment': 'off',
     },
   },
+
+  // Configuration for logging infrastructure files
+  {
+    files: ['src/lib/errors/logging.ts'],
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/no-unused-vars': 'error',
+    },
+  },
 );

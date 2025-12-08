@@ -22,7 +22,7 @@ export interface AIProviderConfig {
 export interface AIServiceConfig {
   defaultProvider: AIProvider;
   enableFallback: boolean;
-  gatewayApiKey: string; // Vercel AI Gateway API key
+  gatewayApiKey?: string; // Vercel AI Gateway API key (optional)
   defaultModel: string; // Standard model for general tasks
   thinkingModel: string; // Advanced model for complex thinking/reading
   providers: Record<AIProvider, AIProviderConfig>;

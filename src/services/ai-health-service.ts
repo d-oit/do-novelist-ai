@@ -14,6 +14,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
+import { logger } from '@/lib/logging/logger';
 
 /**
  * Health check configuration
@@ -242,7 +243,7 @@ function updateCircuitBreaker(provider: AIProvider, success: boolean): void {
     breaker.failureCount = 0;
     breaker.lastFailureTime = null;
     if (breaker.isOpen) {
-      console.log(`[HealthService] Circuit breaker closed for ${provider} - service recovered`);
+      logger.info(`[HealthService] Circuit breaker closed for ${provider} - service recovered`);
       breaker.isOpen = false;
     }
   } else {
@@ -357,7 +358,7 @@ export async function checkProviderHealth(
 ): Promise<void> {
   // Check if circuit breaker allows the check
   if (!shouldAttemptRecovery(provider)) {
-    console.log(
+    logger.info(
       `[HealthService] Skipping ${provider} - circuit breaker open, waiting for recovery window`,
     );
     return;
@@ -367,11 +368,17 @@ export async function checkProviderHealth(
   const providerConfig = config.providers[provider];
 
   if (!providerConfig.enabled) {
-    console.log(`[HealthService] Skipping ${provider} - not enabled`);
+    logger.info(`[HealthService] Skipping ${provider} - not enabled`);
     return;
   }
 
-  console.log(`[HealthService] Checking health of ${provider}...`);
+  logger.info(`[HealthService] Checking health of ${provider}...`);
+
+  // Ensure we have a valid API key for health checks
+  if (!config.gatewayApiKey) {
+    logger.info(`[HealthService] Skipping ${provider} - no API key available`);
+    return;
+  }
 
   const modelName = providerConfig.models.fast; // Use fast model for health checks
   const result = await performHealthCheck(provider, modelName, config.gatewayApiKey);
@@ -432,7 +439,7 @@ export async function checkProviderHealth(
     createdAt: now,
   });
 
-  console.log(`[HealthService] ${provider} health check complete:`, {
+  logger.info(`[HealthService] ${provider} health check complete:`, {
     status,
     errorRate: `${errorRate.toFixed(1)}%`,
     uptime: `${health.uptime.toFixed(1)}%`,
@@ -450,12 +457,12 @@ export async function checkAllProvidersHealth(userId: string = 'system'): Promis
 
   const enabledProviders = providers.filter(p => config.providers[p].enabled);
 
-  console.log(`[HealthService] Starting health checks for ${enabledProviders.length} providers...`);
+  logger.info(`[HealthService] Starting health checks for ${enabledProviders.length} providers...`);
 
   // Run health checks in parallel
   await Promise.allSettled(enabledProviders.map(provider => checkProviderHealth(provider, userId)));
 
-  console.log(`[HealthService] All health checks complete`);
+  logger.info(`[HealthService] All health checks complete`);
 }
 
 /**
@@ -469,7 +476,7 @@ export function startHealthMonitoring(userId: string = 'system'): void {
     return;
   }
 
-  console.log(
+  logger.info(
     `[HealthService] Starting periodic health monitoring (interval: ${HEALTH_CHECK_INTERVAL_MS / 1000}s)`,
   );
 
@@ -493,7 +500,7 @@ export function stopHealthMonitoring(): void {
   if (healthCheckInterval) {
     clearInterval(healthCheckInterval);
     healthCheckInterval = null;
-    console.log('[HealthService] Health monitoring stopped');
+    logger.info('[HealthService] Health monitoring stopped');
   }
 }
 
@@ -532,7 +539,7 @@ export function resetCircuitBreaker(provider: AIProvider): void {
     breaker.failureCount = 0;
     breaker.lastFailureTime = null;
     breaker.isOpen = false;
-    console.log(`[HealthService] Circuit breaker manually reset for ${provider}`);
+    logger.info(`[HealthService] Circuit breaker manually reset for ${provider}`);
   }
 }
 
