@@ -10,6 +10,7 @@ import {
   type WritingSuggestion,
 } from '../types';
 import { generateSecureId } from '../../../lib/secure-random';
+import { logger } from '@/lib/logging/logger';
 
 // Database schema types for Writing Assistant
 export interface AnalysisHistory {
@@ -90,7 +91,9 @@ class WritingAssistantDb {
     try {
       let deviceId = localStorage.getItem('novelist_device_id');
       if (deviceId == null) {
-        const randomSuffix = window.crypto.getRandomValues(new Uint32Array(2)).reduce((acc, val) => acc + val.toString(36), "");
+        const randomSuffix = window.crypto
+          .getRandomValues(new Uint32Array(2))
+          .reduce((acc, val) => acc + val.toString(36), '');
         deviceId = `device_${Date.now()}_${randomSuffix}`;
         localStorage.setItem('novelist_device_id', deviceId);
       }
@@ -107,7 +110,9 @@ class WritingAssistantDb {
     try {
       let userId = localStorage.getItem('novelist_user_id');
       if (userId == null) {
-        const randomSuffix = window.crypto.getRandomValues(new Uint32Array(2)).reduce((acc, val) => acc + val.toString(36), "");
+        const randomSuffix = window.crypto
+          .getRandomValues(new Uint32Array(2))
+          .reduce((acc, val) => acc + val.toString(36), '');
         userId = `user_${Date.now()}_${randomSuffix}`;
         localStorage.setItem('novelist_user_id', userId);
       }
@@ -372,24 +377,27 @@ class WritingAssistantDb {
   // Mock database operations (would be replaced with actual Turso queries)
   private insertAnalysisHistory(record: Omit<AnalysisHistory, 'createdAt'>): void {
     // await db.insert(analysisHistoryTable).values(record);
-    console.log('Saving analysis history:', record.id);
+    logger.info('Saving analysis history:', { analysisId: record.id });
   }
 
   private insertSuggestionFeedback(record: Omit<SuggestionFeedback, 'id'>): void {
     // await db.insert(suggestionFeedbackTable).values(record);
-    console.log('Recording suggestion feedback:', record.suggestionType, record.action);
+    logger.info('Recording suggestion feedback:', {
+      suggestionType: record.suggestionType,
+      action: record.action,
+    });
   }
 
   private upsertUserPreferences(
     record: Omit<UserWritingPreferences, 'createdAt' | 'updatedAt'>,
   ): void {
     // await db.insert(userPreferencesTable).values(record).onConflictDoUpdate(...);
-    console.log('Syncing preferences for user:', record.userId);
+    logger.info('Syncing preferences for user:', { userId: record.userId });
   }
 
   private getUserPreferences(userId: string): UserWritingPreferences | null {
     // return await db.select().from(userPreferencesTable).where(eq(userPreferencesTable.userId, userId));
-    console.log('Loading preferences for user:', userId);
+    logger.info('Loading preferences for user:', { userId });
     return null;
   }
 
@@ -398,7 +406,7 @@ class WritingAssistantDb {
     projectId: string,
     timeRange: string,
   ): WritingProgressMetrics[] {
-    console.log('Loading progress metrics:', userId, projectId, timeRange);
+    logger.info('Loading progress metrics:', { userId, projectId, timeRange });
     return [];
   }
 
@@ -407,7 +415,7 @@ class WritingAssistantDb {
     projectId: string,
     timeRange: string,
   ): AnalysisHistory[] {
-    console.log('Loading analysis history:', userId, projectId, timeRange);
+    logger.info('Loading analysis history:', { userId, projectId, timeRange });
     return [];
   }
 
@@ -416,20 +424,26 @@ class WritingAssistantDb {
     projectId: string,
     timeRange: string,
   ): SuggestionFeedback[] {
-    console.log('Loading suggestion feedback:', userId, projectId, timeRange);
+    logger.info('Loading suggestion feedback:', { userId, projectId, timeRange });
     return [];
   }
 
   private deleteOldAnalysisHistory(cutoffDate: Date): void {
-    console.log('Cleaning up analysis history older than:', cutoffDate);
+    logger.info('Cleaning up analysis history older than:', {
+      cutoffDate: cutoffDate.toISOString(),
+    });
   }
 
   private deleteOldSuggestionFeedback(cutoffDate: Date): void {
-    console.log('Cleaning up suggestion feedback older than:', cutoffDate);
+    logger.info('Cleaning up suggestion feedback older than:', {
+      cutoffDate: cutoffDate.toISOString(),
+    });
   }
 
   private deleteOldProgressMetrics(cutoffDate: Date): void {
-    console.log('Cleaning up progress metrics older than:', cutoffDate);
+    logger.info('Cleaning up progress metrics older than:', {
+      cutoffDate: cutoffDate.toISOString(),
+    });
   }
 }
 

@@ -1,6 +1,7 @@
 import { createChapter } from '../../../shared/utils';
 import type { Chapter } from '@/types';
 import type { ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
+import { logger } from '@/lib/logging/logger';
 
 class VersioningService {
   private static instance: VersioningService;
@@ -258,13 +259,13 @@ class VersioningService {
 
   public switchBranch(branchId: string): boolean {
     // Implementation for switching branches
-    console.log(`Switching to branch: ${branchId}`);
+    logger.info(`Switching to branch: ${branchId}`);
     return true;
   }
 
   public mergeBranch(sourceBranchId: string, targetBranchId: string): boolean {
     // Implementation for merging branches
-    console.log(`Merging branch ${sourceBranchId} into ${targetBranchId}`);
+    logger.info(`Merging branch ${sourceBranchId} into ${targetBranchId}`);
     return true;
   }
 
@@ -272,7 +273,7 @@ class VersioningService {
     if (!this.db) await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
-    console.log(`Deleting branch: ${branchId}`);
+    logger.info(`Deleting branch: ${branchId}`);
 
     const db = this.db;
     return new Promise((resolve, reject) => {
