@@ -123,7 +123,7 @@ jobs:
 
       - name: Download build artifacts
         id: download-primary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ needs.pre-deployment-check.outputs.build_artifact }}
           path: dist/
@@ -131,7 +131,7 @@ jobs:
 
       - name: Download alternative artifacts if primary fails
         if: steps.download-primary.outcome == 'failure'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         id: download-fallback
         with:
           name: production-build-${{ github.sha }}
@@ -181,7 +181,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ needs.pre-deployment-check.outputs.build_artifact }}
           path: _site/
@@ -238,7 +238,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ needs.pre-deployment-check.outputs.build_artifact }}
           path: _site/
@@ -282,7 +282,7 @@ jobs:
 
     steps:
       - name: Download deployment summaries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           merge-multiple: true
 
