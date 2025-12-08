@@ -4,6 +4,8 @@
  * This is a minimal patch to satisfy the AI SDK's logger expectations
  */
 
+import { logger as structuredLogger } from '@/lib/logging/logger';
+
 // Prevent "m.log is not a function" errors
 // This patch is imported by test files and the AI SDK to ensure logger compatibility
 
@@ -16,7 +18,7 @@ const logger = {
       (typeof import.meta !== 'undefined' && import.meta.env?.DEV === true);
 
     if (isDev) {
-      console.log('[AI SDK]', ...args);
+      structuredLogger.debug('AI SDK log', { args });
     }
   },
 };
