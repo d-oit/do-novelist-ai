@@ -234,8 +234,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install ${{ matrix.browser }} --with-deps
+      - name: Install all Playwright browsers
+        run: pnpm exec playwright install --with-deps
 
       - name: Build application for E2E tests
         run: pnpm run build

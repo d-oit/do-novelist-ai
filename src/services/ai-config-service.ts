@@ -5,6 +5,7 @@
 
 import { getUserAIPreference, saveUserAIPreference, type UserAIPreference } from '@/lib/db/index';
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
+import { logger } from '@/lib/logging/logger';
 
 export interface ProviderConfig {
   provider: AIProvider;
@@ -114,7 +115,7 @@ export async function saveUserPreferences(
 
     await saveUserAIPreference(userAIPref as UserAIPreference);
 
-    console.log(`[AI Config] Saved preferences for user ${userId}`);
+    logger.info('Saved AI preferences for user', { userId });
   } catch (error) {
     console.error('Failed to save user preferences:', error);
     throw new Error('Failed to save preferences');
