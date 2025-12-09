@@ -196,91 +196,91 @@ jobs:
       fail-fast: false
       matrix:
         shard: [1, 2]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-          cache: "pnpm"
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: "20"
+        cache: "pnpm"
 
-      - name: Add pnpm to PATH
-        run: |
-          echo "PNPM_HOME=$HOME/.local/share/pnpm" >> "$GITHUB_ENV"
-          echo "PATH=$HOME/.local/share/pnpm:$PATH" >> "$GITHUB_ENV"
+    - name: Add pnpm to PATH
+      run: |
+        echo "PNPM_HOME=$HOME/.local/share/pnpm" >> "$GITHUB_ENV"
+        echo "PATH=$HOME/.local/share/pnpm:$PATH" >> "$GITHUB_ENV"
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 \
-            libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 \
-            libxss1 libxtst6 libnss3 libatk1.0-0 libatk-bridge2.0-0 \
-            libcups2 libdrm2 libgbm1 libgtk-3-0 libxshmfence1 \
-            ca-certificates fonts-liberation wget
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 \
+          libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 \
+          libxss1 libxtst6 libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+          libcups2 libdrm2 libgbm1 libgtk-3-0 libxshmfence1 \
+          ca-certificates fonts-liberation wget
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-playwright-
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
+    - name: Install Playwright browsers
+      run: pnpm exec playwright install --with-deps
 
-       - name: Download build artifacts
-         uses: actions/download-artifact@v4
-         with:
-           name: build-artifacts-${{ github.sha }}
-           path: dist/
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts-${{ github.sha }}
+        path: dist/
 
-       - name: Create test results directory
-         run: mkdir -p test-results
+    - name: Create test results directory
+      run: mkdir -p test-results
 
-       - name: Run E2E tests
-         run: |
-           echo "🧪 Running E2E tests for shard ${{ matrix.shard }}/2"
+    - name: Run E2E tests
+      run: |
+        echo "🧪 Running E2E tests for shard ${{ matrix.shard }}/2"
 
-           # Set environment for Playwright
-           export CI=true
-           export PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright
-           export NODE_ENV=test
+        # Set environment for Playwright
+        export CI=true
+        export PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright
+        export NODE_ENV=test
 
-           # Run tests with shard
-           timeout 1200 pnpm exec playwright test \
-             --shard=${{ matrix.shard }}/2 \
-             --reporter=list,junit,json \
-             --max-failures=10 || {
-               echo "❌ Tests failed or timed out"
-               # Collect debug info
-               df -h
-               free -h
-               ls -la ~/.cache/ms-playwright/ 2>/dev/null || echo "No browser cache"
-               exit 1
-             }
+        # Run tests with shard
+        timeout 1200 pnpm exec playwright test \
+          --shard=${{ matrix.shard }}/2 \
+          --reporter=list,junit,json \
+          --max-failures=10 || {
+            echo "❌ Tests failed or timed out"
+            # Collect debug info
+            df -h
+            free -h
+            ls -la ~/.cache/ms-playwright/ 2>/dev/null || echo "No browser cache"
+            exit 1
+           }
 
-      - name: Upload test artifacts
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: playwright-results-shard-${{ matrix.shard }}-${{ github.sha }}
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 14
+    - name: Upload test artifacts
+      if: always()
+      uses: actions/upload-artifact@v5
+      with:
+        name: playwright-results-shard-${{ matrix.shard }}-${{ github.sha }}
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 14
 
   # Performance analysis
   performance:
@@ -380,12 +380,12 @@ jobs:
             echo "| Performance | ${{ needs.performance.result }} |"
             echo "| Deployment Ready | ${{ needs.deployment-ready.result }} |"
             echo ""
-            
+
             # Overall status
             FAILED=0
             [ "${{ needs.build-and-test.result }}" != "success" ] && FAILED=$((FAILED + 1))
             [ "${{ needs.security.result }}" = "failure" ] && FAILED=$((FAILED + 1))
-            
+
             if [ "$FAILED" -eq 0 ]; then
               echo "## ✅ Overall Status: SUCCESS"
               echo "All critical checks passed!"
