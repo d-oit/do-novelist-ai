@@ -98,19 +98,16 @@ jobs:
 
       # Run linting (if available)
       - name: Run linting
-        if: hashFiles('package.json') != '' && contains(fromJson(steps.package.outputs.content).scripts, 'lint')
         run: npm run lint --if-present
         continue-on-error: true
 
       # Run type checking (if available)
       - name: Run type checking
-        if: hashFiles('package.json') != '' && contains(fromJson(steps.package.outputs.content).scripts, 'type-check')
         run: npm run type-check --if-present
         continue-on-error: true
 
       # Run tests (if available)
       - name: Run tests
-        if: hashFiles('package.json') != '' && contains(fromJson(steps.package.outputs.content).scripts, 'test')
         run: npm test -- --watch=false --ci
         continue-on-error: true
 
