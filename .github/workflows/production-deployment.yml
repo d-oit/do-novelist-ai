@@ -444,7 +444,8 @@ jobs:
             echo "- **Deployed by**: ${{ github.actor }}"
             echo "- **URL**: ${{ steps.deployment.outputs.page_url }}"
             echo "- **Deployment ID**: ${{ needs.validate-deployment.outputs.deployment_id }}"
-            echo "- **Strategy**: ${{ inputs.deployment_strategy || github.event.inputs.deployment_strategy || 'rolling' }}"
+            STRATEGY="${{ inputs.deployment_strategy || github.event.inputs.deployment_strategy || 'rolling' }}"
+            echo "- **Strategy**: ${STRATEGY}"
             echo "- **Time**: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo ""
             echo "### Validation Results"
@@ -488,32 +489,32 @@ jobs:
             echo "**Deployment ID**: ${{ needs.validate-deployment.outputs.deployment_id }}"
             echo "**Environment**: ${{ needs.validate-deployment.outputs.environment }}"
             echo ""
-            
+
             echo "## 📊 Deployment Results"
             echo ""
             echo "| Environment | Status | URL |"
             echo "|-------------|--------|-----|"
-            
+
             if [ -f "staging-deployment-summary.md" ]; then
               STAGING_URL=$(grep -o 'URL:.*' staging-deployment-summary.md | cut -d' ' -f2- || echo "N/A")
               echo "| Staging | ${{ needs.deploy-staging.result }} | $STAGING_URL |"
             else
               echo "| Staging | Skipped | N/A |"
             fi
-            
+
             if [ -f "production-deployment-summary.md" ]; then
               PROD_URL=$(grep -o 'URL:.*' production-deployment-summary.md | cut -d' ' -f2- || echo "N/A")
               echo "| Production | ${{ needs.deploy-production.result }} | $PROD_URL |"
             else
               echo "| Production | Skipped | N/A |"
             fi
-            
+
             echo ""
-            
+
             # Overall status
             STAGING_STATUS="${{ needs.deploy-staging.result }}"
             PROD_STATUS="${{ needs.deploy-production.result }}"
-            
+
             if [ "$STAGING_STATUS" = "success" ] && [ "$PROD_STATUS" = "success" ]; then
               echo "## ✅ Overall Status: SUCCESS"
               echo ""
@@ -539,23 +540,27 @@ jobs:
               echo "- Staging: $STAGING_STATUS"
               echo "- Production: $PROD_STATUS"
             fi
-            
+
             echo ""
             echo "## 📈 Deployment Metrics"
             echo ""
             echo "- **Total Deployment Time**: ~15-20 minutes"
-            echo "- **Strategy Used**: ${{ inputs.deployment_strategy || github.event.inputs.deployment_strategy || 'rolling' }}"
+            STRATEGY="${{ inputs.deployment_strategy || github.event.inputs.deployment_strategy || 'rolling' }}"
+            echo "- **Strategy Used**: ${STRATEGY}"
             echo "- **Artifact Size**: Check individual deployment summaries"
             echo "- **Health Checks**: Automated + Manual verification"
             echo ""
-            
+
             echo "## 🔗 Quick Links"
             echo ""
-            echo "- [View Deployment Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "- [View Deployment Run](${RUN_URL})"
             if [ -n "${{ github.event.pull_request.number }}" ]; then
-              echo "- [Pull Request #${{ github.event.pull_request.number }}](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }})"
+              PR_NUM="${{ github.event.pull_request.number }}"
+              PR_URL="https://github.com/${{ github.repository }}/pull/${PR_NUM}"
+              echo "- [Pull Request #${PR_NUM}](${PR_URL})"
             fi
-            
+
           } > deployment-report.md
 
       - name: Upload deployment report
@@ -590,7 +595,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-deployment, deploy-staging, deploy-production]
     if: |
-      failure() && 
+      failure() &&
       github.event.inputs.force_deploy != 'true' &&
       (needs.deploy-production.result == 'failure' || needs.deploy-staging.result == 'failure')
 
@@ -634,13 +639,13 @@ jobs:
             echo "**Failed Deployment ID**: ${{ needs.validate-deployment.outputs.deployment_id }}"
             echo "**Environment**: ${{ needs.validate-deployment.outputs.environment }}"
             echo ""
-            
+
             echo "## 🚨 Failure Summary"
             echo ""
             echo "- **Staging Status**: ${{ needs.deploy-staging.result }}"
             echo "- **Production Status**: ${{ needs.deploy-production.result }}"
             echo ""
-            
+
             echo "## 🔄 Rollback Actions Required"
             echo ""
             echo "### Immediate Actions:"
@@ -663,7 +668,7 @@ jobs:
             echo "3. **Add Monitoring & Alerting**"
             echo "4. **Update Rollback Procedures**"
             echo ""
-            
+
             echo "## 📞 Contact Information"
             echo ""
             echo "- **Deployment Team**: Contact DevOps team"

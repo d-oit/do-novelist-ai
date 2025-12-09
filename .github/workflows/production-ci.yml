@@ -537,7 +537,7 @@ jobs:
             const fs = require('fs');
             if (fs.existsSync('pipeline-summary.md')) {
               const summary = fs.readFileSync('pipeline-summary.md', 'utf8');
-              
+
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,

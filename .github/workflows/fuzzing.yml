@@ -198,36 +198,38 @@ jobs:
           echo '{"event":"click","element":"button"}' > fuzzing/input/analytics-1.json
 
           # Start fuzzing with timeout
-          timeout $((DURATION * 60)) bash -c "
-            echo \"Fuzzing started at \$(date)\"
+          TIMEOUT_SECS=$((DURATION * 60))
+          timeout "$TIMEOUT_SECS" bash -c '
+            echo "Fuzzing started at $(date)"
 
             # Simulate fuzzing process
             for i in {1..100}; do
               echo "Fuzzing iteration $i"
 
               # Fuzz editor component
+              FILE_NUM=$((i % 3 + 1))
               node -e "
-                const editor = require(\"./src/features/editor\");
-                const inputs = require(\"./fuzzing/input/editor-$((i % 3 + 1)).json\");
-                try { editor.handleInput(inputs.text); } catch(e) { console.log(\"Editor fuzz error:\", e.message); }
+                const editor = require('./src/features/editor');
+                const inputs = require('./fuzzing/input/editor-${FILE_NUM}.json');
+                try { editor.handleInput(inputs.text); } catch(e) { console.log('Editor fuzz error:', e.message); }
               "
 
               # Fuzz AI generation
               node -e "
-                const ai = require(\"./src/features/ai-generation\");
-                const inputs = require(\"./fuzzing/input/ai-$((i % 3 + 1)).json\");
+                const ai = require('./src/features/ai-generation');
+                const inputs = require('./fuzzing/input/ai-${FILE_NUM}.json');
                 try {
                   ai.generate(inputs.prompt, inputs.model);
                 } catch(e) {
-                  console.log(\"AI fuzz error:\", e.message);
+                  console.log('AI fuzz error:', e.message);
                 }
               "
 
               sleep 1
             done
 
-            echo \"Fuzzing completed at \$(date)\"
-          " || echo "Fuzzing timeout reached"
+            echo "Fuzzing completed at $(date)"
+          ' || echo "Fuzzing timeout reached"
 
       - name: Collect fuzzing results
         run: |
