@@ -331,6 +331,24 @@ export class Logger {
 }
 
 /**
+ * Safely check if we're in development mode
+ */
+const isDevelopmentMode = (): boolean => {
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      if (import.meta.env.DEV === true) return true;
+      if (import.meta.env.NODE_ENV === 'development') return true;
+    }
+    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+      return true;
+    }
+  } catch {
+    // Ignore errors in environment detection
+  }
+  return false;
+};
+
+/**
  * Global logger instance
  */
 let globalLogger: Logger | null = null;
@@ -347,7 +365,7 @@ export const getLogger = (): Logger => {
       services.push(new SentryLogService());
     }
 
-    globalLogger = new Logger(services, import.meta.env.DEV ? 'debug' : 'info');
+    globalLogger = new Logger(services, isDevelopmentMode() ? 'debug' : 'info');
   }
   return globalLogger;
 };
