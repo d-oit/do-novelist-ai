@@ -780,9 +780,9 @@ jobs:
               LCP=$(jq -r '.lcp.value' web-vitals.json 2>/dev/null || echo "N/A")
               FID=$(jq -r '.fid.value' web-vitals.json 2>/dev/null || echo "N/A")
               CLS=$(jq -r '.cls.value' web-vitals.json 2>/dev/null || echo "N/A")
-              echo "| Largest Contentful Paint | ${LCP}ms | $([ $LCP -lt 2500 ] && echo 'Good' || echo 'Needs Improvement') | ✅ |"
-              echo "| First Input Delay | ${FID}ms | $([ $FID -lt 100 ] && echo 'Good' || echo 'Needs Improvement') | ✅ |"
-              echo "| Cumulative Layout Shift | $CLS | $([ $(echo "$CLS < 0.1" | bc) -eq 1 ] && echo 'Good' || echo 'Needs Improvement') | ✅ |"
+              echo "| Largest Contentful Paint | ${LCP}ms | $([ "${LCP}" -lt 2500 ] 2>/dev/null && echo 'Good' || echo 'Needs Improvement') | ✅ |"
+              echo "| First Input Delay | ${FID}ms | $([ "${FID}" -lt 100 ] 2>/dev/null && echo 'Good' || echo 'Needs Improvement') | ✅ |"
+              echo "| Cumulative Layout Shift | $CLS | $(echo "$CLS < 0.1" | bc 2>/dev/null | grep -q '^1$' && echo 'Good' || echo 'Needs Improvement') | ✅ |"
             fi
             
             echo ""
@@ -808,9 +808,9 @@ jobs:
               echo ""
               echo "| Component | Size | Status |"
               echo "|-----------|------|--------|"
-              echo "| Main Bundle | $(format_bytes $BUNDLE_SIZE) | $([ $BUNDLE_SIZE -lt 524288 ] && echo '✅ Good' || echo '⚠️ Large') |"
-              echo "| Total Size | $(format_bytes $TOTAL_SIZE) | $([ $TOTAL_SIZE -lt 5242880 ] && echo '✅ Good' || echo '⚠️ Large') |"
-              echo "| JS Chunks | $CHUNK_COUNT | $([ $CHUNK_COUNT -lt 10 ] && echo '✅ Good' || echo '⚠️ Many') |"
+              echo "| Main Bundle | $(format_bytes "${BUNDLE_SIZE}") | $([ "${BUNDLE_SIZE}" -lt 524288 ] 2>/dev/null && echo '✅ Good' || echo '⚠️ Large') |"
+              echo "| Total Size | $(format_bytes "${TOTAL_SIZE}") | $([ "${TOTAL_SIZE}" -lt 5242880 ] 2>/dev/null && echo '✅ Good' || echo '⚠️ Large') |"
+              echo "| JS Chunks | $CHUNK_COUNT | $([ "$CHUNK_COUNT" -lt 10 ] 2>/dev/null && echo '✅ Good' || echo '⚠️ Many') |"
             fi
             
             echo ""
@@ -825,7 +825,8 @@ jobs:
             echo "## 💡 Recommendations"
             echo ""
             
-            if [ "${{ needs.baseline-analysis.outputs.baseline_score }}" -lt 80 ]; then
+            BASELINE_SCORE="${{ needs.baseline-analysis.outputs.baseline_score }}"
+            if [ "$BASELINE_SCORE" -lt 80 ]; then
               echo "### 🔧 Immediate Actions Required"
               echo "- Bundle size optimization needed"
               echo "- Review code splitting strategy"
