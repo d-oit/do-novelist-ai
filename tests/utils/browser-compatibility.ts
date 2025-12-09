@@ -242,7 +242,7 @@ export const CrossBrowserNavigation = {
    * Navigate with multiple fallback strategies
    */
   navigateWithFallback: async (
-    page: Page,
+    _page: Page,
     selectors: Array<() => any>,
     options?: { timeout?: number },
   ): Promise<boolean> => {

@@ -292,13 +292,13 @@ jobs:
             echo "| Build | ${{ needs.build.result }} |"
             echo "| E2E Quick | ${{ needs.e2e-quick.result }} |"
             echo ""
-            
+
             # Overall status
             FAILED=0
             [ "${{ needs.lint-and-typecheck.result }}" != "success" ] && FAILED=$((FAILED + 1))
             [ "${{ needs.unit-tests.result }}" != "success" ] && FAILED=$((FAILED + 1))
             [ "${{ needs.build.result }}" != "success" ] && FAILED=$((FAILED + 1))
-            
+
             if [ "$FAILED" -eq 0 ]; then
               echo "## ✅ Status: PASSED"
               echo "Fast CI checks completed successfully!"

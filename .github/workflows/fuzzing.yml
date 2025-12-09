@@ -198,8 +198,8 @@ jobs:
           echo '{"event":"click","element":"button"}' > fuzzing/input/analytics-1.json
 
           # Start fuzzing with timeout
-          timeout $((DURATION * 60)) bash -c '
-            echo "Fuzzing started at $(date)"
+          timeout $((DURATION * 60)) bash -c "
+            echo \"Fuzzing started at \$(date)\"
 
             # Simulate fuzzing process
             for i in {1..100}; do
@@ -226,8 +226,8 @@ jobs:
               sleep 1
             done
 
-            echo "Fuzzing completed at $(date)"
-          ' || echo "Fuzzing timeout reached"
+            echo \"Fuzzing completed at \$(date)\"
+          " || echo "Fuzzing timeout reached"
 
       - name: Collect fuzzing results
         run: |

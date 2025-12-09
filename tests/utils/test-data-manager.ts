@@ -6,7 +6,6 @@
  * across all browsers and parallel test runs.
  */
 
-import type { Page, BrowserContext } from '@playwright/test';
 import { BASE_TEST_PROJECT, TEST_USERS, SAMPLE_CHAPTERS, TestDataFactory } from './fixtures';
 
 export interface TestDataContext {
@@ -155,7 +154,7 @@ export class TestDataManager {
             overrides.chapters ||
             SAMPLE_CHAPTERS.slice(0, 2).map((chapter, index) => ({
               ...chapter,
-              id: context.chapterIds[index],
+              id: context.chapterIds[index] || `chapter-${index}`,
               orderIndex: index + 1,
             })),
           metadata: {

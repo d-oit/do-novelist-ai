@@ -5,7 +5,7 @@
  * by providing a single, coordinated approach to external service mocking.
  */
 
-import type { Page, Route, BrowserContext } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
 import { setupAISDKMock } from './mock-ai-sdk';
 
 export interface MockConfig {
@@ -69,10 +69,10 @@ export class UnifiedMockManager {
       await this.setupUnifiedRouting(page, testId);
 
       // Step 3: Configure browser-specific optimizations
-      await this.configureBrowserOptimization(page, testId);
+      await this.configureBrowserOptimization(page);
 
       // Step 4: Setup async operation handling
-      await this.setupAsyncHandling(page, testId);
+      await this.setupAsyncHandling(page);
 
       this.isInitialized = true;
       console.log('[UnifiedMock] Initialization complete');
@@ -264,7 +264,7 @@ As she pushed through the heavy wooden doors, the familiar scent of old books an
   /**
    * Handle brainstorm API requests
    */
-  private async handleBrainstormAPI(testId: string, route: Route): Promise<void> {
+  private async handleBrainstormAPI(_testId: string, route: Route): Promise<void> {
     const request = route.request();
     const postData = request.postDataJSON();
     const { context, field } = postData || {};
@@ -289,7 +289,7 @@ As she pushed through the heavy wooden doors, the familiar scent of old books an
   /**
    * Handle generate API requests
    */
-  private async handleGenerateAPI(testId: string, route: Route): Promise<void> {
+  private async handleGenerateAPI(_testId: string, route: Route): Promise<void> {
     const request = route.request();
     const postData = request.postDataJSON();
 
@@ -406,7 +406,7 @@ As she pushed through the heavy wooden doors, the familiar scent of old books an
   /**
    * Configure browser-specific optimizations
    */
-  private async configureBrowserOptimization(page: Page, testId: string): Promise<void> {
+  private async configureBrowserOptimization(page: Page): Promise<void> {
     const browserName = page.context().browser()?.browserType().name() || 'chromium';
 
     // Browser-specific configurations
@@ -438,7 +438,7 @@ As she pushed through the heavy wooden doors, the familiar scent of old books an
   /**
    * Setup async operation handling to prevent race conditions
    */
-  private async setupAsyncHandling(page: Page, testId: string): Promise<void> {
+  private async setupAsyncHandling(page: Page): Promise<void> {
     await page.addInitScript(() => {
       // Setup async operation tracking
       (window as any).__testAsyncOperations = new Set<string>();
@@ -468,7 +468,7 @@ As she pushed through the heavy wooden doors, the familiar scent of old books an
   /**
    * Wait for all async operations to complete
    */
-  async waitForAsyncOperations(page: Page, testId: string, timeout: number = 5000): Promise<void> {
+  async waitForAsyncOperations(page: Page, _testId: string, timeout: number = 5000): Promise<void> {
     const startTime = Date.now();
 
     while (Date.now() - startTime < timeout) {

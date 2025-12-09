@@ -461,7 +461,7 @@ jobs:
             echo "**Trigger**: ${{ github.event_name }}"
             echo "**Environment**: ${{ needs.validate.outputs.environment }}"
             echo ""
-            
+
             echo "## 🎯 Job Results"
             echo ""
             echo "| Job | Status | Duration |"
@@ -473,13 +473,13 @@ jobs:
             echo "| Performance Analysis | ${{ needs.performance.result }} | ~10min |"
             echo "| Deployment Ready | ${{ needs.deployment-ready.result }} | ~2min |"
             echo ""
-            
+
             # Overall status calculation
             FAILED_JOBS=0
             [ "${{ needs.core.result }}" != "success" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
             [ "${{ needs.security.result }}" = "failure" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
             [ "${{ needs.e2e-tests.result }}" = "failure" ] && FAILED_JOBS=$((FAILED_JOBS + 1))
-            
+
             if [ "$FAILED_JOBS" -eq 0 ]; then
               echo "## ✅ Overall Status: SUCCESS"
               echo ""
@@ -501,7 +501,7 @@ jobs:
               echo "- Fix identified issues"
               echo "- Re-run pipeline after fixes"
             fi
-            
+
             echo ""
             echo "## 📊 Pipeline Metrics"
             echo ""
@@ -511,14 +511,15 @@ jobs:
             echo "- **Test Coverage**: >80% threshold maintained"
             echo "- **Security Level**: Moderate+ vulnerabilities blocked"
             echo ""
-            
+
             echo "## 🔗 Quick Links"
             echo ""
             echo "- [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
             if [ -n "${{ github.event.pull_request.number }}" ]; then
-              echo "- [Pull Request #${{ github.event.pull_request.number }}](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }})"
+              PR_LINK="https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+              echo "- [Pull Request #${{ github.event.pull_request.number }}](${PR_LINK})"
             fi
-            
+
           } > pipeline-summary.md
 
       - name: Upload comprehensive summary

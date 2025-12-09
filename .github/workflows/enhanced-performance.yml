@@ -118,8 +118,11 @@ jobs:
           echo "📊 Calculating performance baseline..."
 
           # Load bundle analysis
+          # shellcheck disable=SC1090
           source <(echo "BUNDLE_SIZE=$(echo '${{ steps.analysis.outputs.bundle_data }}' | jq -r '.bundle_size_bytes')")
+          # shellcheck disable=SC1090
           source <(echo "CHUNK_COUNT=$(echo '${{ steps.analysis.outputs.bundle_data }}' | jq -r '.chunk_count')")
+          # shellcheck disable=SC1090
           source <(echo "TOTAL_SIZE=$(echo '${{ steps.analysis.outputs.bundle_data }}' | jq -r '.total_size_bytes')")
 
           # Performance scoring algorithm
@@ -290,7 +293,7 @@ jobs:
 
           # JavaScript chunks analysis
           echo "JavaScript Chunks:"
-          find dist/assets -name "*.js" -exec ls -lah {} \; | while read line; do
+          find dist/assets -name "*.js" -exec ls -lah {} \; | while read -r line; do
             SIZE=$(echo "$line" | awk '{print $5}')
             NAME=$(echo "$line" | awk '{print $9}')
             echo "  - $(basename "$NAME"): $SIZE"
@@ -299,7 +302,7 @@ jobs:
           # CSS analysis
           echo ""
           echo "CSS Files:"
-          find dist/assets -name "*.css" -exec ls -lah {} \; | while read line; do
+          find dist/assets -name "*.css" -exec ls -lah {} \; | while read -r line; do
             SIZE=$(echo "$line" | awk '{print $5}')
             NAME=$(echo "$line" | awk '{print $9}')
             echo "  - $(basename "$NAME"): $SIZE"

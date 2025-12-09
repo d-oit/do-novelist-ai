@@ -48,7 +48,7 @@ jobs:
             echo "- **Total Workflows**: $WORKFLOW_COUNT"
             echo "- **Workflows Found**:"
 
-            find .github/workflows -name "*.yml" -o -name "*.yaml" | while read file; do
+            find .github/workflows -name "*.yml" -o -name "*.yaml" | while read -r file; do
               echo "  - $(basename "$file")"
             done
 
@@ -261,7 +261,7 @@ jobs:
           # Check for outdated packages
           npx npm-check-updates --target minor --json > outdated.json || echo "No outdated packages"
 
-          if [ -s outdated.json ] && [ $(wc -c < outdated.json) -gt 10 ]; then
+          if [ -s outdated.json ] && [ "$(wc -c < outdated.json)" -gt 10 ]; then
             echo "[WARN] Outdated dependencies found:"
             cat outdated.json
 
@@ -277,7 +277,7 @@ jobs:
               # Parse JSON and create readable summary
               if command -v jq >/dev/null 2>&1; then
                 jq -r 'to_entries[] | "- **\(.key)**: \(.value.current)  \(.value.latest)"' \
-                outdated.json || cat outdated.json
+                  outdated.json || cat outdated.json
               else
                 cat outdated.json
               fi
