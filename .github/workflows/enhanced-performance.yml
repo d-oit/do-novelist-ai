@@ -92,9 +92,11 @@ jobs:
           TOTAL_SIZE=$(du -sb dist | awk '{print $1}')
           CHUNK_COUNT=$(find dist/assets -name "*.js" -type f | wc -l)
 
-          echo "bundle_size=$BUNDLE_SIZE" >> "$GITHUB_OUTPUT"
-          echo "total_size=$TOTAL_SIZE" >> "$GITHUB_OUTPUT"
-          echo "chunk_count=$CHUNK_COUNT" >> "$GITHUB_OUTPUT"
+          {
+            echo "bundle_size=$BUNDLE_SIZE"
+            echo "total_size=$TOTAL_SIZE"
+            echo "chunk_count=$CHUNK_COUNT"
+          } >> "$GITHUB_OUTPUT"
 
           # Create bundle analysis JSON
           cat > bundle-analysis.json << EOF
@@ -126,9 +128,9 @@ jobs:
           # Bundle size scoring (40% weight)
           if [ "$BUNDLE_SIZE" -gt 1048576 ]; then  # > 1MB
             SCORE=$((SCORE - 30))
-          elif [ "$BUNDLE_SIZE" -gt 524288 ]]; then  # > 512KB
+          elif [ "$BUNDLE_SIZE" -gt 524288 ]; then  # > 512KB
             SCORE=$((SCORE - 15))
-          elif [ "$BUNDLE_SIZE" -gt 262144 ]]; then  # > 256KB
+          elif [ "$BUNDLE_SIZE" -gt 262144 ]; then  # > 256KB
             SCORE=$((SCORE - 5))
           fi
 
@@ -144,9 +146,9 @@ jobs:
           # Total size scoring (30% weight)
           if [ "$TOTAL_SIZE" -gt 10485760 ]; then  # > 10MB
             SCORE=$((SCORE - 25))
-          elif [ "$TOTAL_SIZE" -gt 5242880 ]]; then  # > 5MB
+          elif [ "$TOTAL_SIZE" -gt 5242880 ]; then  # > 5MB
             SCORE=$((SCORE - 10))
-          elif [ "$TOTAL_SIZE" -gt 2097152 ]]; then  # > 2MB
+          elif [ "$TOTAL_SIZE" -gt 2097152 ]; then  # > 2MB
             SCORE=$((SCORE - 5))
           fi
 
@@ -207,7 +209,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: baseline-analysis
-    if: env.PERFORMANCE_MODE == 'detailed' || env.PERFORMANCE_MODE == 'benchmark'
+    if: github.event.inputs.performance_mode == 'detailed' || github.event.inputs.performance_mode == 'benchmark' || github.event_name != 'workflow_dispatch'
 
     steps:
       - name: Checkout repository

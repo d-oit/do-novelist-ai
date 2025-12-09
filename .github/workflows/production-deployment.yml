@@ -470,7 +470,7 @@ jobs:
   post-deployment:
     name: 📊 Post-deployment Validation
     runs-on: ubuntu-latest
-    needs: [deploy-staging, deploy-production]
+    needs: [validate-deployment, deploy-staging, deploy-production]
     if: always()
 
     steps:
@@ -588,6 +588,7 @@ jobs:
   rollback:
     name: 🔄 Rollback Deployment
     runs-on: ubuntu-latest
+    needs: [validate-deployment, deploy-staging, deploy-production]
     if: |
       failure() && 
       github.event.inputs.force_deploy != 'true' &&

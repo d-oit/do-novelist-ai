@@ -396,7 +396,7 @@ jobs:
     name: 🚦 Deployment Ready
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [security, core, e2e-tests]
+    needs: [validate, security, core, e2e-tests]
     if: |
       always() &&
       (needs.core.result == 'success') &&
