@@ -261,7 +261,7 @@ jobs:
             try {
               const output = execSync('npm audit --json', { encoding: 'utf8' });
               const auditResult = JSON.parse(output);
-              
+
               if (auditResult.vulnerabilities && Object.keys(auditResult.vulnerabilities).length > 0) {
                 core.warning(`Found ${Object.keys(auditResult.vulnerabilities).length} vulnerabilities`);
                 console.log('Vulnerabilities found:', auditResult.vulnerabilities);
