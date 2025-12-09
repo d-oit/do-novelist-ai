@@ -83,32 +83,38 @@ jobs:
         with:
           fetch-depth: 0 # Fetch full history for proper versioning
 
+      # Set up pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       # Set up Node.js with caching
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: ${{ inputs.node_version || '20' }}
-          cache: "npm" # Enable npm caching
+          cache: "pnpm" # Enable pnpm caching
 
       # Install dependencies
       - name: Install dependencies
         run: |
-          npm ci --prefer-offline --no-audit
+          pnpm install --frozen-lockfile --prefer-offline
         shell: bash
 
       # Run linting (if available)
       - name: Run linting
-        run: npm run lint --if-present
+        run: pnpm run lint --if-present
         continue-on-error: true
 
       # Run type checking (if available)
       - name: Run type checking
-        run: npm run type-check --if-present
+        run: pnpm run type-check --if-present
         continue-on-error: true
 
       # Run tests (if available)
       - name: Run tests
-        run: npm test -- --watch=false --ci
+        run: pnpm test -- --watch=false --ci
         continue-on-error: true
 
       # Build the React application
@@ -116,13 +122,13 @@ jobs:
         id: build
         run: |
           # Determine build command based on available scripts
-          if npm run | grep -q "build:"; then
-            npm run build
-          elif npm run | grep -q "build"; then
-            npm run build
+          if pnpm run | grep -q "build:"; then
+            pnpm run build
+          elif pnpm run | grep -q "build"; then
+            pnpm run build
           else
             # Fallback for Create React App
-            npm run build
+            pnpm run build
           fi
 
           # Set output for artifact path
@@ -237,17 +243,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "20"
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run security audit
-        run: npm audit --audit-level=moderate
+        run: pnpm audit --audit-level=moderate
         continue-on-error: true
 
       - name: Check for known vulnerabilities
@@ -256,7 +267,7 @@ jobs:
           script: |
             const { execSync } = require('child_process');
             try {
-              const output = execSync('npm audit --json', { encoding: 'utf8' });
+              const output = execSync('pnpm audit --json', { encoding: 'utf8' });
               const auditResult = JSON.parse(output);
 
               if (auditResult.vulnerabilities && Object.keys(auditResult.vulnerabilities).length > 0) {

@@ -65,21 +65,21 @@ const isTestEnvironment = (): boolean => {
 type Client = ReturnType<typeof createClient>;
 
 export const getStoredConfig = (): DbConfig => {
-  // In test environment, always use localStorage for reliability
+  // 1. Check LocalStorage first (works in all environments including tests)
+  const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+  if (stored != null) {
+    const parsed = JSON.parse(stored) as DbConfig;
+    // If user has explicitly configured, return it
+    return parsed;
+  }
+
+  // In test environment without localStorage config, use local storage
   if (isTestEnvironment()) {
     return {
       url: '',
       authToken: '',
       useCloud: false,
     };
-  }
-
-  // 1. Check LocalStorage (User overrides)
-  const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-  if (stored != null) {
-    const parsed = JSON.parse(stored) as DbConfig;
-    // If user has explicitly configured, return it
-    return parsed;
   }
 
   // 2. Check Environment (System defaults)
