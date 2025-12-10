@@ -29,10 +29,11 @@ export function validateEnvironment(): ValidationResult {
     return { success: true, env: validated };
   } catch (error) {
     if (error instanceof z.ZodError) {
+      const isCI = import.meta.env.CI;
       const errors = error.issues.map((err: z.ZodIssue) => ({
         path: err.path.join('.'),
         message: err.message,
-        severity: (import.meta.env.CI ? 'warning' : 'error') as const,
+        severity: isCI ? 'warning' : 'error',
       }));
       return { success: false, errors };
     }
