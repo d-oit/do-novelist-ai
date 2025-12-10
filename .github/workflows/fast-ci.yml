@@ -170,6 +170,14 @@ jobs:
 
       - name: Build application
         run: pnpm run build
+        env:
+          VITE_AI_GATEWAY_API_KEY: test-gateway-key
+          VITE_DEFAULT_AI_PROVIDER: mistral
+          VITE_DEFAULT_AI_MODEL: mistral:mistral-medium-latest
+          VITE_TURSO_DATABASE_URL: test-url
+          VITE_TURSO_AUTH_TOKEN: test-token
+          VITE_DISABLE_AI_SDK: "true"
+          DISABLE_AI_SDK: "true"
 
       - name: Verify build
         run: |

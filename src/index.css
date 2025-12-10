@@ -16,8 +16,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 255 60% 55%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 255 60% 10%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
@@ -48,7 +48,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 255 60% 65%;
+    --primary: 255 60% 45%;
     --primary-foreground: 240 5.9% 10%;
 
     --secondary: 240 3.7% 15.9%;
@@ -168,5 +168,33 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Enhanced Focus Indicators for Accessibility */
+@layer base {
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Enhanced focus for interactive elements */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.2);
+  }
+
+  /* Skip links focus enhancement */
+  .focus\:not-sr-only:focus {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.2);
   }
 }

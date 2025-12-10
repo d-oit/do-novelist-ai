@@ -330,7 +330,7 @@ const App: React.FC = () => {
         onNavigate={setCurrentView}
       />
 
-      <main id='main-content' className='relative flex-1'>
+      <main id='main-content' role='main' className='relative flex-1'>
         {/* Page Title - Hidden visually but available to screen readers */}
         <h1 className='sr-only'>
           {currentView === 'dashboard' && project.title !== 'Untitled Project'
