@@ -7,6 +7,14 @@
 
 import type { Page, Route } from '@playwright/test';
 import { setupAISDKMock } from './mock-ai-sdk';
+import { randomBytes } from 'crypto';
+
+/**
+ * Generate a cryptographically secure random number between 0 and 1
+ */
+function secureRandom(): number {
+  return randomBytes(4).readUInt32BE(0) / 4294967296;
+}
 
 export interface MockConfig {
   enableNetworkErrors?: boolean;
@@ -201,7 +209,7 @@ As she pushed through the heavy wooden doors, the familiar scent of old books an
     }
 
     // Simulate network error if enabled
-    if (config?.enableNetworkErrors && Math.random() < 0.1) {
+    if (config?.enableNetworkErrors && secureRandom() < 0.1) {
       await route.abort('internetdisconnected');
       return;
     }

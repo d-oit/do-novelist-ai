@@ -99,7 +99,9 @@
       "Bash(gh workflow:*)",
       "Bash(gh pr comment:*)",
       "Bash(gh issue list:*)",
-      "Bash(file:*)"
+      "Bash(file:*)",
+      "Bash(while:*)",
+      "Bash(gh pr status:*)"
     ],
     "deny": [],
     "ask": []

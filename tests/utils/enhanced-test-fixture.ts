@@ -8,6 +8,14 @@
 import type { Page, BrowserContext } from '@playwright/test';
 import { test as base, expect } from '@playwright/test';
 import { unifiedMockManager } from './unified-mock-manager';
+import { randomBytes } from 'crypto';
+
+/**
+ * Generate a cryptographically secure random string
+ */
+function generateSecureId(): string {
+  return randomBytes(4).toString('hex');
+}
 import { testDataManager } from './test-data-manager';
 import { setupCrossBrowserTest, BrowserCompatibility } from './browser-compatibility';
 
@@ -88,7 +96,7 @@ const test = base.extend<EnhancedTestFixtures, TestOptions>({
 
   testData: async (_fixturse, use, testInfo) => {
     // We'll get testId from testInfo through the browser context
-    const testId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const testId = `test-${Date.now()}-${generateSecureId()}`;
     console.log(`📊 Setting up test data for: ${testId}`);
 
     const options = (testInfo as any)?.testOptions || {};
@@ -134,7 +142,7 @@ const test = base.extend<EnhancedTestFixtures, TestOptions>({
 
   mockManager: async ({ page }, use, testInfo) => {
     // We'll get testId from test context
-    const testId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const testId = `test-${Date.now()}-${generateSecureId()}`;
     console.log(`🎭 Setting up unified mock manager for: ${testId}`);
 
     const options = (testInfo as any)?.testOptions || {};

@@ -6,6 +6,14 @@
  */
 
 import type { Page } from '@playwright/test';
+import { randomBytes } from 'crypto';
+
+/**
+ * Generate a cryptographically secure random string
+ */
+function generateSecureId(): string {
+  return randomBytes(4).toString('hex');
+}
 
 export interface DatabaseTransaction {
   id: string;
@@ -79,7 +87,7 @@ export class DatabaseTransactionManager {
 
             // Track transaction start
             (window as any).__DB_TRANSACTIONS__.push({
-              id: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              id: `txn-${Date.now()}-${generateSecureId()}`,
               type: 'TRANSACTION_START',
               stores: Array.isArray(stores) ? stores : [stores],
               mode: mode || 'readonly',
@@ -166,7 +174,7 @@ export class DatabaseTransactionManager {
     const ids: string[] = [];
 
     for (const record of data) {
-      const id = `${table}-${testId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const id = `${table}-${testId}-${Date.now()}-${generateSecureId()}`;
 
       // Record CREATE transaction
       this.recordTransaction(testId, {
@@ -211,7 +219,7 @@ export class DatabaseTransactionManager {
 
     // Record READ transaction
     this.recordTransaction(testId, {
-      id: `read-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `read-${Date.now()}-${generateSecureId()}`,
       type: 'READ',
       table,
       query: filter ? `SELECT * FROM ${table} WHERE ${filter.field} = ?` : `SELECT * FROM ${table}`,
@@ -252,7 +260,7 @@ export class DatabaseTransactionManager {
 
     // Record UPDATE transaction
     this.recordTransaction(testId, {
-      id: `update-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `update-${Date.now()}-${generateSecureId()}`,
       type: 'UPDATE',
       table,
       query: `UPDATE ${table} SET data = ? WHERE id = ?`,
@@ -289,7 +297,7 @@ export class DatabaseTransactionManager {
 
     // Record DELETE transaction
     this.recordTransaction(testId, {
-      id: `delete-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `delete-${Date.now()}-${generateSecureId()}`,
       type: 'DELETE',
       table,
       query: `DELETE FROM ${table} WHERE id = ?`,
