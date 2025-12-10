@@ -94,7 +94,7 @@ const test = base.extend<EnhancedTestFixtures>({
     await use(context);
   },
 
-  testData: async (_fixtures, use, testInfo) => {
+  testData: async (use, testInfo) => {
     // We'll get testId from testInfo through the browser context
     const testId = `test-${Date.now()}-${generateSecureId()}`;
     console.log(`📊 Setting up test data for: ${testId}`);
