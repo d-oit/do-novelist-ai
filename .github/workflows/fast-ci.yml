@@ -247,8 +247,9 @@ jobs:
           export PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright
           export NODE_ENV=test
 
-          # Run a subset of tests for quick feedback
+          # Run a subset of tests for quick feedback (chromium only)
           pnpm exec playwright test \
+            --project=chromium \
             --reporter=list \
             --grep="accessibility|settings" \
             --max-failures=3 || {
