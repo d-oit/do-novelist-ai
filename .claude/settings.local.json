@@ -96,7 +96,10 @@
       "Bash(git pull:*)",
       "Bash(xargs -I {} bash -c 'wc -l \"\"{}\"\" | awk \"\"{if(\\$1 > 500) print \\$0}\"\"')",
       "Bash(while read f)",
-      "Bash(gh workflow:*)"
+      "Bash(gh workflow:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh issue list:*)",
+      "Bash(file:*)"
     ],
     "deny": [],
     "ask": []
