@@ -14,28 +14,86 @@ export interface DbConfig {
   useCloud: boolean;
 }
 
+/**
+ * Check if a URL is valid for Turso database connection
+ * Turso URLs must be proper libsql:// or https:// URLs
+ */
+const isValidTursoUrl = (url: string): boolean => {
+  if (!url || url.length < 10) return false;
+  // Skip test placeholder URLs
+  if (url === 'test-url' || url.startsWith('test-')) return false;
+  // Must be a proper URL format
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === 'libsql:' || parsed.protocol === 'https:' || parsed.protocol === 'http:'
+    );
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Check if running in test environment
+ */
+const isTestEnvironment = (): boolean => {
+  // Check browser environment flags
+  if (typeof window !== 'undefined') {
+    const env = import.meta.env;
+    return (
+      env?.PLAYWRIGHT_TEST === 'true' ||
+      env?.PLAYWRIGHT === 'true' ||
+      env?.NODE_ENV === 'test' ||
+      env?.CI === 'true'
+    );
+  }
+  // Check Node.js environment
+  if (typeof process !== 'undefined' && process.env) {
+    return (
+      process.env.PLAYWRIGHT_TEST === 'true' ||
+      process.env.PLAYWRIGHT === 'true' ||
+      process.env.NODE_ENV === 'test' ||
+      process.env.CI === 'true'
+    );
+  }
+  return false;
+};
+
 // Removed local validation - using shared validation utilities
 
 // Helper type since Client isn't explicitly exported in all versions
 type Client = ReturnType<typeof createClient>;
 
 export const getStoredConfig = (): DbConfig => {
-  // 1. Check LocalStorage (User overrides)
+  // 1. Check LocalStorage first (works in all environments including tests)
   const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
   if (stored != null) {
     const parsed = JSON.parse(stored) as DbConfig;
-    // If user has explicitly explicitly configured, return it
+    // If user has explicitly configured, return it
     return parsed;
+  }
+
+  // In test environment without localStorage config, use local storage
+  if (isTestEnvironment()) {
+    return {
+      url: '',
+      authToken: '',
+      useCloud: false,
+    };
   }
 
   // 2. Check Environment (System defaults)
   const envUrl = (import.meta.env.VITE_TURSO_DATABASE_URL as string | undefined) ?? '';
   const envToken = (import.meta.env.VITE_TURSO_AUTH_TOKEN as string | undefined) ?? '';
 
+  // Only use cloud if URL is valid and token exists
+  const validUrl = isValidTursoUrl(envUrl);
+  const hasToken = (envToken?.length ?? 0) > 0;
+
   return {
-    url: envUrl ?? '',
-    authToken: envToken ?? '',
-    useCloud: envUrl != null && envToken != null, // Default to cloud if env vars exist
+    url: validUrl ? envUrl : '',
+    authToken: hasToken ? envToken : '',
+    useCloud: validUrl && hasToken,
   };
 };
 
