@@ -94,8 +94,8 @@ const test = base.extend<EnhancedTestFixtures>({
     await use(context);
   },
 
+  // eslint-disable-next-line no-empty-pattern
   testData: async ({}, use, testInfo) => {
-    // eslint-disable-line no-empty-pattern
     // We'll get testId from testInfo through the browser context
     const testId = `test-${Date.now()}-${generateSecureId()}`;
     console.log(`📊 Setting up test data for: ${testId}`);
@@ -165,8 +165,8 @@ const test = base.extend<EnhancedTestFixtures>({
     }
   },
 
+  // eslint-disable-next-line no-empty-pattern
   dataManager: async ({}, use) => {
-    // eslint-disable-line no-empty-pattern
     console.log(`🗄️ Providing data manager`);
     await use(testDataManager);
   },
