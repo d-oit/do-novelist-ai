@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import App from './app/App';
-import './assets/styles.css';
 import './index.css';
 import { addResourceHints, preloadCriticalResources } from './lib/performance';
 
