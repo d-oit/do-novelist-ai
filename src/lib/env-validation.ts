@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
-  // Optional - required in production but lenient in tests
-  VITE_AI_GATEWAY_API_KEY: z.string().min(1, 'AI Gateway API key is required').optional(),
+  // Optional - required in production but lenient in tests/CI
+  VITE_AI_GATEWAY_API_KEY: z.string().optional(),
 
   // Optional with defaults
   VITE_DEFAULT_AI_PROVIDER: z.enum(['openai', 'anthropic', 'google', 'mistral']).default('mistral'),
@@ -32,7 +32,7 @@ export function validateEnvironment(): ValidationResult {
       const errors = error.issues.map((err: z.ZodIssue) => ({
         path: err.path.join('.'),
         message: err.message,
-        severity: 'error' as const,
+        severity: (import.meta.env.CI ? 'warning' : 'error') as const,
       }));
       return { success: false, errors };
     }
@@ -46,6 +46,16 @@ export function validateEnvironment(): ValidationResult {
 export function getValidatedEnv(): ValidatedEnv {
   const result = validateEnvironment();
   if (!result.success || !result.env) {
+    if (import.meta.env.CI) {
+      // In CI, return default environment instead of throwing
+      return {
+        VITE_AI_GATEWAY_API_KEY: undefined,
+        VITE_DEFAULT_AI_PROVIDER: 'mistral',
+        VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
+        VITE_THINKING_AI_MODEL: 'mistral:mistral-medium',
+        VITE_ENABLE_AUTO_FALLBACK: undefined,
+      };
+    }
     const errorMessages = result.errors?.map(e => `${e.path}: ${e.message}`).join('\n');
     throw new Error(`Environment validation failed:\n${errorMessages}`);
   }

@@ -1,83 +1,108 @@
 import type { Page } from '@playwright/test';
-import { expect, test } from '@playwright/test';
-
-import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { expect, test } from '../utils/enhanced-test-fixture';
 import { performanceMonitor } from '../utils/performance-monitor';
+import { dbTransactionManager } from '../utils/database-transaction-manager';
+import { unifiedMockManager } from '../utils/unified-mock-manager';
 
 /**
- * Check if an element exists and is visible without throwing.
- * Uses Playwright's built-in polling instead of explicit timeouts.
+ * Enhanced AI Generation and GOAP Workflow E2E Tests
+ *
+ * Demonstrates optimized test data management, unified mocking,
+ * and comprehensive isolation for robust test execution.
  */
+
+// Helper function for element visibility checking
 async function isElementVisible(page: Page, selector: string): Promise<boolean> {
-  const element = page.locator(selector);
   try {
-    await expect(element.first()).toBeVisible({ timeout: 3000 });
+    const element = page.locator(selector);
+    await element.waitFor({ state: 'visible', timeout: 3000 });
     return true;
   } catch {
     return false;
   }
 }
-
 test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
-  test.beforeAll(async () => {
+  test.beforeAll(async ({ page }) => {
+    // Initialize database transaction manager
+    await dbTransactionManager.initialize(page);
+
     // Start performance monitoring for the test suite
     performanceMonitor.startTestSuite('AI Generation E2E Tests');
+
+    console.log('🚀 Enhanced AI Generation test suite initialized');
   });
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, testData, mockManager, compatibility }) => {
     performanceMonitor.startTimer('Test Setup');
+
     // Capture console logs
     page.on('console', msg => console.log(`[Browser Console]: ${msg.text()}`));
 
-    // Complete state reset to ensure clean environment
-    await page.unroute('**/*');
-    await page.evaluate(() => {
-      // Safe localStorage clearing with error handling
-      try {
-        localStorage.clear();
-        sessionStorage.clear();
-      } catch (error) {
-        console.log('Storage clear failed (expected in some contexts):', error);
-      }
+    console.log('🔧 Setting up enhanced test environment:', {
+      projectId: testData.project.id,
+      userId: testData.user.id,
+      chapterCount: testData.chapters.length,
     });
-    await page.context().clearCookies();
 
-    // Setup AI mocks
-    await setupGeminiMock(page);
+    // Configure unified mocking with error simulation capability
+    mockManager.configureErrorSimulation('test-session', {
+      enableNetworkErrors: false,
+      enableTimeoutErrors: false,
+      mockDelay: 0,
+    });
 
-    // Navigate to home page and wait for app to be ready with optimized waiting
-    await page.goto('/');
-    // Use specific element wait instead of networkidle for better performance
-    await expect(page.getByRole('navigation')).toBeVisible();
-    await page.setViewportSize({ width: 1280, height: 720 });
+    // Navigate to home page with cross-browser compatibility
+    await page.goto('/', {
+      waitUntil: 'networkidle',
+      timeout: compatibility.getTimeoutMultiplier() * 30000,
+    });
 
-    // Use role-based wait instead of hardcoded timeout
+    // Wait for app to be ready
     await expect(page.getByRole('navigation')).toBeVisible();
     await expect(page.getByTestId('nav-dashboard')).toBeVisible();
+    await page.setViewportSize({ width: 1280, height: 720 });
+
+    console.log('✅ Enhanced test environment setup complete');
   });
 
-  test.afterEach(async ({ page }) => {
-    performanceMonitor.endTimer('Test Setup');
+  test.afterEach(async ({ page, mockManager }) => {
     performanceMonitor.startTimer('Test Cleanup');
 
-    // Comprehensive cleanup after each test
-    await page.unroute('**/*');
-    await page.evaluate(() => {
-      // Safe storage clearing with error handling
-      try {
-        localStorage.clear();
-        sessionStorage.clear();
-      } catch (error) {
-        console.log('Storage clear failed (expected in some contexts):', error);
-      }
-    });
-    await page.context().clearCookies();
-    await page.goto('about:blank');
+    console.log('🧹 Cleaning up test');
+
+    try {
+      // End database transaction context with rollback
+      await dbTransactionManager.endTransactionContext('test-session');
+
+      // Cleanup unified mocking
+      await mockManager.cleanupPageRoutes(page, 'test-session');
+
+      // Clear browser state
+      await page.unroute('**/*');
+      await page.evaluate(() => {
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch (error) {
+          console.log('Storage clear failed (expected in some contexts):', error);
+        }
+      });
+      await page.context().clearCookies();
+      await page.goto('about:blank', { waitUntil: 'domcontentloaded' });
+
+      console.log('✅ Test cleanup complete');
+    } catch (error) {
+      console.error('❌ Test cleanup failed:', error);
+    }
 
     performanceMonitor.endTimer('Test Cleanup');
   });
 
   test.afterAll(async () => {
+    // Global cleanup
+    await dbTransactionManager.globalCleanup();
+    await unifiedMockManager.globalCleanup();
+
     // End performance monitoring and report results
     performanceMonitor.endTestSuite('AI Generation E2E Tests');
     performanceMonitor.reportMetrics();
@@ -87,6 +112,15 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
     if (!passed) {
       console.warn('⚠️ Some performance targets were missed');
     }
+
+    // Log final statistics
+    const dbStats = dbTransactionManager.getTransactionStatistics();
+    const mockStats = unifiedMockManager.getStatistics();
+
+    console.log('📊 Final Test Statistics:', {
+      database: dbStats,
+      mocking: mockStats,
+    });
   });
 
   test('should access dashboard via navigation', async ({ page }) => {

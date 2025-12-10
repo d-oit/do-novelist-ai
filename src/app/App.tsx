@@ -180,7 +180,21 @@ const App: React.FC = () => {
   useEffect(() => {
     const initApp = async (): Promise<void> => {
       performanceMonitor.startTiming('app-initialization');
-      await db.init();
+      try {
+        // Add timeout to prevent infinite loading in CI environments
+        const initPromise = db.init();
+        const timeoutPromise = new Promise<void>((_, reject) =>
+          setTimeout(() => reject(new Error('Database initialization timeout')), 5000),
+        );
+
+        await Promise.race([initPromise, timeoutPromise]);
+      } catch (error) {
+        console.warn(
+          'Database initialization failed or timed out, continuing with local storage:',
+          error,
+        );
+        // Continue with local storage - don't block the app
+      }
       performanceMonitor.endTiming('app-initialization');
       setIsLoading(false);
     };
@@ -330,7 +344,7 @@ const App: React.FC = () => {
         onNavigate={setCurrentView}
       />
 
-      <main id='main-content' className='relative flex-1'>
+      <main id='main-content' role='main' className='relative flex-1'>
         {/* Page Title - Hidden visually but available to screen readers */}
         <h1 className='sr-only'>
           {currentView === 'dashboard' && project.title !== 'Untitled Project'

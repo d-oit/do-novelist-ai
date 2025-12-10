@@ -20,9 +20,47 @@ export interface LogEntry {
   };
 }
 
+/**
+ * Safely check if we're in development mode
+ * Handles various environments including Vite, Node.js, and test contexts
+ */
+const isDevelopmentMode = (): boolean => {
+  try {
+    // Check Vite environment first
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      if (import.meta.env.DEV === true) return true;
+      if (import.meta.env.NODE_ENV === 'development') return true;
+    }
+    // Check Node.js environment
+    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+      return true;
+    }
+  } catch {
+    // Ignore errors in environment detection
+  }
+  return false;
+};
+
+/**
+ * Safely check if we're in production mode
+ */
+const isProductionMode = (): boolean => {
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      if (import.meta.env.PROD === true) return true;
+      if (import.meta.env.NODE_ENV === 'production') return true;
+    }
+    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'production') {
+      return true;
+    }
+  } catch {
+    // Ignore errors in environment detection
+  }
+  return false;
+};
+
 class Logger {
-  private minLevel: LogLevel =
-    typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV ? 'debug' : 'info';
+  private minLevel: LogLevel = isDevelopmentMode() ? 'debug' : 'info';
   private context: LogContext = {};
 
   public setContext(context: LogContext): void {
@@ -52,7 +90,7 @@ class Logger {
       };
     }
 
-    const formatted = import.meta.env.PROD
+    const formatted = isProductionMode()
       ? JSON.stringify(entry)
       : `[${entry.timestamp}] ${entry.level.toUpperCase()} ${message} ${JSON.stringify(entry.context || {})}`;
 
@@ -68,7 +106,7 @@ class Logger {
         break;
     }
 
-    if (import.meta.env.PROD) {
+    if (isProductionMode()) {
       this.sendToAggregator();
     }
   }
