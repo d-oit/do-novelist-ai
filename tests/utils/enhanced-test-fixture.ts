@@ -55,7 +55,7 @@ export interface TestOptions {
 /**
  * Enhanced test fixture with comprehensive data management and mocking
  */
-const test = base.extend<EnhancedTestFixtures, TestOptions>({
+const test = base.extend<EnhancedTestFixtures>({
   page: async ({ page }, use) => {
     // Browser-specific setup
     const browserName = page.context().browser()?.browserType().name() || 'chromium';
