@@ -1,6 +1,3 @@
-import type { Project, AgentAction, LogEntry, Chapter } from '@shared/types';
-import { AgentMode, ChapterStatus } from '@shared/types';
-import { createChapter } from '@shared/utils';
 import type React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
@@ -11,7 +8,10 @@ import {
   analyzeConsistency,
   continueWriting,
 } from '@/lib/ai';
-import type { RefineOptions } from '@/shared/types';
+import type { RefineOptions, Project, AgentAction, LogEntry, Chapter  } from '@/shared/types';
+
+import { AgentMode, ChapterStatus } from '@shared/types';
+import { createChapter } from '@shared/utils';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {

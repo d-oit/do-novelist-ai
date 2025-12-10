@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+import { type Character } from '../../characters/types';
 import { writingAssistantDb } from '../services/writingAssistantDb';
 import { writingAssistantService } from '../services/writingAssistantService';
 import {
@@ -17,7 +18,6 @@ import {
   type WritingProgressMetrics,
 } from '../types';
 import { DEFAULT_WRITING_ASSISTANT_CONFIG } from '../types';
-import { type Character } from '../../characters/types';
 
 interface UseWritingAssistantOptions {
   autoAnalyze?: boolean;

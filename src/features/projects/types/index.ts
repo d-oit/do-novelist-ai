@@ -9,6 +9,11 @@ import { z } from 'zod';
 import { WritingStyleSchema } from '@/types';
 
 /**
+ * Project update data
+ */
+import { type WritingStyle, type PublishStatus } from '@/types';
+
+/**
  * Project creation wizard step
  */
 export type WizardStep = 'idea' | 'outline' | 'style' | 'chapters' | 'review';
@@ -50,11 +55,6 @@ export const ProjectCreationSchema = z.object({
 });
 
 export type ProjectCreationData = z.infer<typeof ProjectCreationSchema>;
-
-/**
- * Project update data
- */
-import { type WritingStyle, type PublishStatus } from '@/types';
 
 export interface ProjectUpdateData {
   title?: string;

@@ -2,9 +2,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, User, Calendar, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
 import React, { useEffect } from 'react';
 
-import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
+import { cn } from '../../../lib/utils';
 import { type ReaderFeedback } from '../types';
 
 interface DetailedFeedbackModalProps {

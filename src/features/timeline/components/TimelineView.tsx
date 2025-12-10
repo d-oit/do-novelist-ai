@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import type { Project, TimelineEvent } from '@/types/schemas';
-import { useTimelineStore } from '../stores/timelineStore';
-import { TimelineCanvas } from './TimelineCanvas';
-import { Button } from '@/components/ui/Button';
 import { Plus, ZoomIn, ZoomOut, Calendar } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+
+import { Button } from '@/components/ui/Button';
+import type { Project, TimelineEvent } from '@/types/schemas';
+
+import { useTimelineStore } from '../stores/timelineStore';
+
+import { TimelineCanvas } from './TimelineCanvas';
 
 interface TimelineViewProps {
   project: Project;

@@ -15,12 +15,13 @@ import {
 } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 
+import { logger } from '@/lib/logging/logger';
+
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { cn, iconButtonTarget } from '../../../lib/utils';
 import { useAnalytics } from '../hooks/useAnalytics';
 import type { WritingGoals } from '../types';
-import { logger } from '@/lib/logging/logger';
 
 interface GoalsManagerProps {
   projectId?: string;

@@ -16,10 +16,11 @@ import {
 } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 
+import type { Chapter } from '@/types';
+
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { cn } from '../../../lib/utils';
-import type { Chapter } from '@/types';
 import { useVersioning } from '../hooks/useVersioning';
 import type { ChapterVersion, VersionFilter, SortOrder } from '../types';
 

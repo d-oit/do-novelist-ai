@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
 import { ChevronDown, Zap, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+
+import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 import { cn } from '@/lib/utils';
 import { loadUserPreferences, saveUserPreferences } from '@/services/ai-config-service';
-import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 
 interface ProviderSelectorProps {
   userId: string;

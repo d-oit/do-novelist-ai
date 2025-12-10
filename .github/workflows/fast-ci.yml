@@ -160,6 +160,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check file sizes
+        run: pnpm run check:file-size
+
       - name: Cache Vite build
         uses: actions/cache@v4
         with:

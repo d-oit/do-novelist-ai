@@ -4,13 +4,14 @@
  */
 
 // import { db } from '../../../lib/db'; // Will be used when implementing actual DB queries
+import { logger } from '@/lib/logging/logger';
+
+import { generateSecureId } from '../../../lib/secure-random';
 import {
   type ContentAnalysis,
   type WritingAssistantConfig,
   type WritingSuggestion,
 } from '../types';
-import { generateSecureId } from '../../../lib/secure-random';
-import { logger } from '@/lib/logging/logger';
 
 // Database schema types for Writing Assistant
 export interface AnalysisHistory {

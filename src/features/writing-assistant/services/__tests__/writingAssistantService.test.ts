@@ -6,6 +6,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+
 import type { WritingAssistantConfig } from '../../types';
 import { writingAssistantService } from '../writingAssistantService';
 

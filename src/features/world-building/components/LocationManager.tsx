@@ -3,13 +3,16 @@
  * Specialized interface for managing locations
  */
 
-import React, { useState } from 'react';
 import { Plus, MapPin, Edit } from 'lucide-react';
-import { useWorldBuilding } from '../hooks/useWorldBuilding';
-import { WorldElementEditor } from './WorldElementEditor';
-import type { Location } from '../types';
+import React, { useState } from 'react';
+
 import { Button } from '@shared/components/button';
 import { Card } from '@shared/components/card';
+
+import { useWorldBuilding } from '../hooks/useWorldBuilding';
+import type { Location } from '../types';
+
+import { WorldElementEditor } from './WorldElementEditor';
 
 interface LocationManagerProps {
   projectId: string;

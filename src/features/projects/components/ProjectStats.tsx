@@ -1,6 +1,7 @@
-import type { Project } from '@shared/types';
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+
+import type { Project } from '@shared/types';
 
 interface ProjectStatsProps {
   project: Project;

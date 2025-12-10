@@ -1,8 +1,45 @@
+import { clsx, type ClassValue } from 'clsx';
+import {
+  BookOpen,
+  CheckCircle2,
+  Wand2,
+  Loader2,
+  Menu,
+  X,
+  Maximize2,
+  Minimize2,
+  AlignLeft,
+  Type,
+  UploadCloud,
+  Timer,
+  ChevronDown,
+  CircleDashed,
+  PenLine,
+  Eye,
+  Plus,
+  Sparkles,
+  Image as ImageIcon,
+  RefreshCw,
+  GitBranch,
+  History,
+  BarChart3,
+} from 'lucide-react';
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
+import { twMerge } from 'tailwind-merge';
 
 import type { Project, Chapter, RefineOptions } from '@/shared/types';
 import { ChapterStatus } from '@/shared/types';
+
+import { generateChapterIllustration } from '../../../lib/ai';
+import { AnalyticsDashboard, useAnalytics } from '../../analytics';
+import { VersionHistory, VersionComparison, useVersioning } from '../../versioning';
+import { useEditorState } from '../hooks/useEditorState';
 import type { AIModel } from '../types';
+
+import CoverGenerator from './CoverGenerator';
+import PublishPanel from './PublishPanel';
+
+
 
 // ...
 
@@ -50,43 +87,6 @@ const getStatusConfig = (
       };
   }
 };
-import {
-  BookOpen,
-  CheckCircle2,
-  Wand2,
-  Loader2,
-  Menu,
-  X,
-  Maximize2,
-  Minimize2,
-  AlignLeft,
-  Type,
-  UploadCloud,
-  Timer,
-  ChevronDown,
-  CircleDashed,
-  PenLine,
-  Eye,
-  Plus,
-  Sparkles,
-  Image as ImageIcon,
-  RefreshCw,
-  GitBranch,
-  History,
-  BarChart3,
-} from 'lucide-react';
-
-import { AnalyticsDashboard, useAnalytics } from '../../analytics';
-import { VersionHistory, VersionComparison, useVersioning } from '../../versioning';
-import { useEditorState } from '../hooks/useEditorState';
-
-import CoverGenerator from './CoverGenerator';
-import PublishPanel from './PublishPanel';
-
-import { generateChapterIllustration } from '../../../lib/ai';
-
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 
 function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));

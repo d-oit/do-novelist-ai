@@ -9,8 +9,8 @@
 
 import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
-import type { ReactElement } from 'react';
 import axe, { type AxeResults } from 'axe-core';
+import type { ReactElement } from 'react';
 
 /**
  * Axe configuration for WCAG 2.1 AA compliance

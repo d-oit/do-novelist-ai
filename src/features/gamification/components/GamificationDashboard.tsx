@@ -1,8 +1,10 @@
-import React from 'react';
 import { Flame, Award, Target, TrendingUp } from 'lucide-react';
+import React from 'react';
+
 import { useGamification } from '../hooks/useGamification';
-import { StreakDisplay } from './StreakDisplay';
+
 import { AchievementsList } from './AchievementsList';
+import { StreakDisplay } from './StreakDisplay';
 
 interface GamificationDashboardProps {
   userId: string;

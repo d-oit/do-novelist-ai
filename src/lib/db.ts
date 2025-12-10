@@ -1,8 +1,9 @@
 import { createClient } from '@libsql/client/web';
 
-import { type Project, PublishStatus, ChapterStatus } from '../types';
 import { parseChapterStatus, parsePublishStatus } from '../shared/utils/validation';
+import { type Project, PublishStatus, ChapterStatus } from '../types';
 import { ProjectSchema, type WorldState, type ProjectSettings } from '../types/schemas';
+
 import { logger } from './logging/logger';
 
 const STORAGE_KEY = 'novelist_db_config';

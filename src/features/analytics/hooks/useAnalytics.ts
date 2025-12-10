@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useAnalyticsStore } from '../../../lib/stores/analyticsStore';
 import type { Project } from '@/types';
+
+import { useAnalyticsStore } from '../../../lib/stores/analyticsStore';
 import type {
   WritingSession,
   WeeklyStats,

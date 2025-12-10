@@ -29,12 +29,14 @@ export function validateEnvironment(): ValidationResult {
     return { success: true, env: validated };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const isCI = import.meta.env.CI;
-      const errors = error.issues.map((err: z.ZodIssue) => ({
-        path: err.path.join('.'),
-        message: err.message,
-        severity: isCI ? 'warning' : 'error',
-      }));
+      const errors = error.issues.map((err: z.ZodIssue) => {
+        const severity: 'error' | 'warning' = import.meta.env.CI ? 'warning' : 'error';
+        return {
+          path: err.path.join('.'),
+          message: err.message,
+          severity,
+        };
+      });
       return { success: false, errors };
     }
     return {

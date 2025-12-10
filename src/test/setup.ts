@@ -27,7 +27,58 @@ afterEach(() => {
 vi.mock('framer-motion', () => {
   const createMotionComponent = (elementType: string) => {
     return ({ children, ...props }: any) => {
-      return React.createElement(elementType, props, children);
+      // Filter out Framer Motion specific props that cause React warnings
+      const {
+        whileHover: _whileHover,
+        whileTap: _whileTap,
+        whileFocus: _whileFocus,
+        whileInView: _whileInView,
+        initial: _initial,
+        animate: _animate,
+        exit: _exit,
+        transition: _transition,
+        variants: _variants,
+        layout: _layout,
+        layoutId: _layoutId,
+        drag: _drag,
+        dragConstraints: _dragConstraints,
+        dragElastic: _dragElastic,
+        onDragStart: _onDragStart,
+        onDrag: _onDrag,
+        onDragEnd: _onDragEnd,
+        onAnimationStart: _onAnimationStart,
+        onAnimationComplete: _onAnimationComplete,
+        onUpdate: _onUpdate,
+        transformTemplate: _transformTemplate,
+        ...domProps
+      } = props;
+
+      // Silence unused variable warnings - these are intentionally filtered out
+      void [
+        _whileHover,
+        _whileTap,
+        _whileFocus,
+        _whileInView,
+        _initial,
+        _animate,
+        _exit,
+        _transition,
+        _variants,
+        _layout,
+        _layoutId,
+        _drag,
+        _dragConstraints,
+        _dragElastic,
+        _onDragStart,
+        _onDrag,
+        _onDragEnd,
+        _onAnimationStart,
+        _onAnimationComplete,
+        _onUpdate,
+        _transformTemplate,
+      ];
+
+      return React.createElement(elementType, domProps, children);
     };
   };
 

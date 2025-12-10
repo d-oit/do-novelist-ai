@@ -1,5 +1,7 @@
-// UI Primitives - strict public export barrier
-export { Button, buttonVariants, type ButtonProps } from './Button';
+// UI Primitives - Re-exported from canonical shared components
+// These exports are deprecated - use @shared/components/ui directly
+export { Badge, badgeVariants, type BadgeProps } from '@shared/components/ui/Badge';
+export { Button, buttonVariants, type ButtonProps } from '@shared/components/ui/Button';
 export {
   Card,
   CardHeader,
@@ -9,4 +11,5 @@ export {
   CardFooter,
   cardVariants,
   type CardProps,
-} from './Card';
+} from '@shared/components/ui/Card';
+export { MetricCard, type MetricCardProps } from '@shared/components/ui/MetricCard';

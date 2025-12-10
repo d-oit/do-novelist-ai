@@ -2,9 +2,10 @@ import { motion } from 'framer-motion';
 import { BarChart3, Eye, EyeOff, Download, RefreshCw } from 'lucide-react';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
+import type { Project } from '@/types';
+
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import type { Project } from '@/types';
 import { useAnalytics } from '../hooks/useAnalytics';
 
 import GoalsProgress from './GoalsProgress';

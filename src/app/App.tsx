@@ -1,16 +1,16 @@
 import { Loader2, Settings } from 'lucide-react';
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 
-import Navbar from '../components/Navbar';
+import type { Chapter, Project, RefineOptions  } from '@/shared/types';
+import { ChapterStatus, PublishStatus } from '@/shared/types';
+
 import { ProjectsErrorBoundary } from '../components/error-boundary';
+import Navbar from '../components/Navbar';
 import { ActionCard, BookViewer, PlannerControl } from '../features/generation/components';
 import { useGoapEngine } from '../features/generation/hooks';
 import { ProjectStats, ProjectWizard } from '../features/projects/components';
 import { db } from '../features/projects/services';
-import type { Chapter, Project } from '@/shared/types';
-import { ChapterStatus, PublishStatus } from '@/shared/types';
 import { createChapter } from '../shared/utils';
-import type { RefineOptions } from '@/shared/types';
 import { performanceMonitor } from '../utils/performance';
 
 // Lazy load heavy components for better performance

@@ -5,25 +5,27 @@
  * to achieve WCAG 2.1 AA compliance standards
  */
 
-import React from 'react';
 import { render, act } from '@testing-library/react';
 import { toHaveNoViolations } from 'jest-axe';
+import React from 'react';
+
+
+// Import testable components
+import ActionCard from '../components/ActionCard';
+import GoapVisualizer from '../components/GoapVisualizer';
+import Header from '../components/layout/Header';
+import MainLayout from '../components/layout/MainLayout';
+import { UserProvider } from '../contexts/UserContext';
+import AnalyticsDashboardRefactored from '../features/analytics/components/AnalyticsDashboardRefactored';
+import SettingsView from '../features/settings/components/SettingsView';
+import { AgentMode, PublishStatus } from '../shared/types';
+
 import { runA11yTests, groupViolationsBySeverity, type A11yViolation } from './a11y-utils';
 
 // Extend Jest matchers for accessibility (only if expect is available)
 if (typeof expect !== 'undefined') {
   expect.extend(toHaveNoViolations);
 }
-
-// Import testable components
-import MainLayout from '../components/layout/MainLayout';
-import Header from '../components/layout/Header';
-import SettingsView from '../features/settings/components/SettingsView';
-import AnalyticsDashboardRefactored from '../features/analytics/components/AnalyticsDashboardRefactored';
-import ActionCard from '../components/ActionCard';
-import GoapVisualizer from '../components/GoapVisualizer';
-import { AgentMode, PublishStatus } from '../shared/types';
-import { UserProvider } from '../contexts/UserContext';
 
 /**
  * Test suite for accessibility compliance

@@ -16,9 +16,10 @@ import {
 } from 'lucide-react';
 import React, { useState, useRef, useEffect } from 'react';
 
+import type { Project, Chapter, RefineOptions } from '@/types';
+
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import type { Project, Chapter, RefineOptions } from '@/types';
 import { WritingAssistantPanel } from '../../writing-assistant';
 
 interface ChapterEditorProps {

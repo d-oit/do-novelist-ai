@@ -18,6 +18,7 @@ import type { DbConfig } from '../../../lib/db';
 import { db, getStoredConfig, saveStoredConfig } from '../../../lib/db';
 import { cn } from '../../../lib/utils';
 import { GamificationPanel } from '../../gamification';
+
 import { AISettingsPanel } from './AISettingsPanel';
 
 const SettingsView: React.FC = () => {

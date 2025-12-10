@@ -1,12 +1,15 @@
-import type { Project, Chapter } from '@shared/types';
-import { PublishStatus } from '@shared/types';
 import { Download, Globe, Rocket, Target, Languages, Loader2, FileCheck } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { translateContent } from '@/lib/ai';
 import { cn } from '@/lib/utils';
+
+import type { Project, Chapter } from '@shared/types';
+import { PublishStatus } from '@shared/types';
+
+
 import { generateEpub } from '../services/epubService';
 
-import { translateContent } from '@/lib/ai';
 
 interface PublishViewProps {
   project: Project;

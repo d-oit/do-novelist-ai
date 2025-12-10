@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
 import { Settings, DollarSign, Shield, Zap, Activity } from 'lucide-react';
-import { ProviderSelector } from '@/components/ai/ProviderSelector';
+import { useState, useEffect } from 'react';
+
 import { CostDashboard } from '@/components/ai/CostDashboard';
+import { ProviderSelector } from '@/components/ai/ProviderSelector';
 import { cn } from '@/lib/utils';
 import {
   loadUserPreferences,

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+
 import { gamificationService } from '../services/gamificationService';
 import {
   type WritingStreak,

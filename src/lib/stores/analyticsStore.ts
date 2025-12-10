@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
+import { type Project } from '@/types';
+
 import { analyticsService } from '../../features/analytics/services/analyticsService';
 import {
   type AnalyticsFilter,
@@ -13,7 +15,6 @@ import {
   type WritingSession,
 } from '../../features/analytics/types';
 
-import { type Project } from '@/types';
 
 // Store State
 interface AnalyticsState {

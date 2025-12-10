@@ -7,10 +7,11 @@ import { motion } from 'framer-motion';
 import { X, Download, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 
-import { Button } from '../../../components/ui/Button';
-import { cn } from '../../../lib/utils';
 import type { Project } from '@/types';
 import { ChapterStatus } from '@/types';
+
+import { Button } from '../../../components/ui/Button';
+import { cn } from '../../../lib/utils';
 
 import AnalyticsContent from './AnalyticsContent';
 import AnalyticsSidebar from './AnalyticsSidebar';

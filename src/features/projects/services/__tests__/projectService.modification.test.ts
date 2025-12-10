@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { PublishStatus } from '@/types';
+
+import { db } from '../../../../lib/db';
 import { type ProjectCreationData, type ProjectUpdateData } from '../../types';
 import { projectService } from '../projectService';
+
 
 // Mock the db module to use localStorage
 vi.mock('../../../../lib/db', () => ({
@@ -14,8 +17,6 @@ vi.mock('../../../../lib/db', () => ({
     deleteProject: vi.fn().mockResolvedValue(undefined),
   },
 }));
-
-import { db } from '../../../../lib/db';
 
 describe('ProjectService - Modification', () => {
   // In-memory storage for mocked operations

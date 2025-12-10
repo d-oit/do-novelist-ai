@@ -3,17 +3,18 @@
  * Provides periodic health checks, latency monitoring, error tracking, and circuit breaker pattern
  */
 
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
+import { generateText } from 'ai';
+
+import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 import {
   getProviderHealth,
   updateProviderHealth,
   logUsageAnalytic,
   type AIProviderHealth,
 } from '@/lib/db/index';
-import { generateText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
-import { createAnthropic } from '@ai-sdk/anthropic';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 import { logger } from '@/lib/logging/logger';
 
 /**

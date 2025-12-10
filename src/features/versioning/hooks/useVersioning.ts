@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 
-import { useVersioningStore } from '../../../lib/stores/versioningStore';
 import type { Chapter } from '@/types';
+
+import { useVersioningStore } from '../../../lib/stores/versioningStore';
 import type {
   ChapterVersion,
   Branch,

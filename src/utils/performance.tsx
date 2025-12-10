@@ -1,5 +1,6 @@
 // Performance monitoring utilities for lazy loading and component metrics
 import React from 'react';
+
 import { logger } from '@/lib/logging/logger';
 
 interface PerformanceMetrics {

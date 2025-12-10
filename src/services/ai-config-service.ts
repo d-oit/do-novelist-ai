@@ -3,8 +3,8 @@
  * Manages user preferences for AI provider selection
  */
 
-import { getUserAIPreference, saveUserAIPreference, type UserAIPreference } from '@/lib/db/index';
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
+import { getUserAIPreference, saveUserAIPreference, type UserAIPreference } from '@/lib/db/index';
 import { logger } from '@/lib/logging/logger';
 
 export interface ProviderConfig {

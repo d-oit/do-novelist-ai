@@ -8,6 +8,11 @@
 - [ ] No console.log, debugger, or console.* statements in production code
 - [ ] All new code has appropriate error handling
 - [ ] No TODO comments without corresponding issue
+- [ ] Imports use `@/` alias instead of relative paths (`../../../`)
+- [ ] Shared components use `@shared/` alias
+- [ ] Imports are organized (React → external → internal → relative)
+- [ ] No files exceed 500 LOC limit (`npm run check:file-size`)
+- [ ] No new `any` types in production code (prefer `unknown` or proper typing)
 
 #### Security
 - [ ] No secrets, API keys, or credentials in code

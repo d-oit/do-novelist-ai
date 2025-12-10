@@ -30,6 +30,7 @@
     "perf:monitor": "node scripts/performance-monitor.cjs",
     "perf:build": "pnpm run build && pnpm run perf:monitor",
     "check:file-size": "node scripts/check-file-size.js",
+    "fix:imports": "node scripts/fix-imports.js",
     "ci:quality": "pnpm run lint:ci && pnpm run test && pnpm run coverage",
     "ci:performance": "pnpm run perf:build && pnpm run test:e2e",
     "ci:build": "pnpm run typecheck && pnpm run lint:ci && pnpm run build"

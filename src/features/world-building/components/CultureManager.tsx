@@ -3,13 +3,16 @@
  * Specialized interface for managing cultures
  */
 
-import React, { useState } from 'react';
 import { Plus, Users, Edit } from 'lucide-react';
-import { useWorldBuilding } from '../hooks/useWorldBuilding';
-import { WorldElementEditor } from './WorldElementEditor';
-import type { Culture } from '../types';
+import React, { useState } from 'react';
+
 import { Button } from '@shared/components/button';
 import { Card } from '@shared/components/card';
+
+import { useWorldBuilding } from '../hooks/useWorldBuilding';
+import type { Culture } from '../types';
+
+import { WorldElementEditor } from './WorldElementEditor';
 
 interface CultureManagerProps {
   projectId: string;

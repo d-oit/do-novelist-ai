@@ -3,8 +3,8 @@
  * Initializes analytics and health monitoring
  */
 
-import { startHealthMonitoring } from '@/services/ai-health-service';
 import { logger } from '@/lib/logging/logger';
+import { startHealthMonitoring } from '@/services/ai-health-service';
 
 let healthMonitorStopper: (() => void) | null = null;
 

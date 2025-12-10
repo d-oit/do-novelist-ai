@@ -12,16 +12,17 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import React, { useState } from 'react';
+
+import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
+import type { Project, Chapter, ProjectSettings } from '@/types';
+import { PublishStatus } from '@/types';
 
 import { translateContent } from '../../../lib/ai';
 import { generateEpub } from '../../../lib/epub';
-import type { Project, Chapter, ProjectSettings } from '@/types';
-import { PublishStatus } from '@/types';
 import { usePublishingAnalytics } from '../../publishing';
 import PublishingDashboard from '../../publishing/components/PublishingDashboard';
 import PublishingSetup from '../../publishing/components/PublishingSetup';
-import { logger } from '@/lib/logging/logger';
 
 interface PublishPanelProps {
   project: Project;

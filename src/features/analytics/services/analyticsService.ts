@@ -1,3 +1,5 @@
+import { type Project } from '@/types';
+
 import {
   type WritingSession,
   type DailyStats,
@@ -9,7 +11,6 @@ import {
   type ChartDataPoint,
 } from '../types';
 
-import { type Project } from '@/types';
 
 interface SessionProgress {
   wordsWritten: number;

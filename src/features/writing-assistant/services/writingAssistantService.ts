@@ -5,6 +5,10 @@
 
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText, type LanguageModel } from 'ai';
+
+import { logger } from '@/lib/logging/logger';
+
+import { type Character } from '../../characters/types';
 import {
   type ContentAnalysis,
   type WritingSuggestion,
@@ -20,8 +24,6 @@ import {
   type TransitionAnalysis,
   type WritingSuggestionCategory,
 } from '../types';
-import { type Character } from '../../characters/types';
-import { logger } from '@/lib/logging/logger';
 
 // Raw AI response type for suggestions
 interface RawAISuggestion {

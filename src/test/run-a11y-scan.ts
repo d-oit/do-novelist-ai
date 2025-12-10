@@ -3,19 +3,21 @@
  * Scans key components and generates detailed violation report
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { runA11yTests, groupViolationsBySeverity, formatViolations } from './a11y-utils';
-import type { A11yViolation } from './a11y-utils';
+import React from 'react';
+
 
 // Import components to scan
-import MainLayout from '../components/layout/MainLayout';
-import Header from '../components/layout/Header';
 import ActionCard from '../components/ActionCard';
 import GoapVisualizer from '../components/GoapVisualizer';
-import SettingsView from '../features/settings/components/SettingsView';
+import Header from '../components/layout/Header';
+import MainLayout from '../components/layout/MainLayout';
 import { UserProvider } from '../contexts/UserContext';
+import SettingsView from '../features/settings/components/SettingsView';
 import { AgentMode, PublishStatus } from '../shared/types';
+
+import { runA11yTests, groupViolationsBySeverity, formatViolations } from './a11y-utils';
+import type { A11yViolation } from './a11y-utils';
 
 interface ComponentScanResult {
   name: string;

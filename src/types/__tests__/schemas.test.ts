@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ChapterStatus, PublishStatus } from '../../shared/types';
 
+import { ChapterStatus, PublishStatus } from '../../shared/types';
 import {
   ProjectSchema,
   ChapterSchema,

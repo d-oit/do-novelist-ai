@@ -7,6 +7,9 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Import after mocking localStorage and logger
+import type { ContentAnalysis, WritingSuggestion } from '../../types';
+
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
@@ -43,9 +46,6 @@ const mockLogger = {
 vi.mock('@/lib/logging/logger', () => ({
   logger: mockLogger,
 }));
-
-// Import after mocking localStorage and logger
-import type { ContentAnalysis, WritingSuggestion } from '../../types';
 
 describe('WritingAssistantDb - Secure ID Generation', () => {
   beforeEach(() => {

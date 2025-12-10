@@ -24,9 +24,9 @@ import React, { useState } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { cn } from '../../../lib/utils';
+import { type Character } from '../../characters/types';
 import useWritingAssistant from '../hooks/useWritingAssistant';
 import { type WritingSuggestion, type WritingSuggestionCategory } from '../types';
-import { type Character } from '../../characters/types';
 
 interface WritingAssistantPanelProps {
   content: string;

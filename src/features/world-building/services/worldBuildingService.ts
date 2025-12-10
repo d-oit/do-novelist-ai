@@ -13,6 +13,7 @@ import type {
   WorldBuildingValidationResult,
   ConsistencyIssue,
 } from '../types';
+
 import { worldBuildingDb } from './worldBuildingDb';
 
 // Type for items that can be filtered by search and tags

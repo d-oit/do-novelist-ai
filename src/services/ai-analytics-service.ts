@@ -3,13 +3,14 @@
  * Tracks usage, costs, and provides analytics
  */
 
+import { type AIProvider } from '@/lib/ai-config';
 import {
   logUsageAnalytic,
   getUserUsageStats,
   type AIUsageAnalytic,
   type UsageStats,
 } from '@/lib/db/index';
-import { type AIProvider } from '@/lib/ai-config';
+
 import { loadUserPreferences } from './ai-config-service';
 
 /**

@@ -5,9 +5,11 @@
 
 import type { ErrorInfo, ReactNode, ComponentType } from 'react';
 import React, { Component } from 'react';
-import { Button } from './ui/Button';
+
 import { errorHandler } from '../lib/errors/error-handler';
 import { logger } from '../lib/errors/logging';
+
+import { Button } from './ui/Button';
 
 interface Props {
   children: ReactNode;

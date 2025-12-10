@@ -1,8 +1,10 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { ChapterStatus, PublishStatus } from '@/shared/types';
 import type { Project } from '@/shared/types';
+
 import { useAnalytics } from '../hooks/useAnalytics';
 
 import AnalyticsDashboard from './AnalyticsDashboard';
@@ -12,14 +14,73 @@ vi.mock('../hooks/useAnalytics');
 const mockUseAnalytics = vi.mocked(useAnalytics);
 
 // Mock framer-motion
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    circle: ({ children, ...props }: any) => <circle {...props}>{children}</circle>,
-    button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
-  },
-  AnimatePresence: ({ children }: any) => children,
-}));
+vi.mock('framer-motion', () => {
+  const createMotionComponent = (elementType: string) => {
+    return ({ children, ...props }: any) => {
+      // Filter out Framer Motion specific props that cause React warnings
+      const {
+        whileHover: _whileHover,
+        whileTap: _whileTap,
+        whileFocus: _whileFocus,
+        whileInView: _whileInView,
+        initial: _initial,
+        animate: _animate,
+        exit: _exit,
+        transition: _transition,
+        variants: _variants,
+        layout: _layout,
+        layoutId: _layoutId,
+        drag: _drag,
+        dragConstraints: _dragConstraints,
+        dragElastic: _dragElastic,
+        onDragStart: _onDragStart,
+        onDrag: _onDrag,
+        onDragEnd: _onDragEnd,
+        onAnimationStart: _onAnimationStart,
+        onAnimationComplete: _onAnimationComplete,
+        onUpdate: _onUpdate,
+        transformTemplate: _transformTemplate,
+        ...domProps
+      } = props;
+
+      // Silence unused variable warnings - these are intentionally filtered out
+      void [
+        _whileHover,
+        _whileTap,
+        _whileFocus,
+        _whileInView,
+        _initial,
+        _animate,
+        _exit,
+        _transition,
+        _variants,
+        _layout,
+        _layoutId,
+        _drag,
+        _dragConstraints,
+        _dragElastic,
+        _onDragStart,
+        _onDrag,
+        _onDragEnd,
+        _onAnimationStart,
+        _onAnimationComplete,
+        _onUpdate,
+        _transformTemplate,
+      ];
+
+      return React.createElement(elementType, domProps, children);
+    };
+  };
+
+  return {
+    motion: {
+      div: createMotionComponent('div'),
+      circle: createMotionComponent('circle'),
+      button: createMotionComponent('button'),
+    },
+    AnimatePresence: ({ children }: any) => children,
+  };
+});
 
 // Mock UI components
 vi.mock('../../../components/ui/Button', () => ({

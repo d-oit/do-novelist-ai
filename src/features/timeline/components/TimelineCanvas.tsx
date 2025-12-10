@@ -1,7 +1,9 @@
-import React from 'react';
-import type { TimelineEvent } from '@/types';
-import { EventNode } from './EventNode';
 import { motion } from 'framer-motion';
+import React from 'react';
+
+import type { TimelineEvent } from '@/types';
+
+import { EventNode } from './EventNode';
 
 interface TimelineCanvasProps {
   events: TimelineEvent[];

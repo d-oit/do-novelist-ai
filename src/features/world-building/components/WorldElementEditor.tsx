@@ -3,11 +3,14 @@
  * Generic editor for world-building elements
  */
 
-import React, { useState } from 'react';
 import { X, Save, Trash2 } from 'lucide-react';
-import type { Location, Culture } from '../types';
+import React, { useState } from 'react';
+
+
 import { Button } from '@shared/components/button';
 import { Card } from '@shared/components/card';
+
+import type { Location, Culture } from '../types';
 
 interface WorldElementEditorProps {
   element: Location | Culture | null;

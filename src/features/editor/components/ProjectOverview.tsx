@@ -6,10 +6,11 @@
 import { Edit3, Save, Book, User, Globe } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { Button } from '../../../components/ui/Button';
-import { cn } from '../../../lib/utils';
 import type { Project } from '@/types';
 import { ChapterStatus } from '@/types';
+
+import { Button } from '../../../components/ui/Button';
+import { cn } from '../../../lib/utils';
 
 interface ProjectOverviewProps {
   project: Project;

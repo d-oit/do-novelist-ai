@@ -3,7 +3,6 @@
  * Main interface for managing world-building elements
  */
 
-import React, { useState } from 'react';
 import {
   Map,
   Users,
@@ -16,10 +15,14 @@ import {
   CheckCircle,
   Filter,
 } from 'lucide-react';
-import { useWorldBuilding } from '../hooks/useWorldBuilding';
-import { cn } from '../../../lib/utils';
-import { Card } from '@shared/components/card';
+import React, { useState } from 'react';
+
 import { Button } from '@shared/components/button';
+import { Card } from '@shared/components/card';
+
+import { cn } from '../../../lib/utils';
+import { useWorldBuilding } from '../hooks/useWorldBuilding';
+
 
 interface WorldBuildingDashboardProps {
   projectId: string;

@@ -1,6 +1,9 @@
 import type React from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
+import type { Project, AgentAction, LogEntry, Chapter, RefineOptions, WorldState } from '@/types';
+import { AgentMode, ChapterStatus } from '@/types';
+
 import {
   generateOutline,
   writeChapterContent,
@@ -12,8 +15,6 @@ import {
   enhancePlot,
   polishDialogue,
 } from '../../../lib/ai';
-import type { Project, AgentAction, LogEntry, Chapter, RefineOptions, WorldState } from '@/types';
-import { AgentMode, ChapterStatus } from '@/types';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {

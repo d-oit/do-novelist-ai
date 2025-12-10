@@ -1,5 +1,3 @@
-import type { Project, Chapter } from '@shared/types';
-import { ChapterStatus } from '@shared/types';
 import {
   BookOpen,
   CheckCircle2,
@@ -21,10 +19,15 @@ import {
 import React, { useState, useEffect, useRef } from 'react';
 
 import { cn } from '@/lib/utils';
+import { type RefineOptions } from '@/types';
+
+import type { Project, Chapter } from '@shared/types';
+import { ChapterStatus } from '@shared/types';
+
+
 import CoverGenerator from '../../publishing/components/CoverGenerator';
 import PublishPanel from '../../publishing/components/PublishPanel';
 
-import { type RefineOptions } from '@/types';
 
 interface BookViewerProps {
   project: Project;

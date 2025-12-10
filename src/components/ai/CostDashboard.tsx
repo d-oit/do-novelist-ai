@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Activity, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+
+import { type AIProvider } from '@/lib/ai-config';
 import { cn } from '@/lib/utils';
-import {
+import type { BudgetInfo,
   getUsageStats,
   getBudgetInfo,
   getOptimizationRecommendations,
-  type EnhancedUsageStats,
+  type EnhancedUsageStats 
+ 
 } from '@/services/ai-analytics-service';
-import type { BudgetInfo } from '@/services/ai-analytics-service';
-import { type AIProvider } from '@/lib/ai-config';
 
 interface CostDashboardProps {
   userId: string;

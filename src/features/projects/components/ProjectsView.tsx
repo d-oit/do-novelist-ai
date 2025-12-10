@@ -1,6 +1,7 @@
-import type { Project } from '@shared/types';
 import { Clock, FileText, Folder, Loader2, MoreVertical, Plus, Star, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+
+import type { Project } from '@shared/types';
 
 import { db } from '../../../lib/db';
 import { iconButtonTarget } from '../../../lib/utils';

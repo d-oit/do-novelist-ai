@@ -1,4 +1,7 @@
 import React, { lazy, Suspense } from 'react';
+
+import type { Project, AgentAction, RefineOptions } from '@/shared/types';
+
 import {
   AnalyticsLoading,
   BookViewerLoading,
@@ -7,7 +10,6 @@ import {
 } from '../lib/lazy-components';
 
 // Import types for proper typing
-import type { Project, AgentAction, RefineOptions } from '@/shared/types';
 
 // Lazy load heavy analytics components
 const AnalyticsDashboard = lazy(

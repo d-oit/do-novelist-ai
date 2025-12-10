@@ -1,4 +1,6 @@
+import { logger } from '@/lib/logging/logger';
 import type { Project } from '@/types';
+
 import type {
   Publication,
   PublishedInstance,
@@ -12,7 +14,6 @@ import type {
   PublishingAlert,
   PublishingPlatform,
 } from '../types';
-import { logger } from '@/lib/logging/logger';
 
 class PublishingAnalyticsService {
   private static instance: PublishingAnalyticsService | null = null;

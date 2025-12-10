@@ -5,8 +5,9 @@
 
 import React from 'react';
 
-import { cn } from '../../../lib/utils';
 import type { Project } from '@/shared/types';
+
+import { cn } from '../../../lib/utils';
 
 import GoalsProgress from './GoalsProgress';
 import ProductivityChart from './ProductivityChart';

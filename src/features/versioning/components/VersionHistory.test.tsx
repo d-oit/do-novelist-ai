@@ -1,9 +1,10 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { createChapter } from '../../../shared/utils';
 import type { Chapter } from '@/types';
 import { ChapterStatus } from '@/types';
+
+import { createChapter } from '../../../shared/utils';
 import { useVersioning } from '../hooks/useVersioning';
 
 import VersionHistory from './VersionHistory';

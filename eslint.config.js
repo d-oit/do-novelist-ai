@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import prettierConfig from 'eslint-config-prettier';
+import pluginImportX from 'eslint-plugin-import-x';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginReactRefresh from 'eslint-plugin-react-refresh';
@@ -106,6 +107,7 @@ export default tseslint.config(
     ignores: ['src/index.tsx', 'src/index.ts'],
     plugins: {
       security,
+      'import-x': pluginImportX,
     },
     languageOptions: {
       parserOptions: {
@@ -199,6 +201,43 @@ export default tseslint.config(
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': 'off',
+
+      // Import optimization rules
+      'import-x/order': [
+        'error',
+        {
+          groups: [
+            'builtin',          // Node.js built-in modules
+            'external',         // External packages
+            'internal',         // Internal modules using alias paths
+            'parent',          // Parent directory imports
+            'sibling',         // Same directory imports
+            'index',           // Index file imports
+          ],
+          pathGroups: [
+            {
+              pattern: '@/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '@shared/**',
+              group: 'internal',
+              position: 'before',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin'],
+          'newlines-between': 'always',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+        },
+      ],
+      'import-x/no-relative-parent-imports': 'warn',
+      'import-x/no-duplicates': 'error',
+      'import-x/first': 'error',
+      'import-x/newline-after-import': 'error',
     },
   },
 

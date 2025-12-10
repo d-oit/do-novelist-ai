@@ -3,6 +3,9 @@
  * Provides comprehensive versioning capabilities for chapters and projects
  */
 
+import type { ChapterStatus } from '@/types';
+import type { WorldState, ProjectSettings } from '@/types/schemas';
+
 export interface Version {
   id: string;
   timestamp: Date;
@@ -21,9 +24,6 @@ export interface ChapterVersion extends Version {
   content: string;
   status: ChapterStatus;
 }
-
-import type { ChapterStatus } from '@/types';
-import type { WorldState, ProjectSettings } from '@/types/schemas';
 
 export interface ProjectVersion extends Version {
   projectId: string;
