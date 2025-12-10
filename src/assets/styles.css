@@ -49,7 +49,7 @@
     --popover: 222.2 47.4% 11.2%; /* slate-950 #0f172a */
     --popover-foreground: 210 40% 98%; /* slate-50 #f8fafc */
 
-    --primary: 238.7 83.5% 35%; /* darker indigo for WCAG AA compliance */
+    --primary: 238.7 83.5% 25%; /* darker indigo for WCAG AA compliance */
     --primary-foreground: 0 0% 100%; /* pure white for maximum contrast */
 
     --secondary: 217.2 32.6% 17.5%; /* slate-900 #1e293b */
