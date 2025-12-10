@@ -144,6 +144,9 @@ export class PerformanceBoundary extends React.Component<
               <p className='text-muted-foreground'>
                 A performance issue was detected. Please try again.
               </p>
+              {this.state.error && (
+                <p className='mt-2 text-xs text-muted-foreground'>{this.state.error.message}</p>
+              )}
             </div>
           </div>
         )

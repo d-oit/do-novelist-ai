@@ -1,0 +1,316 @@
+---
+name: Fast CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 1
+  NODE_OPTIONS: "--max-old-space-size=4096"
+  CI: true
+
+jobs:
+  # Quick validation and setup
+  setup:
+    name: 🚀 Quick Setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      node-version: "20"
+      pnpm-version: "9"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+  # Fast lint and type check
+  lint-and-typecheck:
+    name: 🔍 Lint & Type Check
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Restore pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and type check
+        run: pnpm run lint:ci
+
+  # Unit tests
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Restore pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests
+        run: pnpm run test
+
+      - name: Generate coverage
+        run: pnpm run coverage
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: coverage-report-${{ github.sha }}
+          path: coverage/
+          retention-days: 7
+
+  # Fast build
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    needs: [setup, lint-and-typecheck]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Restore pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Vite build
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.vite
+            dist
+          key: ${{ runner.os }}-vite-${{ hashFiles('src/**', 'vite.config.ts') }}
+
+      - name: Build application
+        run: pnpm run build
+
+      - name: Verify build
+        run: |
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ Build failed: index.html not found"
+            exit 1
+          fi
+          echo "✅ Build completed successfully"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+
+  # Quick E2E test (single run for fast feedback)
+  e2e-quick:
+    name: 🎭 E2E Quick Test
+    runs-on: ubuntu-latest
+    needs: [build]
+    timeout-minutes: 20
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'test-e2e')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 \
+            libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 \
+            libxss1 libxtst6 libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+            libcups2 libdrm2 libgbm1 libgtk-3-0 libxshmfence1 \
+            ca-certificates fonts-liberation wget
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: dist/
+
+      - name: Run quick E2E tests
+        run: |
+          echo "🎭 Running quick E2E tests"
+
+          # Set environment
+          export CI=true
+          export PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright
+          export NODE_ENV=test
+
+          # Run a subset of tests for quick feedback
+          pnpm exec playwright test \
+            --reporter=list \
+            --grep="accessibility|settings" \
+            --max-failures=3 || {
+              echo "❌ Quick E2E tests failed"
+              exit 1
+            }
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: e2e-quick-results-${{ github.sha }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # Summary
+  summary:
+    name: 📊 Summary
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, unit-tests, build, e2e-quick]
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: Generate summary
+        run: |
+          {
+            echo "# ⚡ Fast CI Summary"
+            echo ""
+            echo "**Commit**: ${{ github.sha }}"
+            echo "**Branch**: ${{ github.ref_name }}"
+            echo "**Trigger**: ${{ github.event_name }}"
+            echo ""
+            echo "## 🎯 Job Results"
+            echo ""
+            echo "| Job | Status |"
+            echo "|-----|--------|"
+            echo "| Lint & TypeCheck | ${{ needs.lint-and-typecheck.result }} |"
+            echo "| Unit Tests | ${{ needs.unit-tests.result }} |"
+            echo "| Build | ${{ needs.build.result }} |"
+            echo "| E2E Quick | ${{ needs.e2e-quick.result }} |"
+            echo ""
+
+            # Overall status
+            FAILED=0
+            [ "${{ needs.lint-and-typecheck.result }}" != "success" ] && FAILED=$((FAILED + 1))
+            [ "${{ needs.unit-tests.result }}" != "success" ] && FAILED=$((FAILED + 1))
+            [ "${{ needs.build.result }}" != "success" ] && FAILED=$((FAILED + 1))
+
+            if [ "$FAILED" -eq 0 ]; then
+              echo "## ✅ Status: PASSED"
+              echo "Fast CI checks completed successfully!"
+            else
+              echo "## ❌ Status: FAILED"
+              echo "$FAILED critical job(s) failed."
+            fi
+          } > fast-ci-summary.md
+
+      - name: Upload summary
+        uses: actions/upload-artifact@v5
+        with:
+          name: fast-ci-summary-${{ github.sha }}
+          path: fast-ci-summary.md
+          retention-days: 7
