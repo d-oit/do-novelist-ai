@@ -1,8 +1,7 @@
 
 import { motion } from 'framer-motion';
 import { Filter, Search } from 'lucide-react';
-
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';

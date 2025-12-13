@@ -14,7 +14,8 @@ import {
   PanelRightOpen,
   PanelRightClose,
 } from 'lucide-react';
-import { useState, useRef, useEffect, FC } from 'react';
+import type { FC } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { WritingAssistantPanel } from '@/features/writing-assistant/components/WritingAssistantPanel';

@@ -12,7 +12,8 @@ import {
   Zap,
   ExternalLink,
 } from 'lucide-react';
-import { useEffect, useState, FC } from 'react';
+import type { FC } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';

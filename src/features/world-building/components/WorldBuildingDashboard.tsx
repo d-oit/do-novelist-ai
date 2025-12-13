@@ -15,7 +15,8 @@ import {
   CheckCircle,
   Filter,
 } from 'lucide-react';
-import { useState, FC } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 
 import { useWorldBuilding } from '@/features/world-building/hooks/useWorldBuilding';
 import { cn } from '@/lib/utils';

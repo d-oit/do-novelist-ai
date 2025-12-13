@@ -1,7 +1,6 @@
 
 import { Flame, Award, Target, TrendingUp } from 'lucide-react';
-
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { AchievementsList } from '@/features/gamification/components/AchievementsList';
 import { StreakDisplay } from '@/features/gamification/components/StreakDisplay';

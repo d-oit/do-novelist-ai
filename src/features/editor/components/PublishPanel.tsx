@@ -11,7 +11,8 @@ import {
   Upload,
   TrendingUp,
 } from 'lucide-react';
-import { useState, FC } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 
 import PublishingDashboard from '@/features/publishing/components/PublishingDashboard';
 import PublishingSetup from '@/features/publishing/components/PublishingSetup';

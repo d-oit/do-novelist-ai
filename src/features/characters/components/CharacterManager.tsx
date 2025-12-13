@@ -1,5 +1,6 @@
 import { Users, Plus, AlertCircle } from 'lucide-react';
-import { useEffect, useMemo, useState, FC } from 'react';
+import type { FC } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { CharacterEditor } from '@/features/characters/components/CharacterEditor';

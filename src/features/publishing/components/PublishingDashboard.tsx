@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Globe, BookOpen, RefreshCw, X } from 'lucide-react';
-import { useState, useEffect, useMemo, FC } from 'react';
+import type { FC } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { AlertsSection } from '@/features/publishing/components/AlertsSection';

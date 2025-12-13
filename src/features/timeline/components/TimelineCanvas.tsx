@@ -1,7 +1,6 @@
 
 import { motion } from 'framer-motion';
-
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { EventNode } from '@/features/timeline/components/EventNode';
 import type { TimelineEvent } from '@/types';

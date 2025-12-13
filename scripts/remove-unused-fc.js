@@ -51,56 +51,6 @@ async function getAllFiles(dir, fileList = []) {
   return fileList;
 }
 
-function removeUnusedFC(content) {
-  const lines = content.split('\n');
-  let modified = false;
-
-  // Check if FC is imported
-  const fcImportMatch = content.match(/import\s+(?:type\s+)?{([^}]*FC[^}]*)}\s+from\s+['"]react['"]/);
-
-  if (!fcImportMatch) {
-    return { content, modified: false, reason: 'FC not in import' };
-  }
-
-  const importList = fcImportMatch[1].split(',').map(s => s.trim()).filter(s => s);
-
-  // Check if FC is actually used
-  const usesFC = /[^a-zA-Z]FC<[^>]+\>/.test(content);
-
-  if (!usesFC) {
-    // Remove FC from import list
-    const filteredImports = importList.filter(s => s !== 'FC');
-
-    if (filteredImports.length === 0) {
-      // Remove entire import line
-      const newLines = [];
-      for (const line of lines) {
-        if (!line.match(/^import\s+(?:type\s+)?{[^}]*FC[^}]*}\s+from\s+['"]react['"]/)) {
-          newLines.push(line);
-        }
-      }
-      modified = true;
-      return { content: newLines.join('\n'), modified, reason: 'removed FC import' };
-    } else {
-      // Keep other imports
-      const newLines = [];
-      for (const line of lines) {
-        const match = line.match(/^import\s+(type\s+)?{([^}]*FC[^}]*)}\s+from\s+['"]react['"]/);
-        if (match) {
-          const isTypeImport = match[1] !== undefined;
-          newLines.push(`import ${isTypeImport ? 'type ' : ''}{ ${filteredImports.join(', ')} } from 'react';`);
-          modified = true;
-        } else {
-          newLines.push(line);
-        }
-      }
-      return { content: newLines.join('\n'), modified, reason: 'removed FC from import' };
-    }
-  }
-
-  return { content, modified: false, reason: 'FC is used' };
-}
-
 function removeStandaloneFC(content) {
   const lines = content.split('\n');
   let modified = false;
@@ -116,7 +66,7 @@ function removeStandaloneFC(content) {
   }
 
   // Check if FC is actually used
-  const usesFC = /[^a-zA-Z]FC<[^>]+\>/.test(content);
+  const usesFC = /[^a-zA-Z]FC<[^>]+>/.test(content);
 
   if (!usesFC) {
     // Remove the standalone FC import line

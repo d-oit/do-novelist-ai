@@ -16,7 +16,8 @@ import {
   Plus,
   Sparkles,
 } from 'lucide-react';
-import { useState, useEffect, useRef, FC } from 'react';
+import type { FC } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import CoverGenerator from '@/features/publishing/components/CoverGenerator';
 import PublishPanel from '@/features/publishing/components/PublishPanel';

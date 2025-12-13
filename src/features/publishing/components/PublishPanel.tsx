@@ -8,7 +8,8 @@ import {
   FileCheck,
   Settings,
 } from 'lucide-react';
-import { useState, FC } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 
 import { generateEpub } from '@/features/publishing/services/epubService';
 import { translateContent } from '@/lib/ai';

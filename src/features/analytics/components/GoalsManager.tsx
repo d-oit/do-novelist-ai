@@ -13,7 +13,8 @@ import {
   Flame,
   X,
 } from 'lucide-react';
-import { useState, useMemo, FC } from 'react';
+import type { FC } from 'react';
+import { useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';

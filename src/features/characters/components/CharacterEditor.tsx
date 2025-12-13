@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { X, Save, AlertCircle } from 'lucide-react';
-import { useState, useEffect, FC } from 'react';
+import type { FC } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/Card';

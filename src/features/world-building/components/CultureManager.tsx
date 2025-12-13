@@ -4,7 +4,8 @@
  */
 
 import { Plus, Users, Edit } from 'lucide-react';
-import { useState, FC } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 
 import { WorldElementEditor } from '@/features/world-building/components/WorldElementEditor';
 import { useWorldBuilding } from '@/features/world-building/hooks/useWorldBuilding';

@@ -18,7 +18,8 @@ import {
   Lightbulb,
   Activity,
 } from 'lucide-react';
-import { useState, useEffect, FC } from 'react';
+import type { FC } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';

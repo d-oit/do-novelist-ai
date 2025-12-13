@@ -4,7 +4,7 @@
  * Handles main analytics display area
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import GoalsProgress from '@/features/analytics/components/GoalsProgress';
 import ProductivityChart from '@/features/analytics/components/ProductivityChart';

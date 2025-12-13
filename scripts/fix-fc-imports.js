@@ -55,7 +55,7 @@ function addFCImport(content) {
   const lines = content.split('\n');
 
   // Check if FC is used
-  const usesFC = /[^a-zA-Z]FC<[^>]+\>/.test(content);
+  const usesFC = /[^a-zA-Z]FC<[^>]+>/.test(content);
   if (!usesFC) {
     return { content, modified: false, reason: 'FC not used' };
   }

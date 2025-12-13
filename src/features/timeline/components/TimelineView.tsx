@@ -1,5 +1,6 @@
 import { Plus, ZoomIn, ZoomOut, Calendar } from 'lucide-react';
-import { useEffect, useState, FC } from 'react';
+import type { FC } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { TimelineCanvas } from '@/features/timeline/components/TimelineCanvas';
