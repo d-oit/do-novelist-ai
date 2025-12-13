@@ -1,3 +1,4 @@
+
 /**
  * Analytics Sidebar Component - Extracted from AnalyticsDashboard
  * Handles analytics navigation and quick stats
@@ -7,9 +8,10 @@ import { motion } from 'framer-motion';
 import { BarChart3, TrendingUp, Target, Clock } from 'lucide-react';
 import React from 'react';
 
-import { cn } from '../../../lib/utils';
-import type { Project } from '../../../shared/types';
-import { ChapterStatus } from '../../../shared/types';
+import { cn } from '@/lib/utils';
+
+import type { Project } from '@shared/types';
+import { ChapterStatus } from '@shared/types';
 
 interface AnalyticsSidebarProps {
   project: Project;

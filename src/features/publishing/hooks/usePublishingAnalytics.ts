@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
-import type { Project } from '@/types';
-
-import { usePublishingStore } from '../../../lib/stores/publishingStore';
-import { publishingAnalyticsService } from '../services/publishingAnalyticsService';
+import { publishingAnalyticsService } from '@/features/publishing/services/publishingAnalyticsService';
 import type {
   EngagementMetrics,
   PlatformAnalytics,
@@ -14,7 +11,10 @@ import type {
   PublishingTrends,
   ReaderFeedback,
   ReaderInsights,
-} from '../types';
+} from '@/features/publishing/types';
+import { usePublishingStore } from '@/lib/stores/publishingStore';
+import type { Project } from '@/types';
+
 
 export interface UsePublishingAnalyticsReturn {
   // Publications

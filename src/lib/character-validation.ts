@@ -5,6 +5,7 @@
 
 import type { z } from 'zod';
 
+
 import {
   type ProjectId,
   createCharacterId,
@@ -17,7 +18,7 @@ import {
   hasCharacterArc,
   isMainCharacter,
   isProtagonist,
-} from '../types/character-guards';
+} from '@/types/character-guards';
 import {
   CharacterSchema,
   CharacterRelationshipSchema,
@@ -32,8 +33,8 @@ import {
   type UpdateCharacter,
   type CharacterRole,
   type PersonalityTrait,
-} from '../types/character-schemas';
-import { type ValidationResult, validateData } from '../types/schemas';
+} from '@/types/character-schemas';
+import { type ValidationResult, validateData } from '@/types/schemas';
 
 // =============================================================================
 // CHARACTER VALIDATION SERVICE

@@ -3,10 +3,10 @@
  * Based on 2024-2025 best practices
  */
 
-import type { AppError } from './error-types';
-import { getErrorMessage, toAppError } from './error-types';
-import { logger } from './logging';
-import { err, isErr, retry as retryResult, tryCatch, tryCatchAsync, type Result } from './result';
+import type { AppError } from '@/lib/errors/error-types';
+import { getErrorMessage, toAppError } from '@/lib/errors/error-types';
+import { logger } from '@/lib/errors/logging';
+import { err, isErr, retry as retryResult, tryCatch, tryCatchAsync, type Result } from '@/lib/errors/result';
 
 export interface RetryOptions {
   maxAttempts?: number;

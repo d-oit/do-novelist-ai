@@ -1,16 +1,14 @@
-import { type Project } from '@/types';
-
-import {
-  type WritingSession,
-  type DailyStats,
-  type WeeklyStats,
-  type ProjectAnalytics,
-  type WritingGoals,
-  type WritingInsights,
-  type AnalyticsFilter,
-  type ChartDataPoint,
-} from '../types';
-
+import type {
+  WritingSession,
+  DailyStats,
+  WeeklyStats,
+  ProjectAnalytics,
+  WritingGoals,
+  WritingInsights,
+  AnalyticsFilter,
+  ChartDataPoint,
+} from '@/features/analytics/types';
+import type { Project } from '@/types';
 
 interface SessionProgress {
   wordsWritten: number;

@@ -5,8 +5,8 @@
 
 import { useState, useCallback } from 'react';
 
-import { worldBuildingService } from '../services/worldBuildingService';
-import type { WorldBuildingValidationResult } from '../types';
+import { worldBuildingService } from '@/features/world-building/services/worldBuildingService';
+import type { WorldBuildingValidationResult } from '@/types';
 
 interface UseWorldBuildingValidationReturn {
   validation: WorldBuildingValidationResult | null;

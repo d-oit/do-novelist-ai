@@ -12,19 +12,16 @@ import {
   Zap,
   ExternalLink,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, FC } from 'react';
 
-import type { Project } from '@/types';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { PlatformCard } from '@/features/publishing/components/PlatformCard';
+import { PublishingMetadataForm } from '@/features/publishing/components/PublishingMetadataForm';
+import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
+import { cn, iconButtonTarget } from '@/lib/utils';
 import { ChapterStatus } from '@/types';
-
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
-import { cn, iconButtonTarget } from '../../../lib/utils';
-import { usePublishingAnalytics } from '../hooks/usePublishingAnalytics';
-import type { PublishingPlatform, Publication } from '../types';
-
-import { PlatformCard } from './PlatformCard';
-import { PublishingMetadataForm } from './PublishingMetadataForm';
+import type { Project, PublishingPlatform, Publication  } from '@/types';
 
 interface PublishingSetupProps {
   project: Project;
@@ -33,7 +30,7 @@ interface PublishingSetupProps {
   className?: string;
 }
 
-const PublishingSetup: React.FC<PublishingSetupProps> = ({
+const PublishingSetup: FC<PublishingSetupProps> = ({
   project,
   onPublishingComplete,
   onClose,

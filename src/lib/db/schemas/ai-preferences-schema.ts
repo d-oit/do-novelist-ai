@@ -3,7 +3,7 @@
  * Defines tables for storing AI provider preferences, capabilities, usage analytics, and health status
  */
 
-import { type AIProvider } from '../../ai-config';
+import { type AIProvider } from '@/lib/ai-config';
 
 /**
  * User AI Preferences

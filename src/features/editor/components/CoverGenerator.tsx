@@ -1,10 +1,10 @@
+
 import { Image, Wand2, Loader2, RefreshCcw, Download } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { generateCoverImage } from '@/lib/ai';
 import { cn } from '@/lib/utils';
 import type { Project } from '@/types';
-
-import { generateCoverImage } from '../../../lib/ai';
 
 interface CoverGeneratorProps {
   project: Project;

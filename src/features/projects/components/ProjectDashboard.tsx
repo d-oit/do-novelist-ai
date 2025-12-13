@@ -1,11 +1,9 @@
 import React from 'react';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { useProjects } from '@/features/projects/hooks/useProjects';
 
 import type { Project } from '@shared/types';
-
-import { useProjects } from '../hooks/useProjects';
-
 
 export const ProjectDashboard: React.FC = React.memo(() => {
   const { projects, isLoading, error } = useProjects();

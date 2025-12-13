@@ -6,18 +6,17 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-
 // Import components to scan
-import ActionCard from '../components/ActionCard';
-import GoapVisualizer from '../components/GoapVisualizer';
-import Header from '../components/layout/Header';
-import MainLayout from '../components/layout/MainLayout';
-import { UserProvider } from '../contexts/UserContext';
-import SettingsView from '../features/settings/components/SettingsView';
-import { AgentMode, PublishStatus } from '../shared/types';
+import ActionCard from '@/components/ActionCard';
+import GoapVisualizer from '@/components/GoapVisualizer';
+import Header from '@/components/layout/Header';
+import MainLayout from '@/components/layout/MainLayout';
+import { UserProvider } from '@/contexts/UserContext';
+import SettingsView from '@/features/settings/components/SettingsView';
+import { runA11yTests, groupViolationsBySeverity, formatViolations } from '@/test/a11y-utils';
+import type { A11yViolation } from '@/test/a11y-utils';
 
-import { runA11yTests, groupViolationsBySeverity, formatViolations } from './a11y-utils';
-import type { A11yViolation } from './a11y-utils';
+import { AgentMode, PublishStatus } from '@shared/types';
 
 interface ComponentScanResult {
   name: string;

@@ -1,11 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import type { Chapter } from '@/types';
+import { versioningService } from '@/features/versioning/services/versioningService';
 import { ChapterStatus } from '@/types';
+import type { Chapter, Version  } from '@/types';
 
-import { createChapter } from '../../../../shared/utils';
-import type { Version } from '../../types';
-import { versioningService } from '../versioningService';
+import { createChapter } from '@shared/utils';
 
 describe('VersioningService', () => {
   let testChapter: Chapter;

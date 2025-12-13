@@ -15,13 +15,13 @@ import {
   getProviderHealth,
   updateProviderHealth,
   initAIPreferencesDB,
-} from '../ai-preferences';
+} from '@/lib/db/ai-preferences';
 import {
   type UserAIPreference,
   type AIProviderCapability,
   type AIUsageAnalytic,
   type AIProviderHealth,
-} from '../schemas/ai-preferences-schema';
+} from '@/lib/db/schemas/ai-preferences-schema';
 
 // Mock localStorage
 const localStorageMock = (() => {

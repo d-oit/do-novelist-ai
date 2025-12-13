@@ -1,8 +1,8 @@
-import React from 'react';
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
 import { configureAxe } from 'jest-axe';
+import React from 'react';
+import { afterEach, vi } from 'vitest';
 
 // Configure axe-core for testing
 const axeConfig = {
@@ -273,6 +273,38 @@ const createIndexedDBMock = () => {
 
 // Set up the enhanced IndexedDB mock
 createIndexedDBMock();
+
+// Mock HTMLCanvasElement.getContext to avoid jsdom warnings during tests
+// Always override to ensure a non-throwing implementation in jsdom
+// @ts-expect-error - augmenting prototype in test environment
+HTMLCanvasElement.prototype.getContext = function getContextMock() {
+  // Minimal 2D context mock used by charting libs
+  return {
+    fillRect: () => undefined,
+    clearRect: () => undefined,
+    getImageData: () => ({ data: [] }),
+    putImageData: () => undefined,
+    createImageData: () => [],
+    setTransform: () => undefined,
+    drawImage: () => undefined,
+    save: () => undefined,
+    fillText: () => undefined,
+    restore: () => undefined,
+    beginPath: () => undefined,
+    moveTo: () => undefined,
+    lineTo: () => undefined,
+    closePath: () => undefined,
+    stroke: () => undefined,
+    translate: () => undefined,
+    scale: () => undefined,
+    rotate: () => undefined,
+    arc: () => undefined,
+    fill: () => undefined,
+    measureText: () => ({ width: 0 }),
+    transform: () => undefined,
+    resetTransform: () => undefined,
+  } as unknown as CanvasRenderingContext2D;
+};
 
 const localStorageMock = (() => {
   let store: Record<string, string> = {};

@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 
-import { ChapterStatus, PublishStatus, AgentMode } from '../shared/types';
+import { ChapterStatus, PublishStatus, AgentMode } from '@shared/types';
 
 // Re-export enums for convenience
 export { ChapterStatus, PublishStatus };

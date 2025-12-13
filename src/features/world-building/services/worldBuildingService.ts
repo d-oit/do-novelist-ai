@@ -3,6 +3,7 @@
  * Business logic layer for world-building operations
  */
 
+import { worldBuildingDb } from '@/features/world-building/services/worldBuildingDb';
 import type {
   WorldBuildingProject,
   Location,
@@ -12,9 +13,7 @@ import type {
   WorldBuildingFilters,
   WorldBuildingValidationResult,
   ConsistencyIssue,
-} from '../types';
-
-import { worldBuildingDb } from './worldBuildingDb';
+} from '@/features/world-building/types';
 
 // Type for items that can be filtered by search and tags
 type FilterableWorldElement = Location | Culture | Timeline | LoreEntry;

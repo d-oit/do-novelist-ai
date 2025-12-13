@@ -44,8 +44,9 @@ import {
   someMatch,
   createEnumGuard,
   isEnumValue,
-} from '../guards';
-import { ProjectSchema, ChapterSchema } from '../schemas';
+} from '@/types/guards';
+import { ProjectSchema, ChapterSchema } from '@/types/schemas';
+
 
 describe('Type Guards Tests', () => {
   describe('Schema-based Type Guards', () => {

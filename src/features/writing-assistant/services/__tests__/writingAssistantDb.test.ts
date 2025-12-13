@@ -8,7 +8,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Import after mocking localStorage and logger
-import type { ContentAnalysis, WritingSuggestion } from '../../types';
+import type { ContentAnalysis, WritingSuggestion } from '@/types';
 
 // Mock localStorage
 const localStorageMock = (() => {

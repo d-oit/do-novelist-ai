@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { analyticsService } from '../analyticsService';
+import { analyticsService } from '@/features/analytics/services/analyticsService';
 
 describe('AnalyticsService', () => {
   beforeEach(async () => {

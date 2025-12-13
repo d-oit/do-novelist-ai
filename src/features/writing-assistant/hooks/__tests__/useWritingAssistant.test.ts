@@ -5,7 +5,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import useWritingAssistant from '../useWritingAssistant';
+import useWritingAssistant from "@/features/writing-assistant/hooks/useWritingAssistant"
 
 // Mock the service
 vi.mock('../services/writingAssistantService', () => ({

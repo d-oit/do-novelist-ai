@@ -11,18 +11,17 @@ import {
   Upload,
   TrendingUp,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState, FC } from 'react';
 
+import PublishingDashboard from '@/features/publishing/components/PublishingDashboard';
+import PublishingSetup from '@/features/publishing/components/PublishingSetup';
+import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
+import { translateContent } from '@/lib/ai';
+import { generateEpub } from '@/lib/epub';
 import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
-import type { Project, Chapter, ProjectSettings } from '@/types';
 import { PublishStatus } from '@/types';
-
-import { translateContent } from '../../../lib/ai';
-import { generateEpub } from '../../../lib/epub';
-import { usePublishingAnalytics } from '../../publishing';
-import PublishingDashboard from '../../publishing/components/PublishingDashboard';
-import PublishingSetup from '../../publishing/components/PublishingSetup';
+import type { Project, Chapter, ProjectSettings } from '@/types';
 
 interface PublishPanelProps {
   project: Project;
@@ -30,7 +29,7 @@ interface PublishPanelProps {
   onUpdateChapter: (chapterId: string, updates: Partial<Chapter>) => void;
 }
 
-const PublishPanel: React.FC<PublishPanelProps> = ({
+const PublishPanel: FC<PublishPanelProps> = ({
   project,
   onUpdateProject,
   onUpdateChapter,

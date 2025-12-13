@@ -6,9 +6,9 @@
  * Enhanced with comprehensive error handling (2024-2025 best practices)
  */
 
-import { createStorageError } from '../../../lib/errors/error-types';
-import { logger } from '../../../lib/errors/logging';
-import { type SavedDraft, type DraftMetadata } from '../types';
+import { createStorageError } from '@/lib/errors/error-types';
+import { logger } from '@/lib/errors/logging';
+import { type SavedDraft, type DraftMetadata } from '@/types';
 
 // Import error handling system
 

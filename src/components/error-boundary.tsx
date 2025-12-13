@@ -3,13 +3,11 @@
  * Based on 2024-2025 best practices
  */
 
-import type { ErrorInfo, ReactNode, ComponentType } from 'react';
-import React, { Component } from 'react';
+import React, { Component, type ReactNode, type ComponentType, type ErrorInfo } from 'react';
 
-import { errorHandler } from '../lib/errors/error-handler';
-import { logger } from '../lib/errors/logging';
-
-import { Button } from './ui/Button';
+import { Button } from '@/components/ui/Button';
+import { errorHandler } from '@/lib/errors/error-handler';
+import { logger } from '@/lib/errors/logging';
 
 interface Props {
   children: ReactNode;

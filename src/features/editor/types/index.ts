@@ -7,35 +7,12 @@
 
 import { z } from 'zod';
 
-// ============================================================================
-// Refine Options
-// ============================================================================
+import type { RefineOptions } from '@/types/schemas';
+import { RefineOptionsSchema } from '@/types/schemas';
 
-export const RefineOptionsSchema = z.object({
-  model: z.enum(['gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash']),
-  temperature: z.number().min(0).max(2).default(0.7),
-  maxTokens: z.number().int().min(100).max(8000).default(2000),
-  topP: z.number().min(0).max(1).default(0.95),
-  focusAreas: z
-    .array(
-      z.enum([
-        'grammar',
-        'style',
-        'pacing',
-        'character_development',
-        'dialogue',
-        'description',
-        'plot_consistency',
-        'tone',
-      ]),
-    )
-    .default(['grammar', 'style']),
-  preserveLength: z.boolean().default(false),
-  targetTone: z.enum(['formal', 'casual', 'dramatic', 'humorous', 'mysterious']).optional(),
-});
-
-export type RefineOptions = z.infer<typeof RefineOptionsSchema>;
-export type AIModel = z.infer<typeof RefineOptionsSchema.shape.model>;
+// Re-export for external use
+export { RefineOptionsSchema };
+export type { RefineOptions };
 
 // ============================================================================
 // Editor Content State

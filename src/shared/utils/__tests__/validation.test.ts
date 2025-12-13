@@ -17,7 +17,7 @@ import {
   validateURL,
   validateWordCount,
   ValidationError,
-} from '../validation';
+} from '@shared/utils/validation';
 
 describe('Validation Utilities', () => {
   describe('validateChapterTitle', () => {

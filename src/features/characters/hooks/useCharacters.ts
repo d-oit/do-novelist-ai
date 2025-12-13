@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import { characterService } from '../services/characterService';
-import { type Character, type CharacterFilters } from '../types';
+import { characterService } from "@/features/characters/services/characterService"
+import { type Character, type CharacterFilters } from '@/types';
 
 interface CharactersState {
   // Data

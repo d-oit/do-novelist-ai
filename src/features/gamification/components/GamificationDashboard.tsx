@@ -1,16 +1,17 @@
+
 import { Flame, Award, Target, TrendingUp } from 'lucide-react';
-import React from 'react';
 
-import { useGamification } from '../hooks/useGamification';
+import { FC } from 'react';
 
-import { AchievementsList } from './AchievementsList';
-import { StreakDisplay } from './StreakDisplay';
+import { AchievementsList } from '@/features/gamification/components/AchievementsList';
+import { StreakDisplay } from '@/features/gamification/components/StreakDisplay';
+import { useGamification } from '@/features/gamification/hooks/useGamification';
 
 interface GamificationDashboardProps {
   userId: string;
 }
 
-export const GamificationDashboard: React.FC<GamificationDashboardProps> = ({ userId }) => {
+export const GamificationDashboard: FC<GamificationDashboardProps> = ({ userId }) => {
   const { streak, achievements, milestones, stats, badges, isLoading, error } =
     useGamification(userId);
 

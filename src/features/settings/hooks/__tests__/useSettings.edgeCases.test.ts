@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { settingsService } from '../../services/settingsService';
-import { type Settings, type SettingsCategory } from '../../types';
-import { DEFAULT_SETTINGS } from '../../types';
-import { useSettings } from '../useSettings';
+import { useSettings } from '@/features/settings/hooks/useSettings';
+import { settingsService } from '@/features/settings/services/settingsService';
+import { type Settings, type SettingsCategory } from '@/types';
+import { DEFAULT_SETTINGS } from '@/types';
 
 // Mock settings service
 vi.mock('../../services/settingsService');
@@ -27,11 +27,22 @@ describe('useSettings - Edge Cases', () => {
       activeCategory: 'appearance',
     });
 
-    // Setup DOM mocks
+    // Setup DOM mocks with writable fontSize property
+    const mockStyle = {
+      fontSize: '',
+      setProperty: mockSetProperty,
+    };
+
+    Object.defineProperty(mockStyle, 'fontSize', {
+      writable: true,
+      configurable: true,
+      value: '',
+    });
+
     Object.defineProperty(document, 'documentElement', {
       value: {
         classList: { toggle: mockClassListToggle },
-        style: { fontSize: '', setProperty: mockSetProperty },
+        style: mockStyle,
       },
       writable: true,
       configurable: true,

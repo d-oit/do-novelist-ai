@@ -1,8 +1,9 @@
+
 import { Flame, Calendar, TrendingUp } from 'lucide-react';
 import React from 'react';
 
-import { cn } from '../../../lib/utils';
-import { type WritingStreak, type StreakMilestone } from '../types';
+import { cn } from '@/lib/utils';
+import { type WritingStreak, type StreakMilestone } from '@/types';
 
 interface StreakDisplayProps {
   streak: WritingStreak | null;

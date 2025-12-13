@@ -1,10 +1,12 @@
+
 import { motion } from 'framer-motion';
 import { Filter, Search } from 'lucide-react';
-import React from 'react';
 
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
-import { cn } from '../../../lib/utils';
-import { type CharacterFilters as FilterType, type CharacterRole } from '../types';
+import { FC } from 'react';
+
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { cn } from '@/lib/utils';
+import { type CharacterFilters as FilterType, type CharacterRole } from '@/types';
 
 interface CharacterFiltersProps {
   filters: FilterType;
@@ -17,11 +19,15 @@ const ROLES: CharacterRole[] = [
   'supporting',
   'mentor',
   'foil',
-  'love-interest',
-  'comic-relief',
+  'love_interest',
+  'sidekick',
+  'deuteragonist',
+  'tritagonist',
+  'minor',
+  'background',
 ];
 
-export const CharacterFilters: React.FC<CharacterFiltersProps> = ({ filters, onFilterChange }) => {
+export const CharacterFilters: FC<CharacterFiltersProps> = ({ filters, onFilterChange }) => {
   const toggleRole = (role: CharacterRole): void => {
     const currentRoles = filters.roles;
     const newRoles = currentRoles.includes(role)

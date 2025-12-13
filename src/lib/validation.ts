@@ -3,8 +3,7 @@
  * Integrates Zod schemas with application logic
  */
 
-import { ChapterStatus, PublishStatus } from '../shared/types';
-import { createChapterId, createProjectId, isProjectId } from '../types/guards';
+import { createChapterId, createProjectId, isProjectId } from '@/types/guards';
 import {
   ChapterSchema,
   CreateProjectSchema,
@@ -16,7 +15,10 @@ import {
   type Chapter,
   type Project,
   type ValidationResult,
-} from '../types/schemas';
+} from '@/types/schemas';
+
+import { ChapterStatus, PublishStatus } from '@shared/types';
+
 
 // =============================================================================
 // VALIDATION SERVICE CLASS

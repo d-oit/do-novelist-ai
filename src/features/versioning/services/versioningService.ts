@@ -1,9 +1,7 @@
 import { logger } from '@/lib/logging/logger';
-import type { Chapter } from '@/types';
+import type { Chapter, ChapterVersion, Branch, VersionDiff, VersionCompareResult  } from '@/types';
 
-import { createChapter } from '../../../shared/utils';
-import type { ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '../types';
-
+import { createChapter } from '@shared/utils';
 
 class VersioningService {
   private static instance: VersioningService;

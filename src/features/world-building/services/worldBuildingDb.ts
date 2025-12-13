@@ -11,7 +11,7 @@ import type {
   LoreEntry,
   ResearchSource,
   WorldMap,
-} from '../types';
+} from '@/features/world-building/types';
 
 class WorldBuildingDatabase {
   private readonly dbName = 'novelist-world-building';

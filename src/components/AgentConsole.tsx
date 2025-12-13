@@ -1,8 +1,10 @@
+
 import { Terminal, CheckCircle2, AlertTriangle, Info, Brain } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 
-import { cn } from '../lib/utils';
-import type { LogEntry, ActionTraceStep, AgentDecision } from '../shared/types';
+import { cn } from '@/lib/utils';
+
+import type { LogEntry, ActionTraceStep, AgentDecision } from '@shared/types';
 
 interface AgentConsoleProps {
   logs: LogEntry[];

@@ -1,9 +1,9 @@
+
 import { Award } from 'lucide-react';
 import React from 'react';
 
-import { type Achievement, type UserAchievement } from '../types';
-
-import { AchievementBadge } from './AchievementBadge';
+import { AchievementBadge } from '@/features/gamification/components/AchievementBadge';
+import { type Achievement, type UserAchievement } from '@/types';
 
 interface AchievementsListProps {
   achievements: Achievement[];

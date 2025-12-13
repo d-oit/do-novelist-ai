@@ -2,12 +2,10 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+import AnalyticsDashboard from '@/features/analytics/components/AnalyticsDashboard';
+import { useAnalytics } from '@/features/analytics/hooks/useAnalytics';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
 import type { Project } from '@/shared/types';
-
-import { useAnalytics } from '../hooks/useAnalytics';
-
-import AnalyticsDashboard from './AnalyticsDashboard';
 
 // Mock the analytics hook
 vi.mock('../hooks/useAnalytics');

@@ -1,17 +1,15 @@
 import { motion } from 'framer-motion';
 import { Globe, BookOpen, RefreshCw, X } from 'lucide-react';
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, FC } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { AlertsSection } from '@/features/publishing/components/AlertsSection';
+import { FeedbackWidget } from '@/features/publishing/components/FeedbackWidget';
+import { MetricsOverview } from '@/features/publishing/components/MetricsOverview';
+import { PlatformStatusGrid } from '@/features/publishing/components/PlatformStatusGrid';
+import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
+import { cn } from '@/lib/utils';
 import type { Project } from '@/types';
-
-import { Button } from '../../../components/ui/Button';
-import { cn } from '../../../lib/utils';
-import { usePublishingAnalytics } from '../hooks/usePublishingAnalytics';
-
-import { AlertsSection } from './AlertsSection';
-import { FeedbackWidget } from './FeedbackWidget';
-import { MetricsOverview } from './MetricsOverview';
-import { PlatformStatusGrid } from './PlatformStatusGrid';
 
 interface PublishingDashboardProps {
   project: Project;
@@ -20,7 +18,7 @@ interface PublishingDashboardProps {
   className?: string;
 }
 
-const PublishingDashboard: React.FC<PublishingDashboardProps> = ({
+const PublishingDashboard: FC<PublishingDashboardProps> = ({
   project,
   publicationId,
   onClose,

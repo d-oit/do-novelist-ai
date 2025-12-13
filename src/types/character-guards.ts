@@ -3,6 +3,8 @@
  * Runtime type checking and validation for character entities
  */
 
+import { type ProjectId } from '@/types/schemas';
+
 import {
   CharacterConflictSchema,
   CharacterGroupSchema,
@@ -24,7 +26,6 @@ import {
   type RelationshipType,
   type UpdateCharacter,
 } from './character-schemas';
-import { type ProjectId } from './schemas';
 
 // =============================================================================
 // BRANDED TYPE CREATION

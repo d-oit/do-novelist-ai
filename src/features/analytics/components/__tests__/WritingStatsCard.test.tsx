@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 
-import { WritingStatsCard } from '../WritingStatsCard';
+import { WritingStatsCard } from '@/features/analytics/components/WritingStatsCard';
 
 // Mock framer-motion
 vi.mock('framer-motion', () => {

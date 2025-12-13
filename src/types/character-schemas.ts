@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 
-import { ProjectIdSchema, Base64ImageSchema } from './schemas';
+import { ProjectIdSchema, Base64ImageSchema } from '@/types/schemas';
 
 // =============================================================================
 // CHARACTER ENUMS & CONSTANTS

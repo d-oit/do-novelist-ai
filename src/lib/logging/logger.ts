@@ -112,7 +112,31 @@ class Logger {
   }
 
   private sendToAggregator(): void {
-    // TODO: Implement log aggregation (Sentry, LogRocket, Datadog)
+    // Pluggable log aggregation with no-op defaults
+    try {
+      const entry = { context: this.context } as Partial<LogEntry>;
+      // Sentry integration
+      if (typeof window !== 'undefined' && window.Sentry && window.Sentry.captureMessage) {
+        window.Sentry.captureMessage('log', {
+          level: 'info',
+          extra: entry,
+        });
+        return;
+      }
+      // Datadog RUM/logs
+      if (typeof window !== 'undefined' && window.DD_LOGS && window.DD_LOGS.logger) {
+        window.DD_LOGS.logger.info('log', entry);
+        return;
+      }
+      // LogRocket breadcrumbs
+      if (typeof window !== 'undefined' && window.LogRocket && window.LogRocket.log) {
+        window.LogRocket.log('log', entry);
+        return;
+      }
+      // No-op if no aggregator present
+    } catch {
+      // Swallow aggregator errors
+    }
   }
 
   public debug(message: string, context?: LogContext): void {

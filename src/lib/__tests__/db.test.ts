@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { createChapter } from '../../shared/utils';
-import type { Project } from '../../types';
-import { PublishStatus, ChapterStatus } from '../../types';
-import { db, getStoredConfig, saveStoredConfig } from '../db';
+import { db, getStoredConfig, saveStoredConfig } from '@/lib/db';
+import type { Project } from '@/types';
+import { PublishStatus, ChapterStatus } from '@/types';
+
+import { createChapter } from '@shared/utils';
 
 // Mock @libsql/client/web
 const mocks = vi.hoisted(() => ({

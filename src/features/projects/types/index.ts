@@ -6,12 +6,11 @@
 
 import { z } from 'zod';
 
-import { WritingStyleSchema } from '@/types';
+import { WritingStyleSchema, type WritingStyle, type PublishStatus } from '@/types';
 
 /**
  * Project update data
  */
-import { type WritingStyle, type PublishStatus } from '@/types';
 
 /**
  * Project creation wizard step

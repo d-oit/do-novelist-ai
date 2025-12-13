@@ -1,3 +1,4 @@
+
 import { Terminal, CheckCircle2, AlertTriangle, Info, Brain } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 

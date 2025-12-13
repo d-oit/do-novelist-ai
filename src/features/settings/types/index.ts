@@ -13,8 +13,10 @@ export type Theme = 'light' | 'dark' | 'system';
 
 /**
  * AI Model options
+ * Note: This conflicts with AIModel in ./ai-config and ../features/editor/types
+ * Use the one from ./ai-config for consistency
  */
-export type AIModel = 'gemini-pro' | 'gemini-flash' | 'gpt-4' | 'claude-3';
+// export type AIModel = 'gemini-pro' | 'gemini-flash' | 'gpt-4' | 'claude-3';
 
 /**
  * Application settings schema
@@ -143,6 +145,6 @@ export function isTheme(value: string): value is Theme {
   return ['light', 'dark', 'system'].includes(value);
 }
 
-export function isAIModel(value: string): value is AIModel {
-  return ['gemini-pro', 'gemini-flash', 'gpt-4', 'claude-3'].includes(value);
-}
+// export function isAIModel(value: string): value is AIModel {
+//   return ['gemini-pro', 'gemini-flash', 'gpt-4', 'claude-3'].includes(value);
+// }

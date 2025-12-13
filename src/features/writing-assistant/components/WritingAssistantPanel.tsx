@@ -19,14 +19,14 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState, FC } from 'react';
 
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
-import { cn } from '../../../lib/utils';
-import { type Character } from '../../characters/types';
-import useWritingAssistant from '../hooks/useWritingAssistant';
-import { type WritingSuggestion, type WritingSuggestionCategory } from '../types';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { type Character } from '@/features/characters/types';
+import useWritingAssistant from '@/features/writing-assistant/hooks/useWritingAssistant';
+import { cn } from '@/lib/utils';
+import { type WritingSuggestion, type WritingSuggestionCategory } from '@/types';
 
 interface WritingAssistantPanelProps {
   content: string;
@@ -37,7 +37,7 @@ interface WritingAssistantPanelProps {
   plotContext?: string;
 }
 
-const SuggestionIcon: React.FC<{ suggestion: WritingSuggestion }> = ({ suggestion }) => {
+const SuggestionIcon: FC<{ suggestion: WritingSuggestion }> = ({ suggestion }) => {
   const iconProps = { className: 'w-4 h-4' };
 
   switch (suggestion.severity) {
@@ -52,7 +52,7 @@ const SuggestionIcon: React.FC<{ suggestion: WritingSuggestion }> = ({ suggestio
   }
 };
 
-const SeverityBadge: React.FC<{ severity: WritingSuggestion['severity'] }> = ({ severity }) => {
+const SeverityBadge: FC<{ severity: WritingSuggestion['severity'] }> = ({ severity }) => {
   const styles = {
     error:
       'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
@@ -70,7 +70,7 @@ const SeverityBadge: React.FC<{ severity: WritingSuggestion['severity'] }> = ({ 
   );
 };
 
-const SuggestionCard: React.FC<{
+const SuggestionCard: FC<{
   suggestion: WritingSuggestion;
   isSelected?: boolean;
   onSelect: () => void;
@@ -190,7 +190,7 @@ const SuggestionCard: React.FC<{
   );
 };
 
-const AnalysisStats: React.FC<{
+const AnalysisStats: FC<{
   stats: {
     totalSuggestions: number;
     highPrioritySuggestions: number;
@@ -229,7 +229,7 @@ const AnalysisStats: React.FC<{
   );
 };
 
-export const WritingAssistantPanel: React.FC<WritingAssistantPanelProps> = ({
+export const WritingAssistantPanel: FC<WritingAssistantPanelProps> = ({
   content,
   chapterId,
   projectId,

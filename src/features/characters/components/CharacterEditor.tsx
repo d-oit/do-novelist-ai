@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
 import { X, Save, AlertCircle } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 
-import { Button } from '../../../components/ui/Button';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../../components/ui/Card';
-import { iconButtonTarget } from '../../../lib/utils';
-import { type Character, type CharacterRole, type CharacterArc } from '../types';
+import { Button } from '@/components/ui/Button';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/Card';
+import { iconButtonTarget } from '@/lib/utils';
+import { type Character, type CharacterRole, type CharacterArc } from '@/types';
 
 interface CharacterEditorProps {
   character?: Character; // If null, creating new
@@ -17,16 +17,30 @@ interface CharacterEditorProps {
 const ROLES: CharacterRole[] = [
   'protagonist',
   'antagonist',
-  'supporting',
+  'deuteragonist',
+  'tritagonist',
+  'love_interest',
   'mentor',
+  'sidekick',
   'foil',
-  'love-interest',
-  'comic-relief',
+  'supporting',
+  'minor',
+  'background',
 ];
 
-const ARCS: CharacterArc[] = ['change', 'growth', 'fall', 'flat', 'corruption', 'redemption'];
+const ARCS: CharacterArc[] = [
+  'positive_change',
+  'negative_change',
+  'flat',
+  'corruption',
+  'redemption',
+  'growth',
+  'fall',
+  'disillusion',
+  'testing',
+];
 
-export const CharacterEditor: React.FC<CharacterEditorProps> = ({
+export const CharacterEditor: FC<CharacterEditorProps> = ({
   character,
   isOpen,
   onClose,

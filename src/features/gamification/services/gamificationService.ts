@@ -7,7 +7,7 @@ import {
   type StreakMilestone,
   type GamificationStats,
   type Badge,
-} from '../types';
+} from '@/features/gamification/types';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 

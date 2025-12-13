@@ -1,19 +1,17 @@
 import { Plus, ZoomIn, ZoomOut, Calendar } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, FC } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { TimelineCanvas } from '@/features/timeline/components/TimelineCanvas';
+import { useTimelineStore } from '@/features/timeline/stores/timelineStore';
 import type { Project, TimelineEvent } from '@/types/schemas';
-
-import { useTimelineStore } from '../stores/timelineStore';
-
-import { TimelineCanvas } from './TimelineCanvas';
 
 interface TimelineViewProps {
   project: Project;
   onUpdateProject: (updates: Partial<Project>) => void;
 }
 
-export const TimelineView: React.FC<TimelineViewProps> = ({ project, onUpdateProject }) => {
+export const TimelineView: FC<TimelineViewProps> = ({ project, onUpdateProject }) => {
   const { timeline, setTimeline, addEvent, selectedEventId, selectEvent } = useTimelineStore();
 
   const [zoom, setZoom] = useState(1);

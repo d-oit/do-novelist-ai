@@ -2,9 +2,8 @@ import { motion } from 'framer-motion';
 import { TrendingUp } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-import { cn } from '../../lib/utils';
-
-import { Card } from './Card';
+import { Card } from '@/components/ui/Card';
+import { cn } from '@/lib/utils';
 
 interface MetricCardProps {
   title: string;

@@ -1,8 +1,9 @@
+
 import { motion } from 'framer-motion';
 import { TrendingUp, Flame, Brain, Target } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-import { Card } from '../../../components/ui/Card';
+import { Card } from '@/components/ui/Card';
 
 interface InsightData {
   productivity: number;

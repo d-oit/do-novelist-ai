@@ -14,13 +14,12 @@ import {
   PanelRightOpen,
   PanelRightClose,
 } from 'lucide-react';
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, FC } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { WritingAssistantPanel } from '@/features/writing-assistant/components/WritingAssistantPanel';
+import { cn } from '@/lib/utils';
 import type { Project, Chapter, RefineOptions } from '@/types';
-
-import { Button } from '../../../components/ui/Button';
-import { cn } from '../../../lib/utils';
-import { WritingAssistantPanel } from '../../writing-assistant';
 
 interface ChapterEditorProps {
   project: Project;
@@ -31,7 +30,7 @@ interface ChapterEditorProps {
   className?: string;
 }
 
-const ChapterEditor: React.FC<ChapterEditorProps> = ({
+const ChapterEditor: FC<ChapterEditorProps> = ({
   project,
   selectedChapterId,
   onUpdateChapter,

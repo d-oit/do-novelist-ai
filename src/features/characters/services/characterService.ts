@@ -1,4 +1,4 @@
-import { type Character, type CharacterRelationship } from '../types';
+import { type Character, type CharacterRelationship } from '@/types';
 
 /**
  * Character Service

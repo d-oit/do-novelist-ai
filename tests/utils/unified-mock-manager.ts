@@ -407,8 +407,8 @@ As she pushed through the heavy wooden doors, the familiar scent of old books an
    * Handle static assets (pass through)
    */
   private async handleStaticAssets(_testId: string, route: Route): Promise<void> {
-    // Let static assets pass through to real server
-    await route.fulfill();
+    // Let static assets pass through to real server (do not intercept)
+    await route.continue();
   }
 
   /**

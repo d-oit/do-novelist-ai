@@ -4,21 +4,20 @@
  */
 
 import { Plus, Users, Edit } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState, FC } from 'react';
+
+import { WorldElementEditor } from '@/features/world-building/components/WorldElementEditor';
+import { useWorldBuilding } from '@/features/world-building/hooks/useWorldBuilding';
+import type { Culture } from '@/types';
 
 import { Button } from '@shared/components/button';
 import { Card } from '@shared/components/card';
-
-import { useWorldBuilding } from '../hooks/useWorldBuilding';
-import type { Culture } from '../types';
-
-import { WorldElementEditor } from './WorldElementEditor';
 
 interface CultureManagerProps {
   projectId: string;
 }
 
-export const CultureManager: React.FC<CultureManagerProps> = ({ projectId }) => {
+export const CultureManager: FC<CultureManagerProps> = ({ projectId }) => {
   const { cultures, createCulture, updateCulture, deleteCulture } = useWorldBuilding(projectId);
   const [selectedCulture, setSelectedCulture] = useState<Culture | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);

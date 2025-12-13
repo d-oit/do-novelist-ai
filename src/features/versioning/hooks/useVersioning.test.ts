@@ -1,13 +1,12 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+import { useVersioning } from '@/features/versioning/hooks/useVersioning';
+import { versioningService } from '@/features/versioning/services/versioningService';
 import type { Chapter } from '@/types';
 import { ChapterStatus } from '@/types';
 
-import { createChapter } from '../../../shared/utils';
-import { versioningService } from '../services/versioningService';
-
-import { useVersioning } from './useVersioning';
+import { createChapter } from '@shared/utils';
 
 // Mock the versioning service
 vi.mock('../services/versioningService');

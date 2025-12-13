@@ -3,8 +3,7 @@ import { TrendingUp } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
-
-import { Card } from './Card';
+import { Card } from '@/shared/components/ui/Card';
 
 /**
  * Props for the MetricCard component

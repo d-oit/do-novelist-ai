@@ -1,5 +1,5 @@
 import { Settings, DollarSign, Shield, Zap, Activity } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { CostDashboard } from '@/components/ai/CostDashboard';
 import { ProviderSelector } from '@/components/ai/ProviderSelector';

@@ -1,8 +1,8 @@
+import { analyzeConsistency, generateOutline, writeChapterContent } from '@/lib/ai';
+
 import type { Project, AgentAction, Chapter, ProcessedAction, ActionResult } from '@shared/types';
 import { ChapterStatus } from '@shared/types';
 import { createChapter } from '@shared/utils';
-
-import { analyzeConsistency, generateOutline, writeChapterContent } from '../../../lib/ai';
 
 /**
  * Validates if an action can be executed based on project state

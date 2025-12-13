@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import type { Project } from '@/types';
-
-import { useAnalyticsStore } from '../../../lib/stores/analyticsStore';
 import type {
   WritingSession,
   WeeklyStats,
@@ -11,7 +8,9 @@ import type {
   WritingInsights,
   AnalyticsFilter,
   ChartDataPoint,
-} from '../types';
+} from '@/features/analytics/types';
+import { useAnalyticsStore } from '@/lib/stores/analyticsStore';
+import type { Project } from '@/types';
 
 export interface UseAnalyticsReturn {
   // Session Management

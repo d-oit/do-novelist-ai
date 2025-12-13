@@ -3,8 +3,8 @@
  * Based on 2024-2025 TypeScript best practices
  */
 
-import type { AppError } from './error-types';
-import { toAppError } from './error-types';
+import type { AppError } from '@/lib/errors/error-types';
+import { toAppError } from '@/lib/errors/error-types';
 
 /**
  * Result type - represents either a success or failure

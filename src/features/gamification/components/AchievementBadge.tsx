@@ -1,8 +1,9 @@
+
 import { Award, Lock } from 'lucide-react';
 import React from 'react';
 
-import { cn } from '../../../lib/utils';
-import { type Achievement, type UserAchievement } from '../types';
+import { cn } from '@/lib/utils';
+import { type Achievement, type UserAchievement } from '@/types';
 
 interface AchievementBadgeProps {
   achievement: Achievement;

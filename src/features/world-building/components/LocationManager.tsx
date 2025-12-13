@@ -4,21 +4,20 @@
  */
 
 import { Plus, MapPin, Edit } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState, FC } from 'react';
+
+import { WorldElementEditor } from '@/features/world-building/components/WorldElementEditor';
+import { useWorldBuilding } from '@/features/world-building/hooks/useWorldBuilding';
+import type { Location } from '@/types';
 
 import { Button } from '@shared/components/button';
 import { Card } from '@shared/components/card';
-
-import { useWorldBuilding } from '../hooks/useWorldBuilding';
-import type { Location } from '../types';
-
-import { WorldElementEditor } from './WorldElementEditor';
 
 interface LocationManagerProps {
   projectId: string;
 }
 
-export const LocationManager: React.FC<LocationManagerProps> = ({ projectId }) => {
+export const LocationManager: FC<LocationManagerProps> = ({ projectId }) => {
   const { locations, createLocation, updateLocation, deleteLocation } = useWorldBuilding(projectId);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);

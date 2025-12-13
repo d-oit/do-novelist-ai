@@ -4,7 +4,7 @@
  * Uses Vercel AI Gateway for multi-provider routing
  */
 
-import { getValidatedEnv } from './env-validation';
+import { getValidatedEnv } from '@/lib/env-validation';
 
 export type AIProvider = 'openai' | 'anthropic' | 'google' | 'mistral';
 

@@ -1,27 +1,27 @@
 import { Loader2, Settings } from 'lucide-react';
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 
-import type { Chapter, Project, RefineOptions  } from '@/shared/types';
+import { ProjectsErrorBoundary } from '@/components/error-boundary';
+import Navbar from '@/components/Navbar';
+import { ActionCard, BookViewer, PlannerControl } from '@/features/generation/components';
+import { useGoapEngine } from '@/features/generation/hooks';
+import { ProjectStats, ProjectWizard } from '@/features/projects/components';
+import { db } from '@/features/projects/services';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
+import type { Chapter, Project, RefineOptions  } from '@/shared/types';
+import { performanceMonitor } from '@/utils/performance';
 
-import { ProjectsErrorBoundary } from '../components/error-boundary';
-import Navbar from '../components/Navbar';
-import { ActionCard, BookViewer, PlannerControl } from '../features/generation/components';
-import { useGoapEngine } from '../features/generation/hooks';
-import { ProjectStats, ProjectWizard } from '../features/projects/components';
-import { db } from '../features/projects/services';
-import { createChapter } from '../shared/utils';
-import { performanceMonitor } from '../utils/performance';
+import { createChapter } from '@shared/utils';
 
 // Lazy load heavy components for better performance
 const ProjectsView = lazy(() =>
-  import('../features/projects/components').then(module => ({ default: module.ProjectsView })),
+  import('@/features/projects/components').then(module => ({ default: module.ProjectsView })),
 );
 const SettingsView = lazy(() =>
-  import('../features/settings/components').then(module => ({ default: module.SettingsView })),
+  import('@/features/settings/components').then(module => ({ default: module.SettingsView })),
 );
 const AgentConsole = lazy(() =>
-  import('../features/generation/components').then(module => ({ default: module.AgentConsole })),
+  import('@/features/generation/components').then(module => ({ default: module.AgentConsole })),
 );
 
 // Loading components for Suspense boundaries

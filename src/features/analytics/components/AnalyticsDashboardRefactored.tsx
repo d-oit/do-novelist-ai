@@ -1,3 +1,4 @@
+
 /**
  * Analytics Dashboard - Refactored to use smaller components
  * Main container for analytics views
@@ -7,14 +8,12 @@ import { motion } from 'framer-motion';
 import { X, Download, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import AnalyticsContent from '@/features/analytics/components/AnalyticsContent';
+import AnalyticsSidebar from '@/features/analytics/components/AnalyticsSidebar';
+import { cn } from '@/lib/utils';
 import type { Project } from '@/types';
 import { ChapterStatus } from '@/types';
-
-import { Button } from '../../../components/ui/Button';
-import { cn } from '../../../lib/utils';
-
-import AnalyticsContent from './AnalyticsContent';
-import AnalyticsSidebar from './AnalyticsSidebar';
 
 interface AnalyticsDashboardProps {
   project: Project;

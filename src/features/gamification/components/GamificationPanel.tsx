@@ -1,7 +1,8 @@
+
 import { Zap, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { useGamification } from '../hooks/useGamification';
+import { useGamification } from "@/features/gamification/hooks/useGamification"
 
 interface GamificationPanelProps {
   userId: string;

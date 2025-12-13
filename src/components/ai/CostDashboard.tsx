@@ -3,13 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { type AIProvider } from '@/lib/ai-config';
 import { cn } from '@/lib/utils';
-import type { BudgetInfo,
-  getUsageStats,
-  getBudgetInfo,
-  getOptimizationRecommendations,
-  type EnhancedUsageStats 
- 
-} from '@/services/ai-analytics-service';
+import type { BudgetInfo, EnhancedUsageStats } from '@/services/ai-analytics-service';
+import { getUsageStats, getBudgetInfo, getOptimizationRecommendations } from '@/services/ai-analytics-service';
 
 interface CostDashboardProps {
   userId: string;

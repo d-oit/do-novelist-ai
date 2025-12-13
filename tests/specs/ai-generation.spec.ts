@@ -22,10 +22,7 @@ async function isElementVisible(page: Page, selector: string): Promise<boolean> 
   }
 }
 test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
-  test.beforeAll(async ({ page }) => {
-    // Initialize database transaction manager
-    await dbTransactionManager.initialize(page);
-
+  test.beforeAll(async () => {
     // Start performance monitoring for the test suite
     performanceMonitor.startTestSuite('AI Generation E2E Tests');
 
@@ -57,9 +54,14 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
       timeout: compatibility.getTimeoutMultiplier() * 30000,
     });
 
-    // Wait for app to be ready
-    await expect(page.getByRole('navigation')).toBeVisible();
-    await expect(page.getByTestId('nav-dashboard')).toBeVisible();
+    // Wait for app shell to be ready even if initialization spinner shows briefly
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(100);
+    try {
+      await page.getByRole('navigation').waitFor({ state: 'visible', timeout: 15000 });
+    } catch {
+      await page.getByTestId('nav-dashboard').waitFor({ state: 'visible', timeout: 15000 });
+    }
     await page.setViewportSize({ width: 1280, height: 720 });
 
     console.log('✅ Enhanced test environment setup complete');

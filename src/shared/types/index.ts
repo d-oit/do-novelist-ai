@@ -317,4 +317,4 @@ export interface ActionResult {
 }
 
 // Re-export types from schemas for backward compatibility
-export type { WritingStyle } from '../../types/schemas';
+export type { WritingStyle } from '@/types/schemas';

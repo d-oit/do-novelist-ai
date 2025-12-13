@@ -1,11 +1,11 @@
+
 import { AnimatePresence, motion } from 'framer-motion';
 import { Users, Plus } from 'lucide-react';
 import React from 'react';
 
-import { Button } from '../../../components/ui/Button';
-import { type Character } from '../types';
-
-import { CharacterCard } from './CharacterCard';
+import { Button } from '@/components/ui/Button';
+import { CharacterCard } from '@/features/characters/components/CharacterCard';
+import { type Character } from '@/types';
 
 interface CharacterGridProps {
   characters: Character[];

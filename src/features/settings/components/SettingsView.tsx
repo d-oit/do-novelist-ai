@@ -13,13 +13,12 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-import { useUser } from '../../../contexts/UserContext';
-import type { DbConfig } from '../../../lib/db';
-import { db, getStoredConfig, saveStoredConfig } from '../../../lib/db';
-import { cn } from '../../../lib/utils';
-import { GamificationPanel } from '../../gamification';
-
-import { AISettingsPanel } from './AISettingsPanel';
+import { useUser } from '@/contexts/UserContext';
+import { GamificationPanel } from '@/features/gamification/components/GamificationPanel';
+import { AISettingsPanel } from '@/features/settings/components/AISettingsPanel';
+import type { DbConfig } from '@/lib/db';
+import { db, getStoredConfig, saveStoredConfig } from '@/lib/db';
+import { cn } from '@/lib/utils';
 
 const SettingsView: React.FC = () => {
   const { userId } = useUser();

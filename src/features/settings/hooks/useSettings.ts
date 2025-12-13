@@ -7,9 +7,8 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-import { settingsService } from '../services/settingsService';
-import { DEFAULT_SETTINGS, validateSettings } from '../types';
-import { type Settings, type SettingsCategory } from '../types';
+import { settingsService } from "@/features/settings/services/settingsService"
+import { DEFAULT_SETTINGS, validateSettings, type Settings, type SettingsCategory } from '@/features/settings/types';
 
 interface SettingsState {
   // Data

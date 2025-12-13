@@ -1,9 +1,10 @@
+
 import { motion } from 'framer-motion';
-import React from 'react';
 
+import { FC } from 'react';
+
+import { EventNode } from '@/features/timeline/components/EventNode';
 import type { TimelineEvent } from '@/types';
-
-import { EventNode } from './EventNode';
 
 interface TimelineCanvasProps {
   events: TimelineEvent[];
@@ -11,7 +12,7 @@ interface TimelineCanvasProps {
   selectedEventId: string | null;
 }
 
-export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
+export const TimelineCanvas: FC<TimelineCanvasProps> = ({
   events,
   onEventClick,
   selectedEventId,

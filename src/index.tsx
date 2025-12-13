@@ -1,17 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import App from './app/App';
+import App from '@/app/App';
 import './index.css';
-import { addResourceHints, preloadCriticalResources } from './lib/performance';
+import { addResourceHints, preloadCriticalResources } from '@/lib/performance';
 
 // Load AI SDK logger patch to prevent "m.log is not a function" errors
 // This must be imported before any AI SDK code runs
 import './lib/ai-sdk-logger-patch';
 
-import ErrorBoundary from './components/error-boundary';
-import { UserProvider } from './contexts/UserContext';
-import { validateEnvironment } from './lib/env-validation';
+import ErrorBoundary from '@/components/error-boundary';
+import { UserProvider } from '@/contexts/UserContext';
+import { validateEnvironment } from '@/lib/env-validation';
 
 // Environment validation at startup
 const envValidation = validateEnvironment();

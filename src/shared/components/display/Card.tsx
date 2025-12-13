@@ -12,4 +12,4 @@ export {
   CardContent,
   cardVariants,
   type CardProps,
-} from '../../../components/ui/Card';
+} from '@/components/ui/Card';

@@ -5,7 +5,7 @@
 
 import type React from 'react';
 
-import type { ChapterId, ProjectId, Temperature } from './schemas';
+import type { ChapterId, ProjectId, Temperature } from '@/types/schemas';
 
 // =============================================================================
 // UTILITY TYPES

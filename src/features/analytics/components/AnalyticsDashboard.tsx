@@ -1,17 +1,16 @@
+
 import { motion } from 'framer-motion';
 import { BarChart3, Eye, EyeOff, Download, RefreshCw } from 'lucide-react';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import GoalsProgress from '@/features/analytics/components/GoalsProgress';
+import ProductivityChart from '@/features/analytics/components/ProductivityChart';
+import SessionTimeline from '@/features/analytics/components/SessionTimeline';
+import WritingStatsCard from '@/features/analytics/components/WritingStatsCard';
+import { useAnalytics } from '@/features/analytics/hooks/useAnalytics';
+import { cn } from '@/lib/utils';
 import type { Project } from '@/types';
-
-import { Button } from '../../../components/ui/Button';
-import { cn } from '../../../lib/utils';
-import { useAnalytics } from '../hooks/useAnalytics';
-
-import GoalsProgress from './GoalsProgress';
-import ProductivityChart from './ProductivityChart';
-import SessionTimeline from './SessionTimeline';
-import WritingStatsCard from './WritingStatsCard';
 
 interface AnalyticsDashboardProps {
   project: Project;

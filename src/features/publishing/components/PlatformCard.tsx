@@ -1,11 +1,12 @@
+
 import { motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle, Settings } from 'lucide-react';
 import React from 'react';
 
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
-import { cn } from '../../../lib/utils';
-import { type PublishingPlatform } from '../types';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { cn } from '@/lib/utils';
+import { type PublishingPlatform } from '@/types';
 
 interface PlatformCardProps {
   platform: PublishingPlatform;

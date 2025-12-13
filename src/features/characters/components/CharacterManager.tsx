@@ -1,23 +1,22 @@
 import { Users, Plus, AlertCircle } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, FC } from 'react';
 
-import { Button } from '../../../components/ui/Button';
-import { validateCharacter } from '../../../lib/character-validation';
-import { cn } from '../../../lib/utils';
-import { useCharacters } from '../hooks/useCharacters';
-import { type Character } from '../types';
-
-import { CharacterEditor } from './CharacterEditor';
-import { CharacterFilters } from './CharacterFilters';
-import { CharacterGrid } from './CharacterGrid';
-import { CharacterStats } from './CharacterStats';
+import { Button } from '@/components/ui/Button';
+import { CharacterEditor } from '@/features/characters/components/CharacterEditor';
+import { CharacterFilters } from '@/features/characters/components/CharacterFilters';
+import { CharacterGrid } from '@/features/characters/components/CharacterGrid';
+import { CharacterStats } from '@/features/characters/components/CharacterStats';
+import { useCharacters } from '@/features/characters/hooks/useCharacters';
+import { validateCharacter } from '@/lib/character-validation';
+import { cn } from '@/lib/utils';
+import { type Character } from '@/types';
 
 interface CharacterManagerProps {
   projectId: string;
   className?: string;
 }
 
-export const CharacterManager: React.FC<CharacterManagerProps> = ({ projectId, className }) => {
+export const CharacterManager: FC<CharacterManagerProps> = ({ projectId, className }) => {
   const {
     characters,
     filters,

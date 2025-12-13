@@ -1,37 +1,38 @@
-import React, { lazy, Suspense } from 'react';
 
-import type { Project, AgentAction, RefineOptions } from '@/shared/types';
+import React, { lazy, Suspense } from 'react';
 
 import {
   AnalyticsLoading,
   BookViewerLoading,
   WorldBuildingLoading,
   PublishingLoading,
-} from '../lib/lazy-components';
+} from '@/lib/lazy-components';
+import type { Project, AgentAction, RefineOptions } from '@/shared/types';
+
 
 // Import types for proper typing
 
 // Lazy load heavy analytics components
 const AnalyticsDashboard = lazy(
-  () => import('../features/analytics/components/AnalyticsDashboard'),
+  () => import('@/features/analytics/components/AnalyticsDashboard'),
 );
 
 // Lazy load editor components
-const BookViewer = lazy(() => import('../features/editor/components/BookViewer'));
+const BookViewer = lazy(() => import('@/features/editor/components/BookViewer'));
 
 // Lazy load world building components
 const WorldBuildingDashboard = lazy(
-  () => import('../features/world-building/components/WorldBuildingDashboard'),
+  () => import('@/features/world-building/components/WorldBuildingDashboard'),
 );
 
 // Lazy load publishing components
 const PublishingDashboard = lazy(
-  () => import('../features/publishing/components/PublishingDashboard'),
+  () => import('@/features/publishing/components/PublishingDashboard'),
 );
-const PublishingSetup = lazy(() => import('../features/publishing/components/PublishingSetup'));
+const PublishingSetup = lazy(() => import('@/features/publishing/components/PublishingSetup'));
 
 // Lazy load heavy individual components
-const GoapVisualizer = lazy(() => import('../components/GoapVisualizer'));
+const GoapVisualizer = lazy(() => import('@/components/GoapVisualizer'));
 
 /**
  * Props for lazy-loaded analytics dashboard component

@@ -1,11 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+import { projectService } from "@/features/projects/services/projectService";
+import { db } from '@/lib/db';
 import { PublishStatus } from '@/types';
-
-import { db } from '../../../../lib/db';
-import { type ProjectCreationData, type ProjectUpdateData } from '../../types';
-import { projectService } from '../projectService';
-
+import { type ProjectCreationData, type ProjectUpdateData } from '@/types';
 
 // Mock the db module to use localStorage
 vi.mock('../../../../lib/db', () => ({

@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import {
   Crown,
@@ -10,11 +11,15 @@ import {
   Edit3,
   Trash2,
   CheckCircle2,
+  Shield,
+  Star,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import React from 'react';
 
-import { cn, iconButtonTarget } from '../../../lib/utils';
-import { type Character, type CharacterRole } from '../types';
+import { cn, iconButtonTarget } from '@/lib/utils';
+import { type Character, type CharacterRole } from '@/types';
 
 interface CharacterCardProps {
   character: Character;
@@ -28,16 +33,15 @@ interface CharacterCardProps {
 const CHARACTER_ROLE_ICONS: Record<CharacterRole, React.ComponentType<{ className?: string }>> = {
   protagonist: Crown,
   antagonist: Sword,
-  // deuteragonist: Shield, // Not in new schema
-  // tritagonist: Star, // Not in new schema
-  'love-interest': Heart,
+  deuteragonist: Shield,
+  tritagonist: Star,
+  love_interest: Heart,
   mentor: BookOpen,
-  // sidekick: Users, // Not in new schema
+  sidekick: Users,
   foil: Zap,
   supporting: Target,
-  // minor: Eye, // Not in new schema
-  // background: EyeOff // Not in new schema
-  'comic-relief': Users, // Added in new schema
+  minor: Eye,
+  background: EyeOff,
 };
 
 // Fallback for missing icons if schema changed
@@ -51,8 +55,12 @@ const CHARACTER_ROLE_COLORS: Record<CharacterRole, string> = {
   supporting: 'text-blue-500',
   mentor: 'text-purple-500',
   foil: 'text-orange-500',
-  'love-interest': 'text-pink-500',
-  'comic-relief': 'text-green-500',
+  love_interest: 'text-pink-500',
+  sidekick: 'text-green-500',
+  deuteragonist: 'text-cyan-500',
+  tritagonist: 'text-indigo-500',
+  minor: 'text-gray-500',
+  background: 'text-slate-500',
 };
 
 const CharacterCardComponent: React.FC<CharacterCardProps> = ({
@@ -69,7 +77,7 @@ const CharacterCardComponent: React.FC<CharacterCardProps> = ({
   // Helper to determine tier (simplified from original)
   const getTier = (role: CharacterRole): 'main' | 'supporting' | 'minor' => {
     if (role === 'protagonist' || role === 'antagonist') return 'main';
-    if (role === 'supporting' || role === 'love-interest' || role === 'mentor') return 'supporting';
+    if (role === 'supporting' || role === 'love_interest' || role === 'mentor') return 'supporting';
     return 'minor';
   };
 

@@ -10,8 +10,7 @@ import {
   type AIUsageAnalytic,
   type UsageStats,
 } from '@/lib/db/index';
-
-import { loadUserPreferences } from './ai-config-service';
+import { loadUserPreferences } from '@/services/ai-config-service';
 
 /**
  * Enhanced usage stats with computed properties

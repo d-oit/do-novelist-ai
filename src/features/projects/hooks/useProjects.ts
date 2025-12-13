@@ -7,16 +7,16 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import { ChapterStatus, PublishStatus } from '@/types';
-import { type Project } from '@/types';
-
-import { projectService } from '../services/projectService';
+import { projectService } from "@/features/projects/services/projectService"
 import {
   type ProjectFilters,
   type ProjectStats,
   type ProjectCreationData,
   type ProjectUpdateData,
-} from '../types';
+} from '@/features/projects/types';
+import { ChapterStatus, PublishStatus } from '@/types';
+import { type Project } from '@/types';
+
 
 interface ProjectsState {
   // Data

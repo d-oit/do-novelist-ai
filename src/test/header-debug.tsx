@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import axe, { type AxeResults } from 'axe-core';
 
-import Header from '../components/layout/Header';
+import Header from '@/components/layout/Header';
 
 async function debugHeaderAccessibility(): Promise<void> {
   console.log('Testing Header accessibility...');

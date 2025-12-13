@@ -1,9 +1,9 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { characterService } from '../../services/characterService';
-import { type Character, type CharacterRole, type CharacterArc } from '../../types';
-import { useCharacters } from '../useCharacters';
+import { useCharacters } from "@/features/characters/hooks/useCharacters";
+import { characterService } from "@/features/characters/services/characterService";
+import { type Character, type CharacterRole, type CharacterArc } from '@/types';
 
 // Mock the character service
 vi.mock('../../services/characterService');
@@ -13,8 +13,9 @@ const createMockCharacter = (overrides: Partial<Character> = {}): Character => (
   id: crypto.randomUUID(),
   projectId: 'test-project-id',
   name: 'Test Character',
+  aliases: [],
   role: 'protagonist' as CharacterRole,
-  arc: 'change' as CharacterArc,
+  arc: 'positive_change' as CharacterArc,
   age: 25,
   gender: 'Female',
   occupation: 'Detective',
@@ -31,8 +32,14 @@ const createMockCharacter = (overrides: Partial<Character> = {}): Character => (
     },
   ],
   relationships: [],
+  version: 1,
+  summary: undefined,
+  tags: [],
+  notes: undefined,
   createdAt: Date.now(),
   updatedAt: Date.now(),
+  imageUrl: undefined,
+  aiModel: undefined,
   ...overrides,
 });
 
@@ -154,6 +161,7 @@ describe('useCharacters', () => {
     const newCharacterData = {
       projectId: 'test-project-id',
       name: 'New Character',
+      aliases: [],
       role: 'antagonist' as CharacterRole,
       arc: 'fall' as CharacterArc,
       motivation: 'Seeking power at any cost',
@@ -161,6 +169,8 @@ describe('useCharacters', () => {
       conflict: 'Moral boundaries limit his ambition',
       traits: [],
       relationships: [],
+      version: 1,
+      tags: [],
     };
 
     await act(async () => {
@@ -179,6 +189,7 @@ describe('useCharacters', () => {
     const characterData = {
       projectId: 'test-project-id',
       name: 'Character',
+      aliases: [],
       role: 'protagonist' as CharacterRole,
       arc: 'growth' as CharacterArc,
       motivation: 'Test motivation',
@@ -186,6 +197,8 @@ describe('useCharacters', () => {
       conflict: 'Test conflict',
       traits: [],
       relationships: [],
+      version: 1,
+      tags: [],
     };
 
     await act(async () => {
@@ -204,13 +217,16 @@ describe('useCharacters', () => {
       await result.current.create({
         projectId: 'test-project-id',
         name: 'Test',
+        aliases: [],
         role: 'protagonist' as CharacterRole,
-        arc: 'change' as CharacterArc,
+        arc: 'positive_change' as CharacterArc,
         motivation: 'Test motivation',
         goal: 'Test goal',
         conflict: 'Test conflict',
         traits: [],
         relationships: [],
+        version: 1,
+        tags: [],
       });
     });
 
@@ -235,13 +251,16 @@ describe('useCharacters', () => {
       await result.current.create({
         projectId: 'test-project-id',
         name: 'Test',
+        aliases: [],
         role: 'protagonist' as CharacterRole,
-        arc: 'change' as CharacterArc,
+        arc: 'positive_change' as CharacterArc,
         motivation: 'Test motivation',
         goal: 'Test goal',
         conflict: 'Test conflict',
         traits: [],
         relationships: [],
+        version: 1,
+        tags: [],
       });
     });
 
@@ -443,10 +462,10 @@ describe('useCharacters', () => {
     const { result } = renderHook(() => useCharacters());
 
     act(() => {
-      result.current.setFilters({ arcs: ['change', 'growth'] });
+      result.current.setFilters({ arcs: ['positive_change', 'growth'] });
     });
 
-    expect(result.current.filters.arcs).toEqual(['change', 'growth']);
+    expect(result.current.filters.arcs).toEqual(['positive_change', 'growth']);
   });
 
   it('sets validation status filter', () => {
@@ -499,13 +518,16 @@ describe('useCharacters', () => {
       await result.current.create({
         projectId: 'test-project-id',
         name: 'Test',
+        aliases: [],
         role: 'protagonist' as CharacterRole,
-        arc: 'change' as CharacterArc,
+        arc: 'positive_change' as CharacterArc,
         motivation: 'Test motivation',
         goal: 'Test goal',
         conflict: 'Test conflict',
         traits: [],
         relationships: [],
+        version: 1,
+        tags: [],
       });
     });
 

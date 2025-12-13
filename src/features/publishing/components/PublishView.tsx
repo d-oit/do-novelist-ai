@@ -1,15 +1,12 @@
 import { Download, Globe, Rocket, Target, Languages, Loader2, FileCheck } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState, FC } from 'react';
 
+import { generateEpub } from '@/features/publishing/services/epubService';
 import { translateContent } from '@/lib/ai';
 import { cn } from '@/lib/utils';
 
 import type { Project, Chapter } from '@shared/types';
 import { PublishStatus } from '@shared/types';
-
-
-import { generateEpub } from '../services/epubService';
-
 
 interface PublishViewProps {
   project: Project;
@@ -17,7 +14,7 @@ interface PublishViewProps {
   onUpdateChapter: (chapterId: string, updates: Partial<Chapter>) => void;
 }
 
-const PublishView: React.FC<PublishViewProps> = ({ project, onUpdateProject, onUpdateChapter }) => {
+const PublishView: FC<PublishViewProps> = ({ project, onUpdateProject, onUpdateChapter }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [targetLang, setTargetLang] = useState('Spanish');

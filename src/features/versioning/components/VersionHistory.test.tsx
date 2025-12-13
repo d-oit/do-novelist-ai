@@ -1,13 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+import VersionHistory from '@/features/versioning/components/VersionHistory';
+import { useVersioning } from '@/features/versioning/hooks/useVersioning';
 import type { Chapter } from '@/types';
 import { ChapterStatus } from '@/types';
 
-import { createChapter } from '../../../shared/utils';
-import { useVersioning } from '../hooks/useVersioning';
-
-import VersionHistory from './VersionHistory';
+import { createChapter } from '@shared/utils';
 
 // Mock UI components to avoid import issues
 vi.mock('../../../components/ui/Button', () => ({

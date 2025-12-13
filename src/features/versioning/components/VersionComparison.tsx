@@ -1,3 +1,4 @@
+
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   GitCompare,
@@ -15,11 +16,11 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
-import { cn, iconButtonTarget } from '../../../lib/utils';
-import { useVersioning } from '../hooks/useVersioning';
-import type { ChapterVersion, VersionCompareResult } from '../types';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { useVersioning } from '@/features/versioning/hooks/useVersioning';
+import { cn, iconButtonTarget } from '@/lib/utils';
+import type { ChapterVersion, VersionCompareResult } from '@/types';
 
 interface VersionComparisonProps {
   version1: ChapterVersion;

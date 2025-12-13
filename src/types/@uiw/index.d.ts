@@ -1,3 +1,5 @@
+import { FC } from 'react';
+
 declare module '@uiw/react-md-editor' {
   import type * as React from 'react';
 

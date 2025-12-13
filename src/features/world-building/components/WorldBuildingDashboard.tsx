@@ -15,20 +15,19 @@ import {
   CheckCircle,
   Filter,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState, FC } from 'react';
+
+import { useWorldBuilding } from '@/features/world-building/hooks/useWorldBuilding';
+import { cn } from '@/lib/utils';
 
 import { Button } from '@shared/components/button';
 import { Card } from '@shared/components/card';
-
-import { cn } from '../../../lib/utils';
-import { useWorldBuilding } from '../hooks/useWorldBuilding';
-
 
 interface WorldBuildingDashboardProps {
   projectId: string;
 }
 
-const WorldBuildingDashboard: React.FC<WorldBuildingDashboardProps> = ({ projectId }) => {
+const WorldBuildingDashboard: FC<WorldBuildingDashboardProps> = ({ projectId }) => {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'locations' | 'cultures' | 'timeline' | 'lore'
   >('overview');

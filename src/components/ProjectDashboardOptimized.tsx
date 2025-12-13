@@ -1,3 +1,4 @@
+
 /**
  * Project Dashboard - Optimized with Code Splitting
  * Uses dynamic imports for better bundle optimization
@@ -6,16 +7,14 @@
 import { Settings } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 
+import ActionCard from '@/components/ActionCard';
+import AgentConsole from '@/components/AgentConsole';
+import GoapVisualizer from '@/components/GoapVisualizer';
+import PlannerControl from '@/components/PlannerControl';
+import ProjectStats from '@/components/ProjectStats';
+import BookViewer from '@/features/editor/components/BookViewer';
+import type { GoapEngine } from '@/features/editor/hooks/useGoapEngine';
 import type { Project, Chapter, RefineOptions } from '@/shared/types';
-
-import BookViewer from '../features/editor/components/BookViewer';
-import type { GoapEngine } from '../features/editor/hooks/useGoapEngine';
-
-import ActionCard from './ActionCard';
-import AgentConsole from './AgentConsole';
-import GoapVisualizer from './GoapVisualizer';
-import PlannerControl from './PlannerControl';
-import ProjectStats from './ProjectStats';
 
 // Import BookViewer directly to avoid lazy loading issues in tests
 

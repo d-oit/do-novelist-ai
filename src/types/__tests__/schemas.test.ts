@@ -5,7 +5,6 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ChapterStatus, PublishStatus } from '../../shared/types';
 import {
   ProjectSchema,
   ChapterSchema,
@@ -16,7 +15,10 @@ import {
   RefineOptionsSchema,
   isValidData,
   type Project,
-} from '../schemas';
+} from '@/types/schemas';
+
+import { ChapterStatus, PublishStatus } from '@shared/types';
+
 
 describe('Schema Validation Tests', () => {
   describe('WorldStateSchema', () => {

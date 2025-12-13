@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-import { publishingAnalyticsService } from '../../features/publishing/services/publishingAnalyticsService';
+import { publishingAnalyticsService } from '@/features/publishing/services/publishingAnalyticsService';
 import {
   type EngagementMetrics,
   type PlatformAnalytics,
@@ -12,8 +12,9 @@ import {
   type PublishingTrends,
   type ReaderFeedback,
   type ReaderInsights,
-} from '../../features/publishing/types';
-import type { Project } from '../../types';
+} from '@/features/publishing/types';
+import type { Project } from '@/types';
+
 
 // Store State
 interface PublishingState {

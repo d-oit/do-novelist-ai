@@ -1,7 +1,8 @@
+
 import { Loader2 } from 'lucide-react';
 import React, { Suspense } from 'react';
 
-import { cn } from './utils';
+import { cn } from '@/lib/utils';
 
 // Loading component for lazy-loaded routes
 interface LazyLoadingProps {

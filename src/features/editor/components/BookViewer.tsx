@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from 'clsx';
 import {
   BookOpen,
@@ -27,19 +28,17 @@ import {
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { twMerge } from 'tailwind-merge';
 
+import AnalyticsDashboard from '@/features/analytics/components/AnalyticsDashboard';
+import { useAnalytics } from '@/features/analytics/hooks/useAnalytics';
+import CoverGenerator from '@/features/editor/components/CoverGenerator';
+import PublishPanel from '@/features/editor/components/PublishPanel';
+import { useEditorState } from '@/features/editor/hooks/useEditorState';
+import VersionComparison from '@/features/versioning/components/VersionComparison';
+import VersionHistory from '@/features/versioning/components/VersionHistory';
+import { useVersioning } from '@/features/versioning/hooks/useVersioning';
+import { generateChapterIllustration } from '@/lib/ai';
 import type { Project, Chapter, RefineOptions } from '@/shared/types';
 import { ChapterStatus } from '@/shared/types';
-
-import { generateChapterIllustration } from '../../../lib/ai';
-import { AnalyticsDashboard, useAnalytics } from '../../analytics';
-import { VersionHistory, VersionComparison, useVersioning } from '../../versioning';
-import { useEditorState } from '../hooks/useEditorState';
-import type { AIModel } from '../types';
-
-import CoverGenerator from './CoverGenerator';
-import PublishPanel from './PublishPanel';
-
-
 
 // ...
 
@@ -671,7 +670,7 @@ const BookViewer: React.FC<BookViewerProps> = React.memo(
                             className='w-full rounded border border-border bg-background px-3 py-2 text-xs focus:border-primary focus:outline-none'
                             value={state.refineSettings.model}
                             onChange={e =>
-                              actions.updateRefineSettings({ model: e.target.value as AIModel })
+                              actions.updateRefineSettings({ model: e.target.value as 'gemini-2.5-flash' | 'gemini-2.0-flash-exp' | 'gemini-1.5-pro' | 'gemini-1.5-flash' })
                             }
                             disabled={project.isGenerating}
                           >

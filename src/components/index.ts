@@ -31,7 +31,7 @@ export {
 
 // === Layout Components ===
 export { default as Header } from '@shared/components/layout/Header';
-export { default as AppBackground } from './layout/AppBackground';
+export { AppBackground } from './layout/AppBackground';
 export { default as MainLayout } from './layout/MainLayout';
 export { default as Sidebar } from './layout/Sidebar';
 
@@ -50,7 +50,7 @@ export { default as ProjectStats } from './ProjectStats';
 // These are re-exported from their respective feature modules
 export { CharacterCard } from '@/features/characters/components/CharacterCard';
 export { WritingStatsCard } from '@/features/analytics/components/WritingStatsCard';
-export { AnalyticsDashboard } from '@/features/analytics/components/AnalyticsDashboard';
+export { default as AnalyticsDashboard } from '@/features/analytics/components/AnalyticsDashboard';
 
 // === Component Paths Reference ===
 // For developers - shows the canonical locations after consolidation:

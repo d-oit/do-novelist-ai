@@ -7,8 +7,7 @@ import { ProjectSchema } from '@/types/schemas';
 
 import type { Project, ProjectSettings, WorldState, WritingStyle } from '@shared/types';
 import { ChapterStatus, PublishStatus } from '@shared/types';
-
-import { parseChapterStatus, parsePublishStatus } from '../../../shared/utils/validation';
+import { parseChapterStatus, parsePublishStatus } from '@shared/utils/validation';
 
 const STORAGE_KEY = 'novelist_db_config';
 const LOCAL_PROJECTS_KEY = 'novelist_local_projects';

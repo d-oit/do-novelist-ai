@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-import { gamificationService } from '../services/gamificationService';
+import { gamificationService } from "@/features/gamification/services/gamificationService"
 import {
   type WritingStreak,
   type Achievement,
@@ -10,7 +10,7 @@ import {
   type StreakMilestone,
   type GamificationStats,
   type Badge,
-} from '../types';
+} from '@/features/gamification/types';
 
 export interface UseGamificationReturn {
   // Data

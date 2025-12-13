@@ -1,17 +1,15 @@
 import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
-import React from 'react';
+import type { ReactNode, FC } from 'react';
 
-import { cn } from '../../lib/utils';
-
-import { AppBackground } from './AppBackground';
+import { AppBackground } from '@/components/layout/AppBackground';
+import { cn } from '@/lib/utils';
 
 interface MainLayoutProps {
   children: ReactNode;
   className?: string;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
+const MainLayout: FC<MainLayoutProps> = ({ children, className }) => {
   return (
     <motion.div
       className={cn(

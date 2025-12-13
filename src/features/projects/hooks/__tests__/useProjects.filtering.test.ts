@@ -1,11 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+import { useProjects, selectFilteredProjects } from '@/features/projects/hooks/useProjects';
+import { projectService } from '@/features/projects/services/projectService';
 import { type Project, type Language } from '@/types';
 import { PublishStatus, ChapterStatus } from '@/types';
-
-import { projectService } from '../../services/projectService';
-import { useProjects, selectFilteredProjects } from '../useProjects';
 
 // Mock the project service
 vi.mock('../../services/projectService');

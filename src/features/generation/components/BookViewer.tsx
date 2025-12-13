@@ -16,18 +16,15 @@ import {
   Plus,
   Sparkles,
 } from 'lucide-react';
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, FC } from 'react';
 
+import CoverGenerator from '@/features/publishing/components/CoverGenerator';
+import PublishPanel from '@/features/publishing/components/PublishPanel';
 import { cn } from '@/lib/utils';
 import { type RefineOptions } from '@/types';
 
 import type { Project, Chapter } from '@shared/types';
 import { ChapterStatus } from '@shared/types';
-
-
-import CoverGenerator from '../../publishing/components/CoverGenerator';
-import PublishPanel from '../../publishing/components/PublishPanel';
-
 
 interface BookViewerProps {
   project: Project;
@@ -40,7 +37,7 @@ interface BookViewerProps {
   onContinueChapter?: (chapterId: string) => void;
 }
 
-const BookViewer: React.FC<BookViewerProps> = ({
+const BookViewer: FC<BookViewerProps> = ({
   project,
   selectedChapterId,
   onSelectChapter,

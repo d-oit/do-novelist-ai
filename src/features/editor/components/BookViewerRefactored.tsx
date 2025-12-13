@@ -1,3 +1,4 @@
+
 /**
  * Book Viewer - Refactored to use smaller components
  * Main container for chapter editing and project overview
@@ -5,11 +6,10 @@
 
 import React from 'react';
 
+import ChapterEditor from '@/features/editor/components/ChapterEditor';
+import ChapterList from '@/features/editor/components/ChapterList';
+import ProjectOverview from '@/features/editor/components/ProjectOverview';
 import type { Project, Chapter, RefineOptions } from '@/types';
-
-import ChapterEditor from './ChapterEditor';
-import ChapterList from './ChapterList';
-import ProjectOverview from './ProjectOverview';
 
 interface BookViewerProps {
   project: Project;

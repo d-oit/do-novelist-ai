@@ -10,14 +10,11 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateText, type LanguageModel } from 'ai';
 
-import type { Chapter, RefineOptions } from '../types/index';
-
-import { getAIConfig, getEnabledProviders, getModelForTask, type AIProvider } from './ai-config';
-import { withCache } from './cache';
-
-// Import error handling system
-import { createAIError, createConfigurationError } from './errors/error-types';
-import { logger } from './errors/logging';
+import { getAIConfig, getEnabledProviders, getModelForTask, type AIProvider } from '@/lib/ai-config';
+import { withCache } from '@/lib/cache';
+import { createAIError, createConfigurationError } from '@/lib/errors/error-types';
+import { logger } from '@/lib/errors/logging';
+import type { Chapter, RefineOptions } from '@/types/index';
 
 // Get configuration
 const config = getAIConfig();

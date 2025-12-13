@@ -1,3 +1,4 @@
+
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu,
@@ -12,9 +13,9 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import { useScrollLock } from '../../lib/hooks/useScrollLock';
-import { cn } from '../../lib/utils';
-import { zIndex } from '../../lib/z-index.config';
+import { useScrollLock } from '@/lib/hooks/useScrollLock';
+import { cn } from '@/lib/utils';
+import { zIndex } from '@/lib/z-index.config';
 
 interface HeaderProps {
   projectTitle: string;

@@ -14,7 +14,7 @@ import {
   generateAnalysisId,
   generateFeedbackId,
   generatePreferencesId,
-} from '../secure-random';
+} from '@/lib/secure-random';
 
 describe('Secure Random Generator', () => {
   describe('Unit Tests', () => {

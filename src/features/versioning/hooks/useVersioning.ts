@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
 
-import type { Chapter } from '@/types';
-
-import { useVersioningStore } from '../../../lib/stores/versioningStore';
 import type {
   ChapterVersion,
   Branch,
   VersionCompareResult,
   VersionFilter,
   SortOrder,
-} from '../types';
+} from '@/features/versioning/types';
+import { useVersioningStore } from '@/lib/stores/versioningStore';
+import type { Chapter } from '@/types';
+
 
 export interface UseVersioningReturn {
   // State

@@ -1,12 +1,12 @@
+
 import { motion } from 'framer-motion';
 import { MessageSquare, Search, Star, CheckCircle2, Heart, Clock } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { Card } from '../../../components/ui/Card';
-import { cn } from '../../../lib/utils';
-import { type ReaderFeedback } from '../types';
-
-import { DetailedFeedbackModal } from './DetailedFeedbackModal';
+import { Card } from '@/components/ui/Card';
+import { DetailedFeedbackModal } from '@/features/publishing/components/DetailedFeedbackModal';
+import { cn } from '@/lib/utils';
+import { type ReaderFeedback } from '@/types';
 
 interface FeedbackWidgetProps {
   feedback: ReaderFeedback[];

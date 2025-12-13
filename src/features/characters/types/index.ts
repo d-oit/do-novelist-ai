@@ -7,22 +7,29 @@ import { z } from 'zod';
 export const CharacterRoleSchema = z.enum([
   'protagonist',
   'antagonist',
-  'supporting',
+  'deuteragonist',
+  'tritagonist',
+  'love_interest',
   'mentor',
+  'sidekick',
   'foil',
-  'love-interest',
-  'comic-relief',
+  'supporting',
+  'minor',
+  'background',
 ]);
 
 export type CharacterRole = z.infer<typeof CharacterRoleSchema>;
 
 export const CharacterArcSchema = z.enum([
-  'change',
-  'growth',
-  'fall',
+  'positive_change',
+  'negative_change',
   'flat',
   'corruption',
   'redemption',
+  'growth',
+  'fall',
+  'disillusion',
+  'testing',
 ]);
 
 export type CharacterArc = z.infer<typeof CharacterArcSchema>;
@@ -63,6 +70,7 @@ export const CharacterSchema = z.object({
   id: z.string().uuid(),
   projectId: z.string().uuid(),
   name: z.string().min(1).max(100),
+  aliases: z.array(z.string()).default([]),
   role: CharacterRoleSchema,
   arc: CharacterArcSchema,
 
@@ -84,9 +92,14 @@ export const CharacterSchema = z.object({
   relationships: z.array(z.string().uuid()), // IDs of related characters
 
   // Metadata
+  version: z.number().default(1),
+  summary: z.string().max(500).optional(),
+  tags: z.array(z.string()).default([]),
+  notes: z.string().max(2000).optional(),
   createdAt: z.number(),
   updatedAt: z.number(),
   imageUrl: z.string().url().optional(),
+  aiModel: z.string().optional(),
 });
 
 export type Character = z.infer<typeof CharacterSchema>;

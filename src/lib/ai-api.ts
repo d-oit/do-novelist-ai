@@ -4,7 +4,7 @@
  * Avoids CORS issues by routing through Vercel serverless functions
  */
 
-import type { AIProvider } from './ai-config';
+import type { AIProvider } from '@/lib/ai-config';
 
 const API_BASE = '/api/ai';
 

@@ -6,10 +6,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { z } from 'zod';
 
-import { ChapterStatus } from '../../shared/types';
-import type { Project } from '../../types';
-import { createProjectId } from '../../types/guards';
-import { validationService, validate, assertValid, safeConvert } from '../validation';
+import { validationService, validate, assertValid, safeConvert } from '@/lib/validation';
+import type { Project } from '@/types';
+import { createProjectId } from '@/types/guards';
+
+import { ChapterStatus } from '@shared/types';
 
 describe('ValidationService', () => {
   describe('Project Creation Validation', () => {

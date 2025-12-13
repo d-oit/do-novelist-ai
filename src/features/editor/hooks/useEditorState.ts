@@ -1,8 +1,7 @@
 import { useReducer, useCallback } from 'react';
 
+import type { ChapterVersion } from '@/features/versioning/types';
 import type { RefineOptions } from '@/shared/types';
-
-import type { ChapterVersion } from '../../versioning/types';
 
 // State Interface
 interface EditorState {

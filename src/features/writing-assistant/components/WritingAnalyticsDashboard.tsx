@@ -18,12 +18,12 @@ import {
   Lightbulb,
   Activity,
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
-import { cn } from '../../../lib/utils';
-import { writingAssistantDb, type WritingProgressMetrics } from '../services/writingAssistantDb';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { writingAssistantDb, type WritingProgressMetrics } from '@/features/writing-assistant/services/writingAssistantDb';
+import { cn } from '@/lib/utils';
 
 interface WritingAnalyticsDashboardProps {
   projectId: string;
@@ -45,7 +45,7 @@ interface AnalyticsData {
   };
 }
 
-const MetricCard: React.FC<{
+const MetricCard: FC<{
   title: string;
   value: string | number;
   change?: number;
@@ -93,7 +93,7 @@ const MetricCard: React.FC<{
   );
 };
 
-const TrendChart: React.FC<{
+const TrendChart: FC<{
   title: string;
   data: { label: string; value: number; change: number }[];
 }> = ({ title, data }) => (
@@ -143,7 +143,7 @@ const TrendChart: React.FC<{
   </Card>
 );
 
-const InsightCard: React.FC<{
+const InsightCard: FC<{
   title: string;
   insights: string[];
   icon: React.ReactNode;
@@ -172,7 +172,7 @@ const InsightCard: React.FC<{
   </Card>
 );
 
-export const WritingAnalyticsDashboard: React.FC<WritingAnalyticsDashboardProps> = ({
+export const WritingAnalyticsDashboard: FC<WritingAnalyticsDashboardProps> = ({
   projectId,
   className,
   onClose,

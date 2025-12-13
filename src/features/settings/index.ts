@@ -15,6 +15,6 @@ export { useSettings, selectCategorySettings } from './hooks/useSettings';
 export { settingsService } from './services/settingsService';
 
 // Types
-export type { Settings, Theme, AIModel, SettingsCategory, SettingsValidationResult } from './types';
+export type { Settings, Theme, SettingsCategory, SettingsValidationResult } from './types';
 
-export { SettingsSchema, DEFAULT_SETTINGS, validateSettings, isTheme, isAIModel } from './types';
+export { SettingsSchema, DEFAULT_SETTINGS, validateSettings, isTheme } from './types';

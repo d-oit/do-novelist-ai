@@ -13,15 +13,14 @@ import {
   Flame,
   X,
 } from 'lucide-react';
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo, FC } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { useAnalytics } from '@/features/analytics/hooks/useAnalytics';
 import { logger } from '@/lib/logging/logger';
-
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
-import { cn, iconButtonTarget } from '../../../lib/utils';
-import { useAnalytics } from '../hooks/useAnalytics';
-import type { WritingGoals } from '../types';
+import { cn, iconButtonTarget } from '@/lib/utils';
+import type { WritingGoals } from '@/types';
 
 interface GoalsManagerProps {
   projectId?: string;
@@ -43,7 +42,7 @@ const goalTypeColors = {
   project: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
 };
 
-const GoalCard: React.FC<{
+const GoalCard: FC<{
   goal: WritingGoals;
   onEdit: (goal: WritingGoals) => void;
   onDelete: (goalId: string) => void;
@@ -225,7 +224,7 @@ const GoalCard: React.FC<{
   );
 };
 
-const GoalForm: React.FC<{
+const GoalForm: FC<{
   goal?: WritingGoals;
   projectId?: string;
   onSave: (goal: Omit<WritingGoals, 'id' | 'current'>) => Promise<void>;
@@ -393,7 +392,7 @@ const GoalForm: React.FC<{
   );
 };
 
-const GoalsManager: React.FC<GoalsManagerProps> = ({ projectId, onClose, className }) => {
+const GoalsManager: FC<GoalsManagerProps> = ({ projectId, onClose, className }) => {
   const analytics = useAnalytics();
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<WritingGoals | undefined>();

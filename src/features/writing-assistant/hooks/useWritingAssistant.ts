@@ -5,9 +5,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-import { type Character } from '../../characters/types';
-import { writingAssistantDb } from '../services/writingAssistantDb';
-import { writingAssistantService } from '../services/writingAssistantService';
+import { type Character } from '@/features/characters/types';
+import { writingAssistantDb } from "@/features/writing-assistant/services/writingAssistantDb"
+import { writingAssistantService } from "@/features/writing-assistant/services/writingAssistantService"
+import { DEFAULT_WRITING_ASSISTANT_CONFIG } from '@/features/writing-assistant/types';
 import {
   type WritingAssistantState,
   type WritingAssistantActions,
@@ -16,8 +17,7 @@ import {
   type WritingSuggestion,
   type WritingSuggestionCategory,
   type WritingProgressMetrics,
-} from '../types';
-import { DEFAULT_WRITING_ASSISTANT_CONFIG } from '../types';
+} from '@/features/writing-assistant/types';
 
 interface UseWritingAssistantOptions {
   autoAnalyze?: boolean;

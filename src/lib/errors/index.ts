@@ -108,4 +108,4 @@ export {
   AIServiceErrorBoundary,
   withErrorBoundary,
   useErrorHandler,
-} from '../../components/error-boundary';
+} from '@/components/error-boundary';

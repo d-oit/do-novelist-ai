@@ -11,7 +11,7 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { readdir, stat } from 'fs/promises';
-import { join, relative, extname } from 'path';
+import { join, relative, extname, dirname, resolve } from 'path';
 
 // Configuration
 const ALLOWED_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
@@ -70,36 +70,41 @@ async function getAllFiles(dir, fileList = []) {
 /**
  * Fix relative import paths to use alias paths
  */
+function toPosix(p) {
+  return p.split('/').join('/');
+}
+
 function fixRelativeImports(content, filePath) {
   const lines = content.split('\n');
   let modified = false;
 
+  const fileDir = dirname(filePath);
+  // const projectRoot = resolve('.');
+  const srcRoot = resolve('src');
+
   const fixedLines = lines.map(line => {
     // Match import statements with relative paths
-    const importMatch = line.match(/^(\s*import.*from\s+['"])(\.\.\/.+)(['"];?\s*)$/);
-    
+    const importMatch = line.match(/^(\s*import.*from\s+['"])(\.{1,2}\/[^'";]+)(['"];?\s*)$/);
+
     if (importMatch) {
       const [, prefix, importPath, suffix] = importMatch;
-      
-      // Convert ../../../components/ui/Button to @/components/ui/Button
-      if (importPath.startsWith('../')) {
-        const pathSegments = importPath.split('/').filter(seg => seg !== '..' && seg !== '.');
-        
-        // Determine if it's a shared component path
-        if (pathSegments.includes('shared')) {
-          const sharedIndex = pathSegments.indexOf('shared');
-          const aliasPath = '@shared/' + pathSegments.slice(sharedIndex + 1).join('/');
-          modified = true;
-          return `${prefix}${aliasPath}${suffix}`;
-        }
-        
-        // Otherwise use @/ alias
-        const aliasPath = '@/' + pathSegments.join('/');
+
+      // Resolve absolute path of the target import
+      const resolvedAbs = resolve(fileDir, importPath);
+
+      // Map only imports that resolve under src/
+      if (resolvedAbs.startsWith(srcRoot)) {
+        // Compute path after src/
+        const relFromSrc = toPosix(relative(srcRoot, resolvedAbs).replace(/\\/g, '/'));
+
+        // Choose alias
+        const alias = relFromSrc.startsWith('shared/') ? '@shared/' : '@/' ;
+        const aliasPath = alias + relFromSrc;
         modified = true;
         return `${prefix}${aliasPath}${suffix}`;
       }
     }
-    
+
     return line;
   });
 
@@ -111,7 +116,6 @@ function fixRelativeImports(content, filePath) {
  */
 function organizeImports(content) {
   const lines = content.split('\n');
-  let modified = false;
   
   // Find import block
   let importStart = -1;
@@ -247,7 +251,9 @@ async function processFile(filePath) {
     
     // Apply fixes
     const relativeFixResult = fixRelativeImports(result.content, filePath);
-    result = relativeFixResult;
+    if (relativeFixResult.modified) {
+      result = relativeFixResult;
+    }
     
     const organizeResult = organizeImports(result.content);
     if (organizeResult.modified) {

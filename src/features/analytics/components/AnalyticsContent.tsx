@@ -1,18 +1,17 @@
+
 /**
  * Analytics Content Component - Extracted from AnalyticsDashboard
  * Handles main analytics display area
  */
 
-import React from 'react';
+import { FC } from 'react';
 
+import GoalsProgress from '@/features/analytics/components/GoalsProgress';
+import ProductivityChart from '@/features/analytics/components/ProductivityChart';
+import SessionTimeline from '@/features/analytics/components/SessionTimeline';
+import WritingStatsCard from '@/features/analytics/components/WritingStatsCard';
+import { cn } from '@/lib/utils';
 import type { Project } from '@/shared/types';
-
-import { cn } from '../../../lib/utils';
-
-import GoalsProgress from './GoalsProgress';
-import ProductivityChart from './ProductivityChart';
-import SessionTimeline from './SessionTimeline';
-import WritingStatsCard from './WritingStatsCard';
 
 interface AnalyticsContentProps {
   project: Project;
@@ -20,7 +19,7 @@ interface AnalyticsContentProps {
   className?: string;
 }
 
-const AnalyticsContent: React.FC<AnalyticsContentProps> = ({ project, activeView, className }) => {
+const AnalyticsContent: FC<AnalyticsContentProps> = ({ project, activeView, className }) => {
   const stats = {
     totalWords:
       project.analytics?.totalWordCount ??

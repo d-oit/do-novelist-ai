@@ -7,11 +7,10 @@ import { motion } from 'framer-motion';
 import { Plus, FileText, Eye } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 
+import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 import type { Project, Chapter } from '@/types';
 import { ChapterStatus } from '@/types';
-
-import { Button } from '../../../components/ui/Button';
-import { cn } from '../../../lib/utils';
 
 interface ChapterListProps {
   project: Project;

@@ -8,15 +8,13 @@ import {
   FileCheck,
   Settings,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState, FC } from 'react';
 
+import { generateEpub } from '@/features/publishing/services/epubService';
 import { translateContent } from '@/lib/ai';
 
 import type { Project, Chapter } from '@shared/types';
 import { PublishStatus } from '@shared/types';
-
-import { generateEpub } from '../services/epubService';
-
 
 interface PublishPanelProps {
   project: Project;
@@ -42,7 +40,7 @@ const languageNameToCode = (
   return mapping[langName] || 'en';
 };
 
-const PublishPanel: React.FC<PublishPanelProps> = ({
+const PublishPanel: FC<PublishPanelProps> = ({
   project,
   onUpdateProject,
   onUpdateChapter,

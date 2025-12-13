@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-import { worldBuildingDb } from '../services/worldBuildingDb';
-import { worldBuildingService } from '../services/worldBuildingService';
+import { worldBuildingDb } from '@/features/world-building/services/worldBuildingDb';
+import { worldBuildingService } from '@/features/world-building/services/worldBuildingService';
 import type {
   WorldBuildingProject,
   Location,
@@ -15,7 +15,7 @@ import type {
   LoreEntry,
   WorldBuildingFilters,
   WorldBuildingValidationResult,
-} from '../types';
+} from '@/features/world-building/types';
 
 interface UseWorldBuildingReturn {
   // State

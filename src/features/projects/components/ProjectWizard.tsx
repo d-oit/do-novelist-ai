@@ -1,3 +1,4 @@
+
 import {
   AlertCircle,
   Book,
@@ -13,8 +14,8 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { brainstormProject } from '../../../lib/ai';
-import { cn, iconButtonTarget } from '../../../lib/utils';
+import { brainstormProject } from '@/lib/ai';
+import { cn, iconButtonTarget } from '@/lib/utils';
 
 interface ProjectWizardProps {
   isOpen: boolean;
