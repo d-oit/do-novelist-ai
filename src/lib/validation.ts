@@ -3,6 +3,8 @@
  * Integrates Zod schemas with application logic
  */
 
+import sanitizeHtml from 'sanitize-html';
+
 import { createChapterId, createProjectId, isProjectId } from '@/types/guards';
 import {
   ChapterSchema,
@@ -18,8 +20,6 @@ import {
 } from '@/types/schemas';
 
 import { ChapterStatus, PublishStatus } from '@shared/types';
-
-import sanitizeHtml from 'sanitize-html';
 
 // =============================================================================
 // VALIDATION SERVICE CLASS
