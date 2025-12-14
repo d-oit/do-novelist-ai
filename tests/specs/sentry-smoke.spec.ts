@@ -40,7 +40,9 @@ test.describe('Sentry logging smoke', () => {
     // Dynamically import the logging module and emit an error log from within the page context
     await page.evaluate(async () => {
       // Import the module from Vite dev server path
-      const mod = await import('/src/lib/errors/logging.ts');
+      // @ts-expect-error vite dev import path used only in local dev
+
+      const mod = await import(/* @vite-ignore */ '/src/lib/errors/logging.ts');
       const { logger } = mod as unknown as {
         logger: { error: (msg: string | Error, ctx?: Record<string, unknown>) => void };
       };
