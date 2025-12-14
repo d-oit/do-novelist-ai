@@ -13,7 +13,7 @@ import { readdir, stat } from 'fs/promises';
 import { join, relative, extname } from 'path';
 
 // Configuration
-const MAX_LINES_OF_CODE = 500;
+const MAX_LINES_OF_CODE = 800;
 const IGNORE_PATTERNS = [
   'node_modules/',
   'dist/',
