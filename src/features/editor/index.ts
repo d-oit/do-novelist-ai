@@ -26,7 +26,7 @@ export { useGoapEngine } from './hooks/useGoapEngine';
 export { useEditorState } from './hooks/useEditorState';
 
 // Components
-export { default as BookViewer } from './components/BookViewerRefactored';
+export { default as BookViewer } from './components/BookViewer';
 export { default as ChapterList } from './components/ChapterList';
 export { default as ChapterEditor } from './components/ChapterEditor';
 export { default as ProjectOverview } from './components/ProjectOverview';

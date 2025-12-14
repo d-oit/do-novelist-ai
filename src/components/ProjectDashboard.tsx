@@ -1,4 +1,3 @@
-
 import { Settings } from 'lucide-react';
 import React, { useCallback } from 'react';
 
@@ -7,11 +6,11 @@ import AgentConsole from '@/components/AgentConsole';
 import GoapVisualizer from '@/components/GoapVisualizer';
 import PlannerControl from '@/components/PlannerControl';
 import ProjectStats from '@/components/ProjectStats';
-import BookViewer from '@/features/editor/components/BookViewerRefactored';
+import BookViewer from '@/features/editor/components/BookViewer';
 import type { GoapEngine } from '@/features/editor/hooks/useGoapEngine';
 import { TimelineView } from '@/features/timeline/components/TimelineView';
 import { cn } from '@/lib/utils';
-import type { AgentAction, Chapter, Project, RefineOptions  } from '@/shared/types';
+import type { AgentAction, Chapter, Project, RefineOptions } from '@/shared/types';
 
 interface ProjectDashboardProps {
   project: Project;
