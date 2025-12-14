@@ -180,8 +180,17 @@ const App: React.FC = () => {
   useEffect(() => {
     const initApp = async (): Promise<void> => {
       performanceMonitor.startTiming('app-initialization');
+
+      // Set a hard timeout to ensure app renders in CI environments
+      const forceRenderTimeout = setTimeout(() => {
+        console.warn(
+          'Forcing app render after timeout - database initialization may still be running',
+        );
+        setIsLoading(false);
+      }, 2000);
+
       try {
-        // Add timeout to prevent infinite loading in CI environments
+        // Add timeout to prevent infinite loading
         const initPromise = db.init();
         const timeoutPromise = new Promise<void>((_, reject) =>
           setTimeout(() => reject(new Error('Database initialization timeout')), 15000),
@@ -194,9 +203,11 @@ const App: React.FC = () => {
           error,
         );
         // Continue with local storage - don't block the app
+      } finally {
+        performanceMonitor.endTiming('app-initialization');
+        clearTimeout(forceRenderTimeout);
+        setIsLoading(false);
       }
-      performanceMonitor.endTiming('app-initialization');
-      setIsLoading(false);
     };
     void initApp();
   }, []);
