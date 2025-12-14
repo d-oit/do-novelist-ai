@@ -22,6 +22,7 @@ export default tseslint.config(
       '.idea/**',
       '*.min.js',
       '*.bundle.js',
+      '*.backup',
       'build/**',
       'public/**',
       'playwright-report/**',
@@ -207,12 +208,12 @@ export default tseslint.config(
         'error',
         {
           groups: [
-            'builtin',          // Node.js built-in modules
-            'external',         // External packages
-            'internal',         // Internal modules using alias paths
-            'parent',          // Parent directory imports
-            'sibling',         // Same directory imports
-            'index',           // Index file imports
+            'builtin', // Node.js built-in modules
+            'external', // External packages
+            'internal', // Internal modules using alias paths
+            'parent', // Parent directory imports
+            'sibling', // Same directory imports
+            'index', // Index file imports
           ],
           pathGroups: [
             {

@@ -108,7 +108,10 @@
       "Bash(pnpm exec playwright show-trace:*)",
       "Bash(npm run fix:imports)",
       "Bash(xargs:*)",
-      "Bash(gh auth status:*)"
+      "Bash(gh auth status:*)",
+      "Bash(git restore:*)",
+      "Bash(tsc:*)",
+      "Bash(pnpm exec tsc:*)"
     ],
     "deny": [],
     "ask": []
