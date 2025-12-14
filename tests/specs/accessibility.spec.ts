@@ -30,11 +30,14 @@ const CRITICAL_VIOLATIONS = [
 
 test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
   test.beforeEach(async ({ page }) => {
+    // Ensure consistent viewport for testing
+    await page.setViewportSize({ width: 1280, height: 720 });
+
     // Use ReactTestHelpers for consistent app setup
     await ReactTestHelpers.setupReactApp(page);
 
-    // Ensure consistent viewport for testing
-    await page.setViewportSize({ width: 1280, height: 720 });
+    // Additional wait to ensure navigation is fully rendered
+    await page.waitForTimeout(500);
   });
 
   test.describe('Page Load Accessibility', () => {
