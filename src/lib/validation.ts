@@ -19,6 +19,7 @@ import {
 
 import { ChapterStatus, PublishStatus } from '@shared/types';
 
+import sanitizeHtml from 'sanitize-html';
 
 // =============================================================================
 // VALIDATION SERVICE CLASS
@@ -466,12 +467,12 @@ export class ValidationService {
    * Sanitizes HTML content for chapters
    */
   public sanitizeContent(content: string): string {
-    // Basic HTML sanitization (in production, use a proper library like DOMPurify)
-    return content
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/on\w+="[^"]*"/g, '')
-      .replace(/javascript:/gi, '');
+    // Robust HTML sanitization using sanitize-html
+    // For stricter content filtering, configure allowedTags/allowedAttributes as needed
+    return sanitizeHtml(content, {
+      allowedTags: sanitizeHtml.defaults.allowedTags, // adjust as required
+      allowedAttributes: sanitizeHtml.defaults.allowedAttributes, // adjust as required
+    });
   }
 
   /**
