@@ -8,7 +8,7 @@ import { useGoapEngine } from '@/features/generation/hooks';
 import { ProjectStats, ProjectWizard } from '@/features/projects/components';
 import { db } from '@/features/projects/services';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
-import type { Chapter, Project, RefineOptions  } from '@/shared/types';
+import type { Chapter, Project, RefineOptions } from '@/shared/types';
 import { performanceMonitor } from '@/utils/performance';
 
 import { createChapter } from '@shared/utils';
@@ -184,7 +184,7 @@ const App: React.FC = () => {
         // Add timeout to prevent infinite loading in CI environments
         const initPromise = db.init();
         const timeoutPromise = new Promise<void>((_, reject) =>
-          setTimeout(() => reject(new Error('Database initialization timeout')), 5000),
+          setTimeout(() => reject(new Error('Database initialization timeout')), 15000),
         );
 
         await Promise.race([initPromise, timeoutPromise]);
