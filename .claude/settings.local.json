@@ -111,7 +111,14 @@
       "Bash(gh auth status:*)",
       "Bash(git restore:*)",
       "Bash(tsc:*)",
-      "Bash(pnpm exec tsc:*)"
+      "Bash(pnpm exec tsc:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(git fetch:*)",
+      "Bash(pnpm audit:*)",
+      "Bash(pnpm run lint:fix)",
+      "Bash(pnpm run test)",
+      "Bash(gh label list:*)",
+      "Bash(gh label create:*)"
     ],
     "deny": [],
     "ask": []

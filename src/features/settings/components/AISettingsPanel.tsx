@@ -2,6 +2,7 @@ import { Settings, DollarSign, Shield, Zap, Activity } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import { CostDashboard } from '@/components/ai/CostDashboard';
+import { FallbackProviderEditor } from '@/components/ai/FallbackProviderEditor';
 import { ProviderSelector } from '@/components/ai/ProviderSelector';
 import { cn } from '@/lib/utils';
 import {
@@ -185,6 +186,17 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
                   Enable automatic fallback to other providers
                 </span>
               </label>
+            </div>
+
+            <div>
+              <label className='mb-2 block text-sm font-medium text-foreground'>
+                Fallback Providers & Order
+              </label>
+              <FallbackProviderEditor
+                userId={userId}
+                value={preferences.fallbackProviders}
+                onChange={providers => void handleSave({ fallbackProviders: providers })}
+              />
             </div>
 
             <div>

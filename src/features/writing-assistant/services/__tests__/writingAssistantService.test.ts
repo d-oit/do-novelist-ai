@@ -7,17 +7,19 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { writingAssistantService } from "@/features/writing-assistant/services/writingAssistantService"
+import { writingAssistantService } from '@/features/writing-assistant/services/writingAssistantService';
 import type { WritingAssistantConfig } from '@/types';
 
 // Mock the AI SDK to avoid actual API calls
-vi.mock('@ai-sdk/google', () => ({
-  createGoogleGenerativeAI: vi.fn(() => vi.fn(() => ({}))),
-}));
-
-vi.mock('ai', () => ({
-  generateText: vi.fn(() => Promise.resolve({ text: '[]' })),
-}));
+// Mock the AI SDK
+vi.mock('ai', async importOriginal => {
+  const actual = await importOriginal<any>();
+  return {
+    ...actual,
+    createGateway: vi.fn(() => vi.fn(modelId => ({ modelId }))),
+    generateText: vi.fn(() => Promise.resolve({ text: '[]' })),
+  };
+});
 
 // Default test config
 const testConfig: WritingAssistantConfig = {

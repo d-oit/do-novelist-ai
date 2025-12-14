@@ -5,20 +5,26 @@
  * Enhanced with comprehensive error handling (2024-2025 best practices)
  */
 
-import { createAnthropic } from '@ai-sdk/anthropic';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText, type LanguageModel } from 'ai';
+import { createGateway, generateText, type LanguageModel } from 'ai';
 
-import { getAIConfig, getEnabledProviders, getModelForTask, type AIProvider } from '@/lib/ai-config';
+import {
+  getAIConfig,
+  getEnabledProviders,
+  getModelForTask,
+  type AIProvider,
+} from '@/lib/ai-config';
 import { withCache } from '@/lib/cache';
 import { createAIError, createConfigurationError } from '@/lib/errors/error-types';
 import { logger } from '@/lib/errors/logging';
+import {
+  loadUserPreferences,
+  getActiveProviders,
+  type ProviderPreferenceData,
+} from '@/services/ai-config-service';
 import type { Chapter, RefineOptions } from '@/types/index';
 
 // Get configuration
 const config = getAIConfig();
-const enabledProviders = getEnabledProviders(config);
 
 // Create logger for AI module
 const aiLogger = logger.child({ module: 'ai-service' });
@@ -110,94 +116,63 @@ function getModel(
     throw error;
   }
 
-  // Vercel AI Gateway base URL
-  const gatewayUrl = `https://gateway.vercel.ai/v1/${providerConfig.gatewayPath}`;
-
   aiLogger.debug('Creating model instance', {
     provider,
     modelName,
-    gatewayUrl,
     complexity,
   });
 
-  switch (provider) {
-    case 'openai': {
-      const openaiClient = createOpenAI({
-        apiKey: config.gatewayApiKey,
-        baseURL: gatewayUrl,
-      });
-      return openaiClient(modelName);
-    }
+  // Create gateway instance
+  // The Vercel AI Gateway requires the API key to be passed
+  const gateway = createGateway({
+    apiKey: config.gatewayApiKey,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-    case 'anthropic': {
-      const anthropicClient = createAnthropic({
-        apiKey: config.gatewayApiKey,
-        baseURL: gatewayUrl,
-      });
-      return anthropicClient(modelName);
-    }
-
-    case 'google': {
-      const googleClient = createGoogleGenerativeAI({
-        apiKey: config.gatewayApiKey,
-        baseURL: gatewayUrl,
-      });
-      return googleClient(modelName);
-    }
-
-    case 'mistral': {
-      const error = createAIError(
-        'Mistral SDK not installed. To enable Mistral, install @ai-sdk/mistral and uncomment the import.',
-        {
-          provider: 'mistral',
-          model: modelName,
-          operation: 'getModel',
-          context: {
-            complexity,
-          },
-        },
-      );
-
-      aiLogger.error('Mistral SDK not available', {
-        provider,
-        modelName,
-        complexity,
-      });
-
-      throw error;
-    }
-
-    default: {
-      // This should never happen if all AIProvider cases are handled
-      const providerString = provider as string;
-      const error = createAIError(`Unsupported provider: ${providerString}`, {
-        provider: providerString,
-        model: modelName,
-        operation: 'getModel',
-        context: {
-          complexity,
-        },
-      });
-
-      aiLogger.error('Unsupported provider', {
-        provider: providerString,
-        modelName,
-        complexity,
-      });
-
-      throw error;
-    }
-  }
+  // Return the model instance using the gateway
+  // Format: provider/model-name (e.g. anthropic/claude-3-5-sonnet)
+  return gateway(`${provider}/${modelName}`);
 }
 
 /**
  * Execute AI generation with automatic fallback and analytics
  */
+
+async function resolveProviders(): Promise<{ providers: AIProvider[]; enableFallback: boolean }> {
+  try {
+    // Try to get userId from context if in browser
+    let userId: string | null = null;
+    if (typeof window !== 'undefined') {
+      try {
+        // Access storage directly to avoid React hook usage outside component
+        userId = localStorage.getItem('novelist_user_id');
+      } catch {
+        // Ignore localStorage errors
+      }
+    }
+
+    if (userId !== null && userId !== '') {
+      const prefs: ProviderPreferenceData = await loadUserPreferences(userId);
+      const providers = getActiveProviders(prefs);
+      return { providers, enableFallback: prefs.autoFallback };
+    }
+  } catch (e) {
+    aiLogger.warn('Failed to resolve user preferences for providers, falling back to env order', {
+      error: e instanceof Error ? e.message : String(e),
+    });
+  }
+
+  // Fallback to environment-based provider order
+  return { providers: getEnabledProviders(config), enableFallback: config.enableFallback };
+}
+
 async function executeWithFallback<T>(
   operation: (provider: AIProvider) => Promise<T>,
   operationName: string,
 ): Promise<T> {
-  const providers = enabledProviders;
+  const { providers, enableFallback } = await resolveProviders();
 
   if (providers.length === 0) {
     const error = createConfigurationError(
@@ -224,7 +199,7 @@ async function executeWithFallback<T>(
     operationName,
     providerCount: providers.length,
     providers: providers.join(', '),
-    enableFallback: config.enableFallback,
+    enableFallback,
   });
 
   let lastError: Error | null = null;
@@ -267,7 +242,7 @@ async function executeWithFallback<T>(
       lastError = aiError;
 
       // If fallback is disabled or this is the last provider, throw immediately
-      if (!config.enableFallback || provider === providers[providers.length - 1]) {
+      if (!enableFallback || provider === providers[providers.length - 1]) {
         break;
       }
 

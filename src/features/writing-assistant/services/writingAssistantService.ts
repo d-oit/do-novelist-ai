@@ -3,8 +3,7 @@
  * Provides intelligent content analysis and writing suggestions
  */
 
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText, type LanguageModel } from 'ai';
+import { createGateway, generateText, type LanguageModel } from 'ai';
 
 import { type Character } from '@/features/characters/types';
 import {
@@ -23,7 +22,6 @@ import {
   type WritingSuggestionCategory,
 } from '@/features/writing-assistant/types';
 import { logger } from '@/lib/logging/logger';
-
 
 // Raw AI response type for suggestions
 interface RawAISuggestion {
@@ -54,11 +52,10 @@ class WritingAssistantService {
       this.genAI = null;
     } else {
       // Initialize with Vercel AI SDK
-      const googleClient = createGoogleGenerativeAI({
+      const gateway = createGateway({
         apiKey,
-        baseURL: 'https://gateway.vercel.ai/v1/google',
       });
-      this.genAI = googleClient('gemini-pro');
+      this.genAI = gateway('google/gemini-pro');
     }
   }
 

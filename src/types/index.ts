@@ -90,7 +90,7 @@ export type {
 } from '@/features/analytics/types';
 
 // Use enum types from shared types for consistency
-export { AgentMode, ChapterStatus, PublishStatus } from '../shared/types';
+export { AgentMode, ChapterStatus, PublishStatus } from '@shared/types';
 
 // Re-export additional shared types
 export type {
@@ -102,4 +102,4 @@ export type {
   ActionTraceStep,
   AgentDecision,
   GoapDebugInfo,
-} from '../shared/types';
+} from '@shared/types';
