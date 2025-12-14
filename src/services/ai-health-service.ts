@@ -3,10 +3,7 @@
  * Provides periodic health checks, latency monitoring, error tracking, and circuit breaker pattern
  */
 
-import { createAnthropic } from '@ai-sdk/anthropic';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText } from 'ai';
+import { createGateway, generateText } from 'ai';
 
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 import {
@@ -148,21 +145,6 @@ function isLatencySpike(provider: AIProvider, currentLatency: number): boolean {
 /**
  * Create AI provider instance
  */
-function createProviderInstance(
-  provider: AIProvider,
-  apiKey: string,
-): ReturnType<typeof createOpenAI | typeof createAnthropic | typeof createGoogleGenerativeAI> {
-  switch (provider) {
-    case 'openai':
-      return createOpenAI({ apiKey });
-    case 'anthropic':
-      return createAnthropic({ apiKey });
-    case 'google':
-      return createGoogleGenerativeAI({ apiKey });
-    default:
-      throw new Error(`Unknown provider: ${provider}`);
-  }
-}
 
 /**
  * Perform health check on a provider
@@ -180,7 +162,7 @@ async function performHealthCheck(
   const startTime = Date.now();
 
   try {
-    const providerInstance = createProviderInstance(provider, apiKey);
+    const gateway = createGateway({ apiKey });
 
     // Create timeout promise
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -189,7 +171,7 @@ async function performHealthCheck(
 
     // Perform health check with timeout
     const checkPromise = generateText({
-      model: providerInstance(modelName),
+      model: gateway(`${provider}/${modelName}`),
       prompt: TEST_PROMPT,
       maxOutputTokens: 5,
       // Disable AI SDK logging to prevent "m.log is not a function" error

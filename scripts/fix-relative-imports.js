@@ -65,7 +65,9 @@ function fixRelativeImports(content, filePath) {
 
   const fixedLines = lines.map(line => {
     // Match relative parent imports: ../something or ../something/path
-    const importMatch = line.match(/^(\s*import\s+(?:type\s+)?(?:{[^}]*}\s+from\s+)?['"])(\.{1,2}\/[^'";]+)(['"];?\s*)$/);
+    const importMatch = line.match(
+      /^(\s*import\s+(?:type\s+)?(?:{[^}]*}\s+from\s+)?['"])(\.{1,2}\/[^'";]+)(['"];?\s*)$/,
+    );
 
     if (importMatch) {
       const [, prefix, importPath, suffix] = importMatch;
@@ -83,13 +85,8 @@ function fixRelativeImports(content, filePath) {
         // Compute path after src/
         const relFromSrc = relative(srcRoot, resolvedAbs).replace(/\\/g, '/');
 
-        // Choose alias based on the path
-        let aliasPath;
-        if (relFromSrc.startsWith('shared/')) {
-          aliasPath = '@shared/' + relFromSrc.substring('shared/'.length);
-        } else {
-          aliasPath = '@/components/' + relFromSrc;
-        }
+        // Map to the root alias '@/' for all src paths to keep imports consistent
+        const aliasPath = '@/' + relFromSrc;
 
         modified = true;
         return `${prefix}${aliasPath}${suffix}`;
