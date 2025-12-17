@@ -1,3 +1,4 @@
+/* eslint-disable import-x/no-relative-parent-imports */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import type { LogEntry } from '@/lib/errors/logging';
@@ -5,7 +6,7 @@ import { SentryLogService } from '@/lib/errors/logging';
 
 // Minimal LogEntry helper
 const makeEntry = (overrides: Partial<LogEntry> = {}): LogEntry => ({
-  timestamp: new Date().toISOString(),
+  timestamp: Date.now(),
   level: 'error',
   message: 'test',
   context: { feature: 'unit-test' },
