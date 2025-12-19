@@ -132,6 +132,9 @@ export default tseslint.config(
           alwaysTryTypes: true,
           project: './tsconfig.json',
         },
+        node: {
+          extensions: ['.ts', '.tsx', '.js', '.jsx'],
+        },
       },
     },
     rules: {
@@ -236,7 +239,7 @@ export default tseslint.config(
         },
       ],
       // Enabled after import path migration phase to guide future changes without blocking
-      'import-x/no-relative-parent-imports': 'warn',
+      'import-x/no-relative-parent-imports': 'error',
       'import-x/no-duplicates': 'error',
       'import-x/first': 'error',
       'import-x/newline-after-import': 'error',
