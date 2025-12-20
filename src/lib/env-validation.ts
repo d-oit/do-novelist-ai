@@ -2,12 +2,12 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   // Optional - required in production but lenient in tests/CI
-  VITE_AI_GATEWAY_API_KEY: z.string().optional(),
+  VITE_OPENROUTER_API_KEY: z.string().optional(),
 
   // Optional with defaults
   VITE_DEFAULT_AI_PROVIDER: z.enum(['openai', 'anthropic', 'google', 'mistral']).default('mistral'),
-  VITE_DEFAULT_AI_MODEL: z.string().default('mistral:mistral-medium-latest'),
-  VITE_THINKING_AI_MODEL: z.string().default('mistral:mistral-medium'),
+  VITE_DEFAULT_AI_MODEL: z.string().default('mistral/mistral-medium-latest'),
+  VITE_THINKING_AI_MODEL: z.string().default('mistral/mistral-medium'),
   VITE_ENABLE_AUTO_FALLBACK: z.string().optional(),
 });
 
@@ -52,10 +52,10 @@ export function getValidatedEnv(): ValidatedEnv {
     if (import.meta.env.CI) {
       // In CI, return default environment instead of throwing
       return {
-        VITE_AI_GATEWAY_API_KEY: undefined,
+        VITE_OPENROUTER_API_KEY: undefined,
         VITE_DEFAULT_AI_PROVIDER: 'mistral',
-        VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
-        VITE_THINKING_AI_MODEL: 'mistral:mistral-medium',
+        VITE_DEFAULT_AI_MODEL: 'mistral/mistral-medium-latest',
+        VITE_THINKING_AI_MODEL: 'mistral/mistral-medium',
         VITE_ENABLE_AUTO_FALLBACK: undefined,
       };
     }

@@ -1,4 +1,3 @@
-
 import {
   AlertCircle,
   Book,
@@ -418,7 +417,7 @@ Examples:
                   <button
                     key={g}
                     onClick={() => setStyle(g)}
-                    className='rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-primary/20'
+                    className='rounded-full bg-secondary px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-primary/20 hover:text-primary'
                   >
                     {g}
                   </button>

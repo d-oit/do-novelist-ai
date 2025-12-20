@@ -3,7 +3,8 @@
  * Provides intelligent content analysis and writing suggestions
  */
 
-import { createGateway, generateText, type LanguageModel } from 'ai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { generateText, type LanguageModel } from 'ai';
 
 import { type Character } from '@/features/characters/types';
 import {
@@ -51,11 +52,11 @@ class WritingAssistantService {
       console.warn('Gemini API key not found. Writing assistant will use mock data.');
       this.genAI = null;
     } else {
-      // Initialize with Vercel AI SDK
-      const gateway = createGateway({
+      // Initialize with OpenRouter SDK
+      const openrouter = createOpenRouter({
         apiKey,
       });
-      this.genAI = gateway('google/gemini-pro');
+      this.genAI = openrouter('google/gemini-pro');
     }
   }
 

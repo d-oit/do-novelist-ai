@@ -1,7 +1,7 @@
 /**
  * AI Provider Configuration
  * Manages provider selection, API keys, and model configurations
- * Uses Vercel AI Gateway for multi-provider routing
+ * Uses OpenRouter for multi-provider routing
  */
 
 import { getValidatedEnv } from '@/lib/env-validation';
@@ -10,7 +10,7 @@ export type AIProvider = 'openai' | 'anthropic' | 'google' | 'mistral';
 
 export interface AIProviderConfig {
   provider: AIProvider;
-  gatewayPath: string; // Path in Vercel AI Gateway
+  gatewayPath: string; // Provider path for OpenRouter (e.g., 'openai', 'anthropic')
   models: {
     fast: string; // Fast, cheap model for simple tasks
     standard: string; // Balanced model for most tasks
@@ -22,7 +22,7 @@ export interface AIProviderConfig {
 export interface AIServiceConfig {
   defaultProvider: AIProvider;
   enableFallback: boolean;
-  gatewayApiKey?: string; // Vercel AI Gateway API key (optional)
+  openrouterApiKey?: string; // OpenRouter API key (optional)
   defaultModel: string; // Standard model for general tasks
   thinkingModel: string; // Advanced model for complex thinking/reading
   providers: Record<AIProvider, AIProviderConfig>;
@@ -36,12 +36,12 @@ export function getAIConfig(): AIServiceConfig {
   // Get validated environment variables (throws error if invalid)
   const env = getValidatedEnv();
 
-  const gatewayApiKey = env.VITE_AI_GATEWAY_API_KEY;
+  const openrouterApiKey = env.VITE_OPENROUTER_API_KEY;
 
   return {
     defaultProvider: env.VITE_DEFAULT_AI_PROVIDER,
     enableFallback: env.VITE_ENABLE_AUTO_FALLBACK !== 'false',
-    gatewayApiKey,
+    openrouterApiKey,
     defaultModel: env.VITE_DEFAULT_AI_MODEL,
     thinkingModel: env.VITE_THINKING_AI_MODEL,
 
@@ -54,7 +54,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'mistral-medium-latest',
           advanced: 'mistral-large-latest',
         },
-        enabled: Boolean(gatewayApiKey),
+        enabled: Boolean(openrouterApiKey),
       },
 
       openai: {
@@ -65,7 +65,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'gpt-4o',
           advanced: 'gpt-4o',
         },
-        enabled: Boolean(gatewayApiKey),
+        enabled: Boolean(openrouterApiKey),
       },
 
       anthropic: {
@@ -76,7 +76,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'claude-3-5-sonnet-20241022',
           advanced: 'claude-3-5-sonnet-20241022',
         },
-        enabled: Boolean(gatewayApiKey),
+        enabled: Boolean(openrouterApiKey),
       },
 
       google: {
@@ -87,7 +87,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'gemini-2.0-flash-exp',
           advanced: 'gemini-exp-1206',
         },
-        enabled: Boolean(gatewayApiKey),
+        enabled: Boolean(openrouterApiKey),
       },
     },
   };

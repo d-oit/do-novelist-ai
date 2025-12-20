@@ -348,3 +348,8 @@ vi.mock('@ai-sdk/anthropic', () => ({
 vi.mock('@ai-sdk/google', () => ({
   createGoogleGenerativeAI: vi.fn(() => (model: string) => ({ model, provider: 'google' })),
 }));
+
+// Mock OpenRouter AI SDK provider
+vi.mock('@openrouter/ai-sdk-provider', () => ({
+  createOpenRouter: vi.fn(() => (model: string) => ({ model, provider: 'openrouter' })),
+}));

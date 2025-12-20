@@ -1,11 +1,12 @@
 /**
  * AI Service - Universal Multi-Provider Interface
  * Replaces gemini.ts with support for OpenAI, Anthropic, and Google
- * Uses Vercel AI SDK with Vercel AI Gateway for unified API across providers
+ * Uses OpenRouter SDK for unified API across providers
  * Enhanced with comprehensive error handling (2024-2025 best practices)
  */
 
-import { createGateway, generateText, type LanguageModel } from 'ai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { generateText, type LanguageModel } from 'ai';
 
 import {
   getAIConfig,
@@ -87,7 +88,7 @@ function isValidOutline(obj: unknown): obj is { title: string; chapters: Partial
 
 /**
  * Get the appropriate model instance based on provider
- * Uses Vercel AI Gateway for routing
+ * Uses OpenRouter SDK for routing
  */
 function getModel(
   provider: AIProvider,
@@ -122,18 +123,15 @@ function getModel(
     complexity,
   });
 
-  // Create gateway instance
-  // The Vercel AI Gateway requires the API key to be passed
-  const gateway = createGateway({
-    apiKey: config.gatewayApiKey,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  // Create OpenRouter instance
+  // The OpenRouter SDK routes requests to the appropriate provider
+  const openrouter = createOpenRouter({
+    apiKey: config.openrouterApiKey,
   });
 
-  // Return the model instance using the gateway
+  // Return the model instance using OpenRouter
   // Format: provider/model-name (e.g. anthropic/claude-3-5-sonnet)
-  return gateway(`${provider}/${modelName}`);
+  return openrouter(`${provider}/${modelName}`);
 }
 
 /**

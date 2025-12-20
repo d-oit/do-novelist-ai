@@ -87,3 +87,23 @@ export const createIntersectionLoader = (
 
   return observer;
 };
+
+// Performance monitoring utility
+export const performanceMonitor = {
+  startTiming: (name: string) => {
+    if (typeof performance !== 'undefined') {
+      performance.mark(`${name}-start`);
+    }
+  },
+  endTiming: (name: string) => {
+    if (typeof performance !== 'undefined') {
+      try {
+        performance.mark(`${name}-end`);
+        performance.measure(name, `${name}-start`, `${name}-end`);
+      } catch (e) {
+        // Ignore errors if marks are missing
+        console.warn(`Performance measurement failed for ${name}`, e);
+      }
+    }
+  },
+};

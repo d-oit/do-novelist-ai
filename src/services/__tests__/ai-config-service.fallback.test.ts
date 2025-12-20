@@ -10,7 +10,7 @@ vi.mock('@/lib/ai-config', async () => {
     getAIConfig: () => ({
       defaultProvider: 'google',
       enableFallback: true,
-      gatewayApiKey: 'test',
+      openrouterApiKey: 'test',
       defaultModel: 'gemini-2.0-flash-exp',
       thinkingModel: 'gemini-exp-1206',
       providers: {

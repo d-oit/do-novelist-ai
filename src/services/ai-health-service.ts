@@ -3,7 +3,8 @@
  * Provides periodic health checks, latency monitoring, error tracking, and circuit breaker pattern
  */
 
-import { createGateway, generateText } from 'ai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { generateText } from 'ai';
 
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 import {
@@ -162,7 +163,7 @@ async function performHealthCheck(
   const startTime = Date.now();
 
   try {
-    const gateway = createGateway({ apiKey });
+    const openrouter = createOpenRouter({ apiKey });
 
     // Create timeout promise
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -171,7 +172,7 @@ async function performHealthCheck(
 
     // Perform health check with timeout
     const checkPromise = generateText({
-      model: gateway(`${provider}/${modelName}`),
+      model: openrouter(`${provider}/${modelName}`),
       prompt: TEST_PROMPT,
       maxOutputTokens: 5,
       // Disable AI SDK logging to prevent "m.log is not a function" error
@@ -358,13 +359,13 @@ export async function checkProviderHealth(
   logger.info(`[HealthService] Checking health of ${provider}...`);
 
   // Ensure we have a valid API key for health checks
-  if (!config.gatewayApiKey) {
+  if (!config.openrouterApiKey) {
     logger.info(`[HealthService] Skipping ${provider} - no API key available`);
     return;
   }
 
   const modelName = providerConfig.models.fast; // Use fast model for health checks
-  const result = await performHealthCheck(provider, modelName, config.gatewayApiKey);
+  const result = await performHealthCheck(provider, modelName, config.openrouterApiKey);
 
   // Record latency if successful
   if (result.success) {

@@ -239,7 +239,7 @@ export default tseslint.config(
         },
       ],
       // Enabled after import path migration phase to guide future changes without blocking
-      'import-x/no-relative-parent-imports': 'error',
+      'import-x/no-relative-parent-imports': ['error', { ignore: ['^@/', '^@shared/'] }],
       'import-x/no-duplicates': 'error',
       'import-x/first': 'error',
       'import-x/newline-after-import': 'error',
