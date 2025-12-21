@@ -24,6 +24,11 @@ export interface ProviderPreferenceData {
   monthlyBudget: number;
   autoFallback: boolean;
   costOptimization: boolean;
+  // New fields for enhanced features
+  autoRouting: boolean; // Enable OpenRouter Auto Router
+  modelVariant: string; // Model variant like :free, :thinking, etc.
+  enableStructuredOutputs: boolean;
+  enableResponseValidation: boolean;
 }
 
 /**
@@ -39,6 +44,11 @@ function mapUserAIToProviderData(pref: UserAIPreference): ProviderPreferenceData
     monthlyBudget: pref.budgetLimit ?? 50,
     autoFallback: pref.enableFallback,
     costOptimization: false, // Default value as it's not in database schema
+    // Enhanced features - use defaults for now
+    autoRouting: false,
+    modelVariant: '',
+    enableStructuredOutputs: false,
+    enableResponseValidation: false,
   };
 }
 
@@ -79,6 +89,11 @@ const DEFAULT_PREFERENCES: ProviderPreferenceData = {
   monthlyBudget: 50,
   autoFallback: true,
   costOptimization: false,
+  // Enhanced features defaults
+  autoRouting: false,
+  modelVariant: '',
+  enableStructuredOutputs: false,
+  enableResponseValidation: false,
 };
 
 /**

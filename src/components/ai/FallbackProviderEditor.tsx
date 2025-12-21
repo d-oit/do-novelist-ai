@@ -16,7 +16,25 @@ interface ProviderEntry {
   enabled: boolean;
 }
 
-const ALL_PROVIDERS: AIProvider[] = ['openai', 'anthropic', 'google', 'mistral'];
+const ALL_PROVIDERS: AIProvider[] = [
+  // Core Providers
+  'openai',
+  'anthropic',
+  'google',
+  'mistral',
+  // Extended Providers
+  'deepseek',
+  'cohere',
+  'ai21',
+  'together',
+  'fireworks',
+  'perplexity',
+  'xai',
+  '01-ai',
+  'nvidia',
+  'amazon',
+  'meta',
+];
 
 export const FallbackProviderEditor: React.FC<FallbackProviderEditorProps> = ({
   // userId prop reserved for future use

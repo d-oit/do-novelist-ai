@@ -438,7 +438,25 @@ export async function checkProviderHealth(
  */
 export async function checkAllProvidersHealth(userId: string = 'system'): Promise<void> {
   const config = getAIConfig();
-  const providers: AIProvider[] = ['openai', 'anthropic', 'google'];
+  const providers: AIProvider[] = [
+    // Core Providers
+    'openai',
+    'anthropic',
+    'google',
+    'mistral',
+    // Extended Providers
+    'deepseek',
+    'cohere',
+    'ai21',
+    'together',
+    'fireworks',
+    'perplexity',
+    'xai',
+    '01-ai',
+    'nvidia',
+    'amazon',
+    'meta',
+  ];
 
   const enabledProviders = providers.filter(p => config.providers[p].enabled);
 
@@ -548,7 +566,25 @@ export async function getHealthReport(): Promise<{
   }>;
   overallStatus: 'operational' | 'degraded' | 'outage';
 }> {
-  const providers: AIProvider[] = ['openai', 'anthropic', 'google'];
+  const providers: AIProvider[] = [
+    // Core Providers
+    'openai',
+    'anthropic',
+    'google',
+    'mistral',
+    // Extended Providers
+    'deepseek',
+    'cohere',
+    'ai21',
+    'together',
+    'fireworks',
+    'perplexity',
+    'xai',
+    '01-ai',
+    'nvidia',
+    'amazon',
+    'meta',
+  ];
   const healthRecords = await getProviderHealth();
 
   const providerReports = providers.map(provider => {
