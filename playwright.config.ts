@@ -16,17 +16,14 @@ export default defineConfig({
   // Execution strategy optimized for parallel CI execution
   fullyParallel: true,
   forbidOnly: process.env.CI ? true : false,
-  retries: process.env.CI ? 2 : 1,
+  retries: process.env.CI ? 1 : 1,
   workers: process.env.CI ? 2 : 2,
   // Note: Sharding is handled dynamically by CI via --shard flag
 
-  // Production reporting with comprehensive test result generation
-  reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
-    ['json', { outputFile: 'test-results/results.json' }],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
-    ['list'],
-  ],
+  // Reporting is slimmed down in CI to reduce I/O overhead
+  reporter: process.env.CI
+    ? [['list'], ['junit', { outputFile: 'test-results/junit.xml' }]]
+    : [['html', { outputFolder: 'playwright-report' }], ['list']],
 
   // Global settings with strategic diagnostic collection and browser optimization
   use: {

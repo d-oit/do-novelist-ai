@@ -28,7 +28,6 @@ export default tseslint.config(
       'playwright-report/**',
       'test-results/**',
       'types.ts',
-      'src/assets/styles.css',
       'src/index.css',
     ],
   },
