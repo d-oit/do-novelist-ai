@@ -15,7 +15,7 @@ import GoapVisualizer from '@/components/GoapVisualizer';
 import Header from '@/components/layout/Header';
 import MainLayout from '@/components/layout/MainLayout';
 import { UserProvider } from '@/contexts/UserContext';
-import AnalyticsDashboardRefactored from '@/features/analytics/components/AnalyticsDashboardRefactored';
+import { AnalyticsDashboard } from '@/features/analytics';
 import SettingsView from '@/features/settings/components/SettingsView';
 import { runA11yTests, groupViolationsBySeverity, type A11yViolation } from '@/test/a11y-utils';
 
@@ -329,7 +329,7 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
       };
 
       const { container } = render(
-        React.createElement(AnalyticsDashboardRefactored, {
+        React.createElement(AnalyticsDashboard, {
           project,
           onClose: () => {},
         }),

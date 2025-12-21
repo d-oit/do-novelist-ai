@@ -238,8 +238,9 @@ function updateCircuitBreaker(provider: AIProvider, success: boolean): void {
     // Open circuit if threshold exceeded
     if (breaker.failureCount >= CIRCUIT_BREAKER_THRESHOLD && !breaker.isOpen) {
       breaker.isOpen = true;
-      console.warn(
-        `[HealthService] Circuit breaker opened for ${provider} - ${breaker.failureCount} consecutive failures`,
+      logger.warn(
+        `Circuit breaker opened for ${provider} - ${breaker.failureCount} consecutive failures`,
+        { component: 'ai-health-service', provider },
       );
     }
   }
@@ -456,7 +457,7 @@ let healthCheckInterval: ReturnType<typeof setInterval> | null = null;
 
 export function startHealthMonitoring(userId: string = 'system'): void {
   if (healthCheckInterval) {
-    console.warn('[HealthService] Health monitoring already running');
+    logger.warn('Health monitoring already running', { component: 'ai-health-service' });
     return;
   }
 
@@ -466,13 +467,21 @@ export function startHealthMonitoring(userId: string = 'system'): void {
 
   // Run initial check
   checkAllProvidersHealth(userId).catch(error => {
-    console.error('[HealthService] Initial health check failed:', error);
+    logger.error(
+      'Initial health check failed',
+      { component: 'ai-health-service' },
+      error instanceof Error ? error : undefined,
+    );
   });
 
   // Schedule periodic checks
   healthCheckInterval = setInterval(() => {
     checkAllProvidersHealth(userId).catch(error => {
-      console.error('[HealthService] Periodic health check failed:', error);
+      logger.error(
+        'Periodic health check failed',
+        { component: 'ai-health-service' },
+        error instanceof Error ? error : undefined,
+      );
     });
   }, HEALTH_CHECK_INTERVAL_MS);
 }

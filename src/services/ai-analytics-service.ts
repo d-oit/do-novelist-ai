@@ -10,6 +10,7 @@ import {
   type AIUsageAnalytic,
   type UsageStats,
 } from '@/lib/db/index';
+import { logger } from '@/lib/logging/logger';
 import { loadUserPreferences } from '@/services/ai-config-service';
 
 /**
@@ -150,7 +151,11 @@ export async function logAIUsage(
 
     await logUsageAnalytic(analytic);
   } catch (error) {
-    console.error('Failed to log AI usage:', error);
+    logger.error(
+      'Failed to log AI usage',
+      { component: 'ai-analytics-service' },
+      error instanceof Error ? error : undefined,
+    );
   }
 }
 
@@ -180,7 +185,11 @@ export async function getUsageStats(
       budgetRemaining: 0,
     };
   } catch (error) {
-    console.error('Failed to get usage stats:', error);
+    logger.error(
+      'Failed to get usage stats',
+      { component: 'ai-analytics-service' },
+      error instanceof Error ? error : undefined,
+    );
     return {
       totalRequests: 0,
       totalTokens: 0,
@@ -236,7 +245,11 @@ export async function getBudgetInfo(userId: string): Promise<BudgetInfo> {
       isOverLimit: usagePercentage >= 100,
     };
   } catch (error) {
-    console.error('Failed to get budget info:', error);
+    logger.error(
+      'Failed to get budget info',
+      { component: 'ai-analytics-service' },
+      error instanceof Error ? error : undefined,
+    );
     return {
       totalBudget: 50,
       usedBudget: 0,

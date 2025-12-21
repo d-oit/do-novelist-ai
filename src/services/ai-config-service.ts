@@ -94,7 +94,11 @@ export async function loadUserPreferences(userId: string): Promise<ProviderPrefe
 
     return mapUserAIToProviderData(userPrefs);
   } catch (error) {
-    console.error('Failed to load user preferences:', error);
+    logger.error(
+      'Failed to load user preferences',
+      { component: 'ai-config-service' },
+      error instanceof Error ? error : undefined,
+    );
     return getDefaultConfig();
   }
 }
@@ -117,7 +121,11 @@ export async function saveUserPreferences(
 
     logger.info('Saved AI preferences for user', { userId });
   } catch (error) {
-    console.error('Failed to save user preferences:', error);
+    logger.error(
+      'Failed to save user preferences',
+      { component: 'ai-config-service' },
+      error instanceof Error ? error : undefined,
+    );
     throw new Error('Failed to save preferences');
   }
 }

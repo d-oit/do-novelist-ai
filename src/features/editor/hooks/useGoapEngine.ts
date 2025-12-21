@@ -12,9 +12,17 @@ import {
   enhancePlot,
   polishDialogue,
 } from '@/lib/ai';
-import type { Project, AgentAction, LogEntry, Chapter, RefineOptions, WorldState } from '@/types';
-import { AgentMode, ChapterStatus } from '@/types';
-
+import { logger } from '@/lib/logging/logger';
+import {
+  type Project,
+  type AgentAction,
+  type LogEntry,
+  type Chapter,
+  type RefineOptions,
+  type WorldState,
+  AgentMode,
+  ChapterStatus,
+} from '@/types';
 
 const INITIAL_ACTIONS: AgentAction[] = [
   {
@@ -167,6 +175,11 @@ export const useGoapEngine = (
     async (action: AgentAction): Promise<void> => {
       if (project.isGenerating) return;
 
+      logger.info('Executing action', {
+        component: 'GoapEngine',
+        action: action.name,
+        agentMode: action.agentMode,
+      });
       setProject(p => ({ ...p, isGenerating: true }));
       setCurrentAction(action);
 
@@ -284,7 +297,11 @@ export const useGoapEngine = (
                   prevSummary,
                 );
                 return { id: chapter.id, content, success: true };
-              } catch {
+              } catch (error) {
+                logger.error(`Failed to draft chapter "${chapter.title}"`, {
+                  component: 'GoapEngine',
+                  error,
+                });
                 addLog('Writer', `Failed to draft "${chapter.title}"`, 'error');
                 return { id: chapter.id, content: '', success: false };
               }
@@ -350,6 +367,7 @@ export const useGoapEngine = (
           addLog('Editor', `Review Complete. Suggestions:\n${analysis}`, 'success');
         }
       } catch (err) {
+        logger.error('Action failed', { component: 'GoapEngine', action: action.name, error: err });
         addLog('System', 'Action Failed: ' + (err as Error).message, 'error');
       } finally {
         setProject(p => ({ ...p, isGenerating: false }));
@@ -369,6 +387,8 @@ export const useGoapEngine = (
     const contentToRefine = currentContent ?? chapter?.content;
 
     if (!chapter || contentToRefine == null) return;
+
+    logger.info('Refining chapter', { component: 'GoapEngine', chapterId, options });
     setProject(p => ({ ...p, isGenerating: true }));
     addLog('Editor', `Starting refinement for "${chapter.title}"...`, 'info');
 
@@ -387,6 +407,7 @@ export const useGoapEngine = (
       }));
       addLog('Editor', `Refinement complete.`, 'success');
     } catch (err) {
+      logger.error('Refinement failed', { component: 'GoapEngine', chapterId, error: err });
       addLog('Editor', `Refinement failed: ${(err as Error).message}`, 'error');
     } finally {
       setProject(p => ({ ...p, isGenerating: false }));
@@ -398,6 +419,7 @@ export const useGoapEngine = (
     const chapter = project.chapters.find(c => c.id === chapterId);
     if (!chapter) return;
 
+    logger.info('Continuing chapter', { component: 'GoapEngine', chapterId });
     setProject(p => ({ ...p, isGenerating: true }));
     addLog('Writer', `Continuing story for "${chapter.title}"...`, 'info');
 
@@ -425,6 +447,11 @@ export const useGoapEngine = (
         'success',
       );
     } catch (err) {
+      logger.error('Failed to continue chapter', {
+        component: 'GoapEngine',
+        chapterId,
+        error: err,
+      });
       addLog('Writer', `Failed to continue chapter: ${(err as Error).message}`, 'error');
     } finally {
       setProject(p => ({ ...p, isGenerating: false }));
