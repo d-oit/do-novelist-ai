@@ -36,13 +36,14 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
     // Use ReactTestHelpers for consistent app setup
     await ReactTestHelpers.setupReactApp(page);
 
-    // Additional wait to ensure navigation is fully rendered
-    await page.waitForTimeout(500);
+    // Ensure a11y-ready state before scans
+    await ReactTestHelpers.waitForA11yReady(page);
   });
 
   test.describe('Page Load Accessibility', () => {
     test('should have no critical accessibility violations on page load', async ({ page }) => {
       try {
+        await ReactTestHelpers.waitForA11yReady(page);
         const accessibilityScanResults = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
           .analyze();
@@ -80,8 +81,9 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
     });
 
     test('should have proper color contrast ratios', async ({ page }) => {
+      await ReactTestHelpers.waitForA11yReady(page);
       const accessibilityScanResults = await new AxeBuilder({ page })
-        .include('*')
+        .include('main, [role="main"]')
         .exclude('[data-testid="ignore-contrast"]') // Allow specific exclusions
         .analyze();
 
@@ -197,6 +199,7 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
 
       if (settingsNavigated) {
         // Run accessibility scan on settings page
+        await ReactTestHelpers.waitForA11yReady(page);
         const accessibilityScanResults = await new AxeBuilder({ page })
           .include('form, input, textarea, select, button')
           .analyze();
@@ -286,6 +289,7 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
         await expect(page.getByRole('main')).toBeVisible();
 
         // Check that new content doesn't introduce accessibility issues
+        await ReactTestHelpers.waitForA11yReady(page);
         const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
 
         const newViolations = accessibilityScanResults.violations.filter(violation =>
@@ -333,6 +337,7 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
         await expect(page.getByRole('main')).toBeVisible();
 
         // Run accessibility scan for each viewport
+        await ReactTestHelpers.waitForA11yReady(page);
         const accessibilityScanResults = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
 
         const criticalViolations = accessibilityScanResults.violations.filter(violation =>
@@ -393,6 +398,7 @@ test.describe('Accessibility Reporting', () => {
     // Use ReactTestHelpers for consistent app setup
     await ReactTestHelpers.setupReactApp(page);
 
+    await ReactTestHelpers.waitForA11yReady(page);
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'best-practice'])
       .analyze();

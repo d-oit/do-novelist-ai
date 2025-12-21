@@ -36,21 +36,75 @@ export class ReactTestHelpers {
    * Wait for React application to be fully hydrated
    * Checks for DOM readiness and app content availability with optimized performance
    */
-  static async waitForReactHydration(page: Page): Promise<void> {
-    // Use specific element wait instead of networkidle for better performance
-    await expect(page.getByRole('navigation')).toBeVisible({ timeout: 10000 });
+  static async waitForReactHydration(
+    page: Page,
+    options?: { timeout?: number; requireMain?: boolean },
+  ): Promise<void> {
+    const timeout = options?.timeout ?? 10000;
 
-    // Wait for DOM to be ready and no loading indicators
+    // Ensure primary navigation is rendered (proxy for hydration)
+    await expect(page.getByRole('navigation')).toBeVisible({ timeout });
+
+    // Wait for DOM ready, no loading/busy indicators, and optional main landmark
     await page.waitForFunction(
-      () => {
-        return (
-          document.readyState === 'complete' &&
-          !document.querySelector('[data-loading]') &&
-          !document.querySelector('[aria-busy="true"]')
-        );
+      ({ requireMain }) => {
+        const ready = document.readyState === 'complete' || document.readyState === 'interactive';
+        const hasNav = Boolean(document.querySelector('nav,[role="navigation"]'));
+        const noBusy = !document.querySelector('[data-loading], [aria-busy="true"]');
+        const hasMain = Boolean(document.querySelector('main,[role="main"]'));
+        // Optional hydration/app-ready flags
+        const hydratedFlag =
+          document.querySelector('[data-hydrated="true"], [data-app-ready="true"]') != null;
+        return ready && hasNav && noBusy && (hydratedFlag || !requireMain || hasMain);
       },
-      { timeout: 10000 },
+      { requireMain: options?.requireMain ?? false },
+      { timeout },
     );
+
+    // Short mutation-idle window + double RAF to settle layout for a11y scanners
+    await page.evaluate(
+      (t: number) =>
+        new Promise<void>(resolve => {
+          let timer: number | undefined;
+          const settle = () => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          };
+
+          const observer = new MutationObserver(() => {
+            if (timer) clearTimeout(timer);
+            timer = window.setTimeout(settle, 200);
+          });
+          observer.observe(document, {
+            subtree: true,
+            childList: true,
+            attributes: true,
+            characterData: true,
+          });
+
+          // Initial idle settle
+          timer = window.setTimeout(settle, 200);
+
+          // Safety valve
+          window.setTimeout(
+            () => {
+              observer.disconnect();
+              resolve();
+            },
+            Math.min(Math.max(t, 500), 5000),
+          );
+        }),
+      timeout,
+    );
+  }
+
+  /**
+   * Convenience: wait for a11y-ready state (hydrated, main present, settled)
+   */
+  static async waitForA11yReady(page: Page, options?: { timeout?: number }): Promise<void> {
+    await ReactTestHelpers.waitForReactHydration(page, {
+      timeout: options?.timeout,
+      requireMain: true,
+    });
   }
 
   /**
@@ -58,7 +112,7 @@ export class ReactTestHelpers {
    */
   static async setupReactApp(page: Page): Promise<void> {
     await page.goto('/');
-    await ReactTestHelpers.waitForReactHydration(page);
+    await ReactTestHelpers.waitForReactHydration(page, { requireMain: true });
 
     // Wait for main navigation to be ready
     await page.waitForSelector('nav, [role="navigation"]', { timeout: 10000 });
