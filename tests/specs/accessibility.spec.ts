@@ -211,17 +211,24 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
 
         expect(formViolations).toHaveLength(0);
 
-        // Verify form fields have accessible names using role-based approach
-        const formFields = page.locator('input:not([type="hidden"]):not([aria-label]):not([aria-labelledby])');
-        const unlabeledCount = await formFields.count();
+        // Verify form fields have accessible names: either associated <label>, aria-label, or aria-labelledby
+        const unlabeledCount = await page.locator('input:not([type="hidden"])').evaluateAll(
+          els =>
+            els.filter(el => {
+              const input = el as HTMLInputElement;
+              const hasAria = el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby');
+              const hasLabel =
+                (input.labels && input.labels.length > 0) ||
+                (el.id ? document.querySelector(`label[for="${el.id}"]`) !== null : false);
+              return !hasAria && !hasLabel;
+            }).length,
+        );
 
         if (unlabeledCount > 0) {
           console.log(`Found ${unlabeledCount} potentially unlabeled form fields`);
         }
 
-        // Allow for some unlabeled fields (like search inputs, hidden fields, etc.)
-        // Firefox may detect different field counts than Chromium
-        expect(unlabeledCount).toBeLessThan(10);
+        expect(unlabeledCount).toBe(0);
       } else {
         // Settings navigation not available - skip form testing
         expect(true).toBe(true);
