@@ -218,7 +218,7 @@ export class OpenRouterAdvancedService {
       availableVariants.push(':free', ':safe');
 
       // Provider-specific variants
-      if (['openai', 'anthropic', 'google'].includes(provider)) {
+      if (['openai', 'anthropic', 'google'].includes(provider || '')) {
         availableVariants.push(':extended', ':nitro');
       }
 
@@ -325,9 +325,8 @@ export class OpenRouterAdvancedService {
         alternatives,
         metadata: {
           selectionCriteria: this.getSelectionCriteria(request),
-          estimatedCost: this.estimateCost(topModel.model, request),
+          estimatedCost: this.estimateCost(topModel.model),
           estimatedLatency: 1000, // Simple estimate for now
-          features: topModel.model.supported_parameters.slice(0, 5),
           features: topModel.model.supported_parameters.slice(0, 5),
         },
       };
@@ -391,7 +390,7 @@ export class OpenRouterAdvancedService {
 
     // Provider reliability (popular providers get bonus)
     const majorProviders = ['openai', 'anthropic', 'google', 'mistral'];
-    if (majorProviders.includes(model.id.split('/')[0])) score += 10;
+    if (majorProviders.includes(model.id.split('/')[0] || '')) score += 10;
 
     // Model maturity (newer models get slight bonus)
     if (model.created > Date.now() - 365 * 24 * 60 * 60 * 1000) score += 5;
@@ -403,7 +402,7 @@ export class OpenRouterAdvancedService {
    * Get reason for model selection
    */
   private getSelectionReason(model: OpenRouterModel, request: AutoRouterRequest): string {
-    const provider = model.id.split('/')[0];
+    const provider = model.id.split('/')[0] || '';
     const reasons: string[] = [];
 
     if (request.taskType) {
@@ -483,41 +482,6 @@ export class OpenRouterAdvancedService {
       (promptCost * estimatedInputTokens) / 1000000 +
       (completionCost * estimatedOutputTokens) / 1000000
     );
-  }
-
-  /**
-   * Estimate latency for model
-   */
-  private estimateLatency(model: OpenRouterModel): number {
-    const provider = model.id.split('/')[0];
-    const promptCost = parseFloat(model.pricing.prompt);
-
-    // Base latency by provider (rough estimates)
-    let baseLatency = 1000; // 1 second base
-
-    switch (provider) {
-      case 'openai':
-        baseLatency = 800;
-        break;
-      case 'anthropic':
-        baseLatency = 900;
-        break;
-      case 'google':
-        baseLatency = 700;
-        break;
-      case 'mistral':
-        baseLatency = 600;
-        break;
-      default:
-        baseLatency = 1200;
-    }
-
-    // Adjust for cost (more expensive models often have better performance)
-    if (promptCost > 5.0) baseLatency *= 0.8;
-    else if (promptCost > 1.0) baseLatency *= 0.9;
-    else if (promptCost < 0.1) baseLatency *= 1.2;
-
-    return Math.round(baseLatency);
   }
 
   /**

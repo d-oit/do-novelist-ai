@@ -59,6 +59,10 @@ describe('getActiveProviders', () => {
       monthlyBudget: 10,
       autoFallback: true,
       costOptimization: false,
+      autoRouting: false,
+      modelVariant: '',
+      enableStructuredOutputs: false,
+      enableResponseValidation: false,
     };
   });
 

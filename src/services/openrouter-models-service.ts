@@ -313,7 +313,16 @@ export class OpenRouterModelsService {
     const recommendations: ModelRecommendation[] = [];
 
     // Task type mapping to model characteristics
-    const taskMappings = {
+    const taskMappings: Record<
+      string,
+      {
+        modalities?: string[];
+        features?: string[];
+        context?: number;
+        pricing?: string;
+        speed?: string;
+      }
+    > = {
       chat: { modalities: ['text'], context: 8000, pricing: 'low' },
       coding: { modalities: ['text'], features: ['tools'], context: 32000, pricing: 'medium' },
       reasoning: { context: 128000, features: ['tools'], pricing: 'high' },
@@ -336,7 +345,7 @@ export class OpenRouterModelsService {
 
       // Score based on task match
       if (taskConfig.modalities) {
-        const hasModalities = taskConfig.modalities.some(modality =>
+        const hasModalities = taskConfig.modalities.some((modality: string) =>
           model.architecture.input_modalities.includes(modality),
         );
         if (hasModalities) {
@@ -348,7 +357,8 @@ export class OpenRouterModelsService {
 
       if (taskConfig.features) {
         const hasFeatures = taskConfig.features.some(
-          feature => model.supported_parameters.includes(feature) || model.id.includes(feature),
+          (feature: string) =>
+            model.supported_parameters.includes(feature) || model.id.includes(feature),
         );
         if (hasFeatures) {
           score += 25;
@@ -428,7 +438,7 @@ export class OpenRouterModelsService {
 
     // Group models by provider
     for (const model of allModels) {
-      const provider = model.id.split('/')[0];
+      const provider = model.id.split('/')[0] || '';
       if (!providerMap.has(provider)) {
         providerMap.set(provider, []);
       }
