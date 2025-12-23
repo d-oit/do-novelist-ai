@@ -5,6 +5,7 @@
 
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { generateText } from 'ai';
+import type { LanguageModel } from 'ai';
 
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 import {
@@ -172,7 +173,7 @@ async function performHealthCheck(
 
     // Perform health check with timeout
     const checkPromise = generateText({
-      model: openrouter(`${provider}/${modelName}`),
+      model: openrouter(`${provider}/${modelName}`) as unknown as LanguageModel,
       prompt: TEST_PROMPT,
       maxOutputTokens: 5,
       // Disable AI SDK logging to prevent "m.log is not a function" error

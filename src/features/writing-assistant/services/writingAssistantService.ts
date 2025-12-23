@@ -4,7 +4,8 @@
  */
 
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import { generateText, type LanguageModel } from 'ai';
+import { generateText } from 'ai';
+import type { LanguageModel } from 'ai';
 
 import { type Character } from '@/features/characters/types';
 import {
@@ -63,7 +64,7 @@ class WritingAssistantService {
       const openrouter = createOpenRouter({
         apiKey,
       });
-      this.genAI = openrouter('google/gemini-pro');
+      this.genAI = openrouter('google/gemini-pro') as unknown as LanguageModel;
     }
   }
 

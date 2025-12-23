@@ -130,7 +130,7 @@ export function getModel(
 
   // Return the model instance using OpenRouter
   // Format: provider/model-name (e.g. anthropic/claude-3-5-sonnet)
-  return openrouter(`${provider}/${modelName}`);
+  return openrouter(`${provider}/${modelName}`) as unknown as LanguageModel;
 }
 
 /**
