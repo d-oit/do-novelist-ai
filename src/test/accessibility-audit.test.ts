@@ -41,7 +41,10 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
     const results = await runA11yTests(container);
     const criticalViolations = groupViolationsBySeverity(results.violations).critical || [];
 
-    console.log(`MainLayout: ${results.violations.length} violations, ${criticalViolations.length} critical`);
+    // Suppress informational console output in test runs
+    if (import.meta.env.NODE_ENV !== 'test') {
+      console.log(`MainLayout: ${results.violations.length} violations, ${criticalViolations.length} critical`);
+    }
     expect(criticalViolations).toHaveLength(0);
   });
 
@@ -59,25 +62,28 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
     const grouped = groupViolationsBySeverity(results.violations);
     const criticalViolations = grouped.critical || [];
 
-    console.log(`Header: ${results.violations.length} violations, ${criticalViolations.length} critical`);
+    // Suppress informational console output in test runs
+    if (import.meta.env.NODE_ENV !== 'test') {
+      console.log(`Header: ${results.violations.length} violations, ${criticalViolations.length} critical`);
 
-    // Log detailed violation information
-    if (criticalViolations.length > 0) {
-      console.log('\n=== CRITICAL VIOLATIONS IN HEADER ===');
-      criticalViolations.forEach((v, index) => {
-        console.log(`\n${index + 1}. [${v.id}] ${v.help}`);
-        console.log(`   Description: ${v.description}`);
-        console.log(`   Help URL: ${v.helpUrl}`);
-        console.log(`   Affected elements:`);
-        v.nodes.forEach((node, nodeIndex) => {
-          console.log(`     ${nodeIndex + 1}. Target: ${node.target.join(' > ')}`);
-          console.log(`        HTML: ${node.html.substring(0, 200)}...`);
-          if (node.failureSummary) {
-            console.log(`        Issue: ${node.failureSummary}`);
-          }
+      // Log detailed violation information
+      if (criticalViolations.length > 0) {
+        console.log('\n=== CRITICAL VIOLATIONS IN HEADER ===');
+        criticalViolations.forEach((v, index) => {
+          console.log(`\n${index + 1}. [${v.id}] ${v.help}`);
+          console.log(`   Description: ${v.description}`);
+          console.log(`   Help URL: ${v.helpUrl}`);
+          console.log(`   Affected elements:`);
+          v.nodes.forEach((node, nodeIndex) => {
+            console.log(`     ${nodeIndex + 1}. Target: ${node.target.join(' > ')}`);
+            console.log(`        HTML: ${node.html.substring(0, 200)}...`);
+            if (node.failureSummary) {
+              console.log(`        Issue: ${node.failureSummary}`);
+            }
+          });
         });
-      });
-      console.log('\n');
+        console.log('\n');
+      }
     }
 
     expect(criticalViolations).toHaveLength(0);
@@ -118,7 +124,9 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
     expect(clickableElements.length).toBeGreaterThanOrEqual(0);
 
     const criticalViolations = groupViolationsBySeverity(results.violations).critical || [];
-    console.log(`ActionCard: ${results.violations.length} violations, ${criticalViolations.length} critical`);
+    if (import.meta.env.NODE_ENV !== 'test') {
+      console.log(`ActionCard: ${results.violations.length} violations, ${criticalViolations.length} critical`);
+    }
     expect(criticalViolations).toHaveLength(0);
   });
 
@@ -188,7 +196,9 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
     const results = await runA11yTests(container);
     const criticalViolations = groupViolationsBySeverity(results.violations).critical || [];
 
-    console.log(`GoapVisualizer: ${results.violations.length} violations, ${criticalViolations.length} critical`);
+    if (import.meta.env.NODE_ENV !== 'test') {
+      console.log(`GoapVisualizer: ${results.violations.length} violations, ${criticalViolations.length} critical`);
+    }
     expect(criticalViolations).toHaveLength(0);
   });
 

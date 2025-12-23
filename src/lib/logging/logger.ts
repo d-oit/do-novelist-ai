@@ -75,6 +75,9 @@ class Logger {
   private log(level: LogLevel, message: string, context?: LogContext, error?: Error): void {
     if (!this.shouldLog(level)) return;
 
+    // Skip logging in test environment to avoid noise in test output
+    if (import.meta.env?.NODE_ENV === 'test') return;
+
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,

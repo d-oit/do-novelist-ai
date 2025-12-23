@@ -48,8 +48,15 @@ class WritingAssistantService {
 
   private constructor() {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+
+    // Only log API key warning in non-test environments
+    if (!apiKey && import.meta.env.PROD !== true && import.meta.env.NODE_ENV !== 'test') {
+      logger.warn('Gemini API key not found. Writing assistant will use mock data.', {
+        component: 'WritingAssistantService',
+      });
+    }
+
     if (apiKey == null) {
-      console.warn('Gemini API key not found. Writing assistant will use mock data.');
       this.genAI = null;
     } else {
       // Initialize with OpenRouter SDK

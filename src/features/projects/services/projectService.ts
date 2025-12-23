@@ -62,7 +62,12 @@ class ProjectService {
     const project = await db.loadProject(id);
 
     if (!project) {
-      logger.warn('Project not found', { component: 'ProjectService', projectId: id });
+      // Only log as debug in test environment to avoid noise
+      if (import.meta.env.NODE_ENV !== 'test') {
+        logger.warn('Project not found', { component: 'ProjectService', projectId: id });
+      } else {
+        logger.debug('Project not found', { component: 'ProjectService', projectId: id });
+      }
     }
 
     return project;
@@ -155,10 +160,12 @@ class ProjectService {
     const project = await this.getById(id);
     if (!project) {
       const error = new Error(`Project not found: ${id}`);
-      logger.error('Failed to update project: not found', {
-        component: 'ProjectService',
-        projectId: id,
-      });
+      if (import.meta.env.NODE_ENV !== 'test') {
+        logger.error('Failed to update project: not found', {
+          component: 'ProjectService',
+          projectId: id,
+        });
+      }
       throw error;
     }
 
@@ -176,10 +183,18 @@ class ProjectService {
    * Delete project
    */
   public async delete(id: string): Promise<void> {
-    logger.warn('Deleting project', { component: 'ProjectService', projectId: id });
+    if (import.meta.env.NODE_ENV !== 'test') {
+      logger.warn('Deleting project', { component: 'ProjectService', projectId: id });
+    } else {
+      logger.debug('Deleting project', { component: 'ProjectService', projectId: id });
+    }
     await this.init();
     await db.deleteProject(id);
-    logger.info('Project deleted', { component: 'ProjectService', projectId: id });
+    if (import.meta.env.NODE_ENV !== 'test') {
+      logger.info('Project deleted', { component: 'ProjectService', projectId: id });
+    } else {
+      logger.debug('Project deleted', { component: 'ProjectService', projectId: id });
+    }
   }
 
   /**

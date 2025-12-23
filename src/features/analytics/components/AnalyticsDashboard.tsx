@@ -1,18 +1,20 @@
 /**
  * Analytics Dashboard
- * Main container for analytics views
+ * Main container for analytics views - Refactored for better maintainability
  */
 
 import { motion } from 'framer-motion';
-import { X, Download, RefreshCw, Eye, EyeOff } from 'lucide-react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import AnalyticsContent from '@/features/analytics/components/AnalyticsContent';
+import AnalyticsHeader from '@/features/analytics/components/AnalyticsHeader';
 import AnalyticsSidebar from '@/features/analytics/components/AnalyticsSidebar';
 import { cn } from '@/lib/utils';
 import type { Project } from '@/types';
 import { ChapterStatus } from '@/types';
+
+// Type for active views
+type AnalyticsView = 'overview' | 'productivity' | 'goals' | 'timeline';
 
 interface AnalyticsDashboardProps {
   project: Project;
@@ -22,20 +24,23 @@ interface AnalyticsDashboardProps {
 
 const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = React.memo(
   ({ project, onClose, className }) => {
-    const [activeView, setActiveView] = useState('overview');
+    const [activeView, setActiveView] = useState<AnalyticsView>('overview');
     const [isCompact, setIsCompact] = useState(false);
 
-    const handleExport = useCallback((): void => {
-      // Export analytics data
-      const data = {
+    // Memoized export data to optimize performance
+    const exportData = useMemo(
+      () => ({
         project: project.title,
         exportDate: new Date().toISOString(),
         chapters: project.chapters.length,
         totalWords: project.chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0),
         completed: project.chapters.filter(ch => ch.status === ChapterStatus.COMPLETE).length,
-      };
+      }),
+      [project.title, project.chapters],
+    );
 
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const handleExport = useCallback((): void => {
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -44,21 +49,50 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = React.memo(
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    }, [project.title, project.chapters]);
+    }, [exportData, project.title]);
 
-    const handleToggleCompact = useCallback(() => {
+    const handleToggleCompact = useCallback((): void => {
       setIsCompact(prev => !prev);
     }, []);
 
-    const handleRefresh = useCallback(() => {
-      // Handle refresh logic
+    const handleRefresh = useCallback((): void => {
+      // Handle refresh logic - could trigger data reload
     }, []);
+
+    // Enhanced keyboard navigation
+    useEffect(() => {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          onClose();
+        } else if (event.ctrlKey || event.metaKey) {
+          switch (event.key) {
+            case 'e':
+              event.preventDefault();
+              handleExport();
+              break;
+            case 'r':
+              event.preventDefault();
+              handleRefresh();
+              break;
+            case 'd':
+              event.preventDefault();
+              handleToggleCompact();
+              break;
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [onClose, handleExport, handleRefresh, handleToggleCompact]);
 
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
+        role='dialog'
+        aria-modal='true'
         className={cn(
           'fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm',
           className,
@@ -71,34 +105,14 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = React.memo(
           )}
         >
           {/* Header */}
-          <div className='flex items-center justify-between border-b border-border/50 bg-card/30 p-4'>
-            <div className='flex items-center gap-3'>
-              <h2 className='text-xl font-semibold text-foreground'>Analytics Dashboard</h2>
-              <span className='text-sm text-muted-foreground'>{project.title}</span>
-            </div>
-
-            <div className='flex items-center gap-2'>
-              <Button size='sm' variant='outline' onClick={handleToggleCompact}>
-                {isCompact ? <Eye className='h-4 w-4' /> : <EyeOff className='h-4 w-4' />}
-                {isCompact ? 'Detailed' : 'Compact'}
-              </Button>
-
-              <Button size='sm' variant='outline' onClick={handleExport}>
-                <Download className='h-4 w-4' />
-                Export
-              </Button>
-
-              <Button size='sm' variant='outline' onClick={handleRefresh}>
-                <RefreshCw className='h-4 w-4' />
-                Refresh
-              </Button>
-
-              <Button size='sm' variant='outline' onClick={onClose}>
-                <X className='h-4 w-4' />
-                Close
-              </Button>
-            </div>
-          </div>
+          <AnalyticsHeader
+            project={project}
+            isCompact={isCompact}
+            onToggleCompact={handleToggleCompact}
+            onExport={handleExport}
+            onRefresh={handleRefresh}
+            onClose={onClose}
+          />
 
           {/* Content */}
           <div className='flex flex-1 overflow-hidden'>
@@ -107,7 +121,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = React.memo(
               <AnalyticsSidebar
                 project={project}
                 activeView={activeView}
-                onViewChange={setActiveView}
+                onViewChange={(view: string) => setActiveView(view as AnalyticsView)}
               />
             </div>
 
