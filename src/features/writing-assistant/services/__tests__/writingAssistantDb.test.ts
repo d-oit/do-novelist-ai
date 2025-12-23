@@ -57,7 +57,7 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
 
   describe('Device ID Generation', () => {
     it('should generate device ID with correct format', async () => {
-      await import('../writingAssistantDb');
+      await import('@/features/writing-assistant/services/writingAssistantDb');
       const deviceId = localStorageMock.getItem('novelist_device_id');
 
       expect(deviceId).toBeDefined();
@@ -67,13 +67,13 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
     it('should generate unique device IDs across multiple instances', async () => {
       // First instance
       localStorageMock.clear();
-      await import('../writingAssistantDb');
+      await import('@/features/writing-assistant/services/writingAssistantDb');
       const deviceId1 = localStorageMock.getItem('novelist_device_id');
 
       // Second instance (simulate new device)
       localStorageMock.clear();
       vi.resetModules();
-      await import('../writingAssistantDb');
+      await import('@/features/writing-assistant/services/writingAssistantDb');
       const deviceId2 = localStorageMock.getItem('novelist_device_id');
 
       expect(deviceId1).not.toBe(deviceId2);
@@ -83,7 +83,7 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
       const existingDeviceId = 'device_1234567890_abc123xyz';
       localStorageMock.setItem('novelist_device_id', existingDeviceId);
 
-      await import('../writingAssistantDb');
+      await import('@/features/writing-assistant/services/writingAssistantDb');
       const deviceId = localStorageMock.getItem('novelist_device_id');
 
       expect(deviceId).toBe(existingDeviceId);
@@ -92,7 +92,7 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
 
   describe('User ID Generation', () => {
     it('should generate user ID with correct format', async () => {
-      await import('../writingAssistantDb');
+      await import('@/features/writing-assistant/services/writingAssistantDb');
       const userId = localStorageMock.getItem('novelist_user_id');
 
       expect(userId).toBeDefined();
@@ -102,13 +102,13 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
     it('should generate unique user IDs across multiple instances', async () => {
       // First instance
       localStorageMock.clear();
-      await import('../writingAssistantDb');
+      await import('@/features/writing-assistant/services/writingAssistantDb');
       const userId1 = localStorageMock.getItem('novelist_user_id');
 
       // Second instance (simulate new user)
       localStorageMock.clear();
       vi.resetModules();
-      await import('../writingAssistantDb');
+      await import('@/features/writing-assistant/services/writingAssistantDb');
       const userId2 = localStorageMock.getItem('novelist_user_id');
 
       expect(userId1).not.toBe(userId2);
@@ -118,7 +118,7 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
       const existingUserId = 'user_1234567890_xyz789abc';
       localStorageMock.setItem('novelist_user_id', existingUserId);
 
-      await import('../writingAssistantDb');
+      await import('@/features/writing-assistant/services/writingAssistantDb');
       const userId = localStorageMock.getItem('novelist_user_id');
 
       expect(userId).toBe(existingUserId);
@@ -127,7 +127,7 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
 
   describe('Analysis Record ID Generation', () => {
     it('should generate analysis record ID with correct format', async () => {
-      const { writingAssistantDb } = await import('../writingAssistantDb');
+      const { writingAssistantDb } = await import('@/features/writing-assistant/services/writingAssistantDb');
 
       // Clear previous calls
       mockLogger.info.mockClear();
@@ -207,7 +207,7 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
 
   describe('Feedback ID Generation', () => {
     it('should generate feedback ID with correct format', async () => {
-      const { writingAssistantDb } = await import('../writingAssistantDb');
+      const { writingAssistantDb } = await import('@/features/writing-assistant/services/writingAssistantDb');
 
       // Clear previous calls
       mockLogger.info.mockClear();
@@ -246,7 +246,7 @@ describe('WritingAssistantDb - Secure ID Generation', () => {
 
   describe('ID Uniqueness', () => {
     it('should generate different IDs for multiple analysis records', async () => {
-      const { writingAssistantDb } = await import('../writingAssistantDb');
+      const { writingAssistantDb } = await import('@/features/writing-assistant/services/writingAssistantDb');
 
       // Clear previous calls
       mockLogger.info.mockClear();

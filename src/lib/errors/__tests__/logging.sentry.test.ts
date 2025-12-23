@@ -1,4 +1,3 @@
-/* eslint-disable import-x/no-relative-parent-imports */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import type { LogEntry } from '@/lib/errors/logging';

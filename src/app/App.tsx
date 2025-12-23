@@ -7,9 +7,9 @@ import { ActionCard, BookViewer, PlannerControl } from '@/features/generation/co
 import { useGoapEngine } from '@/features/generation/hooks';
 import { ProjectStats, ProjectWizard } from '@/features/projects/components';
 import { db } from '@/features/projects/services';
+import { performanceMonitor } from '@/performance';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
 import type { Chapter, Project, RefineOptions } from '@/shared/types';
-import { performanceMonitor } from '@/performance';
 
 import { createChapter } from '@shared/utils';
 
