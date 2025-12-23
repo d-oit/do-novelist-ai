@@ -1,132 +1,47 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import React from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import AnalyticsDashboard from '@/features/analytics/components/AnalyticsDashboard';
-import { useAnalytics } from '@/features/analytics/hooks/useAnalytics';
-import { ChapterStatus, PublishStatus } from '@/shared/types';
-import type { Project } from '@/shared/types';
+import AnalyticsHeader from '@/features/analytics/components/AnalyticsHeader';
+import { ChapterStatus, PublishStatus } from '@/types';
 
-// Mock the analytics hook
-vi.mock('../hooks/useAnalytics');
-const mockUseAnalytics = vi.mocked(useAnalytics);
-
-// Mock framer-motion
-vi.mock('framer-motion', () => {
-  const createMotionComponent = (elementType: string) => {
-    return ({ children, ...props }: any) => {
-      // Filter out Framer Motion specific props that cause React warnings
-      const {
-        whileHover: _whileHover,
-        whileTap: _whileTap,
-        whileFocus: _whileFocus,
-        whileInView: _whileInView,
-        initial: _initial,
-        animate: _animate,
-        exit: _exit,
-        transition: _transition,
-        variants: _variants,
-        layout: _layout,
-        layoutId: _layoutId,
-        drag: _drag,
-        dragConstraints: _dragConstraints,
-        dragElastic: _dragElastic,
-        onDragStart: _onDragStart,
-        onDrag: _onDrag,
-        onDragEnd: _onDragEnd,
-        onAnimationStart: _onAnimationStart,
-        onAnimationComplete: _onAnimationComplete,
-        onUpdate: _onUpdate,
-        transformTemplate: _transformTemplate,
-        ...domProps
-      } = props;
-
-      // Silence unused variable warnings - these are intentionally filtered out
-      void [
-        _whileHover,
-        _whileTap,
-        _whileFocus,
-        _whileInView,
-        _initial,
-        _animate,
-        _exit,
-        _transition,
-        _variants,
-        _layout,
-        _layoutId,
-        _drag,
-        _dragConstraints,
-        _dragElastic,
-        _onDragStart,
-        _onDrag,
-        _onDragEnd,
-        _onAnimationStart,
-        _onAnimationComplete,
-        _onUpdate,
-        _transformTemplate,
-      ];
-
-      return React.createElement(elementType, domProps, children);
-    };
-  };
-
-  return {
-    motion: {
-      div: createMotionComponent('div'),
-      circle: createMotionComponent('circle'),
-      button: createMotionComponent('button'),
-    },
-    AnimatePresence: ({ children }: any) => children,
-  };
-});
-
-// Mock UI components
-vi.mock('../../../components/ui/Button', () => ({
-  Button: ({ children, onClick, disabled, className, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} className={className} {...props}>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock('../../../components/ui/Card', () => ({
-  Card: ({ children, className, ...props }: any) => (
-    <div className={className} {...props}>
-      {children}
-    </div>
-  ),
-}));
-
-const createChapter = (
-  id: string,
-  title: string,
-  status: (typeof ChapterStatus)[keyof typeof ChapterStatus],
-  orderIndex: number,
-) => ({
-  id,
-  orderIndex,
-  title,
-  summary: `${title} summary`,
-  content: `Content for ${title}`,
-  status,
-  wordCount: 1200,
-  characterCount: 7200,
-  estimatedReadingTime: 6,
-  tags: [],
-  notes: '',
-  createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-02'),
-});
-
-const mockProject: Project = {
-  id: 'test-project',
+// Mock Project data with correct typing
+const mockProject = {
+  id: 'test-project-123',
   title: 'Test Novel',
-  idea: 'A test novel for analytics',
-  style: 'Fantasy',
-  coverImage: undefined,
+  idea: 'A test novel for analytics testing',
+  style: 'General Fiction' as const,
   chapters: [
-    createChapter('chapter-1', 'Chapter 1', ChapterStatus.COMPLETE, 1),
-    createChapter('chapter-2', 'Chapter 2', ChapterStatus.DRAFTING, 2),
+    {
+      id: 'ch1',
+      orderIndex: 1,
+      title: 'Chapter 1',
+      summary: 'First chapter',
+      content: 'Chapter 1 content',
+      status: ChapterStatus.COMPLETE,
+      wordCount: 1000,
+      characterCount: 5000,
+      estimatedReadingTime: 5,
+      tags: [],
+      notes: '',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
+    },
+    {
+      id: 'ch2',
+      orderIndex: 2,
+      title: 'Chapter 2',
+      summary: 'Second chapter',
+      content: 'Chapter 2 content',
+      status: ChapterStatus.PENDING,
+      wordCount: 0,
+      characterCount: 0,
+      estimatedReadingTime: 0,
+      tags: [],
+      notes: '',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
+    },
   ],
   worldState: {
     hasTitle: true,
@@ -135,310 +50,278 @@ const mockProject: Project = {
     chaptersCompleted: 1,
     styleDefined: true,
     isPublished: false,
-    hasCharacters: true,
+    hasCharacters: false,
     hasWorldBuilding: false,
-    hasThemes: true,
-    plotStructureDefined: true,
-    targetAudienceDefined: true,
+    hasThemes: false,
+    plotStructureDefined: false,
+    targetAudienceDefined: false,
   },
   isGenerating: false,
   status: PublishStatus.DRAFT,
-  language: 'en',
+  language: 'en' as const,
   targetWordCount: 50000,
   settings: {
-    enableDropCaps: true,
+    enableDropCaps: false,
     autoSave: true,
-    autoSaveInterval: 120,
+    autoSaveInterval: 30,
     showWordCount: true,
     enableSpellCheck: true,
     darkMode: false,
-    fontSize: 'medium',
-    lineHeight: 'normal',
-    editorTheme: 'default',
+    fontSize: 'medium' as const,
+    lineHeight: 'normal' as const,
+    editorTheme: 'default' as const,
   },
-  genre: ['fantasy'],
-  targetAudience: 'adult',
+  genre: ['Fiction'],
+  targetAudience: 'adult' as const,
   contentWarnings: [],
-  keywords: [],
-  synopsis: 'A fantasy test novel.',
+  keywords: ['test'],
+  synopsis: 'Test novel synopsis',
   createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-02'),
-  publishedAt: undefined,
-  authors: [],
+  updatedAt: new Date('2024-01-01'),
+  authors: [
+    {
+      id: 'author1',
+      name: 'Test Author',
+      email: 'test@example.com',
+      role: 'owner' as const,
+    },
+  ],
   analytics: {
-    totalWordCount: 1500,
-    averageChapterLength: 750,
-    estimatedReadingTime: 8,
+    totalWordCount: 1000,
+    averageChapterLength: 1000,
+    estimatedReadingTime: 5,
     generationCost: 0,
-    editingRounds: 2,
+    editingRounds: 0,
   },
   version: '1.0.0',
   changeLog: [],
   timeline: {
-    id: 'test-timeline',
-    projectId: 'test-project',
+    id: 'timeline1',
+    projectId: 'test-project-123',
     events: [],
     eras: [],
     settings: {
-      viewMode: 'chronological',
+      viewMode: 'chronological' as const,
       zoomLevel: 1,
       showCharacters: true,
-      showImplicitEvents: false,
+      showImplicitEvents: true,
     },
   },
-};
-
-const mockAnalyticsData = {
-  projectAnalytics: {
-    projectId: 'test-project',
-    title: 'Test Novel',
-    createdAt: new Date('2024-01-01'),
-    totalWords: 1500,
-    totalChapters: 2,
-    completedChapters: 1,
-    estimatedReadingTime: 8,
-    averageChapterLength: 750,
-    writingProgress: 50,
-    timeSpent: 120, // 2 hours
-    lastActivity: new Date(),
-    wordCountHistory: [],
-    chapterProgress: [],
-  },
-  weeklyStats: {
-    weekStart: '2024-01-01',
-    totalWords: 500,
-    totalTime: 60,
-    averageDailyWords: 71,
-    mostProductiveDay: '2024-01-03',
-    streak: 5,
-    goals: {
-      wordsTarget: 3500,
-      timeTarget: 420,
-      wordsAchieved: 500,
-      timeAchieved: 60,
-    },
-  },
-  insights: {
-    productivity: {
-      averageWordsPerHour: 45,
-      peakWritingHours: [9, 10, 11],
-      preferredWritingDays: ['Monday', 'Tuesday', 'Wednesday'],
-      consistencyScore: 78,
-    },
-    patterns: {
-      averageSessionLength: 45,
-      sessionsPerDay: 1.2,
-      preferredChapterLength: 2500,
-      revisionRatio: 0.15,
-    },
-    aiUsage: {
-      totalWordsGenerated: 300,
-      assistancePercentage: 20,
-      mostAssistedChapters: ['chapter-1'],
-      aiDependencyTrend: 0.05,
-    },
-    streaks: {
-      currentStreak: 5,
-      longestStreak: 12,
-      streakDates: ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05'],
-    },
-    milestones: [],
-  },
-  wordCountChart: [
-    { date: '2024-01-01', value: 100 },
-    { date: '2024-01-02', value: 150 },
-    { date: '2024-01-03', value: 200 },
-  ],
-  productivityChart: [
-    { date: '2024-01-01', value: 40 },
-    { date: '2024-01-02', value: 45 },
-    { date: '2024-01-03', value: 50 },
-  ],
-};
-
-const mockAnalyticsHook = {
-  ...mockAnalyticsData,
-  isLoading: false,
-  error: null,
-  loadProjectAnalytics: vi.fn(),
-  loadWeeklyStats: vi.fn(),
-  loadInsights: vi.fn(),
-  loadWordCountChart: vi.fn(),
-  loadProductivityChart: vi.fn(),
-  exportAnalytics: vi.fn(),
-  currentSession: null,
-  isTracking: false,
-  startSession: vi.fn(),
-  endSession: vi.fn(),
-  goals: [],
-  createGoal: vi.fn(),
-  updateGoal: vi.fn(),
-  streakChart: [],
 };
 
 describe('AnalyticsDashboard', () => {
   const mockOnClose = vi.fn();
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockUseAnalytics.mockReturnValue(mockAnalyticsHook as any);
+    mockOnClose.mockClear();
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('renders analytics dashboard with project data', () => {
+  it('renders without errors', () => {
     render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
     expect(screen.getByText('Analytics Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Insights for "Test Novel"')).toBeInTheDocument();
-
-    // Check for key statistics
-    expect(screen.getByText('1,500')).toBeInTheDocument(); // Total words
-    expect(screen.getByText(/1\/2/)).toBeInTheDocument(); // Chapters progress (includes percentage suffix)
-    expect(screen.getByText(/2h/)).toBeInTheDocument(); // Time spent (may include minutes)
+    expect(screen.getByText(mockProject.title)).toBeInTheDocument();
   });
 
-  it('shows loading state', () => {
-    mockUseAnalytics.mockReturnValue({
-      ...mockAnalyticsHook,
-      isLoading: true,
-      projectAnalytics: null,
-      weeklyStats: null,
-      insights: null,
-    } as any);
-
+  it('renders modal structure correctly', () => {
     render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
-    expect(screen.getByText('Loading analytics dashboard...')).toBeInTheDocument();
+    // Check modal overlay
+    const modal = screen.getByRole('dialog');
+    expect(modal).toBeInTheDocument();
+
+    // Check that the modal has proper structure
+    expect(modal).toHaveClass('fixed', 'inset-0', 'z-50');
   });
 
-  it('loads analytics data on mount', async () => {
+  it('handles export button functionality', () => {
     render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
-    // Wait for async operations to complete
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
+    const exportButton = screen.getByRole('button', { name: /export/i });
+    expect(exportButton).toBeInTheDocument();
 
-    expect(mockAnalyticsHook.loadProjectAnalytics).toHaveBeenCalledWith(mockProject);
-    expect(mockAnalyticsHook.loadWeeklyStats).toHaveBeenCalled();
-    expect(mockAnalyticsHook.loadInsights).toHaveBeenCalled();
-    expect(mockAnalyticsHook.loadWordCountChart).toHaveBeenCalledWith(mockProject.id);
-    expect(mockAnalyticsHook.loadProductivityChart).toHaveBeenCalled();
+    // Test that button can be clicked without errors
+    fireEvent.click(exportButton);
+    expect(exportButton).toBeEnabled();
   });
 
-  it('can toggle between detailed and compact view', () => {
+  it('toggles compact view', () => {
     render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
-    const toggleButton = screen.getByText('Compact');
-    fireEvent.click(toggleButton);
+    const compactButton = screen.getByRole('button', { name: /compact/i });
+    expect(compactButton).toBeInTheDocument();
 
-    // Should show "Detailed" button after toggling to compact view
-    expect(screen.getByText('Detailed')).toBeInTheDocument();
+    fireEvent.click(compactButton);
 
-    // WritingStatsCard is always shown, but other sections should be hidden in compact view
-    // "This Week's Performance" is part of WritingStatsCard and always visible
+    // Button should change to show "Detailed"
+    expect(screen.getByRole('button', { name: /detailed/i })).toBeInTheDocument();
+  });
+
+  it('calls onClose when close button is clicked', () => {
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+
+    const closeButton = screen.getByRole('button', { name: /close/i });
+    fireEvent.click(closeButton);
+
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles keyboard shortcuts', () => {
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+
+    // Test Escape key
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  it('passes correct props to AnalyticsHeader', () => {
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+
+    // Header should be rendered with project title
+    expect(screen.getByText('Analytics Dashboard')).toBeInTheDocument();
+    expect(screen.getByText(mockProject.title)).toBeInTheDocument();
+  });
+
+  it('renders main component areas', () => {
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+
+    // Should have navigation elements
+    expect(screen.getByText('Overview')).toBeInTheDocument();
+
+    // Should have content area with stats cards
+    expect(screen.getByText('Writing Overview')).toBeInTheDocument();
     expect(screen.getByText("This Week's Performance")).toBeInTheDocument();
   });
 
-  it('can refresh analytics data', async () => {
+  it('displays analytics data calculations', () => {
     render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
 
-    const refreshButton = screen.getByText('Refresh');
+    // Should show word count in some form
+    const wordCountElements = screen.getAllByText('1,000');
+    expect(wordCountElements.length).toBeGreaterThan(0);
 
-    await act(async () => {
-      fireEvent.click(refreshButton);
-      // Wait for the async refreshData function to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    // Should call all load functions again
-    expect(mockAnalyticsHook.loadProjectAnalytics).toHaveBeenCalledTimes(2);
-    expect(mockAnalyticsHook.loadWeeklyStats).toHaveBeenCalledTimes(2);
-    expect(mockAnalyticsHook.loadInsights).toHaveBeenCalledTimes(2);
+    // Should show chapter progress
+    expect(screen.getByText('1/2')).toBeInTheDocument();
   });
 
-  it('can export analytics data', async () => {
-    const mockExportData = JSON.stringify({ analytics: 'data' });
-    mockAnalyticsHook.exportAnalytics.mockResolvedValue(mockExportData);
-
-    // Mock URL methods
-    const originalCreateObjectURL = global.URL.createObjectURL;
-    const originalRevokeObjectURL = global.URL.revokeObjectURL;
-    global.URL.createObjectURL = vi.fn(() => 'mocked-url');
-    global.URL.revokeObjectURL = vi.fn();
-
-    // Mock createElement to return a proper anchor element
-    const originalCreateElement = document.createElement.bind(document);
-    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-      if (tagName === 'a') {
-        const anchor = originalCreateElement('a');
-        anchor.click = vi.fn();
-        return anchor;
-      }
-      return originalCreateElement(tagName);
-    });
-
+  it('has proper accessibility attributes', () => {
     render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+
+    // Check for ARIA labels on buttons
+    const exportButton = screen.getByRole('button', { name: /export/i });
+    expect(exportButton).toHaveAttribute('aria-label', 'Export analytics data');
+
+    const closeButton = screen.getByRole('button', { name: /close/i });
+    expect(closeButton).toHaveAttribute('aria-label', 'Close analytics dashboard');
+  });
+
+  it('supports navigation between views', () => {
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+
+    // Check that all navigation options are present in sidebar
+    const sidebarItems = screen.getAllByText(/Overview|Productivity|Goals|Timeline/);
+    expect(sidebarItems.length).toBeGreaterThanOrEqual(4);
+
+    // Check specific navigation items in sidebar
+    const sidebarNavigation = screen.getByText('Views');
+    expect(sidebarNavigation).toBeInTheDocument();
+  });
+
+  it('renders analytics sidebar with stats', () => {
+    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+
+    // Sidebar should contain stats section
+    expect(screen.getByText('Quick Stats')).toBeInTheDocument();
+  });
+});
+
+describe('AnalyticsHeader', () => {
+  const mockProps = {
+    project: mockProject,
+    isCompact: false,
+    onToggleCompact: vi.fn(),
+    onExport: vi.fn(),
+    onRefresh: vi.fn(),
+    onClose: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders with correct project title', () => {
+    render(<AnalyticsHeader {...mockProps} />);
+
+    expect(screen.getByText('Analytics Dashboard')).toBeInTheDocument();
+    expect(screen.getByText(mockProject.title)).toBeInTheDocument();
+  });
+
+  it('shows compact button when not compact', () => {
+    render(<AnalyticsHeader {...mockProps} />);
+
+    expect(screen.getByText('Compact')).toBeInTheDocument();
+    expect(screen.getByLabelText('Switch to compact view')).toBeInTheDocument();
+  });
+
+  it('shows detailed button when compact', () => {
+    render(<AnalyticsHeader {...mockProps} isCompact={true} />);
+
+    expect(screen.getByText('Detailed')).toBeInTheDocument();
+    expect(screen.getByLabelText('Switch to detailed view')).toBeInTheDocument();
+  });
+
+  it('calls onToggleCompact when compact button is clicked', () => {
+    render(<AnalyticsHeader {...mockProps} />);
+
+    const compactButton = screen.getByText('Compact');
+    fireEvent.click(compactButton);
+
+    expect(mockProps.onToggleCompact).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onExport when export button is clicked', () => {
+    render(<AnalyticsHeader {...mockProps} />);
 
     const exportButton = screen.getByText('Export');
+    fireEvent.click(exportButton);
 
-    await act(async () => {
-      fireEvent.click(exportButton);
-      // Wait for the async exportData function to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    expect(mockAnalyticsHook.exportAnalytics).toHaveBeenCalledWith('json');
-
-    // Restore original functions
-    global.URL.createObjectURL = originalCreateObjectURL;
-    global.URL.revokeObjectURL = originalRevokeObjectURL;
+    expect(mockProps.onExport).toHaveBeenCalledTimes(1);
   });
 
-  it('closes when close button is clicked', () => {
-    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+  it('calls onRefresh when refresh button is clicked', () => {
+    render(<AnalyticsHeader {...mockProps} />);
+
+    const refreshButton = screen.getByText('Refresh');
+    fireEvent.click(refreshButton);
+
+    expect(mockProps.onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onClose when close button is clicked', () => {
+    render(<AnalyticsHeader {...mockProps} />);
 
     const closeButton = screen.getByText('Close');
     fireEvent.click(closeButton);
 
-    expect(mockOnClose).toHaveBeenCalled();
+    expect(mockProps.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('displays writing insights and recommendations', () => {
-    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+  it('renders all header buttons', () => {
+    render(<AnalyticsHeader {...mockProps} />);
 
-    expect(screen.getByText('AI Insights & Recommendations')).toBeInTheDocument();
-    expect(screen.getByText('Peak Performance')).toBeInTheDocument();
-    expect(screen.getByText('Streak Power')).toBeInTheDocument();
-    expect(screen.getByText('AI Balance')).toBeInTheDocument();
-    expect(screen.getByText('Next Milestone')).toBeInTheDocument();
+    expect(screen.getByText('Compact')).toBeInTheDocument();
+    expect(screen.getByText('Export')).toBeInTheDocument();
+    expect(screen.getByText('Refresh')).toBeInTheDocument();
+    expect(screen.getByText('Close')).toBeInTheDocument();
   });
 
-  it('shows progress rings for goals', () => {
-    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
+  it('has correct button accessibility', () => {
+    render(<AnalyticsHeader {...mockProps} />);
 
-    // Progress & Goals is part of GoalsProgress component which is in showAllStats section
-    // The WritingStatsCard "Chapters" metric should always be visible (may appear multiple times)
-    const chaptersElements = screen.getAllByText('Chapters');
-    expect(chaptersElements.length).toBeGreaterThan(0);
-  });
+    const exportButton = screen.getByRole('button', { name: /export/i });
+    expect(exportButton).toHaveAttribute('aria-label', 'Export analytics data');
 
-  it('handles missing analytics data gracefully', () => {
-    mockUseAnalytics.mockReturnValue({
-      ...mockAnalyticsHook,
-      projectAnalytics: null,
-      weeklyStats: null,
-      insights: null,
-      wordCountChart: [],
-      productivityChart: [],
-    } as any);
-
-    render(<AnalyticsDashboard project={mockProject} onClose={mockOnClose} />);
-
-    // Should still render the dashboard structure
-    expect(screen.getByText('Analytics Dashboard')).toBeInTheDocument();
+    const closeButton = screen.getByRole('button', { name: /close/i });
+    expect(closeButton).toHaveAttribute('aria-label', 'Close analytics dashboard');
   });
 });

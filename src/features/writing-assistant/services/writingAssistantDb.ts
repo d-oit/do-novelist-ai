@@ -3,7 +3,7 @@
  * Hybrid approach: localStorage for UI state, Turso DB for persistent analytics
  */
 
-// import { db } from '../../../lib/db'; // Will be used when implementing actual DB queries
+// import { db } from '@/lib/db'; // Will be used when implementing actual DB queries
 import {
   type ContentAnalysis,
   type WritingAssistantConfig,
@@ -11,7 +11,6 @@ import {
 } from '@/features/writing-assistant/types';
 import { logger } from '@/lib/logging/logger';
 import { generateSecureId } from '@/lib/secure-random';
-
 
 // Database schema types for Writing Assistant
 export interface AnalysisHistory {

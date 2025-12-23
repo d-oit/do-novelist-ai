@@ -149,7 +149,9 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
         updatedAt: row.updated_at as string,
       };
     } catch (e) {
-      console.error('Failed to get user AI preference:', e);
+      if (import.meta.env.NODE_ENV !== 'test') {
+        console.error('Failed to get user AI preference:', e);
+      }
       return null;
     }
   } else {
@@ -157,7 +159,12 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
       const stored = localStorage.getItem(`${STORAGE_KEY}_${userId}`);
       return stored != null ? (JSON.parse(stored) as UserAIPreference) : null;
     } catch (e) {
-      console.error('Failed to parse user AI preference from localStorage:', e);
+      // Only log errors in non-test environments to avoid noise in test output
+      if (import.meta.env.NODE_ENV !== 'test') {
+        if (import.meta.env.NODE_ENV !== 'test') {
+          console.error('Failed to parse user AI preference from localStorage:', e);
+        }
+      }
       return null;
     }
   }
@@ -206,7 +213,9 @@ export async function saveUserAIPreference(preference: UserAIPreference): Promis
         ],
       });
     } catch (e) {
-      console.error('Failed to save user AI preference:', e);
+      if (import.meta.env.NODE_ENV !== 'test') {
+        console.error('Failed to save user AI preference:', e);
+      }
       throw e;
     }
   } else {
@@ -249,7 +258,9 @@ export async function getProviderCapabilities(
         updatedAt: row.updated_at as string,
       }));
     } catch (e) {
-      console.error('Failed to get provider capabilities:', e);
+      if (import.meta.env.NODE_ENV !== 'test') {
+        console.error('Failed to get provider capabilities:', e);
+      }
       return [];
     }
   } else {
@@ -300,7 +311,9 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
         ],
       });
     } catch (e) {
-      console.error('Failed to save provider capability:', e);
+      if (import.meta.env.NODE_ENV !== 'test') {
+        console.error('Failed to save provider capability:', e);
+      }
       throw e;
     }
   } else {
@@ -353,7 +366,9 @@ export async function logUsageAnalytic(analytic: AIUsageAnalytic): Promise<void>
         ],
       });
     } catch (e) {
-      console.error('Failed to log usage analytic:', e);
+      if (import.meta.env.NODE_ENV !== 'test') {
+        console.error('Failed to log usage analytic:', e);
+      }
     }
   } else {
     const stored = localStorage.getItem(`${STORAGE_KEY}_analytics`);
@@ -422,7 +437,9 @@ export async function getUserUsageStats(
         avgLatencyMs: (row.avg_latency_ms as number) ?? 0,
       };
     } catch (e) {
-      console.error('Failed to get user usage stats:', e);
+      if (import.meta.env.NODE_ENV !== 'test') {
+        console.error('Failed to get user usage stats:', e);
+      }
       return {
         totalTokens: 0,
         totalCost: 0,
@@ -488,7 +505,9 @@ export async function getProviderHealth(provider?: AIProvider): Promise<AIProvid
         updatedAt: row.updated_at as string,
       }));
     } catch (e) {
-      console.error('Failed to get provider health:', e);
+      if (import.meta.env.NODE_ENV !== 'test') {
+        console.error('Failed to get provider health:', e);
+      }
       return [];
     }
   } else {
@@ -533,7 +552,9 @@ export async function updateProviderHealth(health: AIProviderHealth): Promise<vo
         ],
       });
     } catch (e) {
-      console.error('Failed to update provider health:', e);
+      if (import.meta.env.NODE_ENV !== 'test') {
+        console.error('Failed to update provider health:', e);
+      }
       throw e;
     }
   } else {

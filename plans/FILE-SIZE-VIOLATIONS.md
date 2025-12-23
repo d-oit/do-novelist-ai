@@ -6,25 +6,29 @@ This document tracks files exceeding the 500 LOC limit and refactoring progress.
 
 ## Current Violations (7 files)
 
-| File | LOC | Excess | Priority | Status | Notes |
-|------|-----|--------|----------|---------|-------|
-| `src/features/editor/components/BookViewer.tsx` | 806 | +306 | HIGH | 🔄 Planning | Complex UI component with multiple views |
-| `src/features/writing-assistant/services/writingAssistantService.ts` | 710 | +210 | MEDIUM | ✅ Acceptable | Cohesive service with high test coverage |
-| `src/features/publishing/services/publishingAnalyticsService.ts` | 700 | +200 | MEDIUM | ✅ Acceptable | Complex analytics logic, well-structured |
-| `src/lib/character-validation.ts` | 690 | +190 | LOW | ✅ Acceptable | Type validation schemas, mostly data |
-| `src/lib/ai.ts` | 600 | +100 | MEDIUM | 🔄 Planning | AI integration layer, consider splitting |
-| `src/features/generation/components/BookViewer.tsx` | 559 | +59 | LOW | ✅ Acceptable | Minor violation, monitor growth |
-| `src/features/projects/components/ProjectWizard.tsx` | 532 | +32 | LOW | ✅ Acceptable | Minor violation, monitor growth |
+| File                                                                 | LOC   | Excess   | Priority   | Status        | Notes                                        |
+| -------------------------------------------------------------------- | ----- | -------- | ---------- | ------------- | -------------------------------------------- |
+| File                                                                 | LOC   | Excess   | Priority   | Status        | Notes                                        |
+| ------                                                               | ----- | -------- | ---------- | ---------     | -------                                      |
+| `src/features/editor/components/BookViewer.tsx`                      | 67    | 0        | -          | ✅ Solved     | Refactored into sub-components               |
+| `src/lib/ai.ts`                                                      | ~15   | 0        | -          | ✅ Solved     | Split into `ai-core.ts` & `ai-operations.ts` |
+| `src/features/writing-assistant/services/writingAssistantService.ts` | 766   | +266     | MEDIUM     | ✅ Acceptable | Cohesive service with high test coverage     |
+| `src/features/publishing/services/epubService.ts`                    | 722   | +222     | MEDIUM     | ✅ Acceptable | Complex EPUB generation logic                |
+| `src/lib/character-validation.ts`                                    | 692   | +192     | LOW        | ✅ Acceptable | Type validation schemas, mostly data         |
+| `src/lib/validation.ts`                                              | 516   | +16      | LOW        | ✅ Acceptable | Validation logic                             |
+| `src/features/generation/components/BookViewer.tsx`                  | ~250  | 0        | -          | ✅ Solved     | Refactored into sub-components               |
+| `src/features/projects/components/ProjectWizard.tsx`                 | 532   | +32      | LOW        | ✅ Acceptable | Monitor growth                               |
 
 ## Refactoring Strategy
 
 ### High Priority (>300 LOC excess)
 
 #### 1. BookViewer.tsx (806 LOC, +306)
+
 - **Strategy**: Split into sub-components
 - **Proposed Components**:
   - `BookViewerHeader.tsx` - Navigation and controls
-  - `ChapterRenderer.tsx` - Individual chapter display  
+  - `ChapterRenderer.tsx` - Individual chapter display
   - `BookViewerSidebar.tsx` - Table of contents
   - `BookViewerToolbar.tsx` - Editing tools
 - **Estimated Effort**: 4-6 hours
@@ -33,6 +37,7 @@ This document tracks files exceeding the 500 LOC limit and refactoring progress.
 ### Medium Priority (100-300 LOC excess)
 
 #### 2. AI Integration Layer (600 LOC, +100)
+
 - **Strategy**: Extract provider-specific logic
 - **Proposed Split**:
   - `ai-core.ts` - Core types and interfaces
@@ -43,6 +48,7 @@ This document tracks files exceeding the 500 LOC limit and refactoring progress.
 ### Acceptable (Monitoring)
 
 These files exceed the limit but are cohesive and well-structured:
+
 - **writingAssistantService.ts**: Comprehensive service layer
 - **publishingAnalyticsService.ts**: Complex analytics algorithms
 - **character-validation.ts**: Zod schema definitions
@@ -50,16 +56,19 @@ These files exceed the limit but are cohesive and well-structured:
 ## Implementation Timeline
 
 ### Week 1: High Priority
-- [ ] Refactor BookViewer.tsx into sub-components
-- [ ] Update imports and tests
-- [ ] Verify no regression in functionality
 
-### Week 2: Medium Priority  
-- [ ] Split AI integration layer
-- [ ] Update dependent modules
-- [ ] Add integration tests
+- [x] Refactor BookViewer.tsx into sub-components (Editor & Generation)
+- [x] Update imports and tests
+- [x] Verify no regression in functionality
+
+### Week 2: Medium Priority
+
+- [x] Split AI integration layer
+- [x] Update dependent modules
+- [x] Add integration tests
 
 ### Ongoing: Monitoring
+
 - [ ] Track growth in acceptable violations
 - [ ] Review quarterly for re-prioritization
 - [ ] Add ESLint warnings for files >450 LOC

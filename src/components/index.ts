@@ -43,7 +43,6 @@ export { default as GoapVisualizer } from './GoapVisualizer';
 export { default as Navbar } from './Navbar';
 export { default as PlannerControl } from './PlannerControl';
 export { default as ProjectDashboard } from './ProjectDashboard';
-export { default as ProjectDashboardOptimized } from './ProjectDashboardOptimized';
 export { default as ProjectStats } from './ProjectStats';
 
 // === Feature Components ===
@@ -57,7 +56,7 @@ export { default as AnalyticsDashboard } from '@/features/analytics/components/A
 //
 // UI Primitives: @shared/components/ui/
 //   ├── Badge.tsx (consolidated from 4 locations)
-//   ├── Button.tsx (consolidated from 3 locations) 
+//   ├── Button.tsx (consolidated from 3 locations)
 //   ├── Card.tsx (consolidated from 3 locations)
 //   └── MetricCard.tsx (consolidated from 2 locations)
 //

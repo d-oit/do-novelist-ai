@@ -24,6 +24,11 @@ export interface ProviderPreferenceData {
   monthlyBudget: number;
   autoFallback: boolean;
   costOptimization: boolean;
+  // New fields for enhanced features
+  autoRouting: boolean; // Enable OpenRouter Auto Router
+  modelVariant: string; // Model variant like :free, :thinking, etc.
+  enableStructuredOutputs: boolean;
+  enableResponseValidation: boolean;
 }
 
 /**
@@ -39,6 +44,11 @@ function mapUserAIToProviderData(pref: UserAIPreference): ProviderPreferenceData
     monthlyBudget: pref.budgetLimit ?? 50,
     autoFallback: pref.enableFallback,
     costOptimization: false, // Default value as it's not in database schema
+    // Enhanced features - use defaults for now
+    autoRouting: false,
+    modelVariant: '',
+    enableStructuredOutputs: false,
+    enableResponseValidation: false,
   };
 }
 
@@ -79,6 +89,11 @@ const DEFAULT_PREFERENCES: ProviderPreferenceData = {
   monthlyBudget: 50,
   autoFallback: true,
   costOptimization: false,
+  // Enhanced features defaults
+  autoRouting: false,
+  modelVariant: '',
+  enableStructuredOutputs: false,
+  enableResponseValidation: false,
 };
 
 /**
@@ -94,7 +109,11 @@ export async function loadUserPreferences(userId: string): Promise<ProviderPrefe
 
     return mapUserAIToProviderData(userPrefs);
   } catch (error) {
-    console.error('Failed to load user preferences:', error);
+    logger.error(
+      'Failed to load user preferences',
+      { component: 'ai-config-service' },
+      error instanceof Error ? error : undefined,
+    );
     return getDefaultConfig();
   }
 }
@@ -117,7 +136,11 @@ export async function saveUserPreferences(
 
     logger.info('Saved AI preferences for user', { userId });
   } catch (error) {
-    console.error('Failed to save user preferences:', error);
+    logger.error(
+      'Failed to save user preferences',
+      { component: 'ai-config-service' },
+      error instanceof Error ? error : undefined,
+    );
     throw new Error('Failed to save preferences');
   }
 }

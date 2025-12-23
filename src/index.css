@@ -16,8 +16,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 255 60% 25%; /* Darker for WCAG AA compliance */
-    --primary-foreground: 0 0% 100%; /* Pure white for maximum contrast */
+    --primary: 260 70% 30%; /* Deep Purple/Blue for high contrast */
+    --primary-foreground: 0 0% 100%; /* Pure white */
 
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
@@ -48,8 +48,8 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 255 60% 35%; /* Darker for WCAG AA compliance */
-    --primary-foreground: 0 0% 100%; /* Pure white for maximum contrast */
+    --primary: 260 80% 45%; /* Darker primary in dark mode for WCAG AA contrast */
+    --primary-foreground: 0 0% 100%; /* Use white text for sufficient contrast */
 
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;

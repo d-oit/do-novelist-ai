@@ -5,33 +5,51 @@
  */
 
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logging/logger';
 import { PublishStatus } from '@/types';
-import { type Project, type Language, type ProjectCreationData, type ProjectUpdateData  } from '@/types';
+import {
+  type Project,
+  type Language,
+  type ProjectCreationData,
+  type ProjectUpdateData,
+} from '@/types';
 
 class ProjectService {
   /**
    * Initialize database
    */
   public async init(): Promise<void> {
+    logger.debug('Initializing database connection', { component: 'ProjectService' });
     await db.init();
+    logger.debug('Database initialized', { component: 'ProjectService' });
   }
 
   /**
    * Get all projects
    */
   public async getAll(): Promise<Project[]> {
+    logger.debug('Fetching all projects', { component: 'ProjectService' });
     await this.init();
     const summaries = await db.getAllProjects();
 
     // Load full project data for each summary
     const projects: Project[] = [];
     for (const summary of summaries) {
-      const project = await db.loadProject(summary.id);
-      if (project) {
-        projects.push(project);
+      try {
+        const project = await db.loadProject(summary.id);
+        if (project) {
+          projects.push(project);
+        }
+      } catch (error) {
+        logger.error('Failed to load project details', {
+          component: 'ProjectService',
+          projectId: summary.id,
+          error,
+        });
       }
     }
 
+    logger.info('Retrieved all projects', { component: 'ProjectService', count: projects.length });
     return projects;
   }
 
@@ -39,14 +57,27 @@ class ProjectService {
    * Get project by ID
    */
   public async getById(id: string): Promise<Project | null> {
+    logger.debug('Fetching project by ID', { component: 'ProjectService', projectId: id });
     await this.init();
-    return await db.loadProject(id);
+    const project = await db.loadProject(id);
+
+    if (!project) {
+      // Only log as debug in test environment to avoid noise
+      if (import.meta.env.NODE_ENV !== 'test') {
+        logger.warn('Project not found', { component: 'ProjectService', projectId: id });
+      } else {
+        logger.debug('Project not found', { component: 'ProjectService', projectId: id });
+      }
+    }
+
+    return project;
   }
 
   /**
    * Create new project
    */
   public async create(data: ProjectCreationData): Promise<Project> {
+    logger.info('Creating new project', { component: 'ProjectService', title: data.title });
     await this.init();
 
     const now = Date.now();
@@ -115,6 +146,7 @@ class ProjectService {
     };
 
     await db.saveProject(project);
+    logger.info('Project created successfully', { component: 'ProjectService', projectId });
     return project;
   }
 
@@ -122,11 +154,19 @@ class ProjectService {
    * Update project
    */
   public async update(id: string, data: ProjectUpdateData): Promise<void> {
+    logger.debug('Updating project', { component: 'ProjectService', projectId: id });
     await this.init();
 
     const project = await this.getById(id);
     if (!project) {
-      throw new Error(`Project not found: ${id}`);
+      const error = new Error(`Project not found: ${id}`);
+      if (import.meta.env.NODE_ENV !== 'test') {
+        logger.error('Failed to update project: not found', {
+          component: 'ProjectService',
+          projectId: id,
+        });
+      }
+      throw error;
     }
 
     const updated: Project = {
@@ -136,28 +176,47 @@ class ProjectService {
     };
 
     await db.saveProject(updated);
+    logger.info('Project updated successfully', { component: 'ProjectService', projectId: id });
   }
 
   /**
    * Delete project
    */
   public async delete(id: string): Promise<void> {
+    if (import.meta.env.NODE_ENV !== 'test') {
+      logger.warn('Deleting project', { component: 'ProjectService', projectId: id });
+    } else {
+      logger.debug('Deleting project', { component: 'ProjectService', projectId: id });
+    }
     await this.init();
     await db.deleteProject(id);
+    if (import.meta.env.NODE_ENV !== 'test') {
+      logger.info('Project deleted', { component: 'ProjectService', projectId: id });
+    } else {
+      logger.debug('Project deleted', { component: 'ProjectService', projectId: id });
+    }
   }
 
   /**
    * Get projects by status
    */
   public async getByStatus(status: PublishStatus): Promise<Project[]> {
+    logger.debug('Fetching projects by status', { component: 'ProjectService', status });
     const allProjects = await this.getAll();
-    return allProjects.filter(project => (project.status as PublishStatus) === status);
+    const filtered = allProjects.filter(project => (project.status as PublishStatus) === status);
+    logger.debug('Filtered projects by status', {
+      component: 'ProjectService',
+      status,
+      count: filtered.length,
+    });
+    return filtered;
   }
 
   /**
    * Save project (full update)
    */
   public async save(project: Project): Promise<void> {
+    logger.debug('Saving full project', { component: 'ProjectService', projectId: project.id });
     await this.init();
 
     const updated = {
@@ -166,6 +225,10 @@ class ProjectService {
     };
 
     await db.saveProject(updated);
+    logger.info('Project saved successfully', {
+      component: 'ProjectService',
+      projectId: project.id,
+    });
   }
 }
 

@@ -14,7 +14,7 @@ describe('useSettings - Basic Operations', () => {
     vi.clearAllMocks();
 
     // Reset Zustand store completely
-    useSettings.setState((state) => ({
+    useSettings.setState(state => ({
       ...state,
       settings: DEFAULT_SETTINGS,
       isLoading: false,
@@ -187,12 +187,17 @@ describe('useSettings - Basic Operations', () => {
       writable: true,
     });
 
+    // Suppress console.error for this test since it's expected
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     act(() => {
       result.current.update({ theme: 'dark' });
     });
 
     expect(result.current.error).toBe('Save failed');
     expect(result.current.isSaving).toBe(false);
+
+    consoleErrorSpy.mockRestore();
   });
 
   // Reset Tests
@@ -243,11 +248,16 @@ describe('useSettings - Basic Operations', () => {
       writable: true,
     });
 
+    // Suppress console.error for this test since it's expected
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     expect(() => {
       act(() => {
         result.current.reset();
       });
     }).toThrow('Reset failed');
+
+    consoleErrorSpy.mockRestore();
   });
 
   // Active Category Tests
@@ -292,6 +302,9 @@ describe('useSettings - Basic Operations', () => {
   it('clears error before new operations', () => {
     const { result } = renderHook(() => useSettings());
 
+    // Suppress console.error for this test since it's expected
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     // Force an error
     Object.defineProperty(window, 'localStorage', {
       value: {
@@ -327,6 +340,8 @@ describe('useSettings - Basic Operations', () => {
     });
 
     expect(result.current.error).toBeNull();
+
+    consoleErrorSpy.mockRestore();
   });
 
   // Initial State Tests

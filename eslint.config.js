@@ -28,7 +28,6 @@ export default tseslint.config(
       'playwright-report/**',
       'test-results/**',
       'types.ts',
-      'src/assets/styles.css',
       'src/index.css',
     ],
   },
@@ -131,6 +130,9 @@ export default tseslint.config(
         typescript: {
           alwaysTryTypes: true,
           project: './tsconfig.json',
+        },
+        node: {
+          extensions: ['.ts', '.tsx', '.js', '.jsx'],
         },
       },
     },
@@ -236,7 +238,7 @@ export default tseslint.config(
         },
       ],
       // Enabled after import path migration phase to guide future changes without blocking
-      'import-x/no-relative-parent-imports': 'warn',
+      'import-x/no-relative-parent-imports': ['error', { ignore: ['^@/', '^@shared/'] }],
       'import-x/no-duplicates': 'error',
       'import-x/first': 'error',
       'import-x/newline-after-import': 'error',

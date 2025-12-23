@@ -1,4 +1,3 @@
-
 import { Clock, FileText, Folder, Loader2, MoreVertical, Plus, Star, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
@@ -84,11 +83,11 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
                 >
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <div className='mb-2 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200'>
+                      <div className='mb-2 inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary'>
                         <Star className='mr-1 h-3 w-3' />
                         Open in Editor
                       </div>
-                      <h3 className='text-xl font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400'>
+                      <h3 className='text-xl font-semibold text-gray-900 transition-colors group-hover:text-primary dark:text-white dark:group-hover:text-primary'>
                         {currentProject.title}
                       </h3>
                       <p className='mt-1 text-gray-500 dark:text-gray-400'>
@@ -136,7 +135,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
                     <div className='mt-6'>
                       <button
                         onClick={onNewProject}
-                        className='inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:scale-105 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95'
+                        className='inline-flex items-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-all hover:scale-105 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:scale-95'
                       >
                         <Plus className='mr-2 h-4 w-4' />
                         Create New Project
@@ -155,7 +154,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
                         className='group cursor-pointer rounded-lg border border-gray-200 bg-white p-6 transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-900'
                       >
                         <div className='mb-4 flex items-start justify-between'>
-                          <Folder className='h-6 w-6 text-gray-400 transition-colors group-hover:text-blue-600 dark:text-gray-500 dark:group-hover:text-blue-400' />
+                          <Folder className='h-6 w-6 text-gray-400 transition-colors group-hover:text-primary dark:text-gray-500 dark:group-hover:text-primary' />
                           <button
                             onClick={e => void handleDelete(e, p.id)}
                             className={iconButtonTarget(
@@ -178,7 +177,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
                         </p>
                         <div className='flex items-center justify-between border-t border-gray-200 pt-4 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400'>
                           <span>{new Date(p.updatedAt).toLocaleDateString()}</span>
-                          <span className='flex items-center transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400'>
+                          <span className='flex items-center transition-colors group-hover:text-primary dark:group-hover:text-primary'>
                             Open <MoreVertical className='ml-1 h-3 w-3' />
                           </span>
                         </div>

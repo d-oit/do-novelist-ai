@@ -27,25 +27,25 @@ export const createLazyFeatureLoader = () => {
     loadAnalytics: async () => {
       if (loadedFeatures.has('analytics')) return;
       loadedFeatures.add('analytics');
-      await import('../features/analytics');
+      await import('@/features/analytics');
     },
 
     loadEditor: async () => {
       if (loadedFeatures.has('editor')) return;
       loadedFeatures.add('editor');
-      await import('../features/editor');
+      await import('@/features/editor');
     },
 
     loadPublishing: async () => {
       if (loadedFeatures.has('publishing')) return;
       loadedFeatures.add('publishing');
-      await import('../features/publishing');
+      await import('@/features/publishing');
     },
 
     loadWorldBuilding: async () => {
       if (loadedFeatures.has('world-building')) return;
       loadedFeatures.add('world-building');
-      await import('../features/world-building');
+      await import('@/features/world-building');
     },
   };
 };
@@ -86,4 +86,24 @@ export const createIntersectionLoader = (
   }, options);
 
   return observer;
+};
+
+// Performance monitoring utility
+export const performanceMonitor = {
+  startTiming: (name: string) => {
+    if (typeof performance !== 'undefined') {
+      performance.mark(`${name}-start`);
+    }
+  },
+  endTiming: (name: string) => {
+    if (typeof performance !== 'undefined') {
+      try {
+        performance.mark(`${name}-end`);
+        performance.measure(name, `${name}-start`, `${name}-end`);
+      } catch (e) {
+        // Ignore errors if marks are missing
+        console.warn(`Performance measurement failed for ${name}`, e);
+      }
+    }
+  },
 };

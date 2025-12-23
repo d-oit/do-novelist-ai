@@ -1,4 +1,3 @@
-
 /**
  * Analytics Content Component - Extracted from AnalyticsDashboard
  * Handles main analytics display area
@@ -11,7 +10,7 @@ import ProductivityChart from '@/features/analytics/components/ProductivityChart
 import SessionTimeline from '@/features/analytics/components/SessionTimeline';
 import WritingStatsCard from '@/features/analytics/components/WritingStatsCard';
 import { cn } from '@/lib/utils';
-import type { Project } from '@/shared/types';
+import type { Project } from '@/types';
 
 interface AnalyticsContentProps {
   project: Project;
@@ -76,9 +75,7 @@ const AnalyticsContent: FC<AnalyticsContentProps> = ({ project, activeView, clas
       case 'overview':
         return (
           <div className='space-y-6'>
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
-              <WritingStatsCard {...stats} />
-              <WritingStatsCard {...stats} />
+            <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
               <WritingStatsCard {...stats} />
             </div>
             <ProductivityChart

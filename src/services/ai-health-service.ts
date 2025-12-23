@@ -3,7 +3,8 @@
  * Provides periodic health checks, latency monitoring, error tracking, and circuit breaker pattern
  */
 
-import { createGateway, generateText } from 'ai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { generateText } from 'ai';
 
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
 import {
@@ -162,7 +163,7 @@ async function performHealthCheck(
   const startTime = Date.now();
 
   try {
-    const gateway = createGateway({ apiKey });
+    const openrouter = createOpenRouter({ apiKey });
 
     // Create timeout promise
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -171,7 +172,7 @@ async function performHealthCheck(
 
     // Perform health check with timeout
     const checkPromise = generateText({
-      model: gateway(`${provider}/${modelName}`),
+      model: openrouter(`${provider}/${modelName}`),
       prompt: TEST_PROMPT,
       maxOutputTokens: 5,
       // Disable AI SDK logging to prevent "m.log is not a function" error
@@ -237,8 +238,9 @@ function updateCircuitBreaker(provider: AIProvider, success: boolean): void {
     // Open circuit if threshold exceeded
     if (breaker.failureCount >= CIRCUIT_BREAKER_THRESHOLD && !breaker.isOpen) {
       breaker.isOpen = true;
-      console.warn(
-        `[HealthService] Circuit breaker opened for ${provider} - ${breaker.failureCount} consecutive failures`,
+      logger.warn(
+        `Circuit breaker opened for ${provider} - ${breaker.failureCount} consecutive failures`,
+        { component: 'ai-health-service', provider },
       );
     }
   }
@@ -358,13 +360,13 @@ export async function checkProviderHealth(
   logger.info(`[HealthService] Checking health of ${provider}...`);
 
   // Ensure we have a valid API key for health checks
-  if (!config.gatewayApiKey) {
+  if (!config.openrouterApiKey) {
     logger.info(`[HealthService] Skipping ${provider} - no API key available`);
     return;
   }
 
   const modelName = providerConfig.models.fast; // Use fast model for health checks
-  const result = await performHealthCheck(provider, modelName, config.gatewayApiKey);
+  const result = await performHealthCheck(provider, modelName, config.openrouterApiKey);
 
   // Record latency if successful
   if (result.success) {
@@ -436,7 +438,25 @@ export async function checkProviderHealth(
  */
 export async function checkAllProvidersHealth(userId: string = 'system'): Promise<void> {
   const config = getAIConfig();
-  const providers: AIProvider[] = ['openai', 'anthropic', 'google'];
+  const providers: AIProvider[] = [
+    // Core Providers
+    'openai',
+    'anthropic',
+    'google',
+    'mistral',
+    // Extended Providers
+    'deepseek',
+    'cohere',
+    'ai21',
+    'together',
+    'fireworks',
+    'perplexity',
+    'xai',
+    '01-ai',
+    'nvidia',
+    'amazon',
+    'meta',
+  ];
 
   const enabledProviders = providers.filter(p => config.providers[p].enabled);
 
@@ -455,7 +475,7 @@ let healthCheckInterval: ReturnType<typeof setInterval> | null = null;
 
 export function startHealthMonitoring(userId: string = 'system'): void {
   if (healthCheckInterval) {
-    console.warn('[HealthService] Health monitoring already running');
+    logger.warn('Health monitoring already running', { component: 'ai-health-service' });
     return;
   }
 
@@ -465,13 +485,21 @@ export function startHealthMonitoring(userId: string = 'system'): void {
 
   // Run initial check
   checkAllProvidersHealth(userId).catch(error => {
-    console.error('[HealthService] Initial health check failed:', error);
+    logger.error(
+      'Initial health check failed',
+      { component: 'ai-health-service' },
+      error instanceof Error ? error : undefined,
+    );
   });
 
   // Schedule periodic checks
   healthCheckInterval = setInterval(() => {
     checkAllProvidersHealth(userId).catch(error => {
-      console.error('[HealthService] Periodic health check failed:', error);
+      logger.error(
+        'Periodic health check failed',
+        { component: 'ai-health-service' },
+        error instanceof Error ? error : undefined,
+      );
     });
   }, HEALTH_CHECK_INTERVAL_MS);
 }
@@ -538,7 +566,25 @@ export async function getHealthReport(): Promise<{
   }>;
   overallStatus: 'operational' | 'degraded' | 'outage';
 }> {
-  const providers: AIProvider[] = ['openai', 'anthropic', 'google'];
+  const providers: AIProvider[] = [
+    // Core Providers
+    'openai',
+    'anthropic',
+    'google',
+    'mistral',
+    // Extended Providers
+    'deepseek',
+    'cohere',
+    'ai21',
+    'together',
+    'fireworks',
+    'perplexity',
+    'xai',
+    '01-ai',
+    'nvidia',
+    'amazon',
+    'meta',
+  ];
   const healthRecords = await getProviderHealth();
 
   const providerReports = providers.map(provider => {

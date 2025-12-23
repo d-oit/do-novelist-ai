@@ -38,7 +38,7 @@ folder.
 ### Imports & Organization
 
 - Group imports: React → external libs → internal modules
-- Use absolute imports with `@/` alias (`@/components/Button`)
+- Use absolute imports with `@/` alias (`import { Button } from '@/components'`)
 - Sort imports alphabetically within groups
 - No duplicate imports
 - Auto-organize imports on save (VS Code integration)
@@ -67,7 +67,14 @@ folder.
 ### Error Handling
 
 - Use try/catch blocks for async operations
-- Log errors with `console.error('Context:', error)`
+- **Log errors with Logger Service**:
+  ```ts
+  import { logger } from '@/lib/logging/logger';
+  // ...
+  logger.error('Error message', { component: 'ContextName', error, metadata });
+  ```
+- **Do NOT use `console.log` or `console.error`** in production code (enforced
+  by ESLint)
 - Graceful fallbacks for failed operations
 - User-friendly error messages in UI
 

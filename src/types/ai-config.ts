@@ -1,4 +1,21 @@
-export type AIProvider = 'openai' | 'anthropic' | 'google' | 'meta' | 'xai';
+export type AIProvider =
+  // Core Providers
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'mistral'
+  // Extended Providers
+  | 'deepseek'
+  | 'cohere'
+  | 'ai21'
+  | 'together'
+  | 'fireworks'
+  | 'perplexity'
+  | 'xai'
+  | '01-ai'
+  | 'nvidia'
+  | 'amazon'
+  | 'meta';
 
 export interface AIProviderConfig {
   id?: string;

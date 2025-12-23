@@ -31,6 +31,12 @@ importers:
       "@libsql/client":
         specifier: ^0.15.15
         version: 0.15.15
+      "@openrouter/ai-sdk-provider":
+        specifier: ^1.5.4
+        version: 1.5.4(ai@5.0.108(zod@4.1.13))(zod@4.1.13)
+      "@openrouter/sdk":
+        specifier: ^0.3.10
+        version: 0.3.10
       ai:
         specifier: ^5.0.106
         version: 5.0.108(zod@4.1.13)
@@ -1325,6 +1331,28 @@ packages:
     resolution:
       {
         integrity: sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==,
+      }
+
+  "@openrouter/ai-sdk-provider@1.5.4":
+    resolution:
+      {
+        integrity: sha512-xrSQPUIH8n9zuyYZR0XK7Ba0h2KsjJcMkxnwaYfmv13pKs3sDkjPzVPPhlhzqBGddHb5cFEwJ9VFuFeDcxCDSw==,
+      }
+    engines: { node: ">=18" }
+    peerDependencies:
+      ai: ^5.0.0
+      zod: ^3.24.1 || ^v4
+
+  "@openrouter/sdk@0.1.27":
+    resolution:
+      {
+        integrity: sha512-RH//L10bSmc81q25zAZudiI4kNkLgxF2E+WU42vghp3N6TEvZ6F0jK7uT3tOxkEn91gzmMw9YVmDENy7SJsajQ==,
+      }
+
+  "@openrouter/sdk@0.3.10":
+    resolution:
+      {
+        integrity: sha512-FNOwLn/GvOw1Xk+x36bC1vtDwLIo45yIEoBwin+Dhb4j9DoRVBW2h9L/1rjNd7ILpyj9lB3LBhaLmateOt4Wrg==,
       }
 
   "@opentelemetry/api@1.9.0":
@@ -7474,6 +7502,20 @@ snapshots:
       outvariant: 1.4.3
 
   "@open-draft/until@2.1.0": {}
+
+  "@openrouter/ai-sdk-provider@1.5.4(ai@5.0.108(zod@4.1.13))(zod@4.1.13)":
+    dependencies:
+      "@openrouter/sdk": 0.1.27
+      ai: 5.0.108(zod@4.1.13)
+      zod: 4.1.13
+
+  "@openrouter/sdk@0.1.27":
+    dependencies:
+      zod: 4.1.13
+
+  "@openrouter/sdk@0.3.10":
+    dependencies:
+      zod: 4.1.13
 
   "@opentelemetry/api@1.9.0": {}
 

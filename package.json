@@ -41,6 +41,8 @@
     "@ai-sdk/openai": "^2.0.74",
     "@google/genai": "^1.30.0",
     "@libsql/client": "^0.15.15",
+    "@openrouter/ai-sdk-provider": "^1.5.4",
+    "@openrouter/sdk": "^0.3.10",
     "ai": "^5.0.106",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -50,10 +52,10 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^3.4.1",
+    "sanitize-html": "^2.13.1",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.12",
-    "zustand": "^5.0.8",
-    "sanitize-html": "^2.13.1"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",

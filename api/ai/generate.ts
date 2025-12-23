@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
- * Vercel AI Gateway Proxy - Generate Text
- * Proxies AI generation requests to Vercel AI Gateway server-side
+ * OpenRouter API Proxy - Generate Text
+ * Proxies AI generation requests to OpenRouter server-side
  * to avoid CORS issues and protect API keys
  */
 
-const AI_GATEWAY_URL = 'https://ai-gateway.vercel.sh/v1';
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1';
 
 interface GenerateRequest {
   provider: 'openai' | 'anthropic' | 'google' | 'mistral';
@@ -23,10 +23,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Get API key from server environment (not VITE_ prefixed)
-  const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.VITE_AI_GATEWAY_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'AI Gateway API key not configured' });
+    return res.status(500).json({ error: 'OpenRouter API key not configured' });
   }
 
   try {
@@ -43,12 +43,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     messages.push({ role: 'user', content: prompt });
 
-    // Call Vercel AI Gateway
-    const response = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
+    // Call OpenRouter API
+    const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://novelist.ai',
+        'X-Title': 'Novelist.ai',
       },
       body: JSON.stringify({
         model: `${provider}/${model}`,
@@ -60,9 +62,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
+      console.error('OpenRouter error:', response.status, errorText);
       return res.status(response.status).json({
-        error: 'AI Gateway request failed',
+        error: 'OpenRouter request failed',
         details: errorText,
       });
     }
