@@ -36,7 +36,7 @@
     "ci:build": "pnpm run typecheck && pnpm run lint:ci && pnpm run build"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^2.0.50",
+    "@ai-sdk/anthropic": "^3.0.0",
     "@ai-sdk/google": "^2.0.44",
     "@ai-sdk/openai": "^2.0.74",
     "@google/genai": "^1.30.0",
