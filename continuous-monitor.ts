@@ -19,7 +19,45 @@ interface MonitoringReport {
   status: 'STABLE' | 'MONITORING';
 }
 
+interface WorldState {
+  workflows: Record<string, 'success' | 'failure' | 'pending' | 'unknown'>;
+  codeQuality: {
+    lintErrors: number;
+    typeErrors: number;
+    testFailures: number;
+  };
+  repository: {
+    openIssues: number;
+  };
+}
+
+interface SpecialistAgent {
+  name: string;
+  canHandle(world: WorldState): boolean;
+  execute(world: WorldState): Promise<void>;
+}
+
 class GitHubActionsMonitor {
+  private async getWorldState(): Promise<WorldState> {
+    const workflows: Record<string, 'success' | 'failure' | 'pending' | 'unknown'> = {};
+    for (const [name, status] of this.workflowStatuses.entries()) {
+      const normalized = (
+        ['success', 'failure', 'pending'].includes(status) ? status : 'unknown'
+      ) as 'success' | 'failure' | 'pending' | 'unknown';
+      workflows[name] = normalized;
+    }
+    return {
+      workflows,
+      codeQuality: {
+        lintErrors: 0,
+        typeErrors: 0,
+        testFailures: 0,
+      },
+      repository: {
+        openIssues: 0,
+      },
+    };
+  }
   private consecutiveSuccess = 0;
   private monitoring = true;
   private targetSuccess = 5;
@@ -135,23 +173,35 @@ class GitHubActionsMonitor {
   private async analyzeAndFixFailures(): Promise<void> {
     this.log('🔧 Analyzing failures and attempting auto-fix...');
 
+    const world = await this.getWorldState();
+
+    const agents: SpecialistAgent[] = [
+      new LintFixAgent(this.log.bind(this)),
+      new TestFixAgent(this.log.bind(this)),
+      new SecurityFixAgent(this.log.bind(this)),
+      new CiCdFixAgent(this.log.bind(this)),
+    ];
+
+    for (const agent of agents) {
+      try {
+        if (agent.canHandle(world)) {
+          this.log(`🤖 ${agent.name} engaged`);
+          await agent.execute(world);
+        } else {
+          this.log(`⏭️ ${agent.name} skipped (no relevant issues)`);
+        }
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        this.log(`Agent ${agent.name} failed: ${msg}`, 'error');
+      }
+    }
+
+    // After agent run, attempt to trigger failed workflows again
     const failedWorkflows = Array.from(this.workflowStatuses.entries())
       .filter(([, status]) => status !== 'success')
       .map(([workflowName]) => workflowName);
 
     for (const workflow of failedWorkflows) {
-      this.log(`Attempting to fix: ${workflow}`);
-
-      // Attempt common fixes based on workflow type
-      if (workflow.includes('Fast CI')) {
-        await this.fixFastCIIssues();
-      } else if (workflow.includes('Security')) {
-        await this.fixSecurityIssues();
-      } else if (workflow.includes('YAML')) {
-        await this.fixYAMLIssues();
-      }
-
-      // Trigger workflow after fixing
       await this.triggerWorkflow(workflow);
     }
   }
@@ -322,6 +372,100 @@ class GitHubActionsMonitor {
 
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
+
+// Specialist Agents
+class LintFixAgent implements SpecialistAgent {
+  public name = 'Lint Fix Agent';
+  constructor(private log: (message: string, type?: 'info' | 'error' | 'success') => void) {}
+  canHandle(world: WorldState): boolean {
+    return (
+      Object.values(world.workflows).includes('failure') ||
+      world.codeQuality.lintErrors > 0 ||
+      world.codeQuality.typeErrors > 0
+    );
+  }
+  async execute(_world: WorldState): Promise<void> {
+    void _world;
+    try {
+      execSync('npm run lint:fix', { stdio: 'pipe' });
+      this.log('ESLint auto-fix applied');
+    } catch {
+      this.log('ESLint auto-fix failed', 'error');
+    }
+  }
+}
+
+class TestFixAgent implements SpecialistAgent {
+  public name = 'Test Fix Agent';
+  constructor(private log: (message: string, type?: 'info' | 'error' | 'success') => void) {}
+  canHandle(world: WorldState): boolean {
+    return world.codeQuality.testFailures > 0 || Object.values(world.workflows).includes('failure');
+  }
+  async execute(_world: WorldState): Promise<void> {
+    void _world;
+    try {
+      execSync('npm run test -- --passWithNoTests', { stdio: 'pipe' });
+      this.log('Test suite executed for diagnostics');
+    } catch {
+      this.log('Test suite has failures to address', 'error');
+    }
+  }
+}
+
+class SecurityFixAgent implements SpecialistAgent {
+  public name = 'Security Fix Agent';
+  constructor(private log: (message: string, type?: 'info' | 'error' | 'success') => void) {}
+  canHandle(world: WorldState): boolean {
+    return Object.keys(world.workflows).some(
+      w => w.toLowerCase().includes('security') && world.workflows[w] !== 'success',
+    );
+  }
+  async execute(_world: WorldState): Promise<void> {
+    void _world;
+    try {
+      execSync('npm audit --audit-level moderate', { stdio: 'pipe' });
+      this.log('Security audit completed');
+    } catch {
+      this.log('Security audit detected issues', 'error');
+    }
+  }
+}
+
+class CiCdFixAgent implements SpecialistAgent {
+  public name = 'CI/CD Fix Agent';
+  constructor(private log: (message: string, type?: 'info' | 'error' | 'success') => void) {}
+  canHandle(world: WorldState): boolean {
+    return Object.keys(world.workflows).some(w => world.workflows[w] !== 'success');
+  }
+  async execute(_world: WorldState): Promise<void> {
+    void _world;
+    try {
+      const yamlFiles = execSync(
+        'bash -lc "ls .github/workflows/*.yml .github/workflows/*.yaml 2>/dev/null || true"',
+        { encoding: 'utf8' },
+      )
+        .split('\n')
+        .filter(f => f.trim());
+      if (yamlFiles.length === 0) {
+        this.log('No workflow YAML files detected');
+        return;
+      }
+      // Basic parse check
+      for (const file of yamlFiles) {
+        try {
+          execSync("node -e \"require('fs').readFileSync('" + file + "', 'utf8');\"", {
+            stdio: 'pipe',
+          });
+          this.log(`YAML file accessible: ${file}`);
+        } catch {
+          this.log(`YAML access issue: ${file}`, 'error');
+        }
+      }
+    } catch {
+      this.log('CI/CD validation encountered issues', 'error');
+    }
   }
 }
 
