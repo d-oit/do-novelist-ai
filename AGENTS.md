@@ -1,6 +1,6 @@
 # AGENTS.md - Coding Guidelines for Novelist.ai
 
-Important: All plan,report,summary,proposal,design, etc. documents in plans/
+Important: All plan,report,summary,proposal,design, etc. .md documents in plans/
 folder.
 
 ## Build/Lint/Test Commands
