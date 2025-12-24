@@ -160,7 +160,8 @@ src/features/
 
 ### 1. Complete Logging Migration
 
-- **Status**: ✅ COMPLETED (December 24, 2025)
+- **Status**: ✅ COMPLETED (December 24, 2025) - See
+  LOGGING-MIGRATION-REQUIRED.md
 - **Action**: Replaced `console.log`/`console.error` with structured `logger` in
   all production files (25+ files across lib/, features/, components/, src
   root/).

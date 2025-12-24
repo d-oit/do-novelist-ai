@@ -9,14 +9,14 @@ documents in the plans/ folder
 
 ### 1. CODEBASE-IMPROVEMENTS-GOAP-PLAN.md
 
-| Attribute    | Value                                                     |
-| ------------ | --------------------------------------------------------- |
-| Status       | In Progress                                               |
-| Completion   | ~70%                                                      |
-| Priority     | P0                                                        |
-| Owner        | GOAP Agent                                                |
-| Last Updated | Dec 24, 2025                                              |
-| Notes        | Logging migration incomplete; requires ~5.5 hours of work |
+| Attribute    | Value                                                  |
+| ------------ | ------------------------------------------------------ |
+| Status       | In Progress                                            |
+| Completion   | ~95%                                                   |
+| Priority     | P0                                                     |
+| Owner        | GOAP Agent                                             |
+| Last Updated | Dec 24, 2025                                           |
+| Notes        | Logging migration COMPLETED; remaining: import cleanup |
 
 ### 2. GOAP-EXECUTION-DEC-24-2025.md
 
@@ -29,16 +29,27 @@ documents in the plans/ folder
 | Last Updated | Dec 24, 2025                                |
 | Notes        | Document overclaimed completion; archived   |
 
-### 3. LOGGING-MIGRATION-REQUIRED.md (NEW)
+### 3. LOGGING-MIGRATION-REQUIRED.md
 
 | Attribute    | Value                                             |
 | ------------ | ------------------------------------------------- |
-| Status       | Active                                            |
-| Completion   | 0% (not started)                                  |
+| Status       | ✅ COMPLETED                                      |
+| Completion   | 100%                                              |
 | Priority     | P0                                                |
 | Owner        | GOAP Agent                                        |
 | Last Updated | Dec 24, 2025                                      |
-| Notes        | Created to track remaining logging migration work |
+| Notes        | All console statements migrated to logger service |
+
+### 4. OPENROUTER-MIGRATION.md (NEW)
+
+| Attribute    | Value                                        |
+| ------------ | -------------------------------------------- |
+| Status       | Planning Complete - Ready for Execution      |
+| Completion   | 0%                                           |
+| Priority     | P0                                           |
+| Owner        | GOAP Agent                                   |
+| Last Updated | Dec 24, 2025                                 |
+| Notes        | Migrate from Vercel AI Gateway to OpenRouter |
 
 ---
 
@@ -97,28 +108,15 @@ These are analysis/reference documents, not tracking plans:
 
 ---
 
-## E2E Testing Documents
-
-### 9. E2E-TEST-API-KEYS.md
-
-| Attribute | Value                          |
-| --------- | ------------------------------ |
-| Type      | Documentation                  |
-| Purpose   | E2E test API key configuration |
-| Status    | Current                        |
-| Notes     | Reference for CI/CD setup      |
-
----
-
 ## Summary Statistics
 
-| Category            | Count |
-| ------------------- | ----- |
-| Active Plans        | 2     |
-| Reference Documents | 3     |
-| Archived Documents  | 2     |
-| E2E Documentation   | 1     |
-| **Total**           | **8** |
+| Category            | Count  |
+| ------------------- | ------ |
+| Active Plans        | 4      |
+| Reference Documents | 3      |
+| Archived Documents  | 2      |
+| Tracking Documents  | 1      |
+| **Total**           | **10** |
 
 ---
 
