@@ -4,17 +4,22 @@
 
 // Preload critical resources
 export const preloadCriticalResources = (): void => {
-  // Preload fonts that are critical for first paint
-  const fontPreloads = [
-    'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap',
-    'https://fonts.googleapis.com/css2?family=Inter+Tight:wght@100..900&display=swap',
+  // Preload local self-hosted fonts (optional). Ensure files exist in public/fonts.
+  const fontPreloads: { href: string; type?: string }[] = [
+    { href: '/fonts/SpaceGrotesk[wght].woff2', type: 'font/woff2' },
+    { href: '/fonts/InterTight-VariableFont[wght].woff2', type: 'font/woff2' },
+    { href: '/fonts/JetBrainsMono[wght].woff2', type: 'font/woff2' },
+    // Add Fraunces variants only if used frequently:
+    // { href: '/fonts/Fraunces-VariableFont[wght,opsz].woff2', type: 'font/woff2' },
   ];
 
-  fontPreloads.forEach(href => {
+  fontPreloads.forEach(({ href, type }) => {
     const link = document.createElement('link');
     link.rel = 'preload';
-    link.as = 'style';
+    link.as = 'font';
     link.href = href;
+    if (type) link.type = type;
+    link.setAttribute('crossorigin', 'anonymous');
     document.head.appendChild(link);
   });
 };
@@ -52,11 +57,7 @@ export const createLazyFeatureLoader = () => {
 
 // Resource hints for better loading performance
 export const addResourceHints = (): void => {
-  const hints = [
-    { rel: 'dns-prefetch', href: '//fonts.googleapis.com' },
-    { rel: 'dns-prefetch', href: '//ai-gateway.vercel.sh' },
-    { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true },
-  ];
+  const hints = [{ rel: 'dns-prefetch', href: '//ai-gateway.vercel.sh' }];
 
   hints.forEach(hint => {
     const link = document.createElement('link');

@@ -7,8 +7,6 @@ import { addResourceHints, preloadCriticalResources } from '@/performance';
 
 // Load AI SDK logger patch to prevent "m.log is not a function" errors
 // This must be imported before any AI SDK code runs
-import './lib/ai-sdk-logger-patch';
-
 import ErrorBoundary from '@/components/error-boundary';
 import { UserProvider } from '@/contexts/UserContext';
 import { validateEnvironment } from '@/lib/env-validation';

@@ -1,9 +1,9 @@
-
 import React, { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 import { PublishStatus } from '@/shared/types';
 import type { Project } from '@/shared/types';
+
+const LazyChart = React.lazy(() => import('./ProjectStatsChart'));
 
 interface ProjectStatsProps {
   project: Project;
@@ -90,33 +90,11 @@ const ProjectStats: React.FC<ProjectStatsProps> = React.memo(({ project }) => {
           Project Metrics
         </div>
         <div className='h-24 min-h-[96px] w-full'>
-          <ResponsiveContainer width='100%' height={96} minHeight={96}>
-            <BarChart layout='vertical' data={data} barSize={12}>
-              <XAxis type='number' hide domain={[0, 100]} />
-              <YAxis
-                type='category'
-                dataKey='name'
-                tick={{ fill: '#64748b', fontSize: 10 }}
-                width={60}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                cursor={{ fill: 'transparent' }}
-                contentStyle={{
-                  backgroundColor: '#1e293b',
-                  borderColor: '#334155',
-                  color: '#f1f5f9',
-                  fontSize: '12px',
-                }}
-              />
-              <Bar dataKey='value' radius={[0, 4, 4, 0]}>
-                {data.map((_entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <React.Suspense
+            fallback={<div className='h-24 w-full animate-pulse rounded bg-muted/30' />}
+          >
+            <LazyChart data={data} colors={COLORS} yWidth={60} />
+          </React.Suspense>
         </div>
       </div>
     </div>

@@ -1,6 +1,3 @@
-// CRITICAL: Import AI SDK logger patch FIRST
-import '../../src/lib/ai-sdk-logger-patch';
-
 import type { Page } from '@playwright/test';
 
 /**

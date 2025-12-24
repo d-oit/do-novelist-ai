@@ -38,6 +38,75 @@ interface SpecialistAgent {
 }
 
 class GitHubActionsMonitor {
+  private runCommand(command: string, timeoutMs = 12000): string | null {
+    try {
+      return execSync(command, {
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+        timeout: timeoutMs,
+      });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.log(`Command failed (ignored): ${command} -> ${msg}`, 'error');
+      return null;
+    }
+  }
+
+  private safeParseJson<T>(text: string | null): T | null {
+    if (!text) return null;
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      this.log('JSON parse failed (ignored)', 'error');
+      return null;
+    }
+  }
+
+  private metricTimestamps: Record<string, number> = {};
+  private metricValues: Record<string, number> = {};
+  private getWithCooldown(key: string, ttlMs: number, compute: () => number): number {
+    const now = Date.now();
+    const last = this.metricTimestamps[key] ?? 0;
+    const cached = this.metricValues[key];
+    if (now - last < ttlMs && typeof cached === 'number') {
+      return cached;
+    }
+    const val = compute();
+    this.metricTimestamps[key] = now;
+    this.metricValues[key] = val;
+    return val;
+  }
+
+  private countEslintErrors(): number {
+    return this.getWithCooldown('eslintErrors', 60000, () => {
+      const out = this.runCommand(
+        'npx eslint . -f json --cache --cache-location .eslintcache',
+        12000,
+      );
+      const reports = this.safeParseJson<Array<{ errorCount: number }>>(out) ?? [];
+      let total = 0;
+      for (const r of reports) total += Number(r.errorCount || 0);
+      return total;
+    });
+  }
+
+  private countTypeErrors(): number {
+    return this.getWithCooldown('typeErrors', 60000, () => {
+      const out = this.runCommand('npx tsc --noEmit --pretty false', 12000);
+      if (!out) return 0;
+      const matches = out.match(/error TS\d+:/g);
+      return matches ? matches.length : 0;
+    });
+  }
+
+  private countTestFailures(): number {
+    return this.getWithCooldown('testFailures', 180000, () => {
+      const out = this.runCommand('npx vitest run --reporter=json --passWithNoTests', 15000);
+      const report = this.safeParseJson<{ numFailedTests?: number }>(out);
+      return report?.numFailedTests ?? 0;
+    });
+  }
+
   private async getWorldState(): Promise<WorldState> {
     const workflows: Record<string, 'success' | 'failure' | 'pending' | 'unknown'> = {};
     for (const [name, status] of this.workflowStatuses.entries()) {
@@ -46,12 +115,18 @@ class GitHubActionsMonitor {
       ) as 'success' | 'failure' | 'pending' | 'unknown';
       workflows[name] = normalized;
     }
+
+    // Lightweight parsing with timeouts; treat failures as zeros
+    const lintErrors = this.countEslintErrors();
+    const typeErrors = this.countTypeErrors();
+    const testFailures = this.countTestFailures();
+
     return {
       workflows,
       codeQuality: {
-        lintErrors: 0,
-        typeErrors: 0,
-        testFailures: 0,
+        lintErrors,
+        typeErrors,
+        testFailures,
       },
       repository: {
         openIssues: 0,

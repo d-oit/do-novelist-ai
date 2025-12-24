@@ -1,0 +1,27 @@
+name: Fonts Refresh
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  fetch-fonts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: npm ci || pnpm i || yarn
+      - name: Fetch fonts
+        run: node scripts/fetch-fonts.mjs || npm run fonts:fetch
+      - name: List fonts
+        run: ls -la public/fonts || true
+      - name: Upload fonts artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-hosted-fonts
+          path: public/fonts/*.woff2
+          if-no-files-found: warn

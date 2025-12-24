@@ -33,7 +33,8 @@
     "fix:imports": "node scripts/fix-imports.js",
     "ci:quality": "pnpm run lint:ci && pnpm run test && pnpm run coverage",
     "ci:performance": "pnpm run perf:build && pnpm run test:e2e",
-    "ci:build": "pnpm run typecheck && pnpm run lint:ci && pnpm run build"
+    "ci:build": "pnpm run typecheck && pnpm run lint:ci && pnpm run build",
+    "fonts:fetch": "node scripts/fetch-fonts.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.0",
