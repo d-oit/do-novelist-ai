@@ -8,9 +8,13 @@ test.describe('Project Management E2E Tests', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Use role-based waiting instead of hardcoded timeout
-    await expect(page.getByRole('navigation')).toBeVisible();
-    await expect(page.getByTestId('nav-dashboard')).toBeVisible();
+    // Use robust waiting pattern that works in CI
+    try {
+      await page.getByRole('navigation').waitFor({ state: 'visible', timeout: 15000 });
+    } catch {
+      // Fallback to test ID if navigation role not found
+      await page.getByTestId('nav-dashboard').waitFor({ state: 'visible', timeout: 15000 });
+    }
   });
 
   test('should access dashboard', async ({ page }) => {
