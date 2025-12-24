@@ -1,4 +1,3 @@
-
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   GitCompare,
@@ -19,6 +18,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useVersioning } from '@/features/versioning/hooks/useVersioning';
+import { logger } from '@/lib/logging/logger';
 import { cn, iconButtonTarget } from '@/lib/utils';
 import type { ChapterVersion, VersionCompareResult } from '@/types';
 
@@ -48,7 +48,12 @@ const VersionComparison: React.FC<VersionComparisonProps> = ({
         const result = await compareVersions(version1.id, version2.id);
         setComparison(result);
       } catch (error) {
-        console.error('Failed to compare versions:', error);
+        logger.error('Failed to compare versions', {
+          component: 'VersionComparison',
+          error,
+          versionId1: version1.id,
+          versionId2: version2.id,
+        });
       } finally {
         setIsLoading(false);
       }

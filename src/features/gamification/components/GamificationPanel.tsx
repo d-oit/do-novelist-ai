@@ -1,8 +1,8 @@
-
 import { Zap, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { useGamification } from "@/features/gamification/hooks/useGamification"
+import { useGamification } from '@/features/gamification/hooks/useGamification';
+import { logger } from '@/lib/logging/logger';
 
 interface GamificationPanelProps {
   userId: string;
@@ -26,7 +26,11 @@ export const GamificationPanel: React.FC<GamificationPanelProps> = ({ userId, wo
         newStreak: result.streak.length,
       });
     } catch (error) {
-      console.error('Check-in failed:', error);
+      logger.error('Check-in failed', {
+        component: 'GamificationPanel',
+        error,
+        userId,
+      });
     } finally {
       setIsCheckingIn(false);
       // Clear result after 3 seconds

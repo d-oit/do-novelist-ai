@@ -14,6 +14,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 
 import { brainstormProject } from '@/lib/ai';
+import { logger } from '@/lib/logging/logger';
 import { cn, iconButtonTarget } from '@/lib/utils';
 
 interface ProjectWizardProps {
@@ -85,8 +86,8 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
         if (field === 'idea') setIdea(result);
       }
     } catch (err) {
-      console.error(err);
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      logger.error('AI brainstorming failed', { component: 'ProjectWizard', error: err, field });
       // Provide user-friendly messages for common errors
       if (errorMessage.includes('402') || errorMessage.includes('Payment')) {
         setBrainstormError(
@@ -125,7 +126,11 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
             );
           }
         } catch (err) {
-          console.error('Error reading file', err);
+          logger.error('Error reading file', {
+            component: 'ProjectWizard',
+            error: err,
+            fileName: file.name,
+          });
         }
       }
       setIsReading(false);

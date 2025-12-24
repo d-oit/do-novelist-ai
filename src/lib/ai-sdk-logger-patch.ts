@@ -27,8 +27,8 @@ const logger = {
 // Use try-catch to handle cases where properties are read-only (e.g., browser extensions)
 if (typeof globalThis !== 'undefined') {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (globalThis as any).m = logger;
+    const globalRecord = globalThis as unknown as Record<string, unknown>;
+    globalRecord['m'] = logger;
   } catch {
     // Property is read-only, skip assignment
   }
@@ -37,8 +37,8 @@ if (typeof globalThis !== 'undefined') {
 // Also set on window for browser environments
 if (typeof window !== 'undefined') {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).m = logger;
+    const windowRecord = window as unknown as Record<string, unknown>;
+    windowRecord['m'] = logger;
   } catch {
     // Property is read-only (e.g., React DevTools), skip assignment
   }

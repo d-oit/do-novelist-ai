@@ -2,6 +2,7 @@ import { Clock, FileText, Folder, Loader2, MoreVertical, Plus, Star, Trash2 } fr
 import React, { useEffect, useState } from 'react';
 
 import { db } from '@/lib/db';
+import { logger } from '@/lib/logging/logger';
 import { iconButtonTarget } from '@/lib/utils';
 
 import type { Project } from '@shared/types';
@@ -34,7 +35,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
       const list = await db.getAllProjects();
       setProjects(list);
     } catch (error) {
-      console.error('Failed to load projects:', error);
+      logger.error('Failed to load projects', { component: 'ProjectsView', error });
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +48,11 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
         await db.deleteProject(id);
         await loadProjects();
       } catch (error) {
-        console.error('Failed to delete project:', error);
+        logger.error('Failed to delete project', {
+          component: 'ProjectsView',
+          error,
+          projectId: id,
+        });
       }
     }
   };

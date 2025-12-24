@@ -16,6 +16,7 @@ import type {
   WorldBuildingFilters,
   WorldBuildingValidationResult,
 } from '@/features/world-building/types';
+import { logger } from '@/lib/logging/logger';
 
 interface UseWorldBuildingReturn {
   // State
@@ -81,7 +82,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
       setLore(loreData);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load world-building data';
-      console.error('World-building data loading error:', err);
+      logger.error('World-building data loading error', {
+        component: 'useWorldBuilding',
+        error: err,
+      });
       setError(message);
     } finally {
       setIsLoading(false);
@@ -105,7 +109,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
         await refreshData();
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to initialize world-building';
-        console.error('World-building initialization error:', err);
+        logger.error('World-building initialization error', {
+          component: 'useWorldBuilding',
+          error: err,
+        });
         setError(message);
       } finally {
         setIsLoading(false);
@@ -131,7 +138,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
         setLocations(prev => [...prev, location]);
         return location;
       } catch (err) {
-        console.error('Failed to create location:', err);
+        logger.error('Failed to create location', {
+          component: 'useWorldBuilding',
+          error: err,
+        });
         setError('Failed to create location');
         return null;
       }
@@ -148,7 +158,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
         }
         return updated;
       } catch (err) {
-        console.error('Failed to update location:', err);
+        logger.error('Failed to update location', {
+          component: 'useWorldBuilding',
+          error: err,
+        });
         setError('Failed to update location');
         return null;
       }
@@ -161,7 +174,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
       await worldBuildingService.deleteLocation(id);
       setLocations(prev => prev.filter(loc => loc.id !== id));
     } catch (err) {
-      console.error('Failed to delete location:', err);
+      logger.error('Failed to delete location', {
+        component: 'useWorldBuilding',
+        error: err,
+      });
       setError('Failed to delete location');
     }
   }, []);
@@ -183,7 +199,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
         setCultures(prev => [...prev, culture]);
         return culture;
       } catch (err) {
-        console.error('Failed to create culture:', err);
+        logger.error('Failed to create culture', {
+          component: 'useWorldBuilding',
+          error: err,
+        });
         setError('Failed to create culture');
         return null;
       }
@@ -200,7 +219,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
         }
         return updated;
       } catch (err) {
-        console.error('Failed to update culture:', err);
+        logger.error('Failed to update culture', {
+          component: 'useWorldBuilding',
+          error: err,
+        });
         setError('Failed to update culture');
         return null;
       }
@@ -213,7 +235,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
       await worldBuildingService.deleteCulture(id);
       setCultures(prev => prev.filter(cult => cult.id !== id));
     } catch (err) {
-      console.error('Failed to delete culture:', err);
+      logger.error('Failed to delete culture', {
+        component: 'useWorldBuilding',
+        error: err,
+      });
       setError('Failed to delete culture');
     }
   }, []);
@@ -239,7 +264,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
         setTimelines(results.timelines);
         setLore(results.lore);
       } catch (err) {
-        console.error('Failed to search world elements:', err);
+        logger.error('Failed to search world elements', {
+          component: 'useWorldBuilding',
+          error: err,
+        });
         setError('Failed to search world elements');
       }
     },
@@ -256,7 +284,10 @@ export function useWorldBuilding(projectId?: string): UseWorldBuildingReturn {
       const result = await worldBuildingService.validateWorldBuilding(targetProjectId as string);
       setValidation(result);
     } catch (err) {
-      console.error('Failed to validate world-building:', err);
+      logger.error('Failed to validate world-building', {
+        component: 'useWorldBuilding',
+        error: err,
+      });
       setError('Failed to validate world-building');
     }
   }, [projectId, worldBuilding?.projectId]);

@@ -128,10 +128,10 @@ class WritingAssistantService {
         transitionQuality,
       };
     } catch (error) {
-      console.error(
-        'Content analysis failed:',
-        error instanceof Error ? error.message : String(error),
-      );
+      logger.error('Content analysis failed', {
+        component: 'WritingAssistantService',
+        error: error instanceof Error ? error.message : String(error),
+      });
       return this.getMockAnalysis(content, chapterId);
     }
   }
@@ -188,10 +188,10 @@ class WritingAssistantService {
 
       return this.parseAISuggestions(result.text, config);
     } catch (error) {
-      console.error(
-        'AI suggestion generation failed:',
-        error instanceof Error ? error.message : String(error),
-      );
+      logger.error('AI suggestion generation failed', {
+        component: 'WritingAssistantService',
+        error: error instanceof Error ? error.message : String(error),
+      });
       return this.getMockSuggestions(content);
     }
   }
@@ -235,10 +235,10 @@ class WritingAssistantService {
           }),
         );
     } catch (error) {
-      console.error(
-        'Failed to parse AI suggestions:',
-        error instanceof Error ? error.message : String(error),
-      );
+      logger.error('Failed to parse AI suggestions', {
+        component: 'WritingAssistantService',
+        error: error instanceof Error ? error.message : String(error),
+      });
       return this.extractSuggestionsFromText(aiResponse);
     }
   }

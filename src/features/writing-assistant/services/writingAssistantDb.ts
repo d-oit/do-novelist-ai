@@ -99,7 +99,9 @@ class WritingAssistantDb {
       }
       return deviceId;
     } catch {
-      console.warn('LocalStorage access denied, using temporary device ID');
+      logger.warn('LocalStorage access denied, using temporary device ID', {
+        component: 'WritingAssistantDb',
+      });
       return `temp_device_${Date.now()}`;
     }
   }
@@ -118,7 +120,9 @@ class WritingAssistantDb {
       }
       this.userId = userId;
     } catch {
-      console.warn('LocalStorage access denied, using temporary user ID');
+      logger.warn('LocalStorage access denied, using temporary user ID', {
+        component: 'WritingAssistantDb',
+      });
       this.userId = `temp_user_${Date.now()}`;
     }
   }
@@ -159,7 +163,10 @@ class WritingAssistantDb {
       // Update daily progress metrics
       this.updateDailyProgress();
     } catch (error) {
-      console.error('Failed to save analysis history:', error);
+      logger.error('Failed to save analysis history', {
+        component: 'WritingAssistantDb',
+        error,
+      });
       // Fail gracefully - don't break the user experience
     }
   }
@@ -194,7 +201,10 @@ class WritingAssistantDb {
 
       this.insertSuggestionFeedback(feedback);
     } catch (error) {
-      console.error('Failed to record suggestion feedback:', error);
+      logger.error('Failed to record suggestion feedback', {
+        component: 'WritingAssistantDb',
+        error,
+      });
     }
   }
 
@@ -217,7 +227,10 @@ class WritingAssistantDb {
 
       this.upsertUserPreferences(preferences);
     } catch (error) {
-      console.error('Failed to sync preferences:', error);
+      logger.error('Failed to sync preferences', {
+        component: 'WritingAssistantDb',
+        error,
+      });
     }
   }
 
@@ -231,7 +244,10 @@ class WritingAssistantDb {
       const preferences = this.getUserPreferences(this.userId);
       return preferences?.preferences ?? null;
     } catch (error) {
-      console.error('Failed to load preferences:', error);
+      logger.error('Failed to load preferences', {
+        component: 'WritingAssistantDb',
+        error,
+      });
       return null;
     }
   }
@@ -278,7 +294,11 @@ class WritingAssistantDb {
         suggestionInsights,
       };
     } catch (error) {
-      console.error('Failed to get writing analytics:', error);
+      logger.error('Failed to get writing analytics', {
+        component: 'WritingAssistantDb',
+        error,
+        projectId,
+      });
       return {
         progressMetrics: [],
         improvementTrends: { readabilityTrend: 0, engagementTrend: 0, productivityTrend: 0 },
@@ -299,7 +319,10 @@ class WritingAssistantDb {
       this.deleteOldSuggestionFeedback(cutoffDate);
       this.deleteOldProgressMetrics(cutoffDate);
     } catch (error) {
-      console.error('Failed to cleanup old data:', error);
+      logger.error('Failed to cleanup old data', {
+        component: 'WritingAssistantDb',
+        error,
+      });
     }
   }
 

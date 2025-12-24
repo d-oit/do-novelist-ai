@@ -6,7 +6,14 @@
 import type { AppError } from '@/lib/errors/error-types';
 import { getErrorMessage, toAppError } from '@/lib/errors/error-types';
 import { logger } from '@/lib/errors/logging';
-import { err, isErr, retry as retryResult, tryCatch, tryCatchAsync, type Result } from '@/lib/errors/result';
+import {
+  err,
+  isErr,
+  retry as retryResult,
+  tryCatch,
+  tryCatchAsync,
+  type Result,
+} from '@/lib/errors/result';
 
 export interface RetryOptions {
   maxAttempts?: number;
@@ -118,7 +125,10 @@ export class ErrorHandler {
       try {
         listener(appError);
       } catch (listenerError) {
-        console.error('Error in error listener:', listenerError);
+        logger.error('Error in error listener', {
+          component: 'error-handler',
+          error: listenerError,
+        });
       }
     });
 

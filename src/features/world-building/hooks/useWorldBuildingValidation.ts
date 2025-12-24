@@ -6,6 +6,7 @@
 import { useState, useCallback } from 'react';
 
 import { worldBuildingService } from '@/features/world-building/services/worldBuildingService';
+import { logger } from '@/lib/logging/logger';
 import type { WorldBuildingValidationResult } from '@/types';
 
 interface UseWorldBuildingValidationReturn {
@@ -25,18 +26,24 @@ export function useWorldBuildingValidation(): UseWorldBuildingValidationReturn {
       const result = await worldBuildingService.validateWorldBuilding(projectId);
       setValidation(result);
     } catch (error) {
-      console.error('Validation failed:', error);
+      logger.error('Validation failed', {
+        component: 'useWorldBuildingValidation',
+        error,
+        projectId,
+      });
       // Set a basic error state
       setValidation({
         isValid: false,
         score: 0,
-        issues: [{
-          id: crypto.randomUUID(),
-          type: 'error',
-          category: 'reference',
-          message: 'Failed to validate world-building consistency',
-          affectedElements: [],
-        }],
+        issues: [
+          {
+            id: crypto.randomUUID(),
+            type: 'error',
+            category: 'reference',
+            message: 'Failed to validate world-building consistency',
+            affectedElements: [],
+          },
+        ],
         strengths: [],
         completeness: {
           locations: 0,

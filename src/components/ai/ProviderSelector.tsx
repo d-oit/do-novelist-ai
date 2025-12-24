@@ -2,6 +2,7 @@ import { ChevronDown, Zap, CheckCircle, XCircle, Loader2, Search, RefreshCw } fr
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { getAIConfig, type AIProvider } from '@/lib/ai-config';
+import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
 import { loadUserPreferences, saveUserPreferences } from '@/services/ai-config-service';
 import {
@@ -76,7 +77,11 @@ export const ProviderSelector = ({
       const availableModels = await openRouterModelsService.getAvailableModels();
       setModels(availableModels);
     } catch (error) {
-      console.error('Failed to load models:', error);
+      logger.error('Failed to load models', {
+        component: 'ProviderSelector',
+        error,
+        userId,
+      });
     } finally {
       setModelLoading(false);
     }
@@ -98,7 +103,13 @@ export const ProviderSelector = ({
         onProviderChange(provider, model);
       }
     } catch (error) {
-      console.error('Failed to save provider selection:', error);
+      logger.error('Failed to save provider selection', {
+        component: 'ProviderSelector',
+        error,
+        userId,
+        provider,
+        model,
+      });
     }
   };
 

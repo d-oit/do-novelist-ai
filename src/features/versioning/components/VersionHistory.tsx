@@ -1,4 +1,3 @@
-
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Clock,
@@ -19,9 +18,10 @@ import React, { useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { useVersioning } from "@/features/versioning/hooks/useVersioning"
+import { useVersioning } from '@/features/versioning/hooks/useVersioning';
+import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
-import type { Chapter, ChapterVersion, VersionFilter, SortOrder  } from '@/types';
+import type { Chapter, ChapterVersion, VersionFilter, SortOrder } from '@/types';
 
 interface VersionHistoryProps {
   chapter: Chapter;
@@ -97,7 +97,11 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
         onClose();
       }
     } catch (error) {
-      console.error('Failed to restore version:', error);
+      logger.error('Failed to restore version', {
+        component: 'VersionHistory',
+        error,
+        versionId: version.id,
+      });
     }
   };
 
@@ -122,7 +126,12 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
       a.click();
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to export version history:', error);
+      logger.error('Failed to export version history', {
+        component: 'VersionHistory',
+        error,
+        chapterId: chapter.id,
+        format,
+      });
     }
   };
 

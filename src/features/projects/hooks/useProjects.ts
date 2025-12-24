@@ -7,16 +7,16 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import { projectService } from "@/features/projects/services/projectService"
+import { projectService } from '@/features/projects/services/projectService';
 import {
   type ProjectFilters,
   type ProjectStats,
   type ProjectCreationData,
   type ProjectUpdateData,
 } from '@/features/projects/types';
+import { logger } from '@/lib/logging/logger';
 import { ChapterStatus, PublishStatus } from '@/types';
 import { type Project } from '@/types';
-
 
 interface ProjectsState {
   // Data
@@ -116,7 +116,7 @@ export const useProjects = create<ProjectsState>()(
           };
           set({ stats });
         } catch (error) {
-          console.error('Failed to calculate stats:', error);
+          logger.error('Failed to calculate stats', { component: 'useProjects', error });
         }
       },
 

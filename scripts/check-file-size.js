@@ -2,18 +2,38 @@
 
 /**
  * File Size Checker for GOAP Implementation
- * Enforces the 500 LOC policy for maintainable code
+ *
+ * Policy:
+ * - Warn when a file exceeds 450 LOC
+ * - Fail CI when a file exceeds 500 LOC
  *
  * Usage: node scripts/check-file-size.js
  * Usage: npm run check:file-size
  */
+
+function writeStdout(message) {
+  process.stdout.write(`${message}\n`);
+}
+
+function writeStderr(message) {
+  process.stderr.write(`${message}\n`);
+}
 
 import { readFileSync } from 'fs';
 import { readdir, stat } from 'fs/promises';
 import { join, relative, extname } from 'path';
 
 // Configuration
-const MAX_LINES_OF_CODE = 800;
+const WARN_LINES_OF_CODE = 450;
+const MAX_LINES_OF_CODE = 500;
+const ALLOWED_VIOLATIONS = new Set([
+  // Documented and accepted in plans/FILE-SIZE-VIOLATIONS.md
+  'src/features/writing-assistant/services/writingAssistantService.ts',
+  'src/features/publishing/services/publishingAnalyticsService.ts',
+  'src/lib/character-validation.ts',
+  'src/features/projects/components/ProjectWizard.tsx',
+]);
+
 const IGNORE_PATTERNS = [
   'node_modules/',
   'dist/',
@@ -107,10 +127,11 @@ async function getAllFiles(dir, fileList = []) {
  * Check file sizes and report violations
  */
 async function checkFileSizes() {
-  console.log('🔍 Checking file sizes...\n');
+  writeStdout('🔍 Checking file sizes...\n');
 
+  const warnings = [];
   const violations = [];
-  const totalFiles = { checked: 0, violations: 0 };
+  const totalFiles = { checked: 0, warnings: 0, violations: 0 };
 
   try {
     const files = await getAllFiles('src');
@@ -120,50 +141,79 @@ async function checkFileSizes() {
       try {
         const content = readFileSync(file, 'utf8');
         const linesOfCode = countLinesOfCode(content);
-        const relativePath = relative('.', file);
+        const relativePath = relative('.', file).split('\\').join('/');
 
         if (linesOfCode > MAX_LINES_OF_CODE) {
-          violations.push({
+          if (!ALLOWED_VIOLATIONS.has(relativePath)) {
+            violations.push({
+              path: relativePath,
+              linesOfCode,
+              excess: linesOfCode - MAX_LINES_OF_CODE,
+            });
+            totalFiles.violations++;
+          }
+        } else if (linesOfCode > WARN_LINES_OF_CODE) {
+          warnings.push({
             path: relativePath,
             linesOfCode,
-            excess: linesOfCode - MAX_LINES_OF_CODE,
+            excess: linesOfCode - WARN_LINES_OF_CODE,
           });
-          totalFiles.violations++;
+          totalFiles.warnings++;
         }
 
-        console.log(`${linesOfCode.toString().padStart(4)} LOC  ${relativePath}`);
+        const status =
+          linesOfCode > MAX_LINES_OF_CODE ? '❌' : linesOfCode > WARN_LINES_OF_CODE ? '⚠️ ' : '   ';
+
+        writeStdout(`${status}${linesOfCode.toString().padStart(4)} LOC  ${relativePath}`);
       } catch (error) {
-        console.warn(`⚠️  Could not read ${file}: ${error.message}`);
+        writeStderr(`⚠️  Could not read ${file}: ${error.message}`);
       }
     }
 
-    console.log(`\n📊 Summary:`);
-    console.log(`   Files checked: ${totalFiles.checked}`);
-    console.log(`   Violations: ${totalFiles.violations}`);
+    writeStdout(`\n📊 Summary:`);
+    writeStdout(`   Files checked: ${totalFiles.checked}`);
+    writeStdout(`   Warnings (> ${WARN_LINES_OF_CODE} LOC): ${totalFiles.warnings}`);
+    writeStdout(`   Violations (> ${MAX_LINES_OF_CODE} LOC): ${totalFiles.violations}`);
+
+    const realWarnings = warnings.filter(w => !ALLOWED_VIOLATIONS.has(w.path));
+
+    if (realWarnings.length > 0) {
+      writeStdout(`\n⚠️  Files exceeding ${WARN_LINES_OF_CODE} LOC (warning):`);
+      realWarnings
+        .sort((a, b) => b.linesOfCode - a.linesOfCode)
+        .forEach(warning => {
+          writeStdout(`   ${warning.path}: ${warning.linesOfCode} LOC (+${warning.excess})`);
+        });
+    }
+
+    if (ALLOWED_VIOLATIONS.size > 0) {
+      writeStdout(`\nℹ️  Allowed violations (tracked in plans/FILE-SIZE-VIOLATIONS.md):`);
+      [...ALLOWED_VIOLATIONS].sort().forEach(path => writeStdout(`   - ${path}`));
+    }
 
     if (violations.length > 0) {
-      console.log(`\n🚨 Files exceeding ${MAX_LINES_OF_CODE} LOC:`);
+      writeStdout(`\n🚨 Files exceeding ${MAX_LINES_OF_CODE} LOC (failure):`);
       violations
         .sort((a, b) => b.linesOfCode - a.linesOfCode)
         .forEach(violation => {
-          console.log(`   ${violation.path}: ${violation.linesOfCode} LOC (+${violation.excess})`);
+          writeStdout(`   ${violation.path}: ${violation.linesOfCode} LOC (+${violation.excess})`);
         });
 
-      console.log(`\n💡 Recommendations:`);
+      writeStdout(`\n💡 Recommendations:`);
       violations.forEach(violation => {
-        console.log(`   ${violation.path}:`);
-        console.log(`     - Consider splitting into smaller modules`);
-        console.log(`     - Extract utility functions`);
-        console.log(`     - Split complex components into sub-components`);
+        writeStdout(`   ${violation.path}:`);
+        writeStdout(`     - Consider splitting into smaller modules`);
+        writeStdout(`     - Extract utility functions`);
+        writeStdout(`     - Split complex components into sub-components`);
       });
 
       process.exit(1);
-    } else {
-      console.log(`\n✅ All files are within the ${MAX_LINES_OF_CODE} LOC limit!`);
-      process.exit(0);
     }
+
+    writeStdout(`\n✅ No files exceed ${MAX_LINES_OF_CODE} LOC.`);
+    process.exit(0);
   } catch (error) {
-    console.error(`❌ Error checking file sizes: ${error.message}`);
+    writeStderr(`❌ Error checking file sizes: ${error.message}`);
     process.exit(1);
   }
 }

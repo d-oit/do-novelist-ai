@@ -177,6 +177,39 @@ export const AgentActionSchema = z.object({
   tags: z.array(z.string()).default([]),
 });
 
+// =============================================================================
+// JSON VALUE SCHEMAS
+// =============================================================================
+
+/**
+ * A JSON-serializable value.
+ *
+ * Note: We intentionally disallow functions, symbols, bigint, and class instances.
+ * This keeps log contexts safe to serialize and send to aggregators.
+ */
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+export type JsonObject = Record<string, JsonValue>;
+
+export const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(JsonValueSchema),
+    z.record(z.string(), JsonValueSchema),
+  ]),
+);
+
+export const JsonObjectSchema: z.ZodType<JsonObject> = z.record(z.string(), JsonValueSchema);
+
 export const LogEntrySchema = z.object({
   id: LogIdSchema,
   timestamp: z.date(),
@@ -185,7 +218,8 @@ export const LogEntrySchema = z.object({
   type: LogTypeSchema,
   // Enhanced logging
   level: z.enum(['debug', 'info', 'warn', 'error', 'fatal']).default('info'),
-  context: z.record(z.string(), z.any()).optional(),
+  // Enforce JSON-serializable context to keep logs safe for transport/storage.
+  context: JsonObjectSchema.optional(),
   duration: z.number().min(0).optional(), // milliseconds
   actionName: z.string().optional(),
 });

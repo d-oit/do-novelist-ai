@@ -406,7 +406,7 @@ const GoalsManager: FC<GoalsManagerProps> = ({ projectId, onClose, className }) 
       setShowForm(false);
       setEditingGoal(undefined);
     } catch (error) {
-      console.error('Failed to create goal:', error);
+      logger.error('Failed to create goal', { component: 'GoalsManager', error });
     }
   };
 

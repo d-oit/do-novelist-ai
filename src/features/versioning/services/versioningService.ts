@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logging/logger';
-import type { Chapter, ChapterVersion, Branch, VersionDiff, VersionCompareResult  } from '@/types';
+import type { Chapter, ChapterVersion, Branch, VersionDiff, VersionCompareResult } from '@/types';
 
 import { createChapter } from '@shared/utils';
 
@@ -169,7 +169,11 @@ class VersioningService {
 
       request.onsuccess = (): void => resolve(true);
       request.onerror = (): void => {
-        console.error('Failed to delete version:', request.error);
+        logger.error('Failed to delete version', {
+          component: 'VersioningService',
+          error: request.error,
+          versionId,
+        });
         reject(new Error(request.error?.message ?? 'Failed to delete version'));
       };
     });

@@ -2,6 +2,8 @@
  * Performance optimization utilities for Novelist.ai
  */
 
+import { logger } from '@/lib/logging/logger';
+
 // Preload critical resources
 export const preloadCriticalResources = (): void => {
   // Preload local self-hosted fonts (optional). Ensure files exist in public/fonts.
@@ -103,7 +105,7 @@ export const performanceMonitor = {
         performance.measure(name, `${name}-start`, `${name}-end`);
       } catch (e) {
         // Ignore errors if marks are missing
-        console.warn(`Performance measurement failed for ${name}`, e);
+        logger.warn('Performance measurement failed', { component: 'performance', name, error: e });
       }
     }
   },

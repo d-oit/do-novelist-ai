@@ -141,7 +141,7 @@ const getClient = (): Client | null => {
     });
     return dbClient;
   } catch (e) {
-    console.error('Failed to create Turso client', e);
+    logger.error('Failed to create Turso client', { component: 'db', error: e });
     return null;
   }
 };
@@ -206,7 +206,7 @@ export const db = {
         `);
         logger.info('Turso DB Connection Established');
       } catch (e) {
-        console.error('Turso Init Error (Falling back to local):', e);
+        logger.error('Turso Init Error (Falling back to local)', { component: 'db', error: e });
       }
     } else {
       logger.info('Using LocalStorage Persistence');
@@ -252,7 +252,7 @@ export const db = {
         }
         logger.info(`[DB] Cloud save complete.`);
       } catch (e) {
-        console.error('Failed to save to Cloud', e);
+        logger.error('Failed to save to Cloud', { component: 'db', error: e });
       }
     } else {
       // Local Save
@@ -352,11 +352,15 @@ export const db = {
           logger.info(`[DB] Cloud load success: ${loadedProject.title}`);
           return validationResult.data;
         } else {
-          console.error('Failed to validate loaded project:', validationResult.error);
+          logger.error('Failed to validate loaded project', {
+            component: 'db',
+            error: validationResult.error,
+            projectId,
+          });
           return null;
         }
       } catch (e) {
-        console.error('Failed to load from Cloud', e);
+        logger.error('Failed to load from Cloud', { component: 'db', error: e, projectId });
         return null;
       }
     } else {
@@ -399,7 +403,7 @@ export const db = {
           coverImage: r.cover_image as string,
         }));
       } catch (e) {
-        console.error('Failed to list projects from Cloud', e);
+        logger.error('Failed to list projects from Cloud', { component: 'db', error: e });
         return [];
       }
     } else {
@@ -432,7 +436,7 @@ export const db = {
           'write',
         );
       } catch (e) {
-        console.error('Failed to delete from Cloud', e);
+        logger.error('Failed to delete from Cloud', { component: 'db', error: e, projectId });
       }
     } else {
       const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<

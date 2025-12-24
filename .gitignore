@@ -58,3 +58,4 @@ playwright-results.json
 # Lighthouse CI
 .lighthouseci/
 
+.claude/settings.local.json
