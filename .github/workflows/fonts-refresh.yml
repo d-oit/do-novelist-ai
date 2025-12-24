@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
       - name: Install deps
@@ -20,7 +20,7 @@ jobs:
       - name: List fonts
         run: ls -la public/fonts || true
       - name: Upload fonts artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: self-hosted-fonts
           path: public/fonts/*.woff2
