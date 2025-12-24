@@ -76,7 +76,7 @@ jobs:
           retention-days: 3
 
   e2e:
-    name: 🎭 E2E (${{ matrix.browser }} shard ${{ matrix.shard }})
+    name: 🎭 E2E (${{ matrix.browser }} part ${{ matrix.shard_index }})
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 25
@@ -84,7 +84,9 @@ jobs:
       fail-fast: false
       matrix:
         browser: [chromium, firefox, webkit]
-        shard: ["1/2", "2/2"]
+        shard_index: [1, 2]
+    env:
+      SHARD: ${{ matrix.shard_index == 1 && '1/2' || '2/2' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -126,23 +128,23 @@ jobs:
           name: nightly-dist-${{ github.sha }}
           path: dist/
 
-      - name: Run E2E (${{ matrix.browser }} ${{ matrix.shard }})
+      - name: Run E2E (${{ matrix.browser }} part ${{ matrix.shard_index }})
         env:
           PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
         run: |
-          echo "🎭 Running full E2E on ${{ matrix.browser }} shard ${{ matrix.shard }}"
+          echo "🎭 Running full E2E on ${{ matrix.browser }} part ${{ matrix.shard_index }}"
           pnpm exec playwright test \
             --project=${{ matrix.browser }} \
-            --shard=${{ matrix.shard }} \
+            --shard=${{ env.SHARD }} \
             --reporter=list,junit,html \
             --retries=2 \
             --timeout=90000 --workers=3
 
-      - name: Upload E2E artifacts (${{ matrix.browser }} ${{ matrix.shard }})
+      - name: Upload E2E artifacts (${{ matrix.browser }} part ${{ matrix.shard_index }})
         uses: actions/upload-artifact@v6
         if: always()
         with:
-          name: nightly-e2e-${{ matrix.browser }}-shard-${{ replace(matrix.shard, '/', '-') }}-${{ github.sha }}
+          name: nightly-e2e-${{ matrix.browser }}-part${{ matrix.shard_index }}-${{ github.sha }}
           path: |
             test-results/
             playwright-report/
