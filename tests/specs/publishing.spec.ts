@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { setupGeminiMock } from '../utils/mock-openrouter';
 
 // Publishing features are accessed through the project dashboard, not through top-level navigation.
 // These tests verify the EPUB export functionality that exists in the BookViewer component.

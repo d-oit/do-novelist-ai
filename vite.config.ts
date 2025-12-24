@@ -8,8 +8,8 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
-  // Get AI Gateway API key for dev proxy
-  const aiGatewayApiKey = env.AI_GATEWAY_API_KEY || env.VITE_AI_GATEWAY_API_KEY;
+  // Get OpenRouter API key for dev proxy
+  const openRouterApiKey = env.OPENROUTER_API_KEY || env.VITE_OPENROUTER_API_KEY;
 
   // Get default model from environment (format: "provider/model" e.g., "mistral/mistral-medium")
   const defaultModel = env.VITE_DEFAULT_AI_MODEL || 'mistral/mistral-small-latest';
@@ -76,11 +76,13 @@ export default defineConfig(({ mode }) => {
                 // Use the configured default model from environment
                 // Format: "provider/model" e.g., "mistral/mistral-medium"
 
-                const response = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${aiGatewayApiKey}`,
+                    Authorization: `Bearer ${openRouterApiKey}`,
+                    'HTTP-Referer': 'https://novelist.ai',
+                    'X-Title': 'Novelist.ai',
                   },
                   body: JSON.stringify({
                     model: defaultModel,
@@ -92,11 +94,11 @@ export default defineConfig(({ mode }) => {
 
                 if (!response.ok) {
                   const errorText = await response.text();
-                  console.error('AI Gateway error:', response.status, errorText);
+                  console.error('OpenRouter error:', response.status, errorText);
                   res.statusCode = response.status;
                   res.setHeader('Content-Type', 'application/json');
                   res.end(
-                    JSON.stringify({ error: 'AI Gateway request failed', details: errorText }),
+                    JSON.stringify({ error: 'OpenRouter request failed', details: errorText }),
                   );
                   return;
                 }
@@ -126,11 +128,13 @@ export default defineConfig(({ mode }) => {
                 if (system) messages.push({ role: 'system', content: String(system) });
                 messages.push({ role: 'user', content: String(prompt) });
 
-                const response = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${aiGatewayApiKey}`,
+                    Authorization: `Bearer ${openRouterApiKey}`,
+                    'HTTP-Referer': 'https://novelist.ai',
+                    'X-Title': 'Novelist.ai',
                   },
                   body: JSON.stringify({
                     model: `${provider}/${model}`,
@@ -142,11 +146,11 @@ export default defineConfig(({ mode }) => {
 
                 if (!response.ok) {
                   const errorText = await response.text();
-                  console.error('AI Gateway error:', response.status, errorText);
+                  console.error('OpenRouter error:', response.status, errorText);
                   res.statusCode = response.status;
                   res.setHeader('Content-Type', 'application/json');
                   res.end(
-                    JSON.stringify({ error: 'AI Gateway request failed', details: errorText }),
+                    JSON.stringify({ error: 'OpenRouter request failed', details: errorText }),
                   );
                   return;
                 }

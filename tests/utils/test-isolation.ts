@@ -6,7 +6,7 @@
  */
 
 import type { Page, BrowserContext } from '@playwright/test';
-import { setupGeminiMock } from './mock-ai-gateway';
+import { setupGeminiMock } from './mock-openrouter';
 
 /**
  * Complete state reset for a page/context

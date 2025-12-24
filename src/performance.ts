@@ -59,7 +59,7 @@ export const createLazyFeatureLoader = () => {
 
 // Resource hints for better loading performance
 export const addResourceHints = (): void => {
-  const hints = [{ rel: 'dns-prefetch', href: '//ai-gateway.vercel.sh' }];
+  const hints = [{ rel: 'dns-prefetch', href: '//openrouter.ai' }];
 
   hints.forEach(hint => {
     const link = document.createElement('link');
