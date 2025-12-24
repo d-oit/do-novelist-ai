@@ -81,9 +81,10 @@ export default defineConfig({
   ],
 
   // Optimized web server configuration for React applications
+  // Using 'serve' with -s flag for proper SPA fallback support
   webServer: process.env.CI
     ? {
-        command: 'cd dist && python3 -m http.server 3000',
+        command: 'npx serve -s dist -l 3000',
         url: 'http://localhost:3000',
         reuseExistingServer: !process.env.CI,
         timeout: 120000,
