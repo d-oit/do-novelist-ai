@@ -132,7 +132,8 @@
       "Bash(gh label create:*)",
       "Skill(claude-mem:troubleshoot)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(gh pr edit:*)"
     ],
     "deny": [],
     "ask": []
