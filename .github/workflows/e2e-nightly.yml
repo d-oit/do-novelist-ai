@@ -142,7 +142,7 @@ jobs:
         uses: actions/upload-artifact@v6
         if: always()
         with:
-          name: nightly-e2e-${{ matrix.browser }}-${{ matrix.shard }}-${{ github.sha }}
+          name: nightly-e2e-${{ matrix.browser }}-shard-${{ matrix.shard }}-${{ github.sha }}
           path: |
             test-results/
             playwright-report/
