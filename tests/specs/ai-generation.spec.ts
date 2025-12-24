@@ -185,21 +185,19 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
     expect(true).toBe(true);
   });
 
-  test.skip('should handle navigation between dashboard and settings', async ({ page }) => {
+  test('should handle navigation between dashboard and settings', async ({ page }) => {
     // Start at dashboard
     await page.getByTestId('nav-dashboard').click();
-
-    // Wait for navigation to settle
     await page.waitForLoadState('domcontentloaded');
 
     // Navigate to settings using test ID for reliability
     await page.getByTestId('nav-settings').click();
 
     // Wait for settings view to load with intelligent polling
-    await expect(page.getByTestId('settings-view')).toBeVisible();
+    await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Navigate back to dashboard
     await page.getByTestId('nav-dashboard').click();
-    await expect(page.getByTestId('nav-dashboard')).toBeVisible();
+    await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
   });
 });
