@@ -65,13 +65,7 @@ export const ProviderSelector = ({
     });
   }, [userId]);
 
-  useEffect(() => {
-    if (isOpen && showModelExplorer) {
-      void loadModels();
-    }
-  }, [isOpen, showModelExplorer]);
-
-  const loadModels = async (): Promise<void> => {
+  const loadModels = useCallback(async (): Promise<void> => {
     setModelLoading(true);
     try {
       const availableModels = await openRouterModelsService.getAvailableModels();
@@ -85,7 +79,13 @@ export const ProviderSelector = ({
     } finally {
       setModelLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (isOpen && showModelExplorer) {
+      void loadModels();
+    }
+  }, [isOpen, showModelExplorer, loadModels]);
 
   const handleProviderSelect = async (provider: AIProvider, model: string): Promise<void> => {
     try {
