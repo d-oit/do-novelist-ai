@@ -17,6 +17,8 @@ import { brainstormProject } from '@/lib/ai';
 import { logger } from '@/lib/logging/logger';
 import { cn, iconButtonTarget } from '@/lib/utils';
 
+import { GENRES, TONES, AUDIENCES } from './project-wizard-constants';
+
 interface ProjectWizardProps {
   isOpen: boolean;
   onCreate: (title: string, style: string, idea: string, targetWordCount: number) => void;
@@ -153,45 +155,6 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
 
     onCreate(title, fullStyle, idea, targetWordCount);
   };
-
-  const GENRES = [
-    'Sci-Fi / Cyberpunk',
-    'High Fantasy',
-    'Mystery / Thriller',
-    'Horror',
-    'Romance',
-    'Historical Fiction',
-    'Non-Fiction / Business',
-    'Self-Help',
-    'Memoir',
-    'Literary Fiction',
-    'Young Adult Dystopian',
-    'Space Opera',
-    'True Crime',
-    'Biography',
-    'Satire',
-  ];
-
-  const TONES = [
-    'Neutral',
-    'Dark & Gritty',
-    'Humorous',
-    'Optimistic',
-    'Academic',
-    'Poetic',
-    'Fast-paced',
-    'Atmospheric',
-    'Whimsical',
-  ];
-  const AUDIENCES = [
-    'General',
-    'Adult',
-    'Young Adult (YA)',
-    'Middle Grade',
-    'Children',
-    'Professional',
-    'Academics',
-  ];
 
   return (
     <div
