@@ -5,12 +5,12 @@ import https from 'node:https';
 const fontsDir = path.resolve('public/fonts');
 fs.mkdirSync(fontsDir, { recursive: true });
 
-function fetch(url) {
+function fetchBuffer(url) {
   return new Promise((resolve, reject) => {
     https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'text/css,*/*;q=0.1' } }, (res) => {
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         // follow redirect
-        fetch(res.headers.location).then(resolve, reject);
+        fetchBuffer(res.headers.location).then(resolve, reject);
         return;
       }
       if (res.statusCode !== 200) {
@@ -25,13 +25,13 @@ function fetch(url) {
 }
 
 async function download(url, dest) {
-  const buf = await fetch(url);
+  const buf = await fetchBuffer(url);
   await fs.promises.writeFile(dest, buf);
   console.log(`Downloaded ${url} -> ${dest} (${buf.length} bytes)`);
 }
 
 async function fetchCss(url) {
-  const buf = await fetch(url);
+  const buf = await fetchBuffer(url);
   return buf.toString('utf8');
 }
 
@@ -65,7 +65,7 @@ async function main() {
     {
       name: 'Fraunces-VariableFont[wght,opsz].woff2',
       cssUrl: 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&display=swap',
-      prefer: /Fraunces-VariableFont_SOFT\,WONK\,opsz\,wght|Fraunces-VariableFont_opsz,wght/i,
+      prefer: /Fraunces-VariableFont_SOFT,WONK,opsz,wght|Fraunces-VariableFont_opsz,wght/i,
       optional: true,
     },
   ];
