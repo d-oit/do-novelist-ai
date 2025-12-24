@@ -3,11 +3,10 @@
  * Provides CRUD operations for AI provider preferences, usage analytics, and health monitoring
  */
 
-import { createClient } from '@libsql/client/web';
-
 import { type AIProvider } from '@/lib/ai-config';
 import { logger } from '@/lib/logging/logger';
 
+import { getClient, getStorageKey } from './ai-preferences-helpers';
 import {
   type UserAIPreference,
   type AIProviderCapability,
@@ -15,86 +14,6 @@ import {
   type AIProviderHealth,
   ALL_AI_SCHEMAS,
 } from './schemas/ai-preferences-schema';
-
-type Client = ReturnType<typeof createClient>;
-
-const STORAGE_KEY = 'novelist_ai_preferences';
-
-/**
- * Check if a URL is valid for Turso database connection
- */
-const isValidTursoUrl = (url: string): boolean => {
-  if (!url || url.length < 10) return false;
-  if (url === 'test-url' || url.startsWith('test-')) return false;
-  try {
-    const parsed = new URL(url);
-    return (
-      parsed.protocol === 'libsql:' || parsed.protocol === 'https:' || parsed.protocol === 'http:'
-    );
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Check if running in test environment
- */
-const isTestEnvironment = (): boolean => {
-  if (typeof window !== 'undefined') {
-    const env = import.meta.env;
-    return (
-      env?.PLAYWRIGHT_TEST === 'true' ||
-      env?.PLAYWRIGHT === 'true' ||
-      env?.NODE_ENV === 'test' ||
-      env?.CI === 'true'
-    );
-  }
-  if (typeof process !== 'undefined' && process.env) {
-    return (
-      process.env.PLAYWRIGHT_TEST === 'true' ||
-      process.env.PLAYWRIGHT === 'true' ||
-      process.env.NODE_ENV === 'test' ||
-      process.env.CI === 'true'
-    );
-  }
-  return false;
-};
-
-/**
- * Get database client (reuses existing client from db.ts if available)
- */
-function getClient(): Client | null {
-  // Always use localStorage in test environment
-  if (isTestEnvironment()) {
-    return null;
-  }
-
-  const url = import.meta.env.VITE_TURSO_DATABASE_URL as string | undefined;
-  const authToken = import.meta.env.VITE_TURSO_AUTH_TOKEN as string | undefined;
-
-  // Validate URL before attempting to create client
-  if (url == null || authToken == null || !isValidTursoUrl(url)) {
-    return null;
-  }
-
-  const config = {
-    url: url,
-    authToken: authToken,
-  };
-
-  try {
-    return createClient({
-      url: config.url,
-      authToken: config.authToken,
-    });
-  } catch (e) {
-    logger.error('Failed to create Turso client for AI preferences', {
-      component: 'ai-preferences',
-      error: e,
-    });
-    return null;
-  }
-}
 
 /**
  * Initialize AI preferences database tables
@@ -163,7 +82,7 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
     }
   } else {
     try {
-      const stored = localStorage.getItem(`${STORAGE_KEY}_${userId}`);
+      const stored = localStorage.getItem(getStorageKey(userId));
       return stored != null ? (JSON.parse(stored) as UserAIPreference) : null;
     } catch (e) {
       // Only log errors in non-test environments to avoid noise in test output
@@ -232,7 +151,7 @@ export async function saveUserAIPreference(preference: UserAIPreference): Promis
       throw e;
     }
   } else {
-    localStorage.setItem(`${STORAGE_KEY}_${preference.userId}`, JSON.stringify(preference));
+    localStorage.setItem(getStorageKey(preference.userId), JSON.stringify(preference));
   }
 }
 
@@ -281,7 +200,7 @@ export async function getProviderCapabilities(
       return [];
     }
   } else {
-    const stored = localStorage.getItem(`${STORAGE_KEY}_capabilities`);
+    const stored = localStorage.getItem(`${getStorageKey('capabilities')}`);
     const all = stored != null ? (JSON.parse(stored) as AIProviderCapability[]) : [];
     return provider ? all.filter((c: AIProviderCapability) => c.provider === provider) : all;
   }
@@ -339,7 +258,7 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
       throw e;
     }
   } else {
-    const stored = localStorage.getItem(`${STORAGE_KEY}_capabilities`);
+    const stored = localStorage.getItem(`${getStorageKey('capabilities')}`);
     const all = stored != null ? (JSON.parse(stored) as AIProviderCapability[]) : [];
     const index = all.findIndex(
       (c: AIProviderCapability) =>
@@ -352,7 +271,7 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
       all.push(capability);
     }
 
-    localStorage.setItem(`${STORAGE_KEY}_capabilities`, JSON.stringify(all));
+    localStorage.setItem(`${getStorageKey('capabilities')}`, JSON.stringify(all));
   }
 }
 
@@ -397,10 +316,10 @@ export async function logUsageAnalytic(analytic: AIUsageAnalytic): Promise<void>
       }
     }
   } else {
-    const stored = localStorage.getItem(`${STORAGE_KEY}_analytics`);
+    const stored = localStorage.getItem(`${getStorageKey('analytics')}`);
     const all = stored != null ? (JSON.parse(stored) as AIUsageAnalytic[]) : [];
     all.push(analytic);
-    localStorage.setItem(`${STORAGE_KEY}_analytics`, JSON.stringify(all));
+    localStorage.setItem(`${getStorageKey('analytics')}`, JSON.stringify(all));
   }
 }
 
@@ -479,7 +398,7 @@ export async function getUserUsageStats(
       };
     }
   } else {
-    const stored = localStorage.getItem(`${STORAGE_KEY}_analytics`);
+    const stored = localStorage.getItem(`${getStorageKey('analytics')}`);
     const all: AIUsageAnalytic[] = stored != null ? (JSON.parse(stored) as AIUsageAnalytic[]) : [];
     const filtered = all.filter(a => {
       if (a.userId !== userId) return false;
@@ -545,7 +464,7 @@ export async function getProviderHealth(provider?: AIProvider): Promise<AIProvid
       return [];
     }
   } else {
-    const stored = localStorage.getItem(`${STORAGE_KEY}_health`);
+    const stored = localStorage.getItem(`${getStorageKey('health')}`);
     const all = stored != null ? (JSON.parse(stored) as AIProviderHealth[]) : [];
     return provider ? all.filter((h: AIProviderHealth) => h.provider === provider) : all;
   }
@@ -596,7 +515,7 @@ export async function updateProviderHealth(health: AIProviderHealth): Promise<vo
       throw e;
     }
   } else {
-    const stored = localStorage.getItem(`${STORAGE_KEY}_health`);
+    const stored = localStorage.getItem(`${getStorageKey('health')}`);
     const all = stored != null ? (JSON.parse(stored) as AIProviderHealth[]) : [];
     const index = all.findIndex((h: AIProviderHealth) => h.provider === health.provider);
 
@@ -606,6 +525,6 @@ export async function updateProviderHealth(health: AIProviderHealth): Promise<vo
       all.push(health);
     }
 
-    localStorage.setItem(`${STORAGE_KEY}_health`, JSON.stringify(all));
+    localStorage.setItem(`${getStorageKey('health')}`, JSON.stringify(all));
   }
 }
