@@ -17,6 +17,7 @@ env:
   FORCE_COLOR: 1
   NODE_OPTIONS: "--max-old-space-size=4096"
   CI: true
+  PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
 
 jobs:
   build:
@@ -107,6 +108,8 @@ jobs:
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -114,9 +117,10 @@ jobs:
       - name: Cache Playwright browsers
         uses: actions/cache@v5
         with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: /home/runner/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
+            ${{ runner.os }}-playwright-${{ matrix.browser }}-
             ${{ runner.os }}-playwright-
 
       - name: Install Playwright browsers (${{ matrix.browser }})
@@ -129,8 +133,6 @@ jobs:
           path: dist/
 
       - name: Run E2E (${{ matrix.browser }} part ${{ matrix.shard_index }})
-        env:
-          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
         run: |
           echo "🎭 Running full E2E on ${{ matrix.browser }} part ${{ matrix.shard_index }}"
           pnpm exec playwright test \
