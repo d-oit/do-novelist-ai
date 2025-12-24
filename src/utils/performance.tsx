@@ -42,7 +42,7 @@ class PerformanceMonitor {
   // End timing and record the duration
   endTiming(label: string): number {
     if (!this.startTime[label]) {
-      console.warn(`No start time found for ${label}`);
+      logger.warn('No start time found', { component: 'PerformanceMonitor', label });
       return 0;
     }
 
@@ -132,7 +132,11 @@ export class PerformanceBoundary extends React.Component<
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error('Performance boundary error:', error, errorInfo);
+    logger.error('Performance boundary error', {
+      component: 'PerformanceBoundary',
+      error,
+      errorInfo,
+    });
   }
 
   override render(): React.ReactNode {

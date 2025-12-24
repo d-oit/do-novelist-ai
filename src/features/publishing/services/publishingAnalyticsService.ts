@@ -14,7 +14,6 @@ import type {
 import { logger } from '@/lib/logging/logger';
 import type { Project } from '@/types';
 
-
 class PublishingAnalyticsService {
   private static instance: PublishingAnalyticsService | null = null;
   private readonly dbName = 'novelist-publishing';
@@ -763,7 +762,11 @@ class PublishingAnalyticsService {
       logger.info(`Tracking campaign ${campaignId}:`, { campaignId, metrics });
       // Store metrics data - implementation would go here
     } catch (error) {
-      console.error('Failed to track campaign performance:', error);
+      logger.error('Failed to track campaign performance', {
+        component: 'PublishingAnalyticsService',
+        error,
+        campaignId,
+      });
       throw error;
     }
   }
@@ -792,7 +795,11 @@ class PublishingAnalyticsService {
         },
       ];
     } catch (error) {
-      console.error('Failed to generate insights:', error);
+      logger.error('Failed to generate insights', {
+        component: 'PublishingAnalyticsService',
+        error,
+        publicationId,
+      });
       return [];
     }
   }
@@ -817,7 +824,11 @@ class PublishingAnalyticsService {
           reject(new Error(request.error?.message ?? 'Database operation failed'));
       });
     } catch (error) {
-      console.error('Failed to get publications:', error);
+      logger.error('Failed to get publications', {
+        component: 'PublishingAnalyticsService',
+        error,
+        projectId,
+      });
       return [];
     }
   }

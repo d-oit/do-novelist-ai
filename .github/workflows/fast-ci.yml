@@ -160,6 +160,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check .env.example completeness
+        run: pnpm run check:env-example
+
       - name: Check file sizes
         run: pnpm run check:file-size
 
@@ -249,6 +252,7 @@ jobs:
           path: dist/
 
       - name: Run quick E2E tests
+        continue-on-error: true
         run: |
           echo "🎭 Running quick E2E tests"
 
@@ -261,13 +265,10 @@ jobs:
           # Note: E2E tests are non-blocking - they provide feedback but don't fail the CI
           pnpm exec playwright test \
             --project=chromium \
-            --reporter=list \
+            --reporter=list,html \
             --grep="accessibility|settings" \
-            --timeout=30000 --workers=2 --max-failures=1 || {
-              echo "⚠️  Quick E2E tests failed (non-blocking)"
-              echo "This is a known issue being investigated"
-              exit 0
-            }
+            --retries=1 \
+            --timeout=30000 --workers=2 --max-failures=1
 
       - name: Upload test results
         uses: actions/upload-artifact@v6

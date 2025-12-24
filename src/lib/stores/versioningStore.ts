@@ -8,8 +8,8 @@ import type {
   VersionCompareResult,
   VersionFilter,
 } from '@/features/versioning/types';
+import { logger } from '@/lib/logging/logger';
 import type { Chapter } from '@/types';
-
 
 interface VersioningState {
   // State
@@ -76,7 +76,11 @@ export const useVersioningStore = create<VersioningState>((set, get) => ({
       const active = branchList.find(b => b.isActive) ?? branchList[0] ?? null;
       set({ branches: branchList, currentBranch: active });
     } catch (err) {
-      console.error('Failed to load branches:', err);
+      logger.error('Failed to load branches', {
+        component: 'VersioningStore',
+        error: err,
+        chapterId,
+      });
     }
   },
 

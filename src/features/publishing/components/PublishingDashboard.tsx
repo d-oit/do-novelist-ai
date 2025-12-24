@@ -9,6 +9,7 @@ import { FeedbackWidget } from '@/features/publishing/components/FeedbackWidget'
 import { MetricsOverview } from '@/features/publishing/components/MetricsOverview';
 import { PlatformStatusGrid } from '@/features/publishing/components/PlatformStatusGrid';
 import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
+import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
 import type { Project } from '@/types';
 
@@ -46,7 +47,11 @@ const PublishingDashboard: FC<PublishingDashboardProps> = ({
     try {
       await analytics.refreshAnalytics(publicationId);
     } catch (error) {
-      console.error('Failed to refresh analytics:', error);
+      logger.error('Failed to refresh analytics', {
+        component: 'PublishingDashboard',
+        error,
+        publicationId,
+      });
     } finally {
       setIsRefreshing(false);
     }

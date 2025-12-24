@@ -7,9 +7,9 @@ import type {
   VersionFilter,
   SortOrder,
 } from '@/features/versioning/types';
+import { logger } from '@/lib/logging/logger';
 import { useVersioningStore } from '@/lib/stores/versioningStore';
 import type { Chapter } from '@/types';
-
 
 export interface UseVersioningReturn {
   // State
@@ -58,7 +58,11 @@ export const useVersioning = (chapterId?: string): UseVersioningReturn => {
     if (chapterId != null && chapterId.length > 0) {
       Promise.all([loadVersionHistory(chapterId), loadBranches(chapterId)]).catch(err => {
         if (err instanceof Error && err.name === 'AbortError') return;
-        console.error('Failed to load versioning data:', err);
+        logger.error('Failed to load versioning data', {
+          component: 'useVersioning',
+          error: err,
+          chapterId,
+        });
       });
     }
 

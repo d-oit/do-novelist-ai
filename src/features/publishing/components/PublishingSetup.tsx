@@ -20,9 +20,10 @@ import { Card } from '@/components/ui/Card';
 import { PlatformCard } from '@/features/publishing/components/PlatformCard';
 import { PublishingMetadataForm } from '@/features/publishing/components/PublishingMetadataForm';
 import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
+import { logger } from '@/lib/logging/logger';
 import { cn, iconButtonTarget } from '@/lib/utils';
 import { ChapterStatus } from '@/types';
-import type { Project, PublishingPlatform, Publication  } from '@/types';
+import type { Project, PublishingPlatform, Publication } from '@/types';
 
 interface PublishingSetupProps {
   project: Project;
@@ -87,7 +88,11 @@ const PublishingSetup: FC<PublishingSetupProps> = ({
       onPublishingComplete(publication);
       setShowMetadataForm(false);
     } catch (error) {
-      console.error('Publishing failed:', error);
+      logger.error('Publishing failed', {
+        component: 'PublishingSetup',
+        error,
+        projectId: project.id,
+      });
       alert('Publishing failed. Please try again.');
     }
   };

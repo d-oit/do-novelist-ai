@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { CostDashboard } from '@/components/ai/CostDashboard';
 import { FallbackProviderEditor } from '@/components/ai/FallbackProviderEditor';
 import { ProviderSelector } from '@/components/ai/ProviderSelector';
+import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
 import {
   loadUserPreferences,
@@ -38,7 +39,7 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
       const newPrefs = { ...preferences, ...updates };
       setPreferences(newPrefs);
     } catch (error) {
-      console.error('Failed to save preferences:', error);
+      logger.error('Failed to save preferences', { component: 'AISettingsPanel', error, userId });
     } finally {
       setSaving(false);
     }

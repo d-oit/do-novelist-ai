@@ -2,9 +2,14 @@ import { DollarSign, TrendingUp, TrendingDown, Activity, CheckCircle } from 'luc
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { type AIProvider } from '@/lib/ai-config';
+import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
 import type { BudgetInfo, EnhancedUsageStats } from '@/services/ai-analytics-service';
-import { getUsageStats, getBudgetInfo, getOptimizationRecommendations } from '@/services/ai-analytics-service';
+import {
+  getUsageStats,
+  getBudgetInfo,
+  getOptimizationRecommendations,
+} from '@/services/ai-analytics-service';
 
 interface CostDashboardProps {
   userId: string;
@@ -23,7 +28,11 @@ export const CostDashboard = ({ userId }: CostDashboardProps): React.JSX.Element
       setBudgetInfo(budget);
       setLoading(false);
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      logger.error('Failed to load dashboard data', {
+        component: 'CostDashboard',
+        error,
+        userId,
+      });
       setLoading(false);
     }
   }, [userId]);

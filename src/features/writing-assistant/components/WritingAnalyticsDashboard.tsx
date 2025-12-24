@@ -23,7 +23,11 @@ import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { writingAssistantDb, type WritingProgressMetrics } from '@/features/writing-assistant/services/writingAssistantDb';
+import {
+  writingAssistantDb,
+  type WritingProgressMetrics,
+} from '@/features/writing-assistant/services/writingAssistantDb';
+import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
 
 interface WritingAnalyticsDashboardProps {
@@ -189,7 +193,12 @@ export const WritingAnalyticsDashboard: FC<WritingAnalyticsDashboardProps> = ({
         const data = writingAssistantDb.getWritingAnalytics(projectId, timeRange);
         setAnalyticsData(data);
       } catch (error) {
-        console.error('Failed to load analytics:', error);
+        logger.error('Failed to load analytics', {
+          component: 'WritingAnalyticsDashboard',
+          error,
+          projectId,
+          timeRange,
+        });
         // Provide mock data for demonstration
         setAnalyticsData({
           progressMetrics: [],

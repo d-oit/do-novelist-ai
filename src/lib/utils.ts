@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import { logger } from '@/lib/logging/logger';
+
 /**
  * Utility function to merge Tailwind CSS classes with proper conflict resolution
  * Uses clsx for conditional classes and tailwind-merge for deduplication
@@ -90,7 +92,11 @@ export const storage = {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
-      console.warn('Failed to save to localStorage:', error);
+      logger.warn('Failed to save to localStorage', {
+        component: 'storage',
+        error,
+        key,
+      });
     }
   },
 
@@ -99,7 +105,11 @@ export const storage = {
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.warn('Failed to remove from localStorage:', error);
+      logger.warn('Failed to remove from localStorage', {
+        component: 'storage',
+        error,
+        key,
+      });
     }
   },
 };

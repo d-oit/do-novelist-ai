@@ -9,6 +9,7 @@ import type {
   AnalyticsFilter,
   ChartDataPoint,
 } from '@/features/analytics/types';
+import { logger } from '@/lib/logging/logger';
 import { useAnalyticsStore } from '@/lib/stores/analyticsStore';
 import type { Project } from '@/types';
 
@@ -72,7 +73,10 @@ export const useAnalytics = (): UseAnalyticsReturn => {
 
     store.init().catch((err: unknown) => {
       if (err instanceof Error && err.name === 'AbortError') return;
-      console.error('Failed to initialize analytics:', err);
+      logger.error('Failed to initialize analytics', {
+        component: 'useAnalytics',
+        error: err,
+      });
     });
 
     return (): void => {

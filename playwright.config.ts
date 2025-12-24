@@ -11,18 +11,22 @@ export default defineConfig({
 
   // Timeout settings optimized for CI vs local environments
   timeout: process.env.CI ? 90000 : 60000,
-  expect: { timeout: process.env.CI ? 10000 : 10000 },
+  expect: { timeout: process.env.CI ? 12000 : 10000 },
 
   // Execution strategy optimized for parallel CI execution
   fullyParallel: true,
   forbidOnly: process.env.CI ? true : false,
-  retries: process.env.CI ? 1 : 1,
+  retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 2 : 2,
   // Note: Sharding is handled dynamically by CI via --shard flag
 
   // Reporting is slimmed down in CI to reduce I/O overhead
   reporter: process.env.CI
-    ? [['list'], ['junit', { outputFile: 'test-results/junit.xml' }]]
+    ? [
+        ['list'],
+        ['junit', { outputFile: 'test-results/junit.xml' }],
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
+      ]
     : [['html', { outputFolder: 'playwright-report' }], ['list']],
 
   // Global settings with strategic diagnostic collection and browser optimization

@@ -6,8 +6,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { type Character } from '@/features/characters/types';
-import { writingAssistantDb } from "@/features/writing-assistant/services/writingAssistantDb"
-import { writingAssistantService } from "@/features/writing-assistant/services/writingAssistantService"
+import { writingAssistantDb } from '@/features/writing-assistant/services/writingAssistantDb';
+import { writingAssistantService } from '@/features/writing-assistant/services/writingAssistantService';
 import { DEFAULT_WRITING_ASSISTANT_CONFIG } from '@/features/writing-assistant/types';
 import {
   type WritingAssistantState,
@@ -18,6 +18,7 @@ import {
   type WritingSuggestionCategory,
   type WritingProgressMetrics,
 } from '@/features/writing-assistant/types';
+import { logger } from '@/lib/logging/logger';
 
 interface UseWritingAssistantOptions {
   autoAnalyze?: boolean;
@@ -148,12 +149,18 @@ export function useWritingAssistant(
               localStorage.setItem('novelist_writing_assistant_config', JSON.stringify(dbConfig));
             }
           } catch (error) {
-            console.warn('Failed to load preferences from database:', error);
+            logger.warn('Failed to load preferences from database', {
+              component: 'useWritingAssistant',
+              error,
+            });
             // Gracefully continue with localStorage config
           }
         }
       } catch (error) {
-        console.error('Failed to load writing assistant config:', error);
+        logger.error('Failed to load writing assistant config', {
+          component: 'useWritingAssistant',
+          error,
+        });
         // Fallback to default config
         setState(prev => ({
           ...prev,
@@ -180,12 +187,18 @@ export function useWritingAssistant(
           try {
             writingAssistantDb.syncPreferences(config);
           } catch (error) {
-            console.warn('Failed to sync preferences to database:', error);
+            logger.warn('Failed to sync preferences to database', {
+              component: 'useWritingAssistant',
+              error,
+            });
             // Continue gracefully - localStorage save still worked
           }
         }
       } catch (error) {
-        console.error('Failed to save writing assistant config:', error);
+        logger.error('Failed to save writing assistant config', {
+          component: 'useWritingAssistant',
+          error,
+        });
       }
     },
     [enablePersistence],
@@ -247,7 +260,10 @@ export function useWritingAssistant(
               dismissedCount,
             );
           } catch (error) {
-            console.warn('Failed to save analysis history:', error);
+            logger.warn('Failed to save analysis history', {
+              component: 'useWritingAssistant',
+              error,
+            });
             // Continue gracefully - analysis still worked
           }
         }
@@ -263,7 +279,10 @@ export function useWritingAssistant(
         // Ensure the function returns a Promise
         await Promise.resolve();
       } catch (error) {
-        console.error('Analysis failed:', error);
+        logger.error('Analysis failed', {
+          component: 'useWritingAssistant',
+          error,
+        });
         setAnalysisError(error instanceof Error ? error.message : 'Analysis failed');
         setState(prev => ({ ...prev, isAnalyzing: false }));
       }
@@ -345,7 +364,11 @@ export function useWritingAssistant(
             suggestion.suggestedText, // The text that was applied
           );
         } catch (error) {
-          console.warn('Failed to record suggestion feedback:', error);
+          logger.warn('Failed to record suggestion feedback', {
+            component: 'useWritingAssistant',
+            error,
+            suggestionId,
+          });
           // Continue gracefully - the suggestion was still applied
         }
       }
@@ -399,7 +422,11 @@ export function useWritingAssistant(
             projectId,
           );
         } catch (error) {
-          console.warn('Failed to record suggestion feedback:', error);
+          logger.warn('Failed to record suggestion feedback', {
+            component: 'useWritingAssistant',
+            error,
+            suggestionId,
+          });
           // Continue gracefully - the suggestion was still dismissed
         }
       }
@@ -468,7 +495,12 @@ export function useWritingAssistant(
       try {
         return writingAssistantDb.getWritingAnalytics(projectId, timeRange);
       } catch (error) {
-        console.error('Failed to get writing analytics:', error);
+        logger.error('Failed to get writing analytics', {
+          component: 'useWritingAssistant',
+          error,
+          projectId,
+          timeRange,
+        });
         return {
           progressMetrics: [],
           improvementTrends: { readabilityTrend: 0, engagementTrend: 0, productivityTrend: 0 },

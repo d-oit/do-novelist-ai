@@ -88,7 +88,10 @@ function getClient(): Client | null {
       authToken: config.authToken,
     });
   } catch (e) {
-    console.error('Failed to create Turso client for AI preferences', e);
+    logger.error('Failed to create Turso client for AI preferences', {
+      component: 'ai-preferences',
+      error: e,
+    });
     return null;
   }
 }
@@ -150,7 +153,11 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
       };
     } catch (e) {
       if (import.meta.env.NODE_ENV !== 'test') {
-        console.error('Failed to get user AI preference:', e);
+        logger.error('Failed to get user AI preference', {
+          component: 'ai-preferences',
+          error: e,
+          userId,
+        });
       }
       return null;
     }
@@ -161,9 +168,11 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
     } catch (e) {
       // Only log errors in non-test environments to avoid noise in test output
       if (import.meta.env.NODE_ENV !== 'test') {
-        if (import.meta.env.NODE_ENV !== 'test') {
-          console.error('Failed to parse user AI preference from localStorage:', e);
-        }
+        logger.error('Failed to parse user AI preference from localStorage', {
+          component: 'ai-preferences',
+          error: e,
+          userId,
+        });
       }
       return null;
     }
@@ -214,7 +223,11 @@ export async function saveUserAIPreference(preference: UserAIPreference): Promis
       });
     } catch (e) {
       if (import.meta.env.NODE_ENV !== 'test') {
-        console.error('Failed to save user AI preference:', e);
+        logger.error('Failed to save user AI preference', {
+          component: 'ai-preferences',
+          error: e,
+          preferenceId: preference.id,
+        });
       }
       throw e;
     }
@@ -259,7 +272,11 @@ export async function getProviderCapabilities(
       }));
     } catch (e) {
       if (import.meta.env.NODE_ENV !== 'test') {
-        console.error('Failed to get provider capabilities:', e);
+        logger.error('Failed to get provider capabilities', {
+          component: 'ai-preferences',
+          error: e,
+          provider,
+        });
       }
       return [];
     }
@@ -312,7 +329,12 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
       });
     } catch (e) {
       if (import.meta.env.NODE_ENV !== 'test') {
-        console.error('Failed to save provider capability:', e);
+        logger.error('Failed to save provider capability', {
+          component: 'ai-preferences',
+          error: e,
+          provider: capability.provider,
+          modelName: capability.modelName,
+        });
       }
       throw e;
     }
@@ -367,7 +389,11 @@ export async function logUsageAnalytic(analytic: AIUsageAnalytic): Promise<void>
       });
     } catch (e) {
       if (import.meta.env.NODE_ENV !== 'test') {
-        console.error('Failed to log usage analytic:', e);
+        logger.error('Failed to log usage analytic', {
+          component: 'ai-preferences',
+          error: e,
+          analyticId: analytic.id,
+        });
       }
     }
   } else {
@@ -438,7 +464,11 @@ export async function getUserUsageStats(
       };
     } catch (e) {
       if (import.meta.env.NODE_ENV !== 'test') {
-        console.error('Failed to get user usage stats:', e);
+        logger.error('Failed to get user usage stats', {
+          component: 'ai-preferences',
+          error: e,
+          userId,
+        });
       }
       return {
         totalTokens: 0,
@@ -506,7 +536,11 @@ export async function getProviderHealth(provider?: AIProvider): Promise<AIProvid
       }));
     } catch (e) {
       if (import.meta.env.NODE_ENV !== 'test') {
-        console.error('Failed to get provider health:', e);
+        logger.error('Failed to get provider health', {
+          component: 'ai-preferences',
+          error: e,
+          provider,
+        });
       }
       return [];
     }
@@ -553,7 +587,11 @@ export async function updateProviderHealth(health: AIProviderHealth): Promise<vo
       });
     } catch (e) {
       if (import.meta.env.NODE_ENV !== 'test') {
-        console.error('Failed to update provider health:', e);
+        logger.error('Failed to update provider health', {
+          component: 'ai-preferences',
+          error: e,
+          provider: health.provider,
+        });
       }
       throw e;
     }

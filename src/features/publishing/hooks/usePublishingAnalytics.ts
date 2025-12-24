@@ -12,9 +12,9 @@ import type {
   ReaderFeedback,
   ReaderInsights,
 } from '@/features/publishing/types';
+import { logger } from '@/lib/logging/logger';
 import { usePublishingStore } from '@/lib/stores/publishingStore';
 import type { Project } from '@/types';
-
 
 export interface UsePublishingAnalyticsReturn {
   // Publications
@@ -83,7 +83,10 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
 
     store.init().catch((err: unknown) => {
       if (err instanceof Error && err.name === 'AbortError') return;
-      console.error('Failed to initialize publishing analytics:', err);
+      logger.error('Failed to initialize publishing analytics', {
+        component: 'usePublishingAnalytics',
+        error: err,
+      });
     });
 
     const cleanup = (): void => {

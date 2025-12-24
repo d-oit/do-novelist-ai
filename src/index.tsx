@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from '@/app/App';
 import './index.css';
 import { addResourceHints, preloadCriticalResources } from '@/performance';
+import { logger } from '@/lib/logging/logger';
 
 // Load AI SDK logger patch to prevent "m.log is not a function" errors
 // This must be imported before any AI SDK code runs
@@ -15,7 +16,10 @@ import { validateEnvironment } from '@/lib/env-validation';
 const envValidation = validateEnvironment();
 
 if (!envValidation.success) {
-  console.error('❌ Environment validation failed:', envValidation.errors);
+  logger.error('Environment validation failed', {
+    component: 'index',
+    errors: envValidation.errors,
+  });
 
   const root = document.getElementById('root');
   if (root) {
@@ -34,7 +38,7 @@ if (!envValidation.success) {
   throw new Error('Environment validation failed');
 }
 
-console.log('✅ Environment validation passed');
+logger.info('Environment validation passed', { component: 'index' });
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

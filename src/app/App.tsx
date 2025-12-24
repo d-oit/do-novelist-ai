@@ -7,6 +7,7 @@ import { ActionCard, BookViewer, PlannerControl } from '@/features/generation/co
 import { useGoapEngine } from '@/features/generation/hooks';
 import { ProjectStats, ProjectWizard } from '@/features/projects/components';
 import { db } from '@/features/projects/services';
+import { logger } from '@/lib/logging/logger';
 import { performanceMonitor } from '@/performance';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
 import type { Chapter, Project, RefineOptions } from '@/shared/types';
@@ -63,7 +64,11 @@ class LazyLoadErrorBoundary extends React.Component<
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error('Lazy loading error:', error, errorInfo);
+    logger.error('Lazy loading error', {
+      component: 'LazyLoadErrorBoundary',
+      error,
+      errorInfo,
+    });
   }
 
   override render(): React.ReactNode {
@@ -183,9 +188,10 @@ const App: React.FC = () => {
 
       // Set a hard timeout to ensure app renders in CI environments
       const forceRenderTimeout = setTimeout(() => {
-        console.warn(
-          'Forcing app render after timeout - database initialization may still be running',
-        );
+        logger.warn('Forcing app render after timeout', {
+          component: 'App',
+          note: 'database initialization may still be running',
+        });
         setIsLoading(false);
       }, 2000);
 
@@ -198,10 +204,11 @@ const App: React.FC = () => {
 
         await Promise.race([initPromise, timeoutPromise]);
       } catch (error) {
-        console.warn(
-          'Database initialization failed or timed out, continuing with local storage:',
+        logger.warn('Database initialization failed or timed out', {
+          component: 'App',
           error,
-        );
+          note: 'continuing with local storage',
+        });
         // Continue with local storage - don't block the app
       } finally {
         performanceMonitor.endTiming('app-initialization');

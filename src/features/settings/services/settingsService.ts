@@ -4,6 +4,7 @@
  * Handles localStorage persistence for application settings
  */
 
+import { logger } from '@/lib/logging/logger';
 import { DEFAULT_SETTINGS, validateSettings } from '@/types';
 import { type Settings } from '@/types';
 
@@ -25,7 +26,9 @@ class SettingsService {
       const validation = validateSettings(parsed);
 
       if (!validation.isValid || !validation.data) {
-        console.warn('Invalid settings in storage, using defaults');
+        logger.warn('Invalid settings in storage, using defaults', {
+          component: 'SettingsService',
+        });
         return DEFAULT_SETTINGS;
       }
 
@@ -35,7 +38,10 @@ class SettingsService {
         ...validation.data,
       };
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      logger.error('Failed to load settings', {
+        component: 'SettingsService',
+        error,
+      });
       return DEFAULT_SETTINGS;
     }
   }
@@ -53,7 +59,10 @@ class SettingsService {
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      logger.error('Failed to save settings', {
+        component: 'SettingsService',
+        error,
+      });
       throw error;
     }
   }
@@ -66,7 +75,10 @@ class SettingsService {
       localStorage.removeItem(STORAGE_KEY);
       return DEFAULT_SETTINGS;
     } catch (error) {
-      console.error('Failed to reset settings:', error);
+      logger.error('Failed to reset settings', {
+        component: 'SettingsService',
+        error,
+      });
       throw error;
     }
   }
@@ -94,7 +106,10 @@ class SettingsService {
       this.save(validation.data);
       return validation.data;
     } catch (error) {
-      console.error('Failed to import settings:', error);
+      logger.error('Failed to import settings', {
+        component: 'SettingsService',
+        error,
+      });
       throw error;
     }
   }
