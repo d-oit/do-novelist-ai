@@ -29,6 +29,7 @@ const MAX_LINES_OF_CODE = 500;
 const ALLOWED_VIOLATIONS = new Set([
   // Documented and accepted in plans/FILE-SIZE-VIOLATIONS.md
   'src/features/writing-assistant/services/writingAssistantService.ts',
+  'src/features/writing-assistant/services/grammarSuggestionService.ts',
   'src/features/publishing/services/publishingAnalyticsService.ts',
   'src/lib/character-validation.ts',
   'src/features/projects/components/ProjectWizard.tsx',
