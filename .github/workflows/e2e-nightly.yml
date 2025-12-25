@@ -126,11 +126,8 @@ jobs:
       - name: Install Playwright browsers (${{ matrix.browser }})
         run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: nightly-dist-${{ github.sha }}
-          path: dist/
+      # Note: Using dev server (npm run dev) instead of production build
+      # to match local testing environment for consistent test results
 
       - name: Run E2E (${{ matrix.browser }} part ${{ matrix.shard_index }})
         run: |
