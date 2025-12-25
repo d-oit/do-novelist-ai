@@ -217,18 +217,16 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            // React ecosystem
-            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-              return 'vendor-react';
-            }
-
-            // AI-related dependencies
+            // Group AI SDK with React to avoid breaking React internals
+            // This prevents "Cannot set properties of undefined (setting 'Activity')" errors
             if (
+              id.includes('node_modules/react') ||
+              id.includes('node_modules/react-dom') ||
               id.includes('@google/genai') ||
               id.includes('@ai-sdk') ||
               id.includes('node_modules/ai')
             ) {
-              return 'vendor-ai';
+              return 'vendor-react-ai';
             }
 
             // Chart libraries
