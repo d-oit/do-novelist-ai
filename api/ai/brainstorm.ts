@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
- * Vercel AI Gateway Proxy - Brainstorm
+ * OpenRouter Proxy - Brainstorm
  * Quick generation for titles, styles, and ideas
  */
 
-const AI_GATEWAY_URL = 'https://ai-gateway.vercel.sh/v1';
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1';
 
 interface BrainstormRequest {
   context: string;
@@ -18,10 +18,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.VITE_AI_GATEWAY_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'AI Gateway API key not configured' });
+    return res.status(500).json({ error: 'OpenRouter API key not configured' });
   }
 
   try {
@@ -49,11 +49,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       google: 'gemini-2.0-flash-exp',
     };
 
-    const response = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
+    const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://novelist.ai',
+        'X-Title': 'Novelist.ai',
       },
       body: JSON.stringify({
         model: `${provider}/${modelMap[provider] || modelMap.mistral}`,
@@ -67,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const errorText = await response.text();
       console.error('Brainstorm API error:', response.status, errorText);
       return res.status(response.status).json({
-        error: 'AI Gateway request failed',
+        error: 'OpenRouter request failed',
         details: errorText,
       });
     }

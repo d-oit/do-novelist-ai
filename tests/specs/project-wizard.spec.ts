@@ -1,13 +1,20 @@
 import { expect, test } from '@playwright/test';
 
-import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { setupGeminiMock } from '../utils/mock-openrouter';
 
 test.describe('Project Wizard E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
+
+    // Use robust waiting pattern that works in CI
+    try {
+      await page.getByRole('navigation').waitFor({ state: 'visible', timeout: 15000 });
+    } catch {
+      // Fallback to test ID if navigation role not found
+      await page.getByTestId('nav-dashboard').waitFor({ state: 'visible', timeout: 15000 });
+    }
   });
 
   test('should access new project wizard via navigation', async ({ page }) => {

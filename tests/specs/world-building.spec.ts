@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { setupGeminiMock } from '../utils/mock-openrouter';
 
 test.describe('World Building E2E Tests', () => {
   test.beforeEach(async ({ page }) => {

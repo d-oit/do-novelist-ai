@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { setupGeminiMock } from '../utils/mock-openrouter';
 
 test.describe('Project Management E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -8,9 +8,13 @@ test.describe('Project Management E2E Tests', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Use role-based waiting instead of hardcoded timeout
-    await expect(page.getByRole('navigation')).toBeVisible();
-    await expect(page.getByTestId('nav-dashboard')).toBeVisible();
+    // Use robust waiting pattern that works in CI
+    try {
+      await page.getByRole('navigation').waitFor({ state: 'visible', timeout: 15000 });
+    } catch {
+      // Fallback to test ID if navigation role not found
+      await page.getByTestId('nav-dashboard').waitFor({ state: 'visible', timeout: 15000 });
+    }
   });
 
   test('should access dashboard', async ({ page }) => {

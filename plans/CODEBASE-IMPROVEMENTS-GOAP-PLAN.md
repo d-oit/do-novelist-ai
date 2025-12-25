@@ -1,13 +1,13 @@
 # Codebase Improvements - GOAP Plan
 
 **Date**: December 8, 2025 (Reviewed: December 24, 2025) **Plan Type**:
-Goal-Oriented Action Planning (GOAP) **Status**: In Progress - ~70% ✅ (updated
+Goal-Oriented Action Planning (GOAP) **Status**: In Progress - ~95% ✅ (updated
 Dec 24, 2025) **Context**: Post-production optimization phase - logging
-migration incomplete
+migration COMPLETED
 
-> **IMPORTANT UPDATE (Dec 24, 2025)**: The logging migration is NOT complete.
-> See `plans/LOGGING-MIGRATION-REQUIRED.md` for remaining work (~173 console
-> statements in 41 files). This plan was incorrectly marked as 100% complete.
+> **UPDATE (Dec 24, 2025)**: The logging migration is now COMPLETE! See
+> `plans/LOGGING-MIGRATION-REQUIRED.md` for verification. Remaining work: import
+> path cleanup (~5% of original scope).
 
 ---
 
@@ -653,7 +653,7 @@ opportunistically.
 1. Review and approve this plan
 2. Begin Tier 1 implementation (Environment Validation)
 3. Schedule weekly progress reviews
-4. Track metrics in `plans/IMPROVEMENT-PROGRESS.md`
+4. Track metrics in `plans/PLAN-INVENTORY.md`
 
 ---
 

@@ -81,45 +81,26 @@ export default defineConfig({
   ],
 
   // Optimized web server configuration for React applications
-  webServer: process.env.CI
-    ? {
-        command: 'cd dist && python3 -m http.server 3000',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-        timeout: 120000,
-        stdout: 'pipe',
-        stderr: 'pipe',
-        env: {
-          NODE_ENV: 'production',
-          PLAYWRIGHT_TEST: 'true',
-          VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
-          VITE_DEFAULT_AI_PROVIDER: 'mistral',
-          VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
-          VITE_TURSO_DATABASE_URL: 'test-url',
-          VITE_TURSO_AUTH_TOKEN: 'test-token',
-          VITE_DISABLE_AI_SDK: 'true',
-          DISABLE_AI_SDK: 'true',
-        },
-      }
-    : {
-        command: 'npm run dev',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
-        timeout: 120000,
-        stdout: 'pipe',
-        stderr: 'pipe',
-        env: {
-          NODE_ENV: 'development',
-          PLAYWRIGHT_TEST: 'true',
-          VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
-          VITE_DEFAULT_AI_PROVIDER: 'mistral',
-          VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
-          VITE_TURSO_DATABASE_URL: 'test-url',
-          VITE_TURSO_AUTH_TOKEN: 'test-token',
-          VITE_DISABLE_AI_SDK: 'true',
-          DISABLE_AI_SDK: 'true',
-        },
-      },
+  // Using dev server for both CI and local to ensure consistency
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+    stdout: 'pipe',
+    stderr: 'pipe',
+    env: {
+      NODE_ENV: 'development',
+      PLAYWRIGHT_TEST: 'true',
+      VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
+      VITE_DEFAULT_AI_PROVIDER: 'mistral',
+      VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
+      VITE_TURSO_DATABASE_URL: 'test-url',
+      VITE_TURSO_AUTH_TOKEN: 'test-token',
+      VITE_DISABLE_AI_SDK: 'true',
+      DISABLE_AI_SDK: 'true',
+    },
+  },
 
   // Global setup and teardown
   globalSetup: resolve(__dirname, './tests/global-setup.ts'),

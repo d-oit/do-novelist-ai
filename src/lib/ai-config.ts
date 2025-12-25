@@ -205,8 +205,8 @@ export function getAIConfig(): AIServiceConfig {
         provider: 'nvidia',
         gatewayPath: 'nvidia',
         models: {
-          fast: 'nvidia/llama-3.1-nemotron-70b-instruct',
-          standard: 'nvidia/llama-3.1-nemotron-70b-instruct',
+          fast: 'nvidia/nemotron-3-nano-30b-a3b:free',
+          standard: 'nvidia/nemotron-3-nano-30b-a3b:free',
           advanced: 'nvidia/llama-3.1-nemotron-70b-instruct',
         },
         enabled: Boolean(openrouterApiKey),

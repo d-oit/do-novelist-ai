@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { setupGeminiMock } from '../utils/mock-ai-gateway';
+import { setupGeminiMock } from '../utils/mock-openrouter';
 
 test.describe('Mock Infrastructure Validation', () => {
   test.beforeEach(async ({ page }) => {
