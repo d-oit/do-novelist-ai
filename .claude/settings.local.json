@@ -133,7 +133,13 @@
       "Skill(claude-mem:troubleshoot)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(gh pr edit:*)"
+      "Bash(gh pr edit:*)",
+      "mcp__plugin_claude-mem_mem-search__help",
+      "Bash(npm run worker:start)",
+      "Bash(tasklist)",
+      "Bash(powershell -Command:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(CLAUDE_MEM_WORKER_PORT=37888 cd:*)"
     ],
     "deny": [],
     "ask": []

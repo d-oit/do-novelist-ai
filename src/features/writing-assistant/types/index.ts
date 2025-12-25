@@ -402,3 +402,78 @@ export const DEFAULT_WRITING_ASSISTANT_CONFIG: WritingAssistantConfig = {
   preferredStyle: 'balanced',
   targetAudience: 'adult',
 };
+
+// ============================================================================
+// Style Analysis Types
+// ============================================================================
+
+export type {
+  StyleAnalysisResult,
+  ConsistencyIssue,
+  StyleRecommendation,
+  StyleAnalysisConfig,
+  ReadabilityMetrics,
+  ToneAnalysisDetail,
+  VoiceAnalysisDetail,
+} from './styleAnalysis';
+
+export { DEFAULT_STYLE_ANALYSIS_CONFIG, StyleAnalysisConfigSchema } from './styleAnalysis';
+
+// ============================================================================
+// Grammar Suggestion Types
+// ============================================================================
+
+export type {
+  GrammarSuggestion,
+  GrammarSuggestionType,
+  GrammarCategory,
+  GrammarAnalysisResult,
+  GrammarConfig,
+  GrammarRuleReference,
+  ClarityMetrics,
+  ClaritySuggestion,
+} from './grammarSuggestions';
+
+export { DEFAULT_GRAMMAR_CONFIG, GrammarConfigSchema } from './grammarSuggestions';
+
+// ============================================================================
+// Writing Goals Types
+// ============================================================================
+
+export type {
+  WritingGoal,
+  GoalProgress,
+  GoalMetricProgress,
+  GoalPreset,
+  WritingGoalsConfig,
+  GoalAchievementStatus,
+  GoalWithStatus,
+} from './writingGoals';
+
+export {
+  DEFAULT_WRITING_GOALS_CONFIG,
+  WritingGoalsConfigSchema,
+  GOAL_PRESETS,
+  GOAL_TEMPLATES,
+} from './writingGoals';
+
+// ============================================================================
+// Real-Time Feedback Types
+// ============================================================================
+
+export type {
+  InlineSuggestion,
+  RealTimeAnalysisState,
+  ContentEditorState,
+  SuggestionAction,
+  AnalysisBatch,
+  AnalysisType,
+  RealTimeConfig,
+  SuggestionHighlight,
+  FeedbackPanelState,
+  AnalysisMetrics,
+  RealTimeEvent,
+  RealTimeEventType,
+} from './realTimeFeedback';
+
+export { DEFAULT_REAL_TIME_CONFIG, RealTimeConfigSchema } from './realTimeFeedback';
