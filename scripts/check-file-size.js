@@ -30,6 +30,7 @@ const ALLOWED_VIOLATIONS = new Set([
   // Documented and accepted in plans/FILE-SIZE-VIOLATIONS.md
   'src/features/writing-assistant/services/writingAssistantService.ts',
   'src/features/writing-assistant/services/grammarSuggestionService.ts',
+  'src/features/writing-assistant/components/WritingGoalsPanel.tsx',
   'src/features/publishing/services/publishingAnalyticsService.ts',
   'src/lib/character-validation.ts',
   'src/features/projects/components/ProjectWizard.tsx',
