@@ -20,9 +20,8 @@ import { useState } from 'react';
 
 import { useWorldBuilding } from '@/features/world-building/hooks/useWorldBuilding';
 import { cn } from '@/lib/utils';
-
-import { Button } from '@shared/components/button';
-import { Card } from '@shared/components/card';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 
 interface WorldBuildingDashboardProps {
   projectId: string;

@@ -336,20 +336,30 @@ vi.mock('ai', () => ({
   createGoogleGenerativeAI: vi.fn(() => (model: string) => ({ model, provider: 'google' })),
 }));
 
-// Mock AI SDK provider packages
-vi.mock('@ai-sdk/openai', () => ({
-  createOpenAI: vi.fn(() => (model: string) => ({ model, provider: 'openai' })),
+// Mock OpenRouter SDK (native SDK, not AI SDK provider)
+vi.mock('@openrouter/sdk', () => ({
+  OpenRouter: vi.fn(function (this: any) {
+    this.chat = {
+      send: vi.fn().mockResolvedValue({
+        choices: [{ message: { content: 'Mock response' } }],
+        usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+      }),
+    };
+    return this;
+  }),
 }));
 
-vi.mock('@ai-sdk/anthropic', () => ({
-  createAnthropic: vi.fn(() => (model: string) => ({ model, provider: 'anthropic' })),
-}));
-
-vi.mock('@ai-sdk/google', () => ({
-  createGoogleGenerativeAI: vi.fn(() => (model: string) => ({ model, provider: 'google' })),
-}));
-
-// Mock OpenRouter AI SDK provider
-vi.mock('@openrouter/ai-sdk-provider', () => ({
-  createOpenRouter: vi.fn(() => (model: string) => ({ model, provider: 'openrouter' })),
-}));
+// Mock window.matchMedia globally before any tests run
+Object.defineProperty(global, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});

@@ -15,6 +15,7 @@ import type {
   RealTimeConfig,
   AnalysisType,
 } from '@/features/writing-assistant/types';
+import { logger } from '@/lib/logging/logger';
 
 // ============================================================================
 // Hook Interface
@@ -158,7 +159,7 @@ export function useRealTimeAnalysis(
           onGoalProgress(progressMap);
         }
       } catch (error) {
-        console.error('Analysis failed:', error);
+        logger.error('Analysis failed', { error, component: 'useRealTimeAnalysis' });
       } finally {
         setIsAnalyzing(false);
       }

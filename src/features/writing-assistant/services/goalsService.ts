@@ -263,6 +263,36 @@ class GoalsService {
       });
     }
 
+    // Target vocabulary
+    if (goal.targetVocabulary?.minVocabularyDiversity !== undefined) {
+      const normalizedWords = words
+        .map(w => w.toLowerCase().replace(/[^a-z0-9']/g, ''))
+        .filter(w => w.length > 0);
+      const uniqueWordCount = new Set(normalizedWords).size;
+      const totalWordCount = normalizedWords.length;
+      const diversityRatio = totalWordCount > 0 ? uniqueWordCount / totalWordCount : 0;
+
+      const targetRatio = goal.targetVocabulary.minVocabularyDiversity;
+      const currentPct = Math.round(diversityRatio * 100);
+      const targetPct = Math.round(targetRatio * 100);
+
+      const status: GoalMetricProgress['status'] =
+        diversityRatio >= targetRatio
+          ? 'achieved'
+          : diversityRatio >= targetRatio * 0.8
+            ? 'achieving'
+            : 'below';
+
+      metrics.push({
+        metricKey: 'vocabularyDiversity',
+        metricLabel: 'Vocabulary Diversity',
+        currentValue: currentPct,
+        targetValue: targetPct,
+        unit: '%',
+        status,
+      });
+    }
+
     // Target style
     if (goal.targetStyle) {
       const styleAnalysis = styleAnalysisService.analyzeStyle(content);

@@ -52,7 +52,7 @@ class StyleAnalysisService {
       // Analyze tone
       const toneAnalysis = mergedConfig.enableToneAnalysis
         ? this.analyzeTone(content)
-        : { primary: 'unknown', intensity: 0, emotionalRange: { dominant: [], absent: [] } };
+        : { primary: 'neutral', intensity: 0, emotionalRange: { dominant: [], absent: [] } };
 
       // Analyze voice
       const voiceAnalysis = mergedConfig.enableVoiceAnalysis
@@ -128,6 +128,20 @@ class StyleAnalysisService {
    * Calculate readability metrics using various formulas
    */
   private calculateReadabilityMetrics(content: string): ReadabilityMetrics {
+    // Handle empty content
+    if (!content || content.trim().length === 0) {
+      return {
+        fleschReadingEase: 0,
+        fleschKincaidGrade: 8,
+        gunningFogIndex: 10,
+        smogIndex: 10,
+        automatedReadabilityIndex: 8,
+        colemanLiauIndex: 8,
+        readingTime: 0,
+        gradeLevel: '6-8',
+      };
+    }
+
     const sentences = this.getSentences(content);
     const words = this.getWords(content);
     const syllables = this.countSyllablesInText(words);
@@ -155,7 +169,8 @@ class StyleAnalysisService {
 
     // Automated Readability Index
     const characters = content.replace(/[^a-zA-Z]/g, '').length;
-    const ari = 4.71 * (characters / totalWords) + 0.5 * (totalWords / totalSentences) - 21.43;
+    const totalCharacters = Math.max(characters, 1);
+    const ari = 4.71 * (totalCharacters / totalWords) + 0.5 * (totalWords / totalSentences) - 21.43;
 
     // Reading time (average 200 words per minute)
     const readingTime = totalWords / 200;
@@ -171,10 +186,10 @@ class StyleAnalysisService {
 
     return {
       fleschReadingEase: Math.max(0, Math.min(100, Math.round(fleschReadingEase))),
-      fleschKincaidGrade: Math.max(0, Math.round(fleschKincaidGrade * 10) / 10),
-      gunningFogIndex: Math.max(0, Math.round(gunningFogIndex * 10) / 10),
-      smogIndex: Math.max(0, Math.round(smogIndex * 10) / 10),
-      automatedReadabilityIndex: Math.max(0, Math.round(ari * 10) / 10),
+      fleschKincaidGrade: Math.max(1, Math.round(fleschKincaidGrade * 10) / 10),
+      gunningFogIndex: Math.max(1, Math.round(gunningFogIndex * 10) / 10),
+      smogIndex: Math.max(1, Math.round(smogIndex * 10) / 10),
+      automatedReadabilityIndex: Math.max(1, Math.round(ari * 10) / 10),
       colemanLiauIndex: 0,
       readingTime: Math.round(readingTime * 10) / 10,
       gradeLevel,
@@ -304,16 +319,24 @@ class StyleAnalysisService {
   } {
     const lowerContent = content.toLowerCase();
 
-    // Count passive voice constructions
-    const passivePatterns = /\b(was|were|is|are|been|being)\s+\w+ed\b/gi;
-    const passiveMatches = lowerContent.match(passivePatterns) ?? [];
-    const totalSentences = this.getSentences(content).length;
+    // Count passive voice constructions (including irregular past participles)
+    const passivePatterns = [
+      /\b(was|were|is|are|been|being)\s+\w+ed\b/gi, // Regular past participles (ended in -ed)
+      /\b(was|were|is|are|been|being)\s+(written|taken|given|made|done|seen|hit|put|cut|set|hurt|read|spoken|broken|chosen|driven|eaten|fallen|forgotten|hidden|known|ridden|risen|stolen|torn|worn|beaten|bitten|blown|built|bought|caught|drawn|drunk|felt|fought|found|heard|held|kept|laid|led|left|lost|meant|paid|run|said|shown|shut|sung|sat|slept|sold|spent|stood|stuck|taught|thought|thrown|understood|won)\b/gi,
+    ];
 
-    const passiveRatio = totalSentences > 0 ? (passiveMatches.length / totalSentences) * 100 : 0;
+    let passiveCount = 0;
+    for (const pattern of passivePatterns) {
+      const matches = lowerContent.match(pattern);
+      passiveCount += matches?.length ?? 0;
+    }
+
+    const totalSentences = this.getSentences(content).length;
+    const passiveRatio = totalSentences > 0 ? (passiveCount / totalSentences) * 100 : 0;
 
     let voiceType: 'active' | 'passive' | 'mixed';
-    if (passiveRatio > 30) voiceType = 'passive';
-    else if (passiveRatio > 15) voiceType = 'mixed';
+    if (passiveRatio >= 50) voiceType = 'passive';
+    else if (passiveRatio >= 20) voiceType = 'mixed';
     else voiceType = 'active';
 
     // Determine perspective
@@ -340,13 +363,16 @@ class StyleAnalysisService {
     const pastMatches =
       lowerContent.match(/\b(was|were|had|did|went|came|saw|said)\b/gi)?.length ?? 0;
     const presentMatches =
-      lowerContent.match(/\b(is|are|have|does|go|come|see|say)\b/gi)?.length ?? 0;
+      lowerContent.match(/\b(is|are|have|does|go|come|see|say|walks|sits|sees)\b/gi)?.length ?? 0;
     const futureMatches = lowerContent.match(/\b(will|shall|would|could|should)\b/gi)?.length ?? 0;
 
     let tense: 'present' | 'past' | 'future' | 'mixed';
-    if (pastMatches > presentMatches && pastMatches > futureMatches) {
+    const total = pastMatches + presentMatches + futureMatches;
+    if (total === 0) {
+      tense = 'mixed';
+    } else if (pastMatches > presentMatches * 1.5 && pastMatches > futureMatches) {
       tense = 'past';
-    } else if (presentMatches > pastMatches && presentMatches > futureMatches) {
+    } else if (presentMatches > pastMatches * 1.5 && presentMatches > futureMatches) {
       tense = 'present';
     } else if (futureMatches > pastMatches && futureMatches > presentMatches) {
       tense = 'future';
@@ -547,11 +573,11 @@ class StyleAnalysisService {
     };
   }
 
-  private getMockAnalysis(content: string, id: string): StyleAnalysisResult {
+  private getMockAnalysis(_content: string, id: string): StyleAnalysisResult {
     return {
       id,
       timestamp: new Date(),
-      content,
+      content: '',
       fleschReadingEase: 60,
       fleschKincaidGrade: 8.5,
       gunningFogIndex: 10,

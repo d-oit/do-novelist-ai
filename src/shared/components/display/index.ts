@@ -14,6 +14,6 @@ export {
   CardDescription,
   CardContent,
   cardVariants,
-} from './Card';
+} from '@/shared/components/ui/Card';
 
-export { MetricCard } from './MetricCard';
+export { MetricCard } from '@/shared/components/ui/MetricCard';

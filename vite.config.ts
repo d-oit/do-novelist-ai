@@ -1,5 +1,6 @@
 import path from 'path';
 
+import { VitePWA } from 'vite-plugin-pwa';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
@@ -33,6 +34,77 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
     },
     plugins: [
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+        manifest: {
+          name: 'Novelist.ai - AI-Powered Writing Assistant',
+          short_name: 'Novelist.ai',
+          description:
+            'Write novels with AI assistance. Organize characters, world-building, and chapters in one place.',
+          theme_color: '#7c3aed',
+          background_color: '#1a1a2e',
+          display: 'standalone',
+          orientation: 'portrait-primary',
+          scope: '/',
+          start_url: '/',
+          icons: [
+            {
+              src: 'pwa-192x192.png',
+              sizes: '192x192',
+              type: 'image/png',
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable',
+            },
+          ],
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/openrouter\.ai\/api\/.*/i,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'openrouter-api-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 60 * 24,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'images-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 30,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+          ],
+        },
+        devOptions: {
+          enabled: false,
+          type: 'module',
+        },
+      }) as any,
       // Custom middleware plugin for API routes during development
       {
         name: 'api-middleware',
@@ -223,8 +295,7 @@ export default defineConfig(({ mode }) => {
               id.includes('node_modules/react') ||
               id.includes('node_modules/react-dom') ||
               id.includes('@google/genai') ||
-              id.includes('@ai-sdk') ||
-              id.includes('node_modules/ai')
+              id.includes('@openrouter/sdk')
             ) {
               return 'vendor-react-ai';
             }

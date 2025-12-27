@@ -19,6 +19,7 @@ import { useState, useRef, useEffect } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { WritingAssistantPanel } from '@/features/writing-assistant/components/WritingAssistantPanel';
+import { useAnalytics, useFeatureAction } from '@/lib/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
 import type { Project, Chapter, RefineOptions } from '@/types';
 
@@ -48,6 +49,9 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
   }>({});
   const [showWritingAssistant, setShowWritingAssistant] = useState(false);
 
+  useAnalytics({ feature: 'editor', trackTimeInFeature: true });
+  const { trackAction } = useFeatureAction('editor');
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const selectedChapter: Chapter | undefined =
@@ -68,6 +72,7 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
     setEditingField(field);
     setIsEditing(true);
     setTempValues({ [field]: currentValue });
+    trackAction('start_edit', { field });
   };
 
   const handleSaveEdit = (): void => {
@@ -84,6 +89,7 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
       }
 
       onUpdateChapter(selectedChapter.id, updates);
+      trackAction('save_edit', { field: editingField });
     }
 
     setIsEditing(false);
@@ -94,6 +100,7 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
   const handleCancelEdit = (): void => {
     setIsEditing(false);
     setEditingField(null);
+    trackAction('cancel_edit', { field: editingField });
     setTempValues({});
   };
 

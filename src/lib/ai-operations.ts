@@ -3,17 +3,16 @@
  * Business logic for specific AI tasks: text generation, plot analysis, etc.
  */
 
-import { generateText } from 'ai';
-
 import { withCache } from '@/lib/cache';
 import { createAIError } from '@/lib/errors/error-types';
 import type { Chapter, RefineOptions } from '@/types/index';
 
 import {
+  openrouterClient,
+  getModelName,
   aiLogger,
   isTestEnvironment,
   isValidOutline,
-  getModel,
   executeWithFallback,
   config,
 } from './ai-core';
@@ -27,7 +26,6 @@ const _generateOutline = async (
 ): Promise<{ title: string; chapters: Partial<Chapter>[] }> => {
   const operationLogger = aiLogger.child({ operation: 'generateOutline', ideaLength: idea.length });
 
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     operationLogger.info('Returning mock outline for test environment');
     return {
@@ -41,23 +39,21 @@ const _generateOutline = async (
   }
 
   return executeWithFallback(async provider => {
-    const model = getModel(provider, 'standard');
+    const model = getModelName(provider, 'standard');
 
-    const systemInstruction = `You are an expert Novel Architect.
+    const response = await openrouterClient.chat.send({
+      model,
+      messages: [
+        {
+          role: 'system',
+          content: `You are an expert Novel Architect.
 Your goal is to take a vague book idea and structurize it into a compelling chapter outline.
 The style of the book is: ${style}.
-Adhere to the "Hero's Journey" or "Save the Cat" beat sheets if applicable to the genre.`;
-
-    operationLogger.debug('Generating outline', {
-      provider,
-      style,
-      ideaPreview: idea.substring(0, 100),
-    });
-
-    const response = await generateText({
-      model,
-      system: systemInstruction,
-      prompt: `Create a title and a chapter outline for this idea: "${idea}"
+Adhere to the "Hero's Journey" or "Save the Cat" beat sheets if applicable to the genre.`,
+        },
+        {
+          role: 'user',
+          content: `Create a title and a chapter outline for this idea: "${idea}"
 
 Return a JSON object with this structure:
 {
@@ -70,13 +66,25 @@ Return a JSON object with this structure:
     }
   ]
 }`,
+        },
+      ],
       temperature: 0.7,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
+    operationLogger.debug('Generating outline', {
+      provider,
+      style,
+      ideaPreview: idea.substring(0, 100),
+    });
+
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
     try {
-      const parsed = JSON.parse(response.text) as { title: string; chapters: Partial<Chapter>[] };
+      const parsed = JSON.parse(responseText) as { title: string; chapters: Partial<Chapter>[] };
       if (!isValidOutline(parsed)) {
         throw new Error('Invalid outline structure received from AI');
       }
@@ -90,11 +98,10 @@ Return a JSON object with this structure:
       operationLogger.warn('JSON parsing failed, trying to extract from response', {
         provider,
         error: parseError instanceof Error ? parseError.message : String(parseError),
-        responsePreview: response.text.substring(0, 200),
+        responsePreview: responseText.substring(0, 200),
       });
 
-      // If JSON parsing fails, try to extract JSON from the response
-      const jsonMatch = /\{[\s\S]*\}/.exec(response.text);
+      const jsonMatch = /\{[\s\S]*\}/.exec(responseText);
       if (jsonMatch) {
         try {
           const parsed = JSON.parse(jsonMatch[0]) as {
@@ -126,7 +133,7 @@ Return a JSON object with this structure:
         operation: 'generateOutline',
         cause: parseError instanceof Error ? parseError : undefined,
         context: {
-          responsePreview: response.text.substring(0, 500),
+          responsePreview: responseText.substring(0, 500),
           idea: idea.substring(0, 100),
           style,
         },
@@ -148,7 +155,6 @@ export const writeChapterContent = async (
   style: string,
   previousChapterSummary?: string,
 ): Promise<string> => {
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     return `# ${chapterTitle}
 
@@ -158,25 +164,32 @@ The story continues with detailed narrative, character development, and plot pro
   }
 
   return executeWithFallback(async provider => {
-    const model = getModel(provider, 'standard');
+    const model = getModelName(provider, 'standard');
 
-    const prompt = `
+    const response = await openrouterClient.chat.send({
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: `
 Write the full content for the chapter: "${chapterTitle}".
 Context / Summary: ${chapterSummary}
 ${previousChapterSummary != null ? `Previously: ${previousChapterSummary}` : ''}
 Style: ${style}.
 Write in Markdown. Focus on "Show, Don't Tell". Use sensory details.
-Output only the chapter content.`;
-
-    const response = await generateText({
-      model,
-      prompt,
+Output only the chapter content.`,
+        },
+      ],
       temperature: 0.7,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
-    return response.text ?? '';
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
+    return responseText ?? '';
   }, 'writeChapterContent');
 };
 
@@ -188,7 +201,6 @@ export const continueWriting = async (
   chapterSummary: string,
   style: string,
 ): Promise<string> => {
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     return `# Continued Chapter
 
@@ -198,25 +210,32 @@ The adventure unfolds with new challenges and developments that propel the plot 
   }
 
   return executeWithFallback(async provider => {
-    const model = getModel(provider, 'standard');
+    const model = getModelName(provider, 'standard');
     const context = currentContent.slice(-3000);
 
-    const prompt = `
+    const response = await openrouterClient.chat.send({
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: `
 You are a co-author. Continue the story.
 Style: ${style}
 Goal: ${chapterSummary}
 Rules: Seamlessly continue narrative. Maintain tone. Write 300-500 words. Output ONLY new content.
-Context: ...${context}`;
-
-    const response = await generateText({
-      model,
-      prompt,
+Context: ...${context}`,
+        },
+      ],
       temperature: 0.75,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
-    return response.text ?? '';
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
+    return responseText ?? '';
   }, 'continueWriting');
 };
 
@@ -229,7 +248,6 @@ export const refineChapterContent = async (
   style: string,
   options: RefineOptions,
 ): Promise<string> => {
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     return `# Refined Chapter
 
@@ -247,24 +265,31 @@ This chapter has been refined with improved pacing, better dialogue, and enhance
       options.model?.includes('pro') || options.model?.includes('advanced')
         ? 'advanced'
         : 'standard';
-    const model = getModel(provider, complexity);
+    const model = getModelName(provider, complexity);
 
-    const prompt = `
+    const response = await openrouterClient.chat.send({
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: `
 Refine the following chapter content.
 Style: ${style}
 Goal: ${chapterSummary}
 Instructions: Improve flow, prose, and dialogue. Fix grammar. Maintain tone. Do NOT change plot.
-Content: ${content}`;
-
-    const response = await generateText({
-      model,
-      prompt,
+Content: ${content}`,
+        },
+      ],
       temperature: options.temperature,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
-    return response.text ?? content;
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
+    return responseText ?? content;
   }, 'refineChapterContent');
 };
 
@@ -272,7 +297,6 @@ Content: ${content}`;
  * Analyze consistency across chapters
  */
 export const analyzeConsistency = async (chapters: Chapter[], style: string): Promise<string> => {
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     return `## Consistency Analysis
 
@@ -285,26 +309,33 @@ Overall: The story shows good consistency with minor suggestions for improvement
   }
 
   return executeWithFallback(async provider => {
-    const model = getModel(provider, 'fast');
+    const model = getModelName(provider, 'fast');
     const bookContext = chapters
       .map(c => `Ch ${c.orderIndex} (${c.title}): ${c.summary}`)
       .join('\n');
 
-    const prompt = `
+    const response = await openrouterClient.chat.send({
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: `
 Analyze this outline for inconsistencies, plot holes, or tonal shifts.
 Style: ${style}
 Outline: ${bookContext}
-INSTRUCTIONS: Identify up to 3 issues. For EACH, provide a "SUGGESTED FIX".`;
-
-    const response = await generateText({
-      model,
-      prompt,
+INSTRUCTIONS: Identify up to 3 issues. For EACH, provide a "SUGGESTED FIX".`,
+        },
+      ],
       temperature: 0.3,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
-    return response.text ?? 'No issues found.';
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
+    return responseText ?? 'No issues found.';
   }, 'analyzeConsistency');
 };
 
@@ -316,14 +347,12 @@ export const brainstormProject = async (
   context: string,
   field: 'title' | 'style' | 'idea',
 ): Promise<string> => {
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     if (field === 'title') return 'Mock Project: Agent Test Story';
     if (field === 'style') return 'Science Fiction';
     return '## Brainstorming Notes\n\n### Themes\n- Friendship and teamwork\n- Overcoming adversity\n- Discovery and exploration\n\n### Character Ideas\n- Protagonist with unique abilities\n- Loyal companion\n- Formidable antagonist\n\n### Plot Ideas\n- Quest to save the world\n- Journey of self-discovery\n- Mystery to solve';
   }
 
-  // Use API route to avoid CORS issues in browser
   const response = await fetch('/api/ai/brainstorm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -360,14 +389,10 @@ export const generateCoverImage = (
   _idea: string,
 ): string | null => {
   try {
-    // In test environments, return a mock image to enable testing
     if (isTestEnvironment()) {
-      // Return a 1x1 transparent PNG as mock cover image
       return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
 
-    // This requires Google's Imagen API which is separate from the AI SDK
-    // For now, return null in production
     aiLogger.warn(
       'Cover image generation requires Google Imagen API - keeping original implementation',
       { operation: 'generateCoverImage' },
@@ -395,14 +420,10 @@ export const generateChapterIllustration = (
   _style: string,
 ): string | null => {
   try {
-    // In test environments, return a mock image to enable testing
     if (isTestEnvironment()) {
-      // Return a 1x1 transparent PNG as mock illustration
       return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
 
-    // This requires Google's Imagen API which is separate from the AI SDK
-    // For now, return null in production
     aiLogger.warn(
       'Chapter illustration requires Google Imagen API - keeping original implementation',
       { operation: 'generateChapterIllustration' },
@@ -425,19 +446,26 @@ export const translateContent = async (
   targetLanguage: string,
 ): Promise<string> => {
   return executeWithFallback(async provider => {
-    const model = getModel(provider, 'fast');
+    const model = getModelName(provider, 'fast');
 
-    const prompt = `Translate markdown content to ${targetLanguage}. Maintain formatting and tone.\n\nContent:\n${content}`;
-
-    const response = await generateText({
+    const response = await openrouterClient.chat.send({
       model,
-      prompt,
+      messages: [
+        {
+          role: 'user',
+          content: `Translate markdown content to ${targetLanguage}. Maintain formatting and tone.\n\nContent:\n${content}`,
+        },
+      ],
       temperature: 0.3,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
-    return response.text ?? '';
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
+    return responseText ?? '';
   }, 'translateContent');
 };
 
@@ -445,25 +473,31 @@ export const translateContent = async (
  * Develop characters
  */
 export const developCharacters = async (idea: string, style: string): Promise<string> => {
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     return '**Alice**: A brilliant physicist\n**Bob**: A skilled engineer\n**Charlie**: A mysterious stranger';
   }
 
   return executeWithFallback(async provider => {
-    const model = getModel(provider, 'standard');
+    const model = getModelName(provider, 'standard');
 
-    const prompt = `Create a character cast list for: ${idea}\nStyle: ${style}\nOutput Name, Role, Motivation, Conflict.`;
-
-    const response = await generateText({
+    const response = await openrouterClient.chat.send({
       model,
-      prompt,
+      messages: [
+        {
+          role: 'user',
+          content: `Create a character cast list for: ${idea}\nStyle: ${style}\nOutput Name, Role, Motivation, Conflict.`,
+        },
+      ],
       temperature: 0.8,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
-    return response.text ?? '';
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
+    return responseText ?? '';
   }, 'developCharacters');
 };
 
@@ -471,25 +505,31 @@ export const developCharacters = async (idea: string, style: string): Promise<st
  * Build world
  */
 export const buildWorld = async (idea: string, style: string): Promise<string> => {
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     return '## Setting\nA futuristic space station orbiting a distant planet.\n\n## Technology\nAdvanced AI systems and FTL travel.\n\n## Society\nA diverse coalition of species working together.';
   }
 
   return executeWithFallback(async provider => {
-    const model = getModel(provider, 'standard');
+    const model = getModelName(provider, 'standard');
 
-    const prompt = `Expand setting/lore for: ${idea}\nStyle: ${style}\nFocus on rules, atmosphere, locations.`;
-
-    const response = await generateText({
+    const response = await openrouterClient.chat.send({
       model,
-      prompt,
+      messages: [
+        {
+          role: 'user',
+          content: `Expand setting/lore for: ${idea}\nStyle: ${style}\nFocus on rules, atmosphere, locations.`,
+        },
+      ],
       temperature: 0.85,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
-    return response.text ?? '';
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
+    return responseText ?? '';
   }, 'buildWorld');
 };
 
@@ -497,25 +537,31 @@ export const buildWorld = async (idea: string, style: string): Promise<string> =
  * Enhance plot
  */
 export const enhancePlot = async (idea: string, style: string): Promise<string> => {
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     return '## Plot Development\n1. Opening: Establish the protagonist and setting\n2. Rising Action: Conflict emerges\n3. Climax: The main conflict reaches its peak\n4. Falling Action: Consequences of the climax\n5. Resolution: The story concludes';
   }
 
   return executeWithFallback(async provider => {
-    const model = getModel(provider, 'advanced');
+    const model = getModelName(provider, 'advanced');
 
-    const prompt = `Inject conflict and structure into: ${idea}\nStyle: ${style}\nProvide Inciting Incident, Twist, Climax setup.`;
-
-    const response = await generateText({
+    const response = await openrouterClient.chat.send({
       model,
-      prompt,
+      messages: [
+        {
+          role: 'user',
+          content: `Inject conflict and structure into: ${idea}\nStyle: ${style}\nProvide Inciting Incident, Twist, Climax setup.`,
+        },
+      ],
       temperature: 0.7,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
-    return response.text ?? '';
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
+    return responseText ?? '';
   }, 'enhancePlot');
 };
 
@@ -523,7 +569,6 @@ export const enhancePlot = async (idea: string, style: string): Promise<string> 
  * Polish dialogue
  */
 export const polishDialogue = async (content: string, style: string): Promise<string> => {
-  // Return mock data in test environment
   if (isTestEnvironment()) {
     return `# Polished Script
 
@@ -535,18 +580,25 @@ export const polishDialogue = async (content: string, style: string): Promise<st
   }
 
   return executeWithFallback(async provider => {
-    const model = getModel(provider, 'standard');
+    const model = getModelName(provider, 'standard');
 
-    const prompt = `Rewrite ONLY dialogue to be subtext-rich and distinct.\nStyle: ${style}\nText:\n${content}`;
-
-    const response = await generateText({
+    const response = await openrouterClient.chat.send({
       model,
-      prompt,
+      messages: [
+        {
+          role: 'user',
+          content: `Rewrite ONLY dialogue to be subtext-rich and distinct.\nStyle: ${style}\nText:\n${content}`,
+        },
+      ],
       temperature: 0.6,
-      // Disable AI SDK telemetry to prevent "m.log is not a function" errors in tests
-      experimental_telemetry: { isEnabled: false },
+      stream: false,
     });
 
-    return response.text ?? '';
+    const responseText =
+      typeof response.choices[0]?.message.content === 'string'
+        ? response.choices[0].message.content
+        : '';
+
+    return responseText ?? '';
   }, 'polishDialogue');
 };

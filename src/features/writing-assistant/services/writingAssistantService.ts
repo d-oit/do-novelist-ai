@@ -3,9 +3,7 @@
  * Provides intelligent content analysis and writing suggestions
  */
 
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import { generateText } from 'ai';
-import type { LanguageModel } from 'ai';
+import { OpenRouter } from '@openrouter/sdk';
 
 import { type Character } from '@/features/characters/types';
 import {
@@ -35,7 +33,6 @@ import {
   analyzeTransitions,
 } from './writing-style-analyzers';
 
-// Raw AI response type for suggestions
 interface RawAISuggestion {
   type?: string;
   severity?: string;
@@ -55,12 +52,11 @@ interface RawAISuggestion {
 
 class WritingAssistantService {
   private static instance: WritingAssistantService;
-  private readonly genAI: LanguageModel | null;
+  private readonly genAI: OpenRouter | null;
 
   private constructor() {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 
-    // Only log API key warning in non-test environments
     if (!apiKey && import.meta.env.PROD !== true && import.meta.env.NODE_ENV !== 'test') {
       logger.warn('Gemini API key not found. Writing assistant will use mock data.', {
         component: 'WritingAssistantService',
@@ -70,11 +66,7 @@ class WritingAssistantService {
     if (apiKey == null) {
       this.genAI = null;
     } else {
-      // Initialize with OpenRouter SDK
-      const openrouter = createOpenRouter({
-        apiKey,
-      });
-      this.genAI = openrouter('google/gemini-pro') as unknown as LanguageModel;
+      this.genAI = new OpenRouter({ apiKey });
     }
   }
 
@@ -83,9 +75,6 @@ class WritingAssistantService {
     return WritingAssistantService.instance;
   }
 
-  /**
-   * Analyze chapter content and provide comprehensive feedback
-   */
   public async analyzeContent(
     content: string,
     chapterId: string,
@@ -94,7 +83,6 @@ class WritingAssistantService {
     plotContext?: string,
   ): Promise<ContentAnalysis> {
     try {
-      // Run parallel analyses
       const suggestions = await this.generateWritingSuggestions(content, config);
       const readabilityScore = calculateReadabilityScore(content);
       const sentimentScore = analyzeSentiment(content);
@@ -146,9 +134,6 @@ class WritingAssistantService {
     }
   }
 
-  /**
-   * Generate intelligent writing suggestions using AI
-   */
   private async generateWritingSuggestions(
     content: string,
     config: WritingAssistantConfig,
@@ -158,7 +143,6 @@ class WritingAssistantService {
     }
 
     try {
-      // genAI is guaranteed to be non-null here due to the check above
       const prompt = `
         Analyze the following text and provide writing suggestions. Focus on:
         - Style improvements (clarity, flow, engagement)
@@ -188,15 +172,19 @@ class WritingAssistantService {
         "${content.substring(0, 2000)}${content.length > 2000 ? '...' : ''}"
       `;
 
-      const result = await generateText({
-        model: this.genAI,
-        prompt,
+      const result = await this.genAI!.chat.send({
+        model: 'google/gemini-pro',
+        messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
-        // Disable AI SDK logging to prevent "m.log is not a function" error
-        experimental_telemetry: { isEnabled: false },
+        stream: false,
       });
 
-      return this.parseAISuggestions(result.text, config);
+      const responseText =
+        typeof result.choices[0]?.message.content === 'string'
+          ? result.choices[0].message.content
+          : '';
+
+      return this.parseAISuggestions(responseText, config);
     } catch (error) {
       logger.error('AI suggestion generation failed', {
         component: 'WritingAssistantService',
@@ -206,15 +194,11 @@ class WritingAssistantService {
     }
   }
 
-  /**
-   * Parse AI response into structured suggestions
-   */
   private parseAISuggestions(
     aiResponse: string,
     config: WritingAssistantConfig,
   ): WritingSuggestion[] {
     try {
-      // Try to extract JSON from response
       const jsonMatch = /\[[\s\S]*\]/.exec(aiResponse);
       if (!jsonMatch) {
         return this.extractSuggestionsFromText(aiResponse);
@@ -253,9 +237,6 @@ class WritingAssistantService {
     }
   }
 
-  /**
-   * Extract suggestions from unstructured AI response
-   */
   private extractSuggestionsFromText(text: string): WritingSuggestion[] {
     const suggestions: WritingSuggestion[] = [];
     const lines = text.split('\n').filter(line => line.trim());
@@ -279,23 +260,15 @@ class WritingAssistantService {
     return suggestions.slice(0, 5);
   }
 
-  /**
-   * Detect potential plot holes
-   */
   private detectPlotHoles(content: string, plotContext?: string): PlotHoleDetection[] {
-    // This would use AI to analyze plot consistency
-    // For now, return basic detection
     const plotHoles: PlotHoleDetection[] = [];
 
-    // Use provided plot context if available
     if (plotContext) {
-      // Could use AI to analyze plot context for consistency
       logger.info('Analyzing plot context:', {
         plotContext: plotContext.substring(0, 100) + '...',
       });
     }
 
-    // Check for timeline inconsistencies
     const timeReferences =
       content.match(
         /\b(yesterday|today|tomorrow|last week|next month|morning|evening|night)\b/gi,
@@ -316,16 +289,8 @@ class WritingAssistantService {
     return plotHoles;
   }
 
-  /**
-   * Analyze character consistency
-   */
   private analyzeCharacterConsistency(characterContext?: Character[]): CharacterConsistencyIssue[] {
-    // This would cross-reference character behavior, speech patterns, etc.
-    // Basic implementation for now
-
-    // Use provided character context if available
     if (characterContext && characterContext.length > 0) {
-      // Could use AI to analyze character consistency with provided context
       logger.info('Analyzing characters for consistency', {
         characterCount: characterContext.length,
       });
@@ -334,16 +299,12 @@ class WritingAssistantService {
     return [];
   }
 
-  /**
-   * Analyze dialogue quality
-   */
   private analyzeDialogue(content: string): DialogueAnalysis {
     const dialogueMatches = content.match(/"[^"]*"/g) ?? [];
     const totalDialogue = dialogueMatches.length;
     const dialogueLength = dialogueMatches.join('').length;
     const dialoguePercentage = (dialogueLength / content.length) * 100;
 
-    // Basic dialogue tag analysis
     const tags =
       content.match(/\b(said|asked|replied|shouted|whispered|muttered|exclaimed)\b/gi) ?? [];
     const tagCounts = tags.reduce((acc: Record<string, number>, tag) => {
@@ -378,9 +339,6 @@ class WritingAssistantService {
     return Math.min(dialogueParagraphs.length, 6);
   }
 
-  /**
-   * Helper methods for empty states
-   */
   private getEmptyDialogueAnalysis(): DialogueAnalysis {
     return {
       totalDialogue: 0,
@@ -406,9 +364,6 @@ class WritingAssistantService {
     };
   }
 
-  /**
-   * Generate mock suggestions for testing
-   */
   private getMockSuggestions(content: string): WritingSuggestion[] {
     const suggestions: WritingSuggestion[] = [];
 
@@ -444,9 +399,6 @@ class WritingAssistantService {
     return suggestions;
   }
 
-  /**
-   * Generate mock analysis for testing
-   */
   private getMockAnalysis(content: string, chapterId: string): ContentAnalysis {
     return {
       chapterId,

@@ -10,18 +10,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { writingAssistantService } from '@/features/writing-assistant/services/writingAssistantService';
 import type { WritingAssistantConfig } from '@/types';
 
-// Mock the AI SDK to avoid actual API calls
-// Mock the AI SDK
-vi.mock('ai', async importOriginal => {
-  const actual = await importOriginal<any>();
-  return {
-    ...actual,
-    createGateway: vi.fn(() => vi.fn(modelId => ({ modelId }))),
-    generateText: vi.fn(() => Promise.resolve({ text: '[]' })),
-  };
-});
+vi.mock('@openrouter/sdk', () => ({
+  OpenRouter: class MockOpenRouter {
+    chat = {
+      send: vi.fn(() => Promise.resolve({ choices: [{ message: { content: '[]' } }] })),
+    };
+  },
+}));
 
-// Default test config
 const testConfig: WritingAssistantConfig = {
   enableRealTimeAnalysis: true,
   analysisDelay: 1500,
@@ -41,7 +37,7 @@ const testConfig: WritingAssistantConfig = {
 
 describe('WritingAssistantService', () => {
   describe('getInstance', () => {
-    it('should return the singleton instance', () => {
+    it('should return to singleton instance', () => {
       const instance1 = writingAssistantService;
       const instance2 = writingAssistantService;
       expect(instance1).toBe(instance2);
@@ -81,14 +77,13 @@ describe('WritingAssistantService', () => {
 
     it('should detect plot holes when enabled', async () => {
       const content =
-        'Yesterday morning, John went to the store. Tomorrow he would remember today as the best day. Last week he had planned for next month.';
+        'Yesterday morning, John went to the store. Tomorrow he would remember today as best day. Last week he had planned for next month.';
 
       const analysis = await writingAssistantService.analyzeContent(content, 'timeline-chapter', {
         ...testConfig,
         enablePlotHoleDetection: true,
       });
 
-      // Should detect timeline inconsistencies
       expect(analysis.plotHoles.length).toBeGreaterThanOrEqual(0);
     });
 
@@ -213,6 +208,7 @@ describe('WritingAssistantService', () => {
     it('should detect complex writing style', async () => {
       const complexStyle =
         'The multifaceted implications of this theoretical framework necessitate a comprehensive reevaluation of our fundamental assumptions about epistemological validity.';
+
       const analysis = await writingAssistantService.analyzeContent(complexStyle, 'complex-style', {
         ...testConfig,
         enableStyleAnalysis: true,
@@ -248,13 +244,13 @@ describe('WritingAssistantService', () => {
       const analysis = await writingAssistantService.analyzeContent(mysteriousText, 'mysterious', testConfig);
 
       expect(analysis.toneAnalysis.primary).toBeDefined();
-      // Mysterious words should contribute to the tone
       expect(analysis.toneAnalysis.intensity).toBeGreaterThanOrEqual(0);
     });
 
     it('should detect tense tone', async () => {
       const tenseText =
         'Danger was everywhere. The threat loomed. Fear gripped her heart. Anxiety built with every passing moment.';
+
       const analysis = await writingAssistantService.analyzeContent(tenseText, 'tense', testConfig);
 
       expect(analysis.toneAnalysis.primary).toBe('tense');
@@ -265,6 +261,7 @@ describe('WritingAssistantService', () => {
     it('should detect overused words', async () => {
       const repetitiveText =
         'The very big very tall very strong man was very happy. He was very excited about his very nice day.';
+
       const analysis = await writingAssistantService.analyzeContent(repetitiveText, 'repetitive', testConfig);
 
       const veryOveruse = analysis.wordUsage.overusedWords.find(w => w.word.toLowerCase() === 'very');
@@ -326,6 +323,7 @@ This is a much longer paragraph that contains many sentences and provides extens
     it('should detect complex sentences', async () => {
       const complexSentences =
         'When the cat sat, the mouse ran. Because it rained, we stayed inside. If you study, you will pass.';
+
       const analysis = await writingAssistantService.analyzeContent(complexSentences, 'complex-sentences', testConfig);
 
       expect(analysis.sentenceVariety.typeDistribution.complex).toBeGreaterThan(0);
@@ -336,6 +334,7 @@ This is a much longer paragraph that contains many sentences and provides extens
     it('should detect transition words', async () => {
       const withTransitions =
         'First, we begin. However, there are challenges. Therefore, we must adapt. Furthermore, progress continues.';
+
       const analysis = await writingAssistantService.analyzeContent(withTransitions, 'transitions', testConfig);
 
       expect(analysis.transitionQuality.quality).toBeGreaterThan(0);

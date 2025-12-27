@@ -7,7 +7,6 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { getLatencyStats, getCircuitBreakerStatus, resetCircuitBreaker } from '@/services/ai-health-service';
 
-// Mock dependencies
 vi.mock('@/lib/ai-config', async () => {
   const actual = await vi.importActual<any>('@/lib/ai-config');
   return {
@@ -55,9 +54,18 @@ vi.mock('@/lib/logging/logger', () => ({
   },
 }));
 
+vi.mock('@openrouter/sdk', () => ({
+  OpenRouter: class MockOpenRouter {
+    chat = {
+      send: vi.fn().mockResolvedValue({
+        choices: [{ message: { content: 'Health check response' } }],
+      }),
+    };
+  },
+}));
+
 describe('AI Health Service - Circuit Breaker', () => {
   beforeEach(() => {
-    // Reset circuit breaker state for each test
     resetCircuitBreaker('google');
     resetCircuitBreaker('openai');
     resetCircuitBreaker('anthropic');
@@ -83,7 +91,6 @@ describe('AI Health Service - Circuit Breaker', () => {
       expect(statusBefore.failureCount).toBe(0);
       expect(statusBefore.isOpen).toBe(false);
 
-      // Reset should maintain closed state
       resetCircuitBreaker('anthropic');
       const statusAfter = getCircuitBreakerStatus('anthropic');
       expect(statusAfter.failureCount).toBe(0);
@@ -118,7 +125,6 @@ describe('AI Health Service - Latency Tracking', () => {
 
 describe('AI Health Service - Health Status Determination', () => {
   it('returns operational when no issues', () => {
-    // Test internal function by verifying health status structure
     const status = getCircuitBreakerStatus('google');
     expect(status).toBeDefined();
     expect(typeof status.isOpen).toBe('boolean');

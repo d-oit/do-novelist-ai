@@ -3,8 +3,7 @@
  * Base infrastructure for AI operations including configuration, logging, and provider management.
  */
 
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import type { LanguageModel } from 'ai';
+import { OpenRouter } from '@openrouter/sdk';
 
 import {
   getAIConfig,
@@ -13,7 +12,7 @@ import {
   type AIProvider,
 } from '@/lib/ai-config';
 import { createAIError, createConfigurationError } from '@/lib/errors/error-types';
-import { logger } from '@/lib/errors/logging';
+import { logger } from '@/lib/logging/logger';
 import {
   loadUserPreferences,
   getActiveProviders,
@@ -24,6 +23,11 @@ import type { Chapter } from '@/types/index';
 // Get configuration
 const config = getAIConfig();
 
+// Create OpenRouter SDK client instance
+const openrouterClient = new OpenRouter({
+  apiKey: config.openrouterApiKey ?? '',
+});
+
 // Create logger for AI module
 export const aiLogger = logger.child({ module: 'ai-service' });
 
@@ -31,9 +35,7 @@ export const aiLogger = logger.child({ module: 'ai-service' });
  * Check if running in test/CI environment
  */
 export const isTestEnvironment = (): boolean => {
-  // Check for browser environment first
   if (typeof window !== 'undefined') {
-    // Explicit test environment flags always trigger mock mode
     if (
       import.meta.env?.CI === 'true' ||
       import.meta.env?.NODE_ENV === 'test' ||
@@ -43,8 +45,6 @@ export const isTestEnvironment = (): boolean => {
       return true;
     }
 
-    // On localhost/127.0.0.1, only use mock mode if no API key is configured
-    // This allows local development with real AI when API key is present
     const isLocalhost =
       window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const hasApiKey = !!import.meta.env?.VITE_OPENROUTER_API_KEY;
@@ -53,11 +53,9 @@ export const isTestEnvironment = (): boolean => {
       return true;
     }
 
-    // Not a test environment if we have an API key (even on localhost)
     return false;
   }
 
-  // Node.js environment (for server-side rendering or testing)
   if (typeof process !== 'undefined' && process.env) {
     return (
       process.env.CI === 'true' ||
@@ -66,7 +64,6 @@ export const isTestEnvironment = (): boolean => {
     );
   }
 
-  // Default to false if we can't determine
   return false;
 };
 
@@ -86,13 +83,12 @@ export function isValidOutline(
 }
 
 /**
- * Get the appropriate model instance based on provider
- * Uses OpenRouter SDK for routing
+ * Get model name for a specific provider and complexity level
  */
-export function getModel(
+export function getModelName(
   provider: AIProvider,
   complexity: 'fast' | 'standard' | 'advanced' = 'standard',
-): LanguageModel {
+): string {
   const modelName = getModelForTask(provider, complexity, config);
   const providerConfig = config.providers[provider];
 
@@ -116,21 +112,13 @@ export function getModel(
     throw error;
   }
 
-  aiLogger.debug('Creating model instance', {
+  aiLogger.debug('Generated model name', {
     provider,
     modelName,
     complexity,
   });
 
-  // Create OpenRouter instance
-  // The OpenRouter SDK routes requests to the appropriate provider
-  const openrouter = createOpenRouter({
-    apiKey: config.openrouterApiKey,
-  });
-
-  // Return the model instance using OpenRouter
-  // Format: provider/model-name (e.g. anthropic/claude-3-5-sonnet)
-  return openrouter(`${provider}/${modelName}`) as unknown as LanguageModel;
+  return `${provider}/${modelName}`;
 }
 
 /**
@@ -141,11 +129,9 @@ export async function resolveProviders(): Promise<{
   enableFallback: boolean;
 }> {
   try {
-    // Try to get userId from context if in browser
     let userId: string | null = null;
     if (typeof window !== 'undefined') {
       try {
-        // Access storage directly to avoid React hook usage outside component
         userId = localStorage.getItem('novelist_user_id');
       } catch {
         // Ignore localStorage errors
@@ -163,7 +149,6 @@ export async function resolveProviders(): Promise<{
     });
   }
 
-  // Fallback to environment-based provider order
   return { providers: getEnabledProviders(config), enableFallback: config.enableFallback };
 }
 
@@ -221,7 +206,6 @@ export async function executeWithFallback<T>(
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
-      // Convert to AI error with context
       const aiError = createAIError(
         `Provider ${provider} failed for ${operationName}: ${errorMessage}`,
         {
@@ -243,12 +227,10 @@ export async function executeWithFallback<T>(
 
       lastError = aiError;
 
-      // If fallback is disabled or this is the last provider, throw immediately
       if (!enableFallback || provider === providers[providers.length - 1]) {
         break;
       }
 
-      // Continue to next provider
       continue;
     }
   }
@@ -262,5 +244,5 @@ export async function executeWithFallback<T>(
   throw lastError ?? new Error(`${operationName} failed with all providers`);
 }
 
-// Re-export config for operations that might need it directly (rare, but good for completeness)
-export { config };
+// Export OpenRouter client and config for use in other modules
+export { openrouterClient, config };

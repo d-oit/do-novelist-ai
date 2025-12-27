@@ -1,33 +1,22 @@
 import type { Page } from '@playwright/test';
 
 /**
- * Ensures AI SDK logger is properly initialized in the browser context
- * This must be called before any AI SDK operations
- */
-async function ensureLoggerInitializedInBrowser(page: Page): Promise<void> {
-  // Inject logger into the browser context directly
-  await page.addInitScript(() => {
-    // Create a minimal logger that satisfies AI SDK expectations
-    const mockLogger = {
-      log: (): void => {
-        // Silent no-op in tests to avoid console pollution
-        // Uncomment for debugging: console.log('[AI SDK]', ...args);
-      },
-    };
-
-    // Set on both globalThis and window for maximum compatibility
-    (globalThis as any).m = mockLogger;
-    (window as any).m = mockLogger;
-  });
-}
-
-/**
- * Mock setup for AI SDK
- * Ensures the logger is available in browser context before any AI SDK code runs
+ * Mock setup for OpenRouter SDK
+ * Ensures proper initialization in browser context for E2E tests
  */
 export const setupAISDKMock = async (page: Page): Promise<void> => {
-  // Ensure logger is initialized in the browser context FIRST
-  await ensureLoggerInitializedInBrowser(page);
+  // Initialize mock OpenRouter SDK in browser context
+  await page.addInitScript(() => {
+    // Mock OpenRouter SDK for E2E tests
+    (window as any).__MOCK_OPENROUTER__ = {
+      chat: {
+        send: async () => ({
+          choices: [{ message: { content: 'Mock AI response for E2E test' } }],
+          usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+        }),
+      },
+    };
+  });
 
-  console.log('[mock-ai-sdk] AI SDK logger initialized in browser context');
+  console.log('[mock-ai-sdk] OpenRouter SDK mock initialized in browser context');
 };

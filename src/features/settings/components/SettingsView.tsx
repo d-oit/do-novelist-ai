@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Database,
+  Download,
   Key,
   Laptop,
   Moon,
@@ -16,6 +17,7 @@ import React, { useEffect, useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { GamificationPanel } from '@/features/gamification/components/GamificationPanel';
 import { AISettingsPanel } from '@/features/settings/components/AISettingsPanel';
+import { PWAInstallButton } from '@/features/settings/components/PWAInstallButton';
 import type { DbConfig } from '@/lib/db';
 import { db, getStoredConfig, saveStoredConfig } from '@/lib/db';
 import { cn } from '@/lib/utils';
@@ -178,6 +180,14 @@ const SettingsView: React.FC = () => {
             </button>
           </div>
         </div>
+      </section>
+
+      {/* PWA Installation */}
+      <section className='space-y-4'>
+        <h3 className='flex items-center gap-2 text-lg font-medium'>
+          <Download className='h-5 w-5' /> App Installation
+        </h3>
+        <PWAInstallButton />
       </section>
 
       {/* Appearance */}

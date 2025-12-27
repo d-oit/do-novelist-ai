@@ -92,7 +92,7 @@ export default defineConfig({
     env: {
       NODE_ENV: 'development',
       PLAYWRIGHT_TEST: 'true',
-      VITE_AI_GATEWAY_API_KEY: 'test-gateway-key',
+      VITE_OPENROUTER_API_KEY: 'test-openrouter-key',
       VITE_DEFAULT_AI_PROVIDER: 'mistral',
       VITE_DEFAULT_AI_MODEL: 'mistral:mistral-medium-latest',
       VITE_TURSO_DATABASE_URL: 'test-url',

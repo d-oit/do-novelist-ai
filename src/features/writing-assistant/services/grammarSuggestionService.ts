@@ -210,29 +210,32 @@ class GrammarSuggestionService {
       });
 
       // Check for pronoun reference issues
-      const pronounPattern = /\bthis\s+[\w]+\b/gi;
-      const pronounMatches = line.match(pronounPattern);
-      if (pronounMatches) {
-        const position = this.findPatternPosition(line, pronounPattern);
-        suggestions.push({
-          id: `grammar-pr-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          type: 'pronoun_reference',
-          severity: 'suggestion',
-          category: 'clarity',
-          position: {
-            start: position.start,
-            end: position.end,
-            line: lineIndex + 1,
-            column: position.column,
-          },
-          originalText: pronounMatches[0],
-          message: 'Unclear pronoun reference',
-          explanation: `"${pronounMatches[0]}" may have an unclear antecedent. Consider specifying what "this" refers to.`,
-          confidence: 0.65,
-          aiGenerated: false,
-          timestamp: new Date(),
-        });
-      }
+      const pronounPatterns = [/\bthis\s+[\w]+\b/gi, /\bthat\s+they\b/gi, /\bwhich\b/gi];
+
+      pronounPatterns.forEach(pronounPattern => {
+        const pronounMatches = line.match(pronounPattern);
+        if (pronounMatches) {
+          const position = this.findPatternPosition(line, pronounPattern);
+          suggestions.push({
+            id: `grammar-pr-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            type: 'pronoun_reference',
+            severity: 'suggestion',
+            category: 'clarity',
+            position: {
+              start: position.start,
+              end: position.end,
+              line: lineIndex + 1,
+              column: position.column,
+            },
+            originalText: pronounMatches[0],
+            message: 'Unclear pronoun reference',
+            explanation: `"${pronounMatches[0]}" may have an unclear antecedent. Consider being more specific.`,
+            confidence: 0.7,
+            aiGenerated: false,
+            timestamp: new Date(),
+          });
+        }
+      });
     });
 
     return suggestions;
@@ -246,6 +249,7 @@ class GrammarSuggestionService {
 
     // Common misspelled words patterns
     const misspellings: Record<string, string> = {
+      Teh: 'The',
       teh: 'the',
       taht: 'that',
       definately: 'definitely',
@@ -418,6 +422,7 @@ class GrammarSuggestionService {
       // Check for vague language
       const vaguePatterns = [
         { pattern: /\bsome\s+\w+s?\b/gi, issue: 'vague quantity' },
+        { pattern: /\ba\s+lot\b/gi, issue: 'consider being more specific' },
         { pattern: /\balot\b/gi, issue: '"a lot" should be two words' },
         { pattern: /\bkind of\b|\bsort of\b/gi, issue: 'vague expression' },
         { pattern: /\breally\s+\w+/gi, issue: 'unnecessary intensifier' },
@@ -447,6 +452,34 @@ class GrammarSuggestionService {
           });
         }
       });
+
+      // Check for wordy phrases
+      for (const [wordyPhrase, replacement] of Object.entries(this.WORDY_PHRASES)) {
+        const pattern = new RegExp(`\\b${wordyPhrase}\\b`, 'gi');
+        const match = line.match(pattern);
+        if (match) {
+          const position = this.findPatternPosition(line, pattern);
+          suggestions.push({
+            id: `clarity-wordy-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            type: 'clarity',
+            severity: 'suggestion',
+            category: 'clarity',
+            position: {
+              start: position.start,
+              end: position.end,
+              line: lineIndex + 1,
+              column: position.column,
+            },
+            originalText: match[0],
+            suggestedText: replacement,
+            message: `Wordy phrase: "${match[0]}"`,
+            explanation: `Consider using "${replacement}" instead of "${match[0]}" for conciseness.`,
+            confidence: 0.8,
+            aiGenerated: false,
+            timestamp: new Date(),
+          });
+        }
+      }
     });
 
     return suggestions;
@@ -461,24 +494,26 @@ class GrammarSuggestionService {
     // Check for weak words
     for (const [weakWord, suggestion] of Object.entries(this.WEAK_WORDS)) {
       const pattern = new RegExp(`\\b${weakWord}\\b`, 'gi');
-      let match: RegExpExecArray | null;
-      while ((match = pattern.exec(content)) !== null) {
-        suggestions.push({
-          id: `style-weak-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          type: 'word_choice',
-          severity: 'suggestion',
-          category: 'style',
-          position: {
-            start: match.index,
-            end: match.index + match[0].length,
-          },
-          originalText: match[0],
-          message: `Weak word: "${match[0]}"`,
-          explanation: `${suggestion}. Consider using a more precise word.`,
-          confidence: 0.65,
-          aiGenerated: false,
-          timestamp: new Date(),
-        });
+      const matches = content.matchAll(pattern);
+      for (const match of matches) {
+        if (match.index !== undefined) {
+          suggestions.push({
+            id: `style-weak-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            type: 'word_choice',
+            severity: 'suggestion',
+            category: 'style',
+            position: {
+              start: match.index,
+              end: match.index + match[0].length,
+            },
+            originalText: match[0],
+            message: `Weak word: "${match[0]}"`,
+            explanation: `${suggestion}. Consider using a more precise word.`,
+            confidence: 0.7,
+            aiGenerated: false,
+            timestamp: new Date(),
+          });
+        }
       }
     }
 
@@ -507,23 +542,25 @@ class GrammarSuggestionService {
       { phrase: 'circle around', replacement: 'circle' },
     ];
 
-    const lines = content.split('\n');
-    lines.forEach((line, lineIndex) => {
-      for (const { phrase, replacement } of redundantPhrases) {
-        const pattern = new RegExp(`\\b${phrase}\\b`, 'gi');
-        const match = line.match(pattern);
-        if (match) {
-          const position = this.findPatternPosition(line, pattern);
+    for (const { phrase, replacement } of redundantPhrases) {
+      // Escape special regex characters in phrase
+      const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const pattern = new RegExp(`\\b${escapedPhrase}\\b`, 'gi');
+      const matches = content.matchAll(pattern);
+
+      for (const match of matches) {
+        if (match.index !== undefined) {
+          const lineInfo = this.getLineInfo(content, match.index);
           suggestions.push({
             id: `redundancy-${Date.now()}-${Math.random().toString(36).slice(2)}`,
             type: 'redundancy',
             severity: 'suggestion',
             category: 'clarity',
             position: {
-              start: position.start,
-              end: position.end,
-              line: lineIndex + 1,
-              column: position.column,
+              start: match.index,
+              end: match.index + match[0].length,
+              line: lineInfo.line,
+              column: lineInfo.column,
             },
             originalText: match[0],
             suggestedText: replacement,
@@ -535,7 +572,7 @@ class GrammarSuggestionService {
           });
         }
       }
-    });
+    }
 
     return suggestions;
   }
@@ -651,6 +688,16 @@ class GrammarSuggestionService {
     const beforeSentences = line.split(/[.!?]+/).slice(0, index);
     const start = beforeSentences.join('.').length;
     return { start, end: start + sentence.length };
+  }
+
+  private getLineInfo(content: string, index: number): { line: number; column: number } {
+    const beforeIndex = content.substring(0, index);
+    const lines = beforeIndex.split('\n');
+    const lastLine = lines[lines.length - 1];
+    return {
+      line: lines.length,
+      column: lastLine?.length ?? 0,
+    };
   }
 
   private countSyllables(word: string): number {

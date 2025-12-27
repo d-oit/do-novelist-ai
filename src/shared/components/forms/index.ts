@@ -7,4 +7,4 @@
 //   import { Button } from '@/shared/components/forms';
 //   import { ButtonProps } from '@/shared/components/forms';
 
-export { Button, buttonVariants } from './Button';
+export { Button, buttonVariants } from '@/shared/components/ui/Button';

@@ -9,10 +9,9 @@ import { useState } from 'react';
 
 import { WorldElementEditor } from '@/features/world-building/components/WorldElementEditor';
 import { useWorldBuilding } from '@/features/world-building/hooks/useWorldBuilding';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import type { Location } from '@/types';
-
-import { Button } from '@shared/components/button';
-import { Card } from '@shared/components/card';
 
 interface LocationManagerProps {
   projectId: string;

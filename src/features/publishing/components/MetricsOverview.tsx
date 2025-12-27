@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import {
   Eye,
@@ -13,7 +12,7 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
-import MetricCard from '@/components/ui/MetricCard';
+import { MetricCard } from '@/components/ui/MetricCard';
 import { type PublishingAnalytics, type EngagementMetrics } from '@/types';
 
 interface MetricsOverviewProps {

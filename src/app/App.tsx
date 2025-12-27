@@ -8,6 +8,7 @@ import { useGoapEngine } from '@/features/generation/hooks';
 import { ProjectStats, ProjectWizard } from '@/features/projects/components';
 import { db } from '@/features/projects/services';
 import { logger } from '@/lib/logging/logger';
+import { offlineManager } from '@/lib/pwa';
 import { performanceMonitor } from '@/performance';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
 import type { Chapter, Project, RefineOptions } from '@/shared/types';
@@ -186,6 +187,9 @@ const App: React.FC = () => {
     const initApp = async (): Promise<void> => {
       performanceMonitor.startTiming('app-initialization');
 
+      // Initialize PWA offline manager
+      offlineManager.initialize();
+
       // Set a hard timeout to ensure app renders in CI environments
       const forceRenderTimeout = setTimeout(() => {
         logger.warn('Forcing app render after timeout', {
@@ -209,7 +213,7 @@ const App: React.FC = () => {
           error,
           note: 'continuing with local storage',
         });
-        // Continue with local storage - don't block the app
+        // Continue with local storage - don't block app
       } finally {
         performanceMonitor.endTiming('app-initialization');
         clearTimeout(forceRenderTimeout);
