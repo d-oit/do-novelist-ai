@@ -10,16 +10,18 @@ decisions.
 
 ## Current Status (0 files violating limit)
 
-**✅ All files are within policy limits**. The largest file (712 LOC) is marked
-as an acceptable violation due to cohesive functionality.
+**✅ All files are within policy limits or tracked as acceptable**. The largest
+files (712-766 LOC) are marked as acceptable violations due to cohesive
+functionality.
 
 ## Acceptable Violations (Tracked)
 
-| File                                                                 | LOC | Priority | Status        | Notes                                |
-| -------------------------------------------------------------------- | --- | -------- | ------------- | ------------------------------------ |
-| `src/features/writing-assistant/services/writingAssistantService.ts` | 766 | LOW      | ✅ Acceptable | Cohesive service, high test coverage |
-| `src/lib/character-validation.ts`                                    | 690 | LOW      | ✅ Acceptable | Type validation schemas, mostly data |
-| `src/lib/validation.ts`                                              | 444 | LOW      | ✅ Acceptable | Validation logic                     |
+| File                                                                 | LOC | Priority | Status        | Notes                                     |
+| -------------------------------------------------------------------- | --- | -------- | ------------- | ----------------------------------------- |
+| `src/features/writing-assistant/services/writingAssistantService.ts` | 766 | LOW      | ✅ Acceptable | Cohesive service, high test coverage      |
+| `src/lib/character-validation.ts`                                    | 690 | LOW      | ✅ Acceptable | Type validation schemas, mostly data      |
+| `src/lib/validation.ts`                                              | 444 | LOW      | ✅ Acceptable | Validation logic                          |
+| `src/features/writing-assistant/components/WritingGoalsPanel.tsx`    | 532 | LOW      | ✅ Acceptable | Reduced from 1023 LOC, cohesive component |
 
 ## Decision: Acceptable Violations
 
