@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
+import path from 'path';
 import { logger } from './src/lib/logging/logger';
 
 interface WorkflowRun {
@@ -140,6 +141,13 @@ class GitHubActionsMonitor {
   private maxRuntime = 3600000; // 1 hour maximum
   private startTime = Date.now();
   private workflowStatuses = new Map<string, string>();
+  private readonly logsDir = 'logs';
+
+  constructor() {
+    if (!fs.existsSync(this.logsDir)) {
+      fs.mkdirSync(this.logsDir, { recursive: true });
+    }
+  }
 
   private log(message: string, type: 'info' | 'error' | 'success' = 'info'): void {
     const timestamp = new Date().toISOString();
@@ -152,7 +160,7 @@ class GitHubActionsMonitor {
     }
 
     // Log to file for audit trail
-    fs.appendFileSync('monitoring.log', `[${timestamp}] ${message}\n`);
+    fs.appendFileSync(path.join(this.logsDir, 'monitoring.log'), `[${timestamp}] ${message}\n`);
   }
 
   private async executeGitHubCommand(command: string): Promise<WorkflowRun[] | null> {
@@ -383,7 +391,10 @@ class GitHubActionsMonitor {
       status: this.consecutiveSuccess >= this.targetSuccess ? 'STABLE' : 'MONITORING',
     };
 
-    fs.writeFileSync('monitoring-report.json', JSON.stringify(report, null, 2));
+    fs.writeFileSync(
+      path.join(this.logsDir, 'monitoring-report.json'),
+      JSON.stringify(report, null, 2),
+    );
     this.log('📊 Generated monitoring report');
 
     return report;

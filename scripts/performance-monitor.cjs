@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const PERFORMANCE_DIR = '.performance-metrics';
+const PERFORMANCE_DIR = path.join('logs', '.performance-metrics');
 const THRESHOLDS = {
   mainBundleSize: 250 * 1024, // 250KB (increased from 200KB for complex apps)
   totalBuildSize: 3 * 1024 * 1024, // 3MB
