@@ -46,6 +46,14 @@ const PublishView: FC<PublishViewProps> = ({ project, onUpdateProject, onUpdateC
     setIsExporting(true);
     try {
       const blob = await generateEpub(project, settings.enableDropCaps);
+
+      void import('@/lib/analytics').then(({ featureTracking }) => {
+        featureTracking.trackFeatureUsage('publishing', 'book_exported', {
+          format: 'epub',
+          wordCount: totalWords,
+        });
+      });
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -96,6 +104,14 @@ const PublishView: FC<PublishViewProps> = ({ project, onUpdateProject, onUpdateC
           });
         }
       }
+
+      void import('@/lib/analytics').then(({ featureTracking }) => {
+        featureTracking.trackFeatureUsage('publishing', 'content_translated', {
+          targetLanguage: targetLang,
+          chapterCount: project.chapters.length,
+        });
+      });
+
       alert('Translation complete!');
     } catch {
       alert('Translation failed midway.');

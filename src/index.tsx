@@ -49,12 +49,19 @@ if (!rootElement) {
 addResourceHints();
 preloadCriticalResources();
 
+import { AnalyticsProvider } from '@/components/AnalyticsProvider';
+
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
       <UserProvider>
-        <App />
+        <AnalyticsProvider
+          apiKey={import.meta.env.VITE_POSTHOG_API_KEY}
+          apiHost={import.meta.env.VITE_POSTHOG_API_HOST}
+        >
+          <App />
+        </AnalyticsProvider>
       </UserProvider>
     </ErrorBoundary>
   </React.StrictMode>,

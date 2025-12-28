@@ -1,10 +1,10 @@
 /**
  * Project Service
  *
- * Handles project persistence using the database abstraction layer
+ * Handles project persistence using the Drizzle ORM database layer
  */
 
-import { db } from '@/lib/db';
+import { drizzleDbService } from '@/lib/database';
 import { logger } from '@/lib/logging/logger';
 import { PublishStatus } from '@/types';
 import {
@@ -20,7 +20,7 @@ class ProjectService {
    */
   public async init(): Promise<void> {
     logger.debug('Initializing database connection', { component: 'ProjectService' });
-    await db.init();
+    await drizzleDbService.init();
     logger.debug('Database initialized', { component: 'ProjectService' });
   }
 
@@ -30,13 +30,13 @@ class ProjectService {
   public async getAll(): Promise<Project[]> {
     logger.debug('Fetching all projects', { component: 'ProjectService' });
     await this.init();
-    const summaries = await db.getAllProjects();
+    const summaries = await drizzleDbService.getAllProjects();
 
     // Load full project data for each summary
     const projects: Project[] = [];
     for (const summary of summaries) {
       try {
-        const project = await db.loadProject(summary.id);
+        const project = await drizzleDbService.loadProject(summary.id);
         if (project) {
           projects.push(project);
         }
@@ -59,7 +59,7 @@ class ProjectService {
   public async getById(id: string): Promise<Project | null> {
     logger.debug('Fetching project by ID', { component: 'ProjectService', projectId: id });
     await this.init();
-    const project = await db.loadProject(id);
+    const project = await drizzleDbService.loadProject(id);
 
     if (!project) {
       // Only log as debug in test environment to avoid noise
@@ -145,7 +145,7 @@ class ProjectService {
       },
     };
 
-    await db.saveProject(project);
+    await drizzleDbService.saveProject(project);
     logger.info('Project created successfully', { component: 'ProjectService', projectId });
     return project;
   }
@@ -175,7 +175,7 @@ class ProjectService {
       updatedAt: new Date(),
     };
 
-    await db.saveProject(updated);
+    await drizzleDbService.saveProject(updated);
     logger.info('Project updated successfully', { component: 'ProjectService', projectId: id });
   }
 
@@ -189,7 +189,7 @@ class ProjectService {
       logger.debug('Deleting project', { component: 'ProjectService', projectId: id });
     }
     await this.init();
-    await db.deleteProject(id);
+    await drizzleDbService.deleteProject(id);
     if (import.meta.env.NODE_ENV !== 'test') {
       logger.info('Project deleted', { component: 'ProjectService', projectId: id });
     } else {
@@ -224,7 +224,7 @@ class ProjectService {
       updatedAt: new Date(),
     };
 
-    await db.saveProject(updated);
+    await drizzleDbService.saveProject(updated);
     logger.info('Project saved successfully', {
       component: 'ProjectService',
       projectId: project.id,

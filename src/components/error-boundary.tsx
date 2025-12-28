@@ -5,9 +5,9 @@
 
 import React, { Component, type ReactNode, type ComponentType, type ErrorInfo } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { errorHandler } from '@/lib/errors/error-handler';
 import { logger } from '@/lib/errors/logging';
+import { Button } from '@/shared/components/ui/Button';
 
 interface Props {
   children: ReactNode;

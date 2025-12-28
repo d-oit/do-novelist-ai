@@ -2,6 +2,7 @@ import { Loader2, Settings } from 'lucide-react';
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 
 import { ProjectsErrorBoundary } from '@/components/error-boundary';
+import { BottomNav } from '@/components/layout/BottomNav';
 import Navbar from '@/components/Navbar';
 import { ActionCard, BookViewer, PlannerControl } from '@/features/generation/components';
 import { useGoapEngine } from '@/features/generation/hooks';
@@ -10,6 +11,8 @@ import { db } from '@/features/projects/services';
 import { logger } from '@/lib/logging/logger';
 import { offlineManager } from '@/lib/pwa';
 import { performanceMonitor } from '@/performance';
+import { Skeleton } from '@/shared/components/ui/Skeleton';
+import { Toaster } from '@/shared/components/ui/Toaster';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
 import type { Chapter, Project, RefineOptions } from '@/shared/types';
 
@@ -28,24 +31,37 @@ const AgentConsole = lazy(() =>
 
 // Loading components for Suspense boundaries
 const ProjectsLoader = () => (
-  <div className='flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background text-foreground'>
-    <Loader2 className='mb-4 h-8 w-8 animate-spin text-primary' />
-    <p className='text-muted-foreground'>Loading Projects...</p>
+  <div className='flex min-h-[calc(100vh-4rem)] flex-col gap-6 bg-background p-8'>
+    <div className='mb-8 text-center'>
+      <Skeleton className='mx-auto h-12 w-64' />
+      <Skeleton className='mx-auto mt-3 h-6 w-96' />
+    </div>
+    <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+      {[...Array(6)].map((_, i) => (
+        <Skeleton key={i} className='h-48 w-full' />
+      ))}
+    </div>
   </div>
 );
 
 const SettingsLoader = () => (
-  <div className='flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background text-foreground'>
-    <Loader2 className='mb-4 h-8 w-8 animate-spin text-primary' />
-    <p className='text-muted-foreground'>Loading Settings...</p>
+  <div className='container mx-auto max-w-4xl space-y-8 p-8'>
+    <Skeleton className='h-10 w-48' />
+    <div className='space-y-4'>
+      <Skeleton className='h-32 w-full' />
+      <Skeleton className='h-32 w-full' />
+      <Skeleton className='h-32 w-full' />
+    </div>
   </div>
 );
 
 const ConsoleLoader = () => (
-  <div className='flex h-[300px] min-h-[300px] items-center justify-center rounded-lg border border-border bg-muted/20'>
-    <div className='flex items-center gap-2 text-muted-foreground'>
-      <Loader2 className='h-4 w-4 animate-spin' />
-      <span className='text-sm'>Loading Console...</span>
+  <div className='h-[300px] w-full rounded-lg border border-border bg-muted/20 p-4'>
+    <div className='space-y-2'>
+      <Skeleton className='h-4 w-3/4' />
+      <Skeleton className='h-4 w-1/2' />
+      <Skeleton className='h-4 w-2/3' />
+      <Skeleton className='h-4 w-1/3' />
     </div>
   </div>
 );
@@ -258,6 +274,15 @@ const App: React.FC = () => {
     setProject(newProject);
     void db.saveProject(newProject);
 
+    // Analytics
+    void import('@/lib/analytics').then(({ featureTracking }) => {
+      featureTracking.trackFeatureUsage('projects', 'create_project', {
+        style,
+        targetWordCount,
+        hasIdea: !!idea,
+      });
+    });
+
     engine.addLog('System', 'Project Initialized.', 'info');
     engine.addLog('System', `Idea registered: ${idea.substring(0, 50)}...`, 'thought');
     engine.addLog('System', `Target Word Count set to ${targetWordCount}.`, 'info');
@@ -366,7 +391,7 @@ const App: React.FC = () => {
         onNavigate={setCurrentView}
       />
 
-      <main id='main-content' role='main' className='relative flex-1'>
+      <main id='main-content' role='main' className='relative flex-1 pb-16 md:pb-0'>
         {/* Page Title - Hidden visually but available to screen readers */}
         <h1 className='sr-only'>
           {currentView === 'dashboard' && project.title !== 'Untitled Project'
@@ -476,6 +501,9 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
+      <BottomNav currentView={currentView} onNavigate={setCurrentView} />
+      <Toaster />
     </div>
   );
 };

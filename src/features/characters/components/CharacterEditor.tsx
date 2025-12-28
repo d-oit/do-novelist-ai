@@ -3,9 +3,9 @@ import { X, Save, AlertCircle } from 'lucide-react';
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/Card';
 import { iconButtonTarget } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/shared/components/ui/Card';
 import { type Character, type CharacterRole, type CharacterArc } from '@/types';
 
 interface CharacterEditorProps {

@@ -85,6 +85,13 @@ folder.
 - Dark mode support with `dark:` prefix
 - Consistent spacing with Tailwind scale
 
+**Button Contrast (WCAG AA Compliance):**
+
+- Primary actions: `bg-primary text-primary-foreground` ✅
+- Secondary actions: `bg-secondary text-secondary-foreground` ✅
+- **Never use:** `bg-secondary text-primary` ❌ (poor contrast in dark mode)
+- See `plans/UI-UX-ANALYSIS-AND-RECOMMENDATIONS-JAN-2026.md` for full guidelines
+
 ### Testing
 
 - Vitest for unit tests, Playwright for E2E

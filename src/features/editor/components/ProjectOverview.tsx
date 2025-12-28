@@ -1,4 +1,3 @@
-
 /**
  * Project Overview Component - Extracted from BookViewer
  * Handles project details and metadata editing
@@ -7,8 +6,8 @@
 import { Edit3, Save, Book, User, Globe } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
 import type { Project } from '@/types';
 import { ChapterStatus } from '@/types';
 

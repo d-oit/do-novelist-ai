@@ -2,7 +2,6 @@ import { Users, Plus, AlertCircle } from 'lucide-react';
 import type { FC } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { CharacterEditor } from '@/features/characters/components/CharacterEditor';
 import { CharacterFilters } from '@/features/characters/components/CharacterFilters';
 import { CharacterGrid } from '@/features/characters/components/CharacterGrid';
@@ -10,6 +9,7 @@ import { CharacterStats } from '@/features/characters/components/CharacterStats'
 import { useCharacters } from '@/features/characters/hooks/useCharacters';
 import { validateCharacter } from '@/lib/character-validation';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
 import { type Character } from '@/types';
 
 interface CharacterManagerProps {

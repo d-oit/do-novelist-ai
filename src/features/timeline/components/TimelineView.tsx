@@ -2,9 +2,9 @@ import { Plus, ZoomIn, ZoomOut, Calendar } from 'lucide-react';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { TimelineCanvas } from '@/features/timeline/components/TimelineCanvas';
 import { useTimelineStore } from '@/features/timeline/stores/timelineStore';
+import { Button } from '@/shared/components/ui/Button';
 import type { Project, TimelineEvent } from '@/types/schemas';
 
 interface TimelineViewProps {

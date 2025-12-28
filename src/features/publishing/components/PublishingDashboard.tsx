@@ -3,7 +3,6 @@ import { Globe, BookOpen, RefreshCw, X } from 'lucide-react';
 import type { FC } from 'react';
 import { useState, useEffect, useMemo } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { AlertsSection } from '@/features/publishing/components/AlertsSection';
 import { FeedbackWidget } from '@/features/publishing/components/FeedbackWidget';
 import { MetricsOverview } from '@/features/publishing/components/MetricsOverview';
@@ -11,6 +10,7 @@ import { PlatformStatusGrid } from '@/features/publishing/components/PlatformSta
 import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
 import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
 import type { Project } from '@/types';
 
 interface PublishingDashboardProps {

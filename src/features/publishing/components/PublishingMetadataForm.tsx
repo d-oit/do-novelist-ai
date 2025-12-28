@@ -1,11 +1,10 @@
-
 import { motion } from 'framer-motion';
 import { FileText, Tag, DollarSign, Calendar, Lock, Eye, X, Loader2, Upload } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { cn, iconButtonTarget } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 
 interface PublishingMetadata {
   description: string;

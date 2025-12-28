@@ -9,7 +9,7 @@ import { ChapterStatus } from '@/types';
 import { createChapter } from '@shared/utils';
 
 // Mock UI components to avoid import issues
-vi.mock('@/components/ui/Button', () => ({
+vi.mock('@/shared/components/ui/Button', () => ({
   Button: ({ children, onClick, disabled, className, ...props }: any) => (
     <button onClick={onClick} disabled={disabled} className={className} {...props}>
       {children}
@@ -17,7 +17,7 @@ vi.mock('@/components/ui/Button', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/Card', () => ({
+vi.mock('@/shared/components/ui/Card', () => ({
   Card: ({ children, className, onClick, ...props }: any) => (
     <div className={className} onClick={onClick} {...props}>
       {children}

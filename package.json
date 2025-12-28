@@ -35,7 +35,11 @@
     "ci:quality": "pnpm run lint:ci && pnpm run test && pnpm run coverage",
     "ci:performance": "pnpm run perf:build && pnpm run test:e2e",
     "ci:build": "pnpm run typecheck && pnpm run lint:ci && pnpm run build",
-    "fonts:fetch": "node scripts/fetch-fonts.mjs"
+    "fonts:fetch": "node scripts/fetch-fonts.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
@@ -43,6 +47,7 @@
     "@openrouter/sdk": "^0.3.10",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.1",
     "framer-motion": "^12.23.24",
     "jszip": "^3.10.1",
     "lucide-react": "^0.562.0",
@@ -77,6 +82,7 @@
     "@vitest/coverage-v8": "^4.0.14",
     "autoprefixer": "^10.4.23",
     "axe-core": "^4.11.0",
+    "drizzle-kit": "^0.31.8",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^9.1.2",
     "eslint-import-resolver-typescript": "^4.4.4",

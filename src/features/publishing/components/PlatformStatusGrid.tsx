@@ -1,9 +1,8 @@
-
 import { motion } from 'framer-motion';
 import { PieChart, MapPin, Calendar } from 'lucide-react';
 import React from 'react';
 
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/shared/components/ui/Card';
 import { type ReaderInsights } from '@/types';
 
 interface PlatformStatusGridProps {

@@ -16,11 +16,11 @@ import {
 import type { FC } from 'react';
 import { useState, useMemo } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { useAnalytics } from '@/features/analytics/hooks/useAnalytics';
 import { logger } from '@/lib/logging/logger';
 import { cn, iconButtonTarget } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import type { WritingGoals } from '@/types';
 
 interface GoalsManagerProps {

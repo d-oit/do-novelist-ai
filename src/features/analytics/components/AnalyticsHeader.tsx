@@ -6,8 +6,8 @@
 import { X, Download, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import React from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
 import type { Project } from '@/types';
 
 interface AnalyticsHeaderProps {

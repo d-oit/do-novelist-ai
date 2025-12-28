@@ -15,11 +15,11 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { useVersioning } from '@/features/versioning/hooks/useVersioning';
 import { logger } from '@/lib/logging/logger';
 import { cn, iconButtonTarget } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import type { ChapterVersion, VersionCompareResult } from '@/types';
 
 interface VersionComparisonProps {

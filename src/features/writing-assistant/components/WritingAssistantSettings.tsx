@@ -1,4 +1,3 @@
-
 /**
  * Writing Assistant Settings Component
  * Configuration panel for the AI Writing Assistant
@@ -8,9 +7,9 @@ import { motion } from 'framer-motion';
 import { Settings, Save, RefreshCw, Brain, Filter, Zap, Users, Target } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import { type WritingAssistantConfig } from '@/types';
 
 interface WritingAssistantSettingsProps {

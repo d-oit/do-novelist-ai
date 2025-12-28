@@ -1,11 +1,10 @@
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, X, Award, Zap, Activity, CheckCircle2 } from 'lucide-react';
 import React from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import { type PublishingAlert } from '@/types';
 
 interface AlertsSectionProps {

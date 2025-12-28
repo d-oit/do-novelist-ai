@@ -1,10 +1,9 @@
-
 import { motion } from 'framer-motion';
 import { Filter, Search } from 'lucide-react';
 import type { FC } from 'react';
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/Card';
 import { type CharacterFilters as FilterType, type CharacterRole } from '@/types';
 
 interface CharacterFiltersProps {

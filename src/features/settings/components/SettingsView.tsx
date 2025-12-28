@@ -18,8 +18,13 @@ import { useUser } from '@/contexts/UserContext';
 import { GamificationPanel } from '@/features/gamification/components/GamificationPanel';
 import { AISettingsPanel } from '@/features/settings/components/AISettingsPanel';
 import { PWAInstallButton } from '@/features/settings/components/PWAInstallButton';
-import type { DbConfig } from '@/lib/db';
-import { db, getStoredConfig, saveStoredConfig } from '@/lib/db';
+import {
+  drizzleDbService,
+  getStoredConfig,
+  saveStoredConfig,
+  testDbConnection,
+  type DbConfig,
+} from '@/lib/database';
 import { cn } from '@/lib/utils';
 
 const SettingsView: React.FC = () => {
@@ -64,10 +69,9 @@ const SettingsView: React.FC = () => {
     // Test connection
     setTestStatus('none');
     if (dbConfig.useCloud) {
-      await db.init();
-      // Simple check: if init didn't crash and we can list projects (even empty), it's likely good.
-      const active = getStoredConfig();
-      if (active.useCloud) setTestStatus('success');
+      await drizzleDbService.init();
+      const isConnected = await testDbConnection();
+      if (isConnected) setTestStatus('success');
       else setTestStatus('error');
     } else {
       setTestStatus('success'); // Local is always successful

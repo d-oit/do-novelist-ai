@@ -21,14 +21,14 @@ import {
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import {
   writingAssistantDb,
   type WritingProgressMetrics,
 } from '@/features/writing-assistant/services/writingAssistantDb';
 import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 
 interface WritingAnalyticsDashboardProps {
   projectId: string;

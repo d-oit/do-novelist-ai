@@ -887,6 +887,71 @@ rounded-xl = 1rem = 16px     /* Cards */
 rounded-full = 9999px        /* Pills */
 ```
 
+### Button Styling Guidelines (WCAG AA Compliance)
+
+**Updated: December 2025** - Fixed contrast issues across the application.
+
+#### Primary Action Buttons (AI Actions, Submit, CTA)
+
+Use solid primary background with foreground text for maximum visibility:
+
+```tsx
+// ✅ CORRECT - High contrast, readable
+className = 'bg-primary text-primary-foreground hover:bg-primary/80';
+
+// ❌ WRONG - Poor contrast in dark mode
+className = 'bg-secondary text-primary hover:bg-secondary/80';
+```
+
+**Apply to:**
+
+- AI brainstorm buttons (Enhance, Generate, Suggest)
+- Form submit buttons
+- Call-to-action buttons
+- Any button triggering an important action
+
+#### Secondary Action Buttons
+
+Use secondary styling with proper foreground color:
+
+```tsx
+// ✅ CORRECT
+className = 'bg-secondary text-secondary-foreground hover:bg-secondary/80';
+
+// ❌ WRONG
+className = 'bg-secondary text-primary'; // text-primary has poor contrast on bg-secondary
+```
+
+#### Icon-Only Buttons
+
+```tsx
+// ✅ CORRECT - Uses primary colors for visibility
+className = 'bg-primary text-primary-foreground p-2 rounded-md';
+
+// Alternative for subtle icons
+className = 'text-muted-foreground hover:text-foreground hover:bg-muted';
+```
+
+#### Checkboxes and Form Controls
+
+```tsx
+// ✅ CORRECT - Uses accent color
+className =
+  'rounded border-primary bg-background accent-primary focus:ring-primary';
+
+// ❌ WRONG - text-primary doesn't render well as checkmark color
+className = 'bg-secondary text-primary';
+```
+
+#### Quick Reference
+
+| Button Type | Background       | Text                          | Border           |
+| ----------- | ---------------- | ----------------------------- | ---------------- |
+| Primary CTA | `bg-primary`     | `text-primary-foreground`     | `border-primary` |
+| Secondary   | `bg-secondary`   | `text-secondary-foreground`   | `border-border`  |
+| Ghost       | `bg-transparent` | `text-foreground`             | none             |
+| Destructive | `bg-destructive` | `text-destructive-foreground` | none             |
+
 ---
 
 ## Conclusion & Next Steps

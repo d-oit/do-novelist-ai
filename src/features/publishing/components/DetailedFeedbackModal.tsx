@@ -1,11 +1,10 @@
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, User, Calendar, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
 import React, { useEffect } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import { type ReaderFeedback } from '@/types';
 
 interface DetailedFeedbackModalProps {

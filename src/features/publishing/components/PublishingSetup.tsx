@@ -15,13 +15,13 @@ import {
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { PlatformCard } from '@/features/publishing/components/PlatformCard';
 import { PublishingMetadataForm } from '@/features/publishing/components/PublishingMetadataForm';
 import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
 import { logger } from '@/lib/logging/logger';
 import { cn, iconButtonTarget } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import { ChapterStatus } from '@/types';
 import type { Project, PublishingPlatform, Publication } from '@/types';
 

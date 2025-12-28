@@ -17,10 +17,10 @@ import {
 import type { FC } from 'react';
 import { useState, useRef, useEffect } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { WritingAssistantPanel } from '@/features/writing-assistant/components/WritingAssistantPanel';
 import { useAnalytics, useFeatureAction } from '@/lib/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
 import type { Project, Chapter, RefineOptions } from '@/types';
 
 interface ChapterEditorProps {

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { BookOpen, Target, Clock, Zap, PieChart, Flame, Brain, Activity } from 'lucide-react';
 import React from 'react';
 
-import { MetricCard } from '@/components/ui/MetricCard';
+import { MetricCard } from '@/shared/components/ui/MetricCard';
 
 interface WritingStatsCardProps {
   totalWords: number;

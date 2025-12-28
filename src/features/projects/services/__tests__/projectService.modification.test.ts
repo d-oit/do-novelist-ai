@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { projectService } from '@/features/projects/services/projectService';
-import { db } from '@/lib/db';
+import { drizzleDbService } from '@/lib/database';
 import { PublishStatus } from '@/types';
 import { type ProjectCreationData, type ProjectUpdateData } from '@/types';
 
-// Mock the db module to use localStorage
-vi.mock('@/lib/db', () => ({
-  db: {
+// Mock the database service
+vi.mock('@/lib/database', () => ({
+  drizzleDbService: {
     init: vi.fn().mockResolvedValue(undefined),
     saveProject: vi.fn().mockResolvedValue(undefined),
     loadProject: vi.fn().mockResolvedValue(null),
@@ -30,15 +30,15 @@ describe('ProjectService - Modification', () => {
     };
 
     // Mock db methods
-    (db.init as any).mockResolvedValue(undefined);
-    (db.saveProject as any).mockImplementation((project: any) => {
+    (drizzleDbService.init as any).mockResolvedValue(undefined);
+    (drizzleDbService.saveProject as any).mockImplementation((project: any) => {
       storage.projects = storage.projects.filter(p => p.id !== project.id);
       storage.projects.push(project);
     });
-    (db.loadProject as any).mockImplementation((id: string) => {
+    (drizzleDbService.loadProject as any).mockImplementation((id: string) => {
       return Promise.resolve(storage.projects.find(p => p.id === id) || null);
     });
-    (db.getAllProjects as any).mockImplementation(() => {
+    (drizzleDbService.getAllProjects as any).mockImplementation(() => {
       return Promise.resolve(
         storage.projects.map(p => ({
           id: p.id,
@@ -49,7 +49,7 @@ describe('ProjectService - Modification', () => {
         })),
       );
     });
-    (db.deleteProject as any).mockImplementation((id: string) => {
+    (drizzleDbService.deleteProject as any).mockImplementation((id: string) => {
       storage.projects = storage.projects.filter(p => p.id !== id);
     });
 

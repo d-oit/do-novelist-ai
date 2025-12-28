@@ -1,11 +1,10 @@
-
 import { motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle, Settings } from 'lucide-react';
 import React from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import { type PublishingPlatform } from '@/types';
 
 interface PlatformCardProps {
@@ -60,7 +59,7 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({
           isSelected
             ? 'border-primary/30 bg-primary/5 ring-2 ring-primary'
             : 'border-border hover:shadow-md',
-          !platform.isConnected && 'opacity-75'
+          !platform.isConnected && 'opacity-75',
         )}
       >
         <div className='flex items-start gap-3'>
@@ -108,7 +107,7 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({
                     'h-4 w-4 rounded border-2 transition-colors',
                     isSelected
                       ? 'border-primary bg-primary'
-                      : 'border-border hover:border-primary/50'
+                      : 'border-border hover:border-primary/50',
                   )}
                 >
                   {isSelected && <CheckCircle2 className='h-full w-full text-primary-foreground' />}

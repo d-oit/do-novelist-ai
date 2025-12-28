@@ -1,9 +1,8 @@
-
 import { motion } from 'framer-motion';
 import { Award } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/shared/components/ui/Card';
 
 interface GoalsProgressProps {
   chaptersCompleted: number;

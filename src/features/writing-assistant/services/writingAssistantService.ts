@@ -106,6 +106,14 @@ class WritingAssistantService {
       const sentenceVariety = analyzeSentenceVariety(content);
       const transitionQuality = analyzeTransitions(content);
 
+      void import('@/lib/analytics').then(({ featureTracking }) => {
+        featureTracking.trackFeatureUsage('writing-assistant', 'content_analysis', {
+          length: content.length,
+          readability: readabilityScore,
+          sentiment: sentimentScore,
+        });
+      });
+
       return {
         chapterId,
         content,
@@ -139,8 +147,20 @@ class WritingAssistantService {
     config: WritingAssistantConfig,
   ): Promise<WritingSuggestion[]> {
     if (import.meta.env.VITE_GEMINI_API_KEY == null || this.genAI == null) {
+      void import('@/lib/analytics').then(({ featureTracking }) => {
+        featureTracking.trackFeatureUsage('writing-assistant', 'ai_generation_mock', {
+          length: content.length,
+        });
+      });
       return this.getMockSuggestions(content);
     }
+
+    void import('@/lib/analytics').then(({ featureTracking }) => {
+      featureTracking.trackFeatureUsage('writing-assistant', 'ai_generation', {
+        length: content.length,
+        task: 'suggestions',
+      });
+    });
 
     try {
       const prompt = `

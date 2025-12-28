@@ -7,8 +7,8 @@ import { motion } from 'framer-motion';
 import { Plus, FileText, Eye } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
 import type { Project, Chapter } from '@/types';
 import { ChapterStatus } from '@/types';
 

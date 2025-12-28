@@ -1,9 +1,10 @@
-import { Clock, FileText, Folder, Loader2, MoreVertical, Plus, Star, Trash2 } from 'lucide-react';
+import { Clock, FileText, Folder, MoreVertical, Plus, Star, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-import { db } from '@/lib/db';
+import { drizzleDbService } from '@/lib/database';
 import { logger } from '@/lib/logging/logger';
 import { iconButtonTarget } from '@/lib/utils';
+import { Skeleton } from '@/shared/components/ui/Skeleton';
 
 import type { Project } from '@shared/types';
 
@@ -32,7 +33,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
   const loadProjects = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const list = await db.getAllProjects();
+      const list = await drizzleDbService.getAllProjects();
       setProjects(list);
     } catch (error) {
       logger.error('Failed to load projects', { component: 'ProjectsView', error });
@@ -45,7 +46,13 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this project? This cannot be undone.')) {
       try {
-        await db.deleteProject(id);
+        await drizzleDbService.deleteProject(id);
+
+        // Analytics
+        void import('@/lib/analytics').then(({ featureTracking }) => {
+          featureTracking.trackFeatureUsage('projects', 'delete_project', { projectId: id });
+        });
+
         await loadProjects();
       } catch (error) {
         logger.error('Failed to delete project', {
@@ -71,8 +78,10 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({
         </div>
 
         {isLoading ? (
-          <div className='flex h-64 items-center justify-center'>
-            <Loader2 className='h-8 w-8 animate-spin text-blue-600' />
+          <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className='h-48 w-full' />
+            ))}
           </div>
         ) : (
           <>

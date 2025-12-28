@@ -1,8 +1,7 @@
-
 import { Brain, CheckCircle2, AlertCircle } from 'lucide-react';
 import React from 'react';
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/Card';
 import { type Character, type CharacterValidationResult } from '@/types';
 
 interface CharacterStatsProps {

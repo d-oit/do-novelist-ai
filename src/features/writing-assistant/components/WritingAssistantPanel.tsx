@@ -22,11 +22,11 @@ import {
 import type { FC } from 'react';
 import { useState } from 'react';
 
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { type Character } from '@/features/characters/types';
 import useWritingAssistant from '@/features/writing-assistant/hooks/useWritingAssistant';
 import { cn } from '@/lib/utils';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import { type WritingSuggestion, type WritingSuggestionCategory } from '@/types';
 
 interface WritingAssistantPanelProps {

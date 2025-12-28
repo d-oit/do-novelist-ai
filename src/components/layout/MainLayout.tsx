@@ -51,7 +51,7 @@ const MainLayout: FC<MainLayoutProps> = ({ children, className }) => {
 
       {/* Main content with proper z-index and stagger animation */}
       <motion.div
-        className='relative z-10 flex min-h-screen flex-col'
+        className='relative z-10 flex min-h-screen flex-col pb-16 md:pb-0'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.6 }}
