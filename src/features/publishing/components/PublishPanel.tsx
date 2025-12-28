@@ -41,11 +41,7 @@ const languageNameToCode = (
   return mapping[langName] || 'en';
 };
 
-const PublishPanel: FC<PublishPanelProps> = ({
-  project,
-  onUpdateProject,
-  onUpdateChapter,
-}) => {
+const PublishPanel: FC<PublishPanelProps> = ({ project, onUpdateProject, onUpdateChapter }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [targetLang, setTargetLang] = useState('Spanish');
@@ -257,7 +253,7 @@ const PublishPanel: FC<PublishPanelProps> = ({
                   type='checkbox'
                   checked={settings.enableDropCaps}
                   onChange={e => handleUpdateSettings({ enableDropCaps: e.target.checked })}
-                  className='h-4 w-4 rounded border-border bg-secondary text-primary focus:ring-primary'
+                  className='h-4 w-4 rounded border-primary bg-background accent-primary focus:ring-primary'
                 />
               </label>
             </div>

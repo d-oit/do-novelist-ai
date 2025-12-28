@@ -266,7 +266,7 @@ const PublishView: FC<PublishViewProps> = ({ project, onUpdateProject, onUpdateC
                     type='checkbox'
                     checked={settings.enableDropCaps}
                     onChange={e => handleUpdateSettings({ enableDropCaps: e.target.checked })}
-                    className='rounded border-border bg-secondary text-primary focus:ring-primary'
+                    className='rounded border-primary bg-background accent-primary focus:ring-primary'
                   />
                   <span>Enable "Drop Caps" Styling</span>
                 </label>

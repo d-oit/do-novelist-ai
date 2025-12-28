@@ -194,7 +194,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onCreate, onCance
               <button
                 onClick={() => void handleBrainstorm('idea')}
                 disabled={(!idea && !tone && !audience) || brainstorming.idea}
-                className='flex items-center gap-1.5 rounded border border-border bg-secondary px-2 py-1 text-[10px] text-primary transition-all hover:bg-secondary/80 disabled:opacity-50'
+                className='flex items-center gap-1.5 rounded border border-primary bg-primary px-2 py-1 text-[10px] text-primary-foreground transition-all hover:bg-primary/80 disabled:opacity-50'
                 data-testid='wizard-brainstorm-idea'
               >
                 {brainstorming.idea === true ? (
@@ -341,7 +341,7 @@ Examples:
                 <button
                   onClick={() => void handleBrainstorm('title')}
                   disabled={!idea || brainstorming.title}
-                  className='flex items-center justify-center rounded-md border border-border bg-secondary px-3 text-primary transition-colors hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-50'
+                  className='flex items-center justify-center rounded-md border border-primary bg-primary px-3 text-primary-foreground transition-colors hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50'
                   title='Generate Title from Idea'
                   data-testid='wizard-brainstorm-title'
                 >
@@ -369,7 +369,7 @@ Examples:
                 <button
                   onClick={() => void handleBrainstorm('style')}
                   disabled={!idea || brainstorming.style}
-                  className='flex items-center justify-center rounded-md border border-border bg-secondary px-3 text-primary transition-colors hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-50'
+                  className='flex items-center justify-center rounded-md border border-primary bg-primary px-3 text-primary-foreground transition-colors hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-50'
                   title='Suggest Style from Idea'
                   data-testid='wizard-brainstorm-style'
                 >
