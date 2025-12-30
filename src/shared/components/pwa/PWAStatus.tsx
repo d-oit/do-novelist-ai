@@ -12,7 +12,7 @@ import { Button } from '@/shared/components/ui/Button';
 export const PWAStatus: React.FC = () => {
   const [isOffline, setIsOffline] = useState(offlineManager.isOffline());
   const [canInstall, setCanInstall] = useState(installPromptManager.canInstall());
-  const [isSyncing] = useState<boolean>(false);
+  const [isSyncing] = useState<boolean>(false); // eslint-disable-line react/hook-use-state
 
   useEffect(() => {
     const cleanupOffline = offlineManager.onOfflineChange(offline => {
