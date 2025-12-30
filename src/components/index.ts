@@ -30,17 +30,16 @@ export {
 } from '@shared/components/ui';
 
 // === Layout Components ===
-export { default as Header } from '@shared/components/layout/Header';
-export { AppBackground } from './layout/AppBackground';
-export { default as MainLayout } from './layout/MainLayout';
-export { default as Sidebar } from './layout/Sidebar';
+export { default as Header } from './layout/Header';
+export { AppBackground } from '@shared/components/layout/AppBackground';
+export { default as MainLayout } from '@shared/components/layout/MainLayout';
+export { default as Sidebar } from '@shared/components/layout/Sidebar';
 
 // === Application Components ===
 export { default as ActionCard } from './ActionCard';
 export { default as AgentConsole } from './AgentConsole';
 export { default as ErrorBoundary } from './error-boundary';
 export { default as GoapVisualizer } from './GoapVisualizer';
-export { default as Navbar } from './Navbar';
 export { default as PlannerControl } from './PlannerControl';
 export { default as ProjectDashboard } from './ProjectDashboard';
 export { default as ProjectStats } from './ProjectStats';

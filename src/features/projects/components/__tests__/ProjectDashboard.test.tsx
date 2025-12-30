@@ -1,8 +1,8 @@
 import { screen, render } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
-import { ProjectDashboard } from "@/features/projects/components/ProjectDashboard";
-import { useProjects } from "@/features/projects/hooks/useProjects";
+import { ProjectDashboard } from '@/features/projects/components/ProjectDashboard';
+import { useProjects } from '@/features/projects/hooks/useProjects';
 
 // Mock the stores
 vi.mock('../../hooks/useProjects', () => {
@@ -77,7 +77,7 @@ describe('ProjectDashboard', () => {
 
     render(<ProjectDashboard />);
 
-    expect(screen.getByTestId('card-content')).toBeInTheDocument();
+    expect(screen.getByTestId('card')).toBeInTheDocument();
   });
 
   it('should render dashboard', () => {

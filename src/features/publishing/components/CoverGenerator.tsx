@@ -1,8 +1,7 @@
-
 import { Image, Wand2, Loader2, RefreshCcw, Download } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { generateCoverImage } from '@/lib/ai';
+import { generateBookCover } from '@/features/generation/services/imageGenerationService';
 import { cn } from '@/lib/utils';
 
 import type { Project } from '@shared/types';
@@ -16,13 +15,13 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({ project, onUpdateProjec
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
 
-  const handleGenerate = (): void => {
+  const handleGenerate = async (): Promise<void> => {
     setIsGenerating(true);
     setError('');
     try {
-      const base64Cover = generateCoverImage(project.title, project.style, project.idea);
+      const base64Cover = await generateBookCover(project.title, project.idea, project.style);
       if ((base64Cover?.length ?? 0) > 0) {
-        onUpdateProject({ coverImage: base64Cover ?? undefined });
+        onUpdateProject({ coverImage: base64Cover });
       } else {
         setError('Failed to generate image. Please try again.');
       }

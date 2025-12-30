@@ -13,12 +13,12 @@ import React from 'react';
 import ActionCard from '@/components/ActionCard';
 import GoapVisualizer from '@/components/GoapVisualizer';
 import Header from '@/components/layout/Header';
-import MainLayout from '@/components/layout/MainLayout';
 import { UserProvider } from '@/contexts/UserContext';
 import { AnalyticsDashboard } from '@/features/analytics';
 import SettingsView from '@/features/settings/components/SettingsView';
 import { runA11yTests, groupViolationsBySeverity, type A11yViolation } from '@/test/a11y-utils';
 
+import MainLayout from '@shared/components/layout/MainLayout';
 import { AgentMode, PublishStatus } from '@shared/types';
 
 // Extend Jest matchers for accessibility (only if expect is available)
