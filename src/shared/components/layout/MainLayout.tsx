@@ -1,15 +1,20 @@
 import { motion } from 'framer-motion';
 import type { ReactNode, FC } from 'react';
 
-import { AppBackground } from '@/components/layout/AppBackground';
 import { cn } from '@/lib/utils';
+import { PWAStatus } from '@/shared/components/pwa/PWAStatus';
+
+import { AppBackground } from './AppBackground';
+import { BottomNav } from './BottomNav';
 
 interface MainLayoutProps {
   children: ReactNode;
   className?: string;
+  currentView?: 'dashboard' | 'projects' | 'settings' | 'world-building';
+  onNavigate?: (view: 'dashboard' | 'projects' | 'settings' | 'world-building') => void;
 }
 
-const MainLayout: FC<MainLayoutProps> = ({ children, className }) => {
+const MainLayout: FC<MainLayoutProps> = ({ children, className, currentView, onNavigate }) => {
   return (
     <motion.div
       className={cn(
@@ -58,6 +63,10 @@ const MainLayout: FC<MainLayoutProps> = ({ children, className }) => {
       >
         {children}
       </motion.div>
+
+      {currentView && onNavigate && <BottomNav currentView={currentView} onNavigate={onNavigate} />}
+
+      <PWAStatus />
     </motion.div>
   );
 };

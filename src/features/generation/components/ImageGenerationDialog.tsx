@@ -1,162 +1,133 @@
-'use client';
-
-import { Loader2, Wand2, Image as ImageIcon, Download, RefreshCw } from 'lucide-react';
+/**
+ * ImageGenerationDialog
+ * Dialog for generating book covers and character portraits
+ */
+import { Image as ImageIcon, Loader2, Sparkles, Wand2 } from 'lucide-react';
 import React, { useState } from 'react';
 
+import {
+  generateBookCover,
+  generateCharacterPortrait,
+} from '@/features/generation/services/imageGenerationService';
 import { Button } from '@/shared/components/ui/Button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from '@/shared/components/ui/Dialog';
-import { Progress } from '@/shared/components/ui/Progress';
-import type { Project } from '@/shared/types';
 
 interface ImageGenerationDialogProps {
-  project: Project;
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  onGenerate: (prompt: string, style: string) => Promise<string>;
-  onSave: (imageUrl: string) => void;
+  onClose: () => void;
+  type: 'cover' | 'portrait';
+  title: string;
+  description: string;
+  style: string;
+  onImageGenerated: (url: string) => void;
 }
 
-export const ImageGenerationDialog: React.FC<ImageGenerationDialogProps> = ({
-  project,
+const ImageGenerationDialog: React.FC<ImageGenerationDialogProps> = ({
   isOpen,
-  onOpenChange,
-  onGenerate,
-  onSave,
+  onClose,
+  type,
+  title,
+  description,
+  style,
+  onImageGenerated,
 }) => {
-  const [prompt, setPrompt] = useState<string>('');
-  const [style, setStyle] = useState<string>(project.style || 'Cinematic');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [prompt, setPrompt] = useState(description);
+  const [customStyle, setCustomStyle] = useState(style);
 
-  // Auto-generate prompt on open (mock effect)
-  React.useEffect(() => {
-    if (isOpen && !prompt) {
-      setPrompt(`A cover for a ${project.style} novel titled "${project.title}". ${project.idea}`);
-    }
-  }, [isOpen, project, prompt]);
-
-  const handleGenerate = async (): Promise<void> => {
+  const handleGenerate = async () => {
     setIsGenerating(true);
-    setProgress(10);
-
-    const interval = setInterval(() => {
-      setProgress(p => Math.min(p + 10, 90));
-    }, 500);
-
+    setError(null);
     try {
-      const url = await onGenerate(prompt, style);
-      setGeneratedImage(url);
-      setProgress(100);
-    } catch {
-      // Handle error
+      let url: string;
+      if (type === 'cover') {
+        url = await generateBookCover(title, prompt, customStyle);
+      } else {
+        url = await generateCharacterPortrait(title, prompt, customStyle);
+      }
+      onImageGenerated(url);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate image');
     } finally {
-      clearInterval(interval);
       setIsGenerating(false);
     }
   };
 
-  const handleGenerateClick = (): void => {
-    void handleGenerate();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-2xl'>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className='sm:max-w-[500px]'>
         <DialogHeader>
-          <DialogTitle>Generate Book Cover</DialogTitle>
+          <DialogTitle className='flex items-center gap-2'>
+            {type === 'cover' ? (
+              <ImageIcon className='h-5 w-5' />
+            ) : (
+              <Sparkles className='h-5 w-5' />
+            )}
+            Generate {type === 'cover' ? 'Book Cover' : 'Character Portrait'}
+          </DialogTitle>
           <DialogDescription>
-            Create a unique cover for "{project.title}" using AI.
+            Use AI to create a visual representation for your{' '}
+            {type === 'cover' ? 'book' : 'character'}.
           </DialogDescription>
         </DialogHeader>
 
-        <div className='grid gap-6 py-4 md:grid-cols-2'>
-          {/* Controls */}
-          <div className='space-y-4'>
-            <div className='space-y-2'>
-              <label className='text-sm font-medium'>Prompt</label>
-              <textarea
-                className='custom-scrollbar min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
-                value={prompt}
-                onChange={e => setPrompt(e.target.value)}
-                placeholder='Describe your cover...'
-              />
-            </div>
-
-            <div className='space-y-2'>
-              <label className='text-sm font-medium'>Style</label>
-              <select
-                className='w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
-                value={style}
-                onChange={e => setStyle(e.target.value)}
-              >
-                <option value='Cinematic'>Cinematic</option>
-                <option value='Fantasy'>Fantasy</option>
-                <option value='Sci-Fi'>Sci-Fi</option>
-                <option value='Watercolor'>Watercolor</option>
-                <option value='Minimalist'>Minimalist</option>
-              </select>
-            </div>
-
-            <Button onClick={handleGenerateClick} disabled={isGenerating} className='w-full'>
-              {isGenerating ? (
-                <>
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Wand2 className='mr-2 h-4 w-4' />
-                  Generate Cover
-                </>
-              )}
-            </Button>
+        <div className='grid gap-4 py-4'>
+          <div className='grid gap-2'>
+            <label htmlFor='prompt' className='text-sm font-medium'>
+              {type === 'cover' ? 'Book Premise' : 'Character Description'}
+            </label>
+            <textarea
+              id='prompt'
+              value={prompt}
+              onChange={e => setPrompt(e.target.value)}
+              className='min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+              placeholder={
+                type === 'cover'
+                  ? 'Describe the main plot points or scene...'
+                  : 'Describe physical features, clothes, personality...'
+              }
+            />
           </div>
-
-          {/* Preview */}
-          <div className='flex flex-col gap-4'>
-            <div className='relative aspect-[2/3] w-full overflow-hidden rounded-lg border bg-muted'>
-              {isGenerating ? (
-                <div className='flex h-full flex-col items-center justify-center p-6 text-center'>
-                  <Loader2 className='mb-4 h-8 w-8 animate-spin text-primary' />
-                  <Progress value={progress} className='w-full' />
-                  <p className='mt-2 text-sm text-muted-foreground'>Creating masterpiece...</p>
-                </div>
-              ) : generatedImage ? (
-                <img
-                  src={generatedImage}
-                  alt='Generated cover'
-                  className='h-full w-full object-cover transition-all hover:scale-105'
-                />
-              ) : (
-                <div className='flex h-full flex-col items-center justify-center text-muted-foreground'>
-                  <ImageIcon className='mb-4 h-12 w-12 opacity-20' />
-                  <p className='text-sm'>Preview will appear here</p>
-                </div>
-              )}
-            </div>
-
-            {generatedImage && (
-              <div className='flex gap-2'>
-                <Button variant='outline' className='flex-1' onClick={handleGenerateClick}>
-                  <RefreshCw className='mr-2 h-4 w-4' />
-                  Regenerate
-                </Button>
-                <Button className='flex-1' onClick={() => onSave(generatedImage)}>
-                  <Download className='mr-2 h-4 w-4' />
-                  Save Cover
-                </Button>
-              </div>
-            )}
+          <div className='grid gap-2'>
+            <label htmlFor='style' className='text-sm font-medium'>
+              Art Style
+            </label>
+            <input
+              id='style'
+              value={customStyle}
+              onChange={e => setCustomStyle(e.target.value)}
+              className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+              placeholder='e.g. Cinematic, Watercolor, Cyberpunk...'
+            />
           </div>
+          {error && <p className='text-sm font-medium text-destructive'>{error}</p>}
         </div>
+
+        <DialogFooter>
+          <Button variant='outline' onClick={onClose} disabled={isGenerating}>
+            Cancel
+          </Button>
+          <Button onClick={() => void handleGenerate()} disabled={isGenerating} className='gap-2'>
+            {isGenerating ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              <Wand2 className='h-4 w-4' />
+            )}
+            {isGenerating ? 'Generating...' : 'Generate'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
+
+export default ImageGenerationDialog;

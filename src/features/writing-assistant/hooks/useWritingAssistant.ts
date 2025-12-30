@@ -42,8 +42,9 @@ interface UseWritingAssistantReturn extends WritingAssistantState, WritingAssist
     topCategories: { category: WritingSuggestionCategory; count: number }[];
   };
 
-  // Loading states
+  // Status
   isAnalyzing: boolean;
+  isAnalyzingLocal: boolean;
   lastAnalyzedAt?: Date;
   analysisError?: string;
 
@@ -90,7 +91,7 @@ export function useWritingAssistant(
   // Core state
   const [state, setState] = useState<WritingAssistantState>({
     isActive: false,
-    isAnalyzing: false,
+    isAnalyzing: false, // This will now represent "deep" (AI) analysis
     suggestions: [],
     config: DEFAULT_WRITING_ASSISTANT_CONFIG,
     showSuggestions: true,
@@ -98,13 +99,14 @@ export function useWritingAssistant(
     sortBy: 'severity',
   });
 
+  const [isAnalyzingLocal, setIsAnalyzingLocal] = useState(false);
+
   // Analysis state
   const [currentAnalysis, setCurrentAnalysis] = useState<ContentAnalysis | undefined>();
   const [lastAnalyzedAt, setLastAnalyzedAt] = useState<Date>();
   const [analysisError, setAnalysisError] = useState<string>();
 
   // Refs for debouncing and tracking
-  const analysisTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const lastContentRef = useRef<string>('');
 
   // Track suggestion interactions for learning
@@ -300,22 +302,80 @@ export function useWritingAssistant(
   );
 
   /**
+   * Fast local analysis for immediate feedback
+   */
+  const analyzeLocal = useCallback(
+    (contentToAnalyze: string = content) => {
+      if (!contentToAnalyze.trim() || !state.isActive) return;
+
+      setIsAnalyzingLocal(true);
+      try {
+        const localMetrics = writingAssistantService.analyzeLocalMetrics(
+          contentToAnalyze,
+          state.config,
+        );
+        setCurrentAnalysis(
+          prev =>
+            ({
+              ...prev,
+              chapterId,
+              content: contentToAnalyze,
+              timestamp: new Date(),
+              ...localMetrics,
+              suggestions: prev?.suggestions || [],
+              plotHoles: prev?.plotHoles || [],
+              characterIssues: prev?.characterIssues || [],
+              dialogueAnalysis: prev?.dialogueAnalysis || {
+                totalDialogue: 0,
+                dialoguePercentage: 0,
+                speakerVariety: 0,
+                averageDialogueLength: 0,
+                issues: [],
+                voiceConsistency: [],
+                tagAnalysis: { totalTags: 0, varietyScore: 0, overusedTags: [], suggestions: [] },
+              },
+            }) as ContentAnalysis,
+        );
+      } finally {
+        setIsAnalyzingLocal(false);
+      }
+    },
+    [content, state.isActive, state.config, chapterId],
+  );
+
+  const localAnalysisTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const aiAnalysisTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  /**
    * Debounced content analysis
    */
   const debouncedAnalyze = useCallback(
     (contentToAnalyze: string) => {
-      if (analysisTimeoutRef.current) {
-        clearTimeout(analysisTimeoutRef.current);
+      // Local analysis - fast cycle
+      if (localAnalysisTimeoutRef.current) {
+        clearTimeout(localAnalysisTimeoutRef.current);
       }
-
-      analysisTimeoutRef.current = setTimeout(() => {
-        if (contentToAnalyze !== lastContentRef.current && state.config.enableRealTimeAnalysis) {
-          void analyzeContent(contentToAnalyze);
-          lastContentRef.current = contentToAnalyze;
+      localAnalysisTimeoutRef.current = setTimeout(() => {
+        if (state.config.enableRealTimeAnalysis) {
+          analyzeLocal(contentToAnalyze);
         }
-      }, state.config.analysisDelay);
+      }, 300); // Quick feedback
+
+      // AI analysis - deep cycle
+      if (aiAnalysisTimeoutRef.current) {
+        clearTimeout(aiAnalysisTimeoutRef.current);
+      }
+      aiAnalysisTimeoutRef.current = setTimeout(
+        () => {
+          if (contentToAnalyze !== lastContentRef.current && state.config.enableRealTimeAnalysis) {
+            void analyzeContent(contentToAnalyze);
+            lastContentRef.current = contentToAnalyze;
+          }
+        },
+        Math.max(state.config.analysisDelay, 2000),
+      ); // Longer pause for AI
     },
-    [analyzeContent, state.config.enableRealTimeAnalysis, state.config.analysisDelay],
+    [analyzeLocal, analyzeContent, state.config.enableRealTimeAnalysis, state.config.analysisDelay],
   );
 
   /**
@@ -326,8 +386,11 @@ export function useWritingAssistant(
       debouncedAnalyze(content);
     }
     return (): void => {
-      if (analysisTimeoutRef.current) {
-        clearTimeout(analysisTimeoutRef.current);
+      if (localAnalysisTimeoutRef.current) {
+        clearTimeout(localAnalysisTimeoutRef.current);
+      }
+      if (aiAnalysisTimeoutRef.current) {
+        clearTimeout(aiAnalysisTimeoutRef.current);
       }
     };
   }, [content, autoAnalyze, state.isActive, debouncedAnalyze]);
@@ -630,6 +693,7 @@ export function useWritingAssistant(
     // Status
     lastAnalyzedAt,
     analysisError,
+    isAnalyzingLocal,
 
     // Analytics and insights
     getWritingAnalytics,

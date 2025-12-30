@@ -371,11 +371,18 @@ export const WritingAssistantPanel: FC<WritingAssistantPanelProps> = ({
           )}
 
           {/* Analysis Status */}
-          {assistant.isAnalyzing && (
+          {(assistant.isAnalyzing || assistant.isAnalyzingLocal) && (
             <Card className='mb-4 p-4'>
               <div className='flex items-center gap-2'>
-                <div className='h-4 w-4 animate-spin rounded-full border-b-2 border-blue-600' />
-                <span className='text-sm text-gray-600'>Analyzing content...</span>
+                <div
+                  className={cn(
+                    'h-4 w-4 animate-spin rounded-full border-b-2',
+                    assistant.isAnalyzing ? 'border-blue-600' : 'border-green-500',
+                  )}
+                />
+                <span className='text-sm text-gray-600'>
+                  {assistant.isAnalyzing ? 'Deep analysis in progress...' : 'Updating metrics...'}
+                </span>
               </div>
             </Card>
           )}

@@ -75,6 +75,37 @@ class WritingAssistantService {
     return WritingAssistantService.instance;
   }
 
+  public analyzeLocalMetrics(
+    content: string,
+    config: WritingAssistantConfig,
+  ): Partial<ContentAnalysis> {
+    const readabilityScore = calculateReadabilityScore(content);
+    const sentimentScore = analyzeSentiment(content);
+    const paceScore = analyzePacing(content);
+    const engagementScore = calculateEngagementScore(content);
+    const styleProfile = config.enableStyleAnalysis
+      ? analyzeStyle(content)
+      : this.getEmptyStyleProfile();
+    const toneAnalysis = analyzeTone(content);
+    const wordUsage = analyzeWordUsage(content);
+    const paragraphAnalysis = analyzeParagraphs(content);
+    const sentenceVariety = analyzeSentenceVariety(content);
+    const transitionQuality = analyzeTransitions(content);
+
+    return {
+      readabilityScore,
+      sentimentScore,
+      paceScore,
+      engagementScore,
+      styleProfile,
+      toneAnalysis,
+      wordUsage,
+      paragraphAnalysis,
+      sentenceVariety,
+      transitionQuality,
+    };
+  }
+
   public async analyzeContent(
     content: string,
     chapterId: string,
@@ -84,10 +115,8 @@ class WritingAssistantService {
   ): Promise<ContentAnalysis> {
     try {
       const suggestions = await this.generateWritingSuggestions(content, config);
-      const readabilityScore = calculateReadabilityScore(content);
-      const sentimentScore = analyzeSentiment(content);
-      const paceScore = analyzePacing(content);
-      const engagementScore = calculateEngagementScore(content);
+      const localMetrics = this.analyzeLocalMetrics(content, config);
+
       const plotHoles = config.enablePlotHoleDetection
         ? this.detectPlotHoles(content, plotContext)
         : [];
@@ -97,20 +126,12 @@ class WritingAssistantService {
       const dialogueAnalysis = config.enableDialogueAnalysis
         ? this.analyzeDialogue(content)
         : this.getEmptyDialogueAnalysis();
-      const styleProfile = config.enableStyleAnalysis
-        ? analyzeStyle(content)
-        : this.getEmptyStyleProfile();
-      const toneAnalysis = analyzeTone(content);
-      const wordUsage = analyzeWordUsage(content);
-      const paragraphAnalysis = analyzeParagraphs(content);
-      const sentenceVariety = analyzeSentenceVariety(content);
-      const transitionQuality = analyzeTransitions(content);
 
       void import('@/lib/analytics').then(({ featureTracking }) => {
         featureTracking.trackFeatureUsage('writing-assistant', 'content_analysis', {
           length: content.length,
-          readability: readabilityScore,
-          sentiment: sentimentScore,
+          readability: localMetrics.readabilityScore,
+          sentiment: localMetrics.sentimentScore,
         });
       });
 
@@ -118,21 +139,12 @@ class WritingAssistantService {
         chapterId,
         content,
         timestamp: new Date(),
-        readabilityScore,
-        sentimentScore,
-        paceScore,
-        engagementScore,
+        ...localMetrics,
         suggestions,
         plotHoles,
         characterIssues,
         dialogueAnalysis,
-        styleProfile,
-        toneAnalysis,
-        wordUsage,
-        paragraphAnalysis,
-        sentenceVariety,
-        transitionQuality,
-      };
+      } as ContentAnalysis;
     } catch (error) {
       logger.error('Content analysis failed', {
         component: 'WritingAssistantService',

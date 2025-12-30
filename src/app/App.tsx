@@ -2,8 +2,6 @@ import { Loader2, Settings } from 'lucide-react';
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 
 import { ProjectsErrorBoundary } from '@/components/error-boundary';
-import { BottomNav } from '@/components/layout/BottomNav';
-import Navbar from '@/components/Navbar';
 import { ActionCard, BookViewer, PlannerControl } from '@/features/generation/components';
 import { useGoapEngine } from '@/features/generation/hooks';
 import { ProjectStats, ProjectWizard } from '@/features/projects/components';
@@ -11,6 +9,7 @@ import { db } from '@/features/projects/services';
 import { logger } from '@/lib/logging/logger';
 import { offlineManager } from '@/lib/pwa';
 import { performanceMonitor } from '@/performance';
+import { MainLayout, Header as Navbar } from '@/shared/components/layout';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { Toaster } from '@/shared/components/ui/Toaster';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
@@ -176,7 +175,7 @@ const INITIAL_PROJECT: Project = {
   },
 };
 
-type ViewMode = 'dashboard' | 'projects' | 'settings';
+type ViewMode = 'dashboard' | 'projects' | 'settings' | 'world-building';
 
 const App: React.FC = () => {
   const [project, setProject] = useState<Project>(INITIAL_PROJECT);
@@ -362,21 +361,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className='flex min-h-screen flex-col bg-background font-sans text-foreground selection:bg-primary/20'>
-      {/* Skip Links for Accessibility */}
-      <a
-        href='#main-content'
-        className='sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg'
-      >
-        Skip to main content
-      </a>
-      <a
-        href='#navigation'
-        className='sr-only focus:not-sr-only focus:absolute focus:left-32 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg'
-      >
-        Skip to navigation
-      </a>
-
+    <MainLayout currentView={currentView} onNavigate={setCurrentView}>
       <ProjectWizard
         isOpen={showWizard}
         onCreate={handleCreateProject}
@@ -384,8 +369,7 @@ const App: React.FC = () => {
       />
 
       <Navbar
-        id='navigation'
-        projectTitle={project.title}
+        projectTitle={project?.title ?? 'No Project'}
         onNewProject={() => setShowWizard(true)}
         currentView={currentView}
         onNavigate={setCurrentView}
@@ -502,9 +486,8 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <BottomNav currentView={currentView} onNavigate={setCurrentView} />
       <Toaster />
-    </div>
+    </MainLayout>
   );
 };
 

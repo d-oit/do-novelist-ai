@@ -1,10 +1,10 @@
 # Documentation Index
 
-**Last Updated**: December 27, 2025
+**Last Updated**: December 30, 2025
 
 ---
 
-## 📚 Quick Navigation
+## Quick Navigation
 
 This index helps you quickly find the documentation you need.
 
@@ -12,13 +12,13 @@ This index helps you quickly find the documentation you need.
 
 1. [README.md](../README.md) - Project overview and getting started
 2. [AGENTS.md](../AGENTS.md) - Coding guidelines and best practices
-3. [CODEBASE-ANALYSIS-DEC-27-2025.md](CODEBASE-ANALYSIS-DEC-27-2025.md) -
-   Current codebase health
+3. [CODEBASE-STATUS-DEC-2025.md](CODEBASE-STATUS-DEC-2025.md) - Current codebase
+   health
 
 ### For Developers
 
-1. [CODEBASE-IMPROVEMENTS-GOAP-PLAN.md](CODEBASE-IMPROVEMENTS-GOAP-PLAN.md) -
-   Completed infrastructure improvements
+1. [COMPLETED-IMPROVEMENTS-2025.md](COMPLETED-IMPROVEMENTS-2025.md) - All
+   improvements completed
 2. [DEPENDENCY-MANAGEMENT-STRATEGY-DEC-2025.md](DEPENDENCY-MANAGEMENT-STRATEGY-DEC-2025.md) -
    Dependency approach
 3. [UI-UX-ANALYSIS-AND-RECOMMENDATIONS-JAN-2026.md](UI-UX-ANALYSIS-AND-RECOMMENDATIONS-JAN-2026.md) -
@@ -30,17 +30,6 @@ This index helps you quickly find the documentation you need.
    feature roadmap
 2. [WRITING-ASSISTANT-ENHANCEMENT-PLAN.md](WRITING-ASSISTANT-ENHANCEMENT-PLAN.md) -
    Writing assistant roadmap
-3. [WRITING-ASSISTANT-MVP-IMPLEMENTATION.md](WRITING-ASSISTANT-MVP-IMPLEMENTATION.md) -
-   MVP implementation details
-
-### For Understanding Architecture
-
-1. [OPENROUTER-MIGRATION.md](OPENROUTER-MIGRATION.md) - AI stack migration
-   details
-2. [PWA-IMPLEMENTATION-REPORT-DEC-2025.md](PWA-IMPLEMENTATION-REPORT-DEC-2025.md) -
-   PWA implementation
-3. [COMPONENT-CONSOLIDATION-REPORT-JAN-2026.md](COMPONENT-CONSOLIDATION-REPORT-JAN-2026.md) -
-   UI components
 
 ### For Quality & Maintenance
 
@@ -50,7 +39,7 @@ This index helps you quickly find the documentation you need.
 
 ---
 
-## 📋 Document Types
+## Document Types
 
 ### Active Plans
 
@@ -58,36 +47,23 @@ This index helps you quickly find the documentation you need.
 - **WRITING-ASSISTANT-ENHANCEMENT-PLAN.md** (0% complete) - Writing assistant
   enhancements
 
-### Completed Plans
+### Status & Reference Documents
 
-- **CODEBASE-IMPROVEMENTS-GOAP-PLAN.md** (100%)
-  - Environment validation (Zod-based)
-  - Structured logging (25 files)
-  - Component consolidation
-  - File size policy enforcement
-  - Import path cleanup (@/ alias)
-- **LOGGING-MIGRATION-REQUIRED.md** (100%)
-  - All console statements migrated
-- **OPENROUTER-MIGRATION.md** (100%)
-  - AI stack simplified to OpenRouter SDK only
-- **AI-STACK-SIMPLIFICATION-OPENROUTER-ONLY-JAN-2026.md** (100%)
-  - Legacy test mocks cleaned up
-
-### Reference Documents
-
-- **CODEBASE-ANALYSIS-DEC-27-2025.md** ⭐ **Most Current**
-  - Lint: ✅ Clean
-  - Tests: ✅ 725/725 passing
-  - Build: ✅ Success
-  - File size: ✅ 0 violations
+- **CODEBASE-STATUS-DEC-2025.md** ⭐ **Most Current**
+  - Overall health: Production-ready
   - All quality metrics passing
-- **CODEBASE-ANALYSIS-JAN-2026.md** - Superseded
-- **CODEBASE-ANALYSIS-DEC-2025.md** - Superseded
+  - Architecture assessment
+  - Active plans status
+
+- **COMPLETED-IMPROVEMENTS-2025.md**
+  - 9 major initiatives completed
+  - Success metrics and impact summary
+  - Implementation timeline
+  - Lessons learned
+
 - **DEPENDENCY-MANAGEMENT-STRATEGY-DEC-2025.md** - Strategy document
+- **FILE-SIZE-VIOLATIONS.md** - Track 500 LOC policy violations
 - **UI-UX-ANALYSIS-AND-RECOMMENDATIONS-JAN-2026.md** - Design analysis
-- **COMPONENT-CONSOLIDATION-REPORT-JAN-2026.md** - Consolidation report
-- **PWA-IMPLEMENTATION-REPORT-DEC-2025.md** - PWA implementation details
-- **WRITING-ASSISTANT-MVP-REPORT.md** - MVP completion report
 
 ### Tracking Documents
 
@@ -96,18 +72,16 @@ This index helps you quickly find the documentation you need.
   - character-validation.ts (690 LOC)
   - grammarSuggestionService.ts (634 LOC)
   - publishingAnalyticsService.ts (712 LOC)
-  - ProjectWizard.tsx (501 LOC)
-  - WritingGoalsPanel.tsx (532 LOC)
 
-### Archived Documents
+### Documentation Index
 
-- **GOAP-EXECUTION-DEC-24-2025-ARCHIVED.md**
-- **GOAP-ORCHESTRATOR-STRATEGY.md.bak**
-- **GITHUB-ACTIONS-MONITORING-STRATEGY.md.bak**
+- **DOCUMENTATION-INDEX.md** - This file
+  - Quick navigation to all docs
+  - Document types and status
 
 ---
 
-## 🎯 Key Achievements (December 2025)
+## Key Achievements (2025)
 
 ### Infrastructure Improvements
 
@@ -119,7 +93,7 @@ This index helps you quickly find the documentation you need.
 
 ### Quality Improvements
 
-- ✅ All 725 tests passing (100%)
+- ✅ All 610 tests passing
 - ✅ TypeScript strict mode: 0 errors
 - ✅ ESLint: 0 errors
 - ✅ Build: Successful
@@ -132,13 +106,12 @@ This index helps you quickly find the documentation you need.
   - Grammar suggestions
   - Writing goals tracking
   - Inline suggestions
-- ✅ PWA implementation (v1.2.0)
-- ✅ Analytics dashboard
-- ✅ AI stack migration to OpenRouter SDK
+- ✅ PWA implementation
+- ✅ AI stack migration to OpenRouter SDK only
 
 ---
 
-## 📊 Current Status
+## Current Status
 
 **Overall Health**: ✅ Production-ready
 
@@ -146,7 +119,7 @@ This index helps you quickly find the documentation you need.
 
 - ✅ Lint: Clean
 - ✅ Type Check: Pass
-- ✅ Tests: 725/725
+- ✅ Tests: 610/610 passing
 - ✅ Build: Success
 - ✅ File Size: Compliant
 
@@ -160,22 +133,47 @@ This index helps you quickly find the documentation you need.
 
 ---
 
-## 🔧 Maintenance Notes
+## Maintenance Notes
 
 ### Updating Documentation
 
 1. Always update PLAN-INVENTORY.md when creating new plans
 2. Mark completed plans with completion % = 100%
-3. Supersede old analysis documents with new ones
-4. Archive strategy documents that are no longer relevant
-5. Use `.bak` extension for renamed archived files
+3. Consolidate completed initiatives into COMPLETED-IMPROVEMENTS-[YEAR].md
+4. Archive or delete superseded documents
+5. Update this index with new documents
 
 ### Naming Convention
 
-- **Active Plans**: `*-PLAN-*.md`, `*-GOAP-PLAN.md`
-- **Reference Docs**: `CODEBASE-ANALYSIS-*.md`, `*STRATEGY*.md`, `*-REPORT-*.md`
+- **Active Plans**: `*-PLAN-*.md`
+- **Status & Reference**: `CODEBASE-STATUS-*.md`, `COMPLETED-IMPROVEMENTS-*.md`,
+  `FILE-SIZE-*.md`, `UI-UX-ANALYSIS-*.md`, `DEPENDENCY-MANAGEMENT-*.md`
 - **Tracking**: `FILE-SIZE-*.md`
-- **Archived**: `*-ARCHIVED.md`, `*.bak`
+- **Index**: `DOCUMENTATION-INDEX.md`
+
+---
+
+## Document History
+
+### Removed/Archived (Dec 30, 2025)
+
+Consolidated the following superseded documents into
+COMPLETED-IMPROVEMENTS-2025.md:
+
+- CODEBASE-ANALYSIS-DEC-2025.md
+- CODEBASE-ANALYSIS-DEC-27-2025.md
+- CODEBASE-ANALYSIS-JAN-2026.md
+- CODEBASE-IMPROVEMENTS-GOAP-PLAN.md
+- LOGGING-MIGRATION-REQUIRED.md
+- OPENROUTER-MIGRATION.md
+- AI-STACK-SIMPLIFICATION-OPENROUTER-ONLY-JAN-2026.md
+- COMPONENT-CONSOLIDATION-REPORT-JAN-2026.md
+- PWA-IMPLEMENTATION-REPORT-DEC-2025.md
+- GOAP-EXECUTION-DEC-24-2025-ARCHIVED.md
+- WRITING-ASSISTANT-MVP-IMPLEMENTATION.md
+- WRITING-ASSISTANT-MVP-REPORT.md
+- GITHUB-ACTIONS-MONITORING-STRATEGY.md.bak
+- GOAP-ORCHESTRATOR-STRATEGY.md.bak
 
 ---
 

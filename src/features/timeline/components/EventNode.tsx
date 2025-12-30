@@ -1,10 +1,9 @@
-
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Users } from 'lucide-react';
 import React from 'react';
 
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/shared/components/ui/Badge';
 import type { TimelineEvent } from '@/types';
 
 interface EventNodeProps {

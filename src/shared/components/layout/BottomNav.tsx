@@ -6,8 +6,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface BottomNavProps {
-  currentView: 'dashboard' | 'projects' | 'settings';
-  onNavigate: (view: 'dashboard' | 'projects' | 'settings') => void;
+  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building';
+  onNavigate: (view: 'dashboard' | 'projects' | 'settings' | 'world-building') => void;
 }
 
 interface NavButtonProps {
@@ -52,6 +52,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate })
           icon={<Settings className='h-5 w-5' />}
           label='Settings'
           onClick={() => onNavigate('settings')}
+        />
+        <NavButton
+          active={currentView === 'world-building'}
+          icon={<Edit className='h-5 w-5' />}
+          label='World'
+          onClick={() => onNavigate('world-building')}
         />
       </div>
     </nav>

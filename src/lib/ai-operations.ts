@@ -3,6 +3,10 @@
  * Business logic for specific AI tasks: text generation, plot analysis, etc.
  */
 
+import {
+  generateBookCover as serviceGenerateBookCover,
+  generateChapterIllustration as serviceGenerateChapterIllustration,
+} from '@/features/generation/services/imageGenerationService';
 import { withCache } from '@/lib/cache';
 import { createAIError } from '@/lib/errors/error-types';
 import type { Chapter, RefineOptions } from '@/types/index';
@@ -380,24 +384,17 @@ export const brainstormProject = async (
  * Generate cover image (Google only - has Imagen support)
  * Returns a base64-encoded image for use in the frontend
  */
-export const generateCoverImage = (
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const generateCoverImage = async (
   _title: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _style: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _idea: string,
-): string | null => {
+): Promise<string | null> => {
   try {
     if (isTestEnvironment()) {
       return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
 
-    aiLogger.warn(
-      'Cover image generation requires Google Imagen API - keeping original implementation',
-      { operation: 'generateCoverImage' },
-    );
-    return null;
+    return await serviceGenerateBookCover(_title, _idea, _style);
   } catch (error) {
     aiLogger.error('Cover image generation failed', {
       operation: 'generateCoverImage',
@@ -411,24 +408,19 @@ export const generateCoverImage = (
  * Generate chapter illustration (Google only - has Imagen support)
  * Returns a base64-encoded image for use in the frontend
  */
-export const generateChapterIllustration = (
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const generateChapterIllustration = async (
   _title: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _summary: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _style: string,
-): string | null => {
+): Promise<string | null> => {
   try {
     if (isTestEnvironment()) {
       return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
 
-    aiLogger.warn(
-      'Chapter illustration requires Google Imagen API - keeping original implementation',
-      { operation: 'generateChapterIllustration' },
-    );
-    return null;
+    // Reuse generateBookCover logic for now but pass summary
+    // In a real scenario we might want a different aspect ratio or prompt
+    return await serviceGenerateChapterIllustration(_title, _summary, _style);
   } catch (error) {
     aiLogger.error('Chapter illustration failed', {
       operation: 'generateChapterIllustration',
