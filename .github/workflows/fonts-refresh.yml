@@ -29,8 +29,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Install dependencies
+        run: pnpm install -g
 
       - name: Fetch fonts
         run: node scripts/fetch-fonts.mjs
@@ -38,7 +38,7 @@ jobs:
       - name: List fonts
         run: ls -la public/fonts || true
 
-      - name: Upload fonts
+      - name: Upload fonts artifact
         uses: actions/upload-artifact@v4
         with:
           name: fonts-${{ github.sha }}
