@@ -289,18 +289,28 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            // Group AI SDK with React to avoid breaking React internals
-            // This prevents "Cannot set properties of undefined (setting 'Activity')" errors
-            if (
-              id.includes('node_modules/react') ||
-              id.includes('node_modules/react-dom') ||
-              id.includes('@google/genai') ||
-              id.includes('@openrouter/sdk')
-            ) {
-              return 'vendor-react-ai';
+            // Split React and React-DOM into separate chunks
+            if (id.includes('node_modules/react-dom')) {
+              return 'vendor-react-dom';
+            }
+            if (id.includes('node_modules/react') && !id.includes('react-dom')) {
+              return 'vendor-react';
             }
 
-            // Chart libraries
+            // AI SDKs in separate chunks
+            if (id.includes('@openrouter/sdk')) {
+              return 'vendor-openrouter';
+            }
+            if (id.includes('@google/genai')) {
+              return 'vendor-genai';
+            }
+
+            // Router (can be significant size)
+            if (id.includes('react-router-dom') || id.includes('react-router')) {
+              return 'vendor-router';
+            }
+
+            // Chart libraries (recharts is large)
             if (id.includes('recharts')) {
               return 'vendor-charts';
             }
@@ -315,6 +325,11 @@ export default defineConfig(({ mode }) => {
               return 'vendor-animation';
             }
 
+            // Editor libraries (MDEditor can be large)
+            if (id.includes('@uiw/react-md-editor') || id.includes('react-markdown')) {
+              return 'vendor-editor';
+            }
+
             // UI utilities (small, always needed)
             if (
               id.includes('lucide-react') ||
@@ -325,33 +340,19 @@ export default defineConfig(({ mode }) => {
               return 'vendor-ui';
             }
 
+            // Validation and state management
+            if (id.includes('zod')) {
+              return 'vendor-zod';
+            }
+            if (id.includes('zustand')) {
+              return 'vendor-zustand';
+            }
+
             // Utility libraries
-            if (id.includes('zod') || id.includes('zustand') || id.includes('jszip')) {
-              return 'vendor-utils';
+            if (id.includes('jszip') || id.includes('file-saver')) {
+              return 'vendor-file-utils';
             }
-
-            // Large feature chunks - split by major features
-            if (id.includes('src/features/analytics')) {
-              return 'feature-analytics';
-            }
-
-            if (id.includes('src/features/editor') || id.includes('src/features/generation')) {
-              return 'feature-editor';
-            }
-
-            if (id.includes('src/features/publishing')) {
-              return 'feature-publishing';
-            }
-
-            if (
-              id.includes('src/features/world-building') ||
-              id.includes('src/features/characters')
-            ) {
-              return 'feature-world';
-            }
-
-            // Utility libraries (additional)
-            if (id.includes('dayjs') || id.includes('lodash') || id.includes('uuid')) {
+            if (id.includes('lodash') || id.includes('uuid')) {
               return 'vendor-utils';
             }
 
@@ -360,14 +361,28 @@ export default defineConfig(({ mode }) => {
               return 'vendor-date';
             }
 
-            // Small, commonly used utilities
+            // Large feature chunks - split by major features
+            if (id.includes('src/features/analytics')) {
+              return 'feature-analytics';
+            }
+            if (id.includes('src/features/editor') || id.includes('src/features/generation')) {
+              return 'feature-editor';
+            }
+            if (id.includes('src/features/publishing')) {
+              return 'feature-publishing';
+            }
             if (
-              id.includes('lodash.get') ||
-              id.includes('lodash.set') ||
-              id.includes('lodash.has') ||
-              id.includes('tiny-invariant') ||
-              id.includes('is-hotkey')
+              id.includes('src/features/world-building') ||
+              id.includes('src/features/characters')
             ) {
+              return 'feature-world';
+            }
+            if (id.includes('src/features/writing-assistant')) {
+              return 'feature-writing-assistant';
+            }
+
+            // Small, commonly used utilities
+            if (id.includes('tiny-invariant') || id.includes('is-hotkey') || id.includes('ms')) {
               return 'vendor-small-utils';
             }
 

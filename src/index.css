@@ -16,18 +16,26 @@
 
     --primary: 260 70% 30%; /* Deep Purple/Blue for high contrast */
     --primary-foreground: 0 0% 100%; /* Pure white */
+    --primary-hover: 260 70% 25%;
+    --primary-active: 260 70% 20%;
 
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
+    --secondary-hover: 240 4.8% 90%;
+    --secondary-active: 240 4.8% 85%;
 
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
 
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
+    --accent-hover: 240 4.8% 90%;
+    --accent-active: 240 4.8% 80%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+    --destructive-hover: 0 84.2% 55%;
+    --destructive-active: 0 84.2% 50%;
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
@@ -48,18 +56,26 @@
 
     --primary: 260 80% 45%; /* Darker primary in dark mode for WCAG AA contrast */
     --primary-foreground: 0 0% 100%; /* Use white text for sufficient contrast */
+    --primary-hover: 260 85% 40%;
+    --primary-active: 260 85% 35%;
 
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
+    --secondary-hover: 240 3.7% 20%;
+    --secondary-active: 240 3.7% 25%;
 
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
 
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
+    --accent-hover: 240 3.7% 20%;
+    --accent-active: 240 3.7% 30%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
+    --destructive-hover: 0 62.8% 45%;
+    --destructive-active: 0 62.8% 40%;
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
@@ -109,6 +125,19 @@
     overflow: visible;
     clip: auto;
     white-space: normal;
+  }
+
+  /* Button Active State Enhancements - WCAG 2.2 Compliant */
+  .btn-press-effect {
+    transition:
+      transform 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .btn-press-effect:active {
+    transform: scale(0.97);
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   }
 
   .text-with-depth {
