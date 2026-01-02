@@ -8,7 +8,6 @@ import {
   generateChapterIllustration as serviceGenerateChapterIllustration,
 } from '@/features/generation/services/imageGenerationService';
 import { withCache } from '@/lib/cache';
-import { createAIError } from '@/lib/errors/error-types';
 import type { Chapter, RefineOptions } from '@/types/index';
 
 import {
@@ -23,6 +22,7 @@ import {
 
 /**
  * Generate outline for a book idea
+ * Now uses serverless API endpoint for security
  */
 const _generateOutline = async (
   idea: string,
@@ -42,116 +42,52 @@ const _generateOutline = async (
     };
   }
 
-  return executeWithFallback(async provider => {
-    const model = getModelName(provider, 'standard');
+  operationLogger.debug('Generating outline via serverless API', {
+    style,
+    ideaPreview: idea.substring(0, 100),
+  });
 
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert Novel Architect.
-Your goal is to take a vague book idea and structurize it into a compelling chapter outline.
-The style of the book is: ${style}.
-Adhere to the "Hero's Journey" or "Save the Cat" beat sheets if applicable to the genre.`,
-        },
-        {
-          role: 'user',
-          content: `Create a title and a chapter outline for this idea: "${idea}"
-
-Return a JSON object with this structure:
-{
-  "title": "Book Title",
-  "chapters": [
-    {
-      "orderIndex": 1,
-      "title": "Chapter Title",
-      "summary": "Detailed paragraph summary of what happens in this chapter"
-    }
-  ]
-}`,
-        },
-      ],
-      temperature: 0.7,
-      stream: false,
+  try {
+    const response = await fetch('/api/ai/outline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        idea,
+        style,
+        provider: config.defaultProvider,
+      }),
     });
 
-    operationLogger.debug('Generating outline', {
-      provider,
-      style,
-      ideaPreview: idea.substring(0, 100),
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `API request failed: ${response.status}`);
+    }
+
+    const data = (await response.json()) as { title: string; chapters: Partial<Chapter>[] };
+
+    if (!isValidOutline(data)) {
+      throw new Error('Invalid outline structure received from API');
+    }
+
+    operationLogger.info('Outline generated successfully', {
+      title: data.title,
+      chapterCount: data.chapters?.length ?? 0,
     });
 
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
-
-    try {
-      const parsed = JSON.parse(responseText) as { title: string; chapters: Partial<Chapter>[] };
-      if (!isValidOutline(parsed)) {
-        throw new Error('Invalid outline structure received from AI');
-      }
-      operationLogger.info('Outline generated successfully', {
-        provider,
-        title: parsed.title,
-        chapterCount: parsed.chapters?.length ?? 0,
-      });
-      return parsed;
-    } catch (parseError) {
-      operationLogger.warn('JSON parsing failed, trying to extract from response', {
-        provider,
-        error: parseError instanceof Error ? parseError.message : String(parseError),
-        responsePreview: responseText.substring(0, 200),
-      });
-
-      const jsonMatch = /\{[\s\S]*\}/.exec(responseText);
-      if (jsonMatch) {
-        try {
-          const parsed = JSON.parse(jsonMatch[0]) as {
-            title: string;
-            chapters: Partial<Chapter>[];
-          };
-          if (!isValidOutline(parsed)) {
-            throw new Error('Invalid outline structure received from AI');
-          }
-          operationLogger.info('Successfully extracted JSON from response', {
-            provider,
-            title: parsed.title,
-            chapterCount: parsed.chapters?.length ?? 0,
-          });
-          return parsed;
-        } catch (secondParseError) {
-          operationLogger.error('Failed to parse extracted JSON', {
-            provider,
-            error:
-              secondParseError instanceof Error
-                ? secondParseError.message
-                : String(secondParseError),
-          });
-        }
-      }
-
-      const error = createAIError('Failed to parse outline response as JSON', {
-        provider,
-        operation: 'generateOutline',
-        cause: parseError instanceof Error ? parseError : undefined,
-        context: {
-          responsePreview: responseText.substring(0, 500),
-          idea: idea.substring(0, 100),
-          style,
-        },
-      });
-
-      throw error;
-    }
-  }, 'generateOutline');
+    return data;
+  } catch (error) {
+    operationLogger.error('Outline generation failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
 export const generateOutline = withCache(_generateOutline, 'generateOutline');
 
 /**
  * Write chapter content
+ * Now uses serverless API endpoint for security
  */
 export const writeChapterContent = async (
   chapterTitle: string,
@@ -167,38 +103,37 @@ This is a test chapter content generated by the mock AI service. It contains eno
 The story continues with detailed narrative, character development, and plot progression that would normally be generated by the AI Gateway service.`;
   }
 
-  return executeWithFallback(async provider => {
-    const model = getModelName(provider, 'standard');
-
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: `
-Write the full content for the chapter: "${chapterTitle}".
-Context / Summary: ${chapterSummary}
-${previousChapterSummary != null ? `Previously: ${previousChapterSummary}` : ''}
-Style: ${style}.
-Write in Markdown. Focus on "Show, Don't Tell". Use sensory details.
-Output only the chapter content.`,
-        },
-      ],
-      temperature: 0.7,
-      stream: false,
+  try {
+    const response = await fetch('/api/ai/chapter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chapterTitle,
+        chapterSummary,
+        style,
+        previousChapterSummary,
+        provider: config.defaultProvider,
+      }),
     });
 
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `API request failed: ${response.status}`);
+    }
 
-    return responseText ?? '';
-  }, 'writeChapterContent');
+    const data = (await response.json()) as { content: string };
+    return data.content ?? '';
+  } catch (error) {
+    aiLogger.error('Chapter writing failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
 /**
  * Continue writing from current content
+ * Now uses serverless API endpoint for security
  */
 export const continueWriting = async (
   currentContent: string,
@@ -213,34 +148,31 @@ The story continues from where it left off, maintaining narrative consistency an
 The adventure unfolds with new challenges and developments that propel the plot forward in an engaging manner.`;
   }
 
-  return executeWithFallback(async provider => {
-    const model = getModelName(provider, 'standard');
-    const context = currentContent.slice(-3000);
-
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: `
-You are a co-author. Continue the story.
-Style: ${style}
-Goal: ${chapterSummary}
-Rules: Seamlessly continue narrative. Maintain tone. Write 300-500 words. Output ONLY new content.
-Context: ...${context}`,
-        },
-      ],
-      temperature: 0.75,
-      stream: false,
+  try {
+    const response = await fetch('/api/ai/continue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        currentContent,
+        chapterSummary,
+        style,
+        provider: config.defaultProvider,
+      }),
     });
 
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `API request failed: ${response.status}`);
+    }
 
-    return responseText ?? '';
-  }, 'continueWriting');
+    const data = (await response.json()) as { content: string };
+    return data.content ?? '';
+  } catch (error) {
+    aiLogger.error('Continue writing failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
 /**

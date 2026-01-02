@@ -18,7 +18,18 @@ documents in plans/ folder
 | Last Updated | January 2, 2026                                                                                                                          |
 | Notes        | Phase 1 (Foundation) complete. Multi-Modal AI and PWA already implemented. Ready for Phase 2 Quick Wins or Phase 3 Context Intelligence. |
 
-### 2. WRITING-ASSISTANT-ENHANCEMENT-PLAN.md
+### 2. MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md
+
+| Attribute    | Value                                                                                                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Status       | 📋 READY FOR EXECUTION - Planning Complete                                                                                                                                                 |
+| Completion   | 0% (Planning Phase)                                                                                                                                                                        |
+| Priority     | P0 (Security) + P1/P2 (Strategic)                                                                                                                                                          |
+| Owner        | GOAP Agent                                                                                                                                                                                 |
+| Last Updated | January 2, 2026                                                                                                                                                                            |
+| Notes        | Systematic GOAP plan for 6 missing features: Security Hardening (P0), RAG Phase 1-2, Shared Views, AI Plot Engine, AI Agent Framework. 11-14 week timeline with hybrid execution strategy. |
+
+### 3. WRITING-ASSISTANT-ENHANCEMENT-PLAN.md
 
 | Attribute    | Value                                                                                                                                                                                                              |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -97,19 +108,23 @@ documents in plans/ folder
 
 | Category            | Count |
 | ------------------- | ----- |
-| Active Plans        | 2     |
+| Active Plans        | 3     |
 | Status & Reference  | 5     |
 | Documentation Index | 1     |
-| **Total**           | **8** |
+| **Total**           | **9** |
 
 ## Recent Updates (January 2, 2026)
 
+- **NEW**: Created MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md -
+  Comprehensive GOAP plan for 6 missing features
 - Updated WRITING-ASSISTANT-ENHANCEMENT-PLAN.md from 90% to 100% complete
 - Updated FILE-SIZE-VIOLATIONS.md to reflect 8 tracked violations (from 0)
 - Updated CODEBASE-STATUS-DEC-2025.md to reflect 747 tests (from 610)
 - Updated NEW-FEATURES-PLAN-JAN-2026.md to 60% complete (Phase 1 & 2 mostly
   done)
 - Updated DOCUMENTATION-INDEX.md with current metrics
+- Updated PLAN-INVENTORY.md to include new GOAP implementation plan (3 active
+  plans)
 
 ---
 
