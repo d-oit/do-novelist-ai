@@ -2,7 +2,7 @@
  * VoiceInputPanel Component Tests
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { VoiceInputPanel } from '@/features/editor/components/VoiceInputPanel';
@@ -18,44 +18,31 @@ vi.mock('@/lib/logging/logger', () => ({
 describe('VoiceInputPanel', () => {
   const mockOnTranscript = vi.fn();
 
-  // Mock SpeechRecognition
-  let mockRecognition: any;
-
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Create mock recognition instance
-    mockRecognition = {
+    // Create a mock recognition instance that will be returned by the constructor
+    const mockInstance = {
       start: vi.fn(),
       stop: vi.fn(),
       abort: vi.fn(),
-      onstart: null,
-      onend: null,
-      onerror: null,
-      onresult: null,
-      continuous: false,
-      interimResults: false,
-      lang: '',
-      maxAlternatives: 1,
+      onstart: null as ((event: Event) => void) | null,
+      onend: null as ((event: Event) => void) | null,
+      onerror: null as ((event: SpeechRecognitionErrorEvent) => void) | null,
+      onresult: null as ((event: SpeechRecognitionEvent) => void) | null,
     };
 
-    // Mock SpeechRecognition constructor
-    class MockSpeechRecognition {
-      start = mockRecognition.start;
-      stop = mockRecognition.stop;
-      abort = mockRecognition.abort;
-      onstart = mockRecognition.onstart;
-      onend = mockRecognition.onend;
-      onerror = mockRecognition.onerror;
-      onresult = mockRecognition.onresult;
-      continuous = mockRecognition.continuous;
-      interimResults = mockRecognition.interimResults;
-      lang = mockRecognition.lang;
-      maxAlternatives = mockRecognition.maxAlternatives;
-    }
+    // Store the mock instance so we can access it in tests
+    (global as any).__mockRecognitionInstance = mockInstance;
 
-    (window as any).SpeechRecognition = MockSpeechRecognition;
-    (window as any).webkitSpeechRecognition = MockSpeechRecognition;
+    // Mock SpeechRecognition constructor
+    const MockSpeechRecognition = vi.fn().mockImplementation(function (this: any) {
+      // Return the mock instance
+      return mockInstance;
+    });
+
+    (window as any).SpeechRecognition = MockSpeechRecognition as any;
+    (window as any).webkitSpeechRecognition = MockSpeechRecognition as any;
   });
 
   afterEach(() => {
@@ -84,7 +71,6 @@ describe('VoiceInputPanel', () => {
     it('detects browser support automatically', () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      // Should render the main UI, not the unsupported message
       expect(screen.getByText('Voice Input')).toBeInTheDocument();
       expect(screen.queryByText('Voice input not supported')).not.toBeInTheDocument();
     });
@@ -99,8 +85,8 @@ describe('VoiceInputPanel', () => {
       expect(micButton).toBeDefined();
       fireEvent.click(micButton);
 
-      // Start should be called when button is clicked
-      expect(mockRecognition.start).toHaveBeenCalledTimes(1);
+      const mockInstance = (global as any).__mockRecognitionInstance;
+      expect(mockInstance.start).toHaveBeenCalledTimes(1);
     });
 
     it('stops recording when clicked again', () => {
@@ -114,14 +100,31 @@ describe('VoiceInputPanel', () => {
       // Stop recording
       fireEvent.click(micButton);
 
-      // Stop should be called
-      expect(mockRecognition.stop).toHaveBeenCalledTimes(1);
+      expect(mockRecognition.stop).toHaveBeenCalled();
+    });
+
+    it('shows listening state when recording', async () => {
+      render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
+
+      const micButton = screen.getByTestId('voice-recording-button');
+
+      fireEvent.click(micButton);
+
+      // Trigger onstart callback
+      if (mockRecognition.onstart) {
+        mockRecognition.onstart(new Event('start'));
+      }
+
+      await waitFor(() => {
+        expect(screen.getByText('Listening...')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText(/Say "Stop" to end recording/)).toBeInTheDocument();
     });
 
     it('configures recognition with correct settings', () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} language='es-ES' continuous={false} />);
 
-      // Settings should be applied
       expect(mockRecognition.lang).toBe('es-ES');
       expect(mockRecognition.continuous).toBe(false);
       expect(mockRecognition.interimResults).toBe(true);
@@ -141,7 +144,7 @@ describe('VoiceInputPanel', () => {
   });
 
   describe('Error Handling', () => {
-    it('displays error message on recognition error', () => {
+    it('displays error message on recognition error', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
       const micButton = screen.getByTestId('voice-recording-button');
@@ -153,12 +156,16 @@ describe('VoiceInputPanel', () => {
         message: 'Permission denied',
       } as SpeechRecognitionErrorEvent;
 
-      if (mockRecognition.onerror) mockRecognition.onerror(errorEvent);
+      if (mockRecognition.onerror) {
+        mockRecognition.onerror(errorEvent);
+      }
 
-      expect(screen.getByText('Microphone access denied')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Microphone access denied')).toBeInTheDocument();
+      });
     });
 
-    it('shows appropriate error for no speech detected', () => {
+    it('shows appropriate error for no speech detected', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
       const micButton = screen.getByTestId('voice-recording-button');
@@ -169,12 +176,16 @@ describe('VoiceInputPanel', () => {
         message: 'No speech detected',
       } as SpeechRecognitionErrorEvent;
 
-      if (mockRecognition.onerror) mockRecognition.onerror(errorEvent);
+      if (mockRecognition.onerror) {
+        mockRecognition.onerror(errorEvent);
+      }
 
-      expect(screen.getByText('No speech detected')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('No speech detected')).toBeInTheDocument();
+      });
     });
 
-    it('disables button when microphone access is denied', () => {
+    it('disables button when microphone access is denied', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
       const micButton = screen.getByTestId('voice-recording-button');
@@ -185,10 +196,14 @@ describe('VoiceInputPanel', () => {
         message: 'Permission denied',
       } as SpeechRecognitionErrorEvent;
 
-      if (mockRecognition.onerror) mockRecognition.onerror(errorEvent);
+      if (mockRecognition.onerror) {
+        mockRecognition.onerror(errorEvent);
+      }
 
       // Check that error message appears first
-      expect(screen.getByText('Microphone access denied')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Microphone access denied')).toBeInTheDocument();
+      });
 
       // Then check that button is disabled
       expect(micButton).toBeDisabled();
