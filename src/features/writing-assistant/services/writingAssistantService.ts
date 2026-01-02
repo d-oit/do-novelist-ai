@@ -1,9 +1,8 @@
 /**
  * AI Writing Assistant Service
  * Provides intelligent content analysis and writing suggestions
+ * Uses Edge Functions for security - no API keys in client builds
  */
-
-import { OpenRouter } from '@openrouter/sdk';
 
 import { type Character } from '@/features/characters/types';
 import {
@@ -33,41 +32,14 @@ import {
   analyzeTransitions,
 } from './writing-style-analyzers';
 
-interface RawAISuggestion {
-  type?: string;
-  severity?: string;
-  message: string;
-  originalText?: string;
-  suggestedText?: string;
-  position?: {
-    start?: number;
-    end?: number;
-    line?: number;
-    column?: number;
-  };
-  confidence?: number;
-  reasoning?: string;
-  category?: WritingSuggestionCategory;
-}
-
 class WritingAssistantService {
   private static instance: WritingAssistantService;
-  private readonly genAI: OpenRouter | null;
 
   private constructor() {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-
-    if (!apiKey && import.meta.env.PROD !== true && import.meta.env.NODE_ENV !== 'test') {
-      logger.warn('Gemini API key not found. Writing assistant will use mock data.', {
-        component: 'WritingAssistantService',
-      });
-    }
-
-    if (apiKey == null) {
-      this.genAI = null;
-    } else {
-      this.genAI = new OpenRouter({ apiKey });
-    }
+    // No API keys in client - using Edge Functions for security
+    logger.debug('Writing Assistant Service initialized (using Edge Functions)', {
+      component: 'WritingAssistantService',
+    });
   }
 
   public static getInstance(): WritingAssistantService {
@@ -158,15 +130,6 @@ class WritingAssistantService {
     content: string,
     config: WritingAssistantConfig,
   ): Promise<WritingSuggestion[]> {
-    if (import.meta.env.VITE_GEMINI_API_KEY == null || this.genAI == null) {
-      void import('@/lib/analytics').then(({ featureTracking }) => {
-        featureTracking.trackFeatureUsage('writing-assistant', 'ai_generation_mock', {
-          length: content.length,
-        });
-      });
-      return this.getMockSuggestions(content);
-    }
-
     void import('@/lib/analytics').then(({ featureTracking }) => {
       featureTracking.trackFeatureUsage('writing-assistant', 'ai_generation', {
         length: content.length,
@@ -175,48 +138,71 @@ class WritingAssistantService {
     });
 
     try {
-      const prompt = `
-        Analyze the following text and provide writing suggestions. Focus on:
-        - Style improvements (clarity, flow, engagement)
-        - Tone consistency
-        - Pacing issues
-        - Character voice consistency
-        - Dialogue enhancement
-        - Show vs. tell opportunities
-        - Grammar and readability
-
-        Target audience: ${config.targetAudience}
-        Preferred style: ${config.preferredStyle}
-        ${config.genre != null ? `Genre: ${config.genre}` : ''}
-
-        Please provide suggestions in JSON format with:
-        - type: category of suggestion
-        - severity: info/suggestion/warning/error
-        - message: clear description
-        - originalText: problematic text (if applicable)
-        - suggestedText: improved version (if applicable)
-        - position: {start, end} character positions
-        - confidence: 0-1 score
-        - reasoning: explanation
-        - category: specific category from readability/engagement/consistency/flow/dialogue/description/character_voice/plot_structure/show_vs_tell
-
-        Text to analyze:
-        "${content.substring(0, 2000)}${content.length > 2000 ? '...' : ''}"
-      `;
-
-      const result = await this.genAI!.chat.send({
-        model: 'google/gemini-pro',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        stream: false,
+      const response = await fetch('/api/ai/writing-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content,
+          config: {
+            targetAudience: config.targetAudience,
+            preferredStyle: config.preferredStyle,
+            genre: config.genre,
+            enablePlotHoleDetection: config.enablePlotHoleDetection,
+            enableCharacterTracking: config.enableCharacterTracking,
+            enableDialogueAnalysis: config.enableDialogueAnalysis,
+            enableStyleAnalysis: config.enableStyleAnalysis,
+            minimumConfidence: config.minimumConfidence,
+          },
+        }),
       });
 
-      const responseText =
-        typeof result.choices[0]?.message.content === 'string'
-          ? result.choices[0].message.content
-          : '';
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+        logger.error('Writing Assistant API error', {
+          status: response.status,
+          error: error.error,
+        });
+        return this.getMockSuggestions(content);
+      }
 
-      return this.parseAISuggestions(responseText, config);
+      const data = (await response.json()) as { suggestions: unknown[] };
+      const rawSuggestions = data.suggestions as {
+        id: string;
+        type: string;
+        severity: string;
+        message: string;
+        originalText: string;
+        suggestedText: string;
+        position: {
+          start: number;
+          end: number;
+          line?: number;
+          column?: number;
+        };
+        confidence: number;
+        reasoning: string;
+        category: string;
+      }[];
+
+      return rawSuggestions.map(
+        (s): WritingSuggestion => ({
+          id: s.id,
+          type: s.type as WritingSuggestion['type'],
+          severity: s.severity as WritingSuggestion['severity'],
+          message: s.message,
+          originalText: s.originalText ?? '',
+          suggestedText: s.suggestedText,
+          position: {
+            start: s.position.start ?? 0,
+            end: s.position.end ?? 0,
+            line: s.position.line,
+            column: s.position.column,
+          },
+          confidence: s.confidence ?? 0.7,
+          reasoning: s.reasoning ?? '',
+          category: s.category as WritingSuggestionCategory,
+        }),
+      );
     } catch (error) {
       logger.error('AI suggestion generation failed', {
         component: 'WritingAssistantService',
@@ -224,72 +210,6 @@ class WritingAssistantService {
       });
       return this.getMockSuggestions(content);
     }
-  }
-
-  private parseAISuggestions(
-    aiResponse: string,
-    config: WritingAssistantConfig,
-  ): WritingSuggestion[] {
-    try {
-      const jsonMatch = /\[[\s\S]*\]/.exec(aiResponse);
-      if (!jsonMatch) {
-        return this.extractSuggestionsFromText(aiResponse);
-      }
-
-      const suggestions: RawAISuggestion[] = JSON.parse(jsonMatch[0]) as RawAISuggestion[];
-      return suggestions
-        .filter((s: RawAISuggestion) => (s.confidence ?? 0.7) >= config.minimumConfidence)
-        .map(
-          (s: RawAISuggestion, index: number): WritingSuggestion => ({
-            id: `ai-suggestion-${Date.now()}-${index}`,
-            type: (s.type as WritingSuggestion['type']) ?? 'style',
-            severity: (s.severity as WritingSuggestion['severity']) ?? 'suggestion',
-            message: s.message,
-            originalText: s.originalText ?? '',
-            suggestedText: s.suggestedText,
-            position: s.position
-              ? {
-                  start: s.position.start ?? 0,
-                  end: s.position.end ?? 0,
-                  line: s.position.line,
-                  column: s.position.column,
-                }
-              : { start: 0, end: 0 },
-            confidence: s.confidence ?? 0.7,
-            reasoning: s.reasoning ?? '',
-            category: s.category ?? 'readability',
-          }),
-        );
-    } catch (error) {
-      logger.error('Failed to parse AI suggestions', {
-        component: 'WritingAssistantService',
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return this.extractSuggestionsFromText(aiResponse);
-    }
-  }
-
-  private extractSuggestionsFromText(text: string): WritingSuggestion[] {
-    const suggestions: WritingSuggestion[] = [];
-    const lines = text.split('\n').filter(line => line.trim());
-
-    lines.forEach((line, index) => {
-      if (line.includes('suggestion') || line.includes('improve') || line.includes('consider')) {
-        suggestions.push({
-          id: `parsed-suggestion-${index}`,
-          type: 'style',
-          severity: 'suggestion',
-          message: line.trim(),
-          originalText: '',
-          position: { start: 0, end: 0 },
-          confidence: 0.6,
-          reasoning: 'Extracted from AI response',
-          category: 'readability',
-        });
-      }
-    });
-
-    return suggestions.slice(0, 5);
   }
 
   private detectPlotHoles(content: string, plotContext?: string): PlotHoleDetection[] {
