@@ -397,5 +397,5 @@ test('button shows active state on press', async () => {
 
 ---
 
-_Last Updated: December 31, 2025_ _WCAG 2.2 Level AA Compliance_ _Research
+_Last Updated: January 2, 2026_ _WCAG 2.2 Level AA Compliance_ _Research
 Sources: Latest 2025 web accessibility guidelines_

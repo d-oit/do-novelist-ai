@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-Successfully refactored `WritingGoalsPanel.tsx` from 547 LOC to 115 LOC (79%
+Successfully refactored `WritingGoalsPanel.tsx` from 547 LOC to 132 LOC (76%
 reduction) by extracting 10 focused components and 1 custom hook. All quality
 gates passing with zero regressions.
 
@@ -24,12 +24,12 @@ gates passing with zero regressions.
 
 ### After
 
-- **Main Component**: `WritingGoalsPanel.tsx` (115 LOC)
+- **Main Component**: `WritingGoalsPanel.tsx` (132 LOC)
 - **Extracted Components**: 10 files
 - **Custom Hook**: 1 file
-- **Total LOC**: 744 LOC (distributed across 11 files)
+- **Total LOC**: 761 LOC (distributed across 11 files)
 - **Status**: ✅ Compliant with 500 LOC policy
-- **Reduction**: 79% reduction in main component size
+- **Reduction**: 76% reduction in main component size (from 547 to 132 LOC)
 
 ---
 
