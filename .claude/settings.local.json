@@ -1,15 +1,4 @@
 {
-  "env": {
-    "ANTHROPIC_BASE_URL": "https://api.minimax.io/anthropic",
-    "ANTHROPIC_AUTH_TOKEN": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJHcm91cE5hbWUiOiJEb21pbmlrIE9zd2FsZCIsIlVzZXJOYW1lIjoiRG9taW5payBPc3dhbGQiLCJBY2NvdW50IjoiIiwiU3ViamVjdElEIjoiMTkxMjEzMDY4MTQ2NzU3MjY1OCIsIlBob25lIjoiIiwiR3JvdXBJRCI6IjE5MTIxMzA2ODE0NTkxODQwNTAiLCJQYWdlTmFtZSI6IiIsIk1haWwiOiJkbW1vdGVjQGdtYWlsLmNvbSIsIkNyZWF0ZVRpbWUiOiIyMDI1LTEyLTE3IDIxOjI2OjA0IiwiVG9rZW5UeXBlIjo0LCJpc3MiOiJtaW5pbWF4In0.SVkCPzz5XbO3qQI9H5F9HWhvIIf4ckkGEallPNS9bRXRZFcQVbmeJ4XikqvgxU6MHosSoL3oD8vMfErJADcNXuH--N6ZQXmgcYLYEAod0IIre0cjxTrok-ep-ZIsHxcaaZgb6kg_oIzFngTmGMATDKgRdhl97fLDxdfYRZbXyAVQjPAEEnGJDLD-BYSLejI9EsjWJuiCagNRAxy11V1ZSFZWT5asSE_PQ96r5Kj0MGpVbz1Zz0fySrXfWTXXKxNeVYm0yzb0DVfWi3iqCFb_LZeRDvX3EnjdsqQ3KGE-3ywl4zl6LCmamHFDz_vuV8AtMQIxht17iuUZ9xEWq8Q0DQ",
-    "API_TIMEOUT_MS": "3000000",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "ANTHROPIC_MODEL": "MiniMax-M2.1",
-    "ANTHROPIC_SMALL_FAST_MODEL": "MiniMax-M2.1",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M2.1",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "MiniMax-M2.1",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "MiniMax-M2.1"
-  },
   "permissions": {
     "allow": [
       "Bash(git push:*)",
@@ -139,7 +128,9 @@
       "Bash(tasklist)",
       "Bash(powershell -Command:*)",
       "Bash(cmd.exe:*)",
-      "Bash(CLAUDE_MEM_WORKER_PORT=37888 cd:*)"
+      "Bash(CLAUDE_MEM_WORKER_PORT=37888 cd:*)",
+      "Bash(npm run dev:*)",
+      "Bash(vercel:*)"
     ],
     "deny": [],
     "ask": []

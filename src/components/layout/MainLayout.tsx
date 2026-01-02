@@ -44,9 +44,9 @@ const MainLayout: FC<MainLayoutProps> = ({ children, className, currentView, onN
       <a
         href='#navigation'
         className={cn(
-          'absolute left-4 top-16 z-50',
+          'absolute left-4 top-4 z-50',
           'rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground',
-          '-translate-y-20 transform focus:translate-y-0',
+          '-translate-y-32 transform focus:translate-y-0',
           'transition-transform duration-200',
           'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
         )}
