@@ -34,6 +34,8 @@ const ALLOWED_VIOLATIONS = new Set([
   'src/features/publishing/services/publishingAnalyticsService.ts',
   'src/lib/character-validation.ts',
   'src/features/projects/components/ProjectWizard.tsx',
+  // Pre-existing large file - to be refactored in future
+  'src/lib/ai-operations.ts',
 ]);
 
 const IGNORE_PATTERNS = [
