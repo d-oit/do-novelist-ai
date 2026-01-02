@@ -17,6 +17,7 @@ vi.mock('@/lib/logging/logger', () => ({
 
 describe('VoiceInputPanel', () => {
   const mockOnTranscript = vi.fn();
+  let mockRecognition: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -34,6 +35,7 @@ describe('VoiceInputPanel', () => {
 
     // Store the mock instance so we can access it in tests
     (global as any).__mockRecognitionInstance = mockInstance;
+    mockRecognition = mockInstance;
 
     // Mock SpeechRecognition constructor
     const MockSpeechRecognition = vi.fn().mockImplementation(function (this: any) {
@@ -89,13 +91,23 @@ describe('VoiceInputPanel', () => {
       expect(mockInstance.start).toHaveBeenCalledTimes(1);
     });
 
-    it('stops recording when clicked again', () => {
+    it('stops recording when clicked again', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
       const micButton = screen.getByTestId('voice-recording-button');
 
       // Start recording
       fireEvent.click(micButton);
+
+      // Trigger onstart callback to update isRecording state
+      if (mockRecognition.onstart) {
+        mockRecognition.onstart(new Event('start'));
+      }
+
+      // Wait for state update
+      await waitFor(() => {
+        expect(screen.getByText('Listening...')).toBeInTheDocument();
+      });
 
       // Stop recording
       fireEvent.click(micButton);
