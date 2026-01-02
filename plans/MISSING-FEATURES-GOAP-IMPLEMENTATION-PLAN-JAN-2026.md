@@ -106,15 +106,15 @@ Implement 6 missing features across 3 phases with security-first approach.
 
 **Atomic Tasks**:
 
-1. Task 1.1: Research Vercel Functions vs Cloudflare Workers (Explore agent, 1h)
-2. Task 1.2: Design serverless API architecture (Plan agent, 2h)
-3. Task 1.3: Create serverless function for AI calls (feature-implementer, 1
-   day)
-4. Task 1.4: Implement rate limiting middleware (feature-implementer, 0.5 day)
-5. Task 1.5: Add cost tracking and alerts (feature-implementer, 0.5 day)
-6. Task 1.6: Migrate client AI calls to serverless (refactorer, 1 day)
+1. Task 1.1: ✅ Research Vercel Edge Runtime (Complete - Edge Functions
+   selected)
+2. Task 1.2: ✅ Design Edge Functions API architecture (Complete)
+3. Task 1.3: ✅ Create Edge Functions for AI calls (Complete - all 13 functions)
+4. Task 1.4: ✅ Implement rate limiting middleware (Complete)
+5. Task 1.5: ✅ Add cost tracking and alerts (Complete)
+6. Task 1.6: Migrate client AI calls to Edge Functions (refactorer, 1 day)
 7. Task 1.7: Remove API keys from client builds (refactorer, 0.5 day)
-8. Task 1.8: Write tests for serverless functions (test-runner, 0.5 day)
+8. Task 1.8: ✅ Write tests for Edge Functions (Complete)
 9. Task 1.9: Validate security (code-reviewer, 0.5 day)
 
 #### **Sub-Goal 2: RAG Phase 1 - Project Context Injection (P1)**
@@ -321,36 +321,36 @@ Phase 1: Security Hardening (P0)
 **Tasks**:
 
 1. **Day 1**: Research & Design
-   - Task 1.1: Research Vercel Functions vs Cloudflare Workers
-   - Task 1.2: Design serverless API architecture
-   - Quality Gate: Architecture approved
+   - Task 1.1: ✅ Research Vercel Edge Runtime (Complete)
+   - Task 1.2: ✅ Design Edge Functions API architecture (Complete)
+   - Quality Gate: Architecture approved ✅
 
 2. **Days 2-3**: Implementation
-   - Task 1.3: Create serverless function for AI calls
-   - Task 1.4: Implement rate limiting middleware
-   - Task 1.5: Add cost tracking and alerts
-   - Quality Gate: Serverless functions working
+   - Task 1.3: ✅ Create Edge Functions for AI calls (Complete - all 13)
+   - Task 1.4: ✅ Implement rate limiting middleware (Complete)
+   - Task 1.5: ✅ Add cost tracking and alerts (Complete)
+   - Quality Gate: Edge Functions working ✅
 
 3. **Days 4-5**: Migration & Validation
-   - Task 1.6: Migrate client AI calls to serverless
+   - Task 1.6: Migrate client AI calls to Edge Functions
    - Task 1.7: Remove API keys from client builds
-   - Task 1.8: Write tests for serverless functions
+   - Task 1.8: ✅ Write tests for Edge Functions (Complete)
    - Task 1.9: Validate security
    - Quality Gate: Zero API keys in client, all tests passing
 
 **Quality Gates**:
 
 - [x] Architecture designed and approved
-- [x] Serverless functions implemented and tested
-- [x] Zero API keys in client builds (verified)
-- [x] All AI calls routed through serverless
+- [x] Edge Functions implemented and tested (all 13 functions)
+- [ ] Zero API keys in client builds (pending client migration)
+- [ ] All AI calls routed through Edge Functions (pending client migration)
 - [x] Rate limiting and cost tracking active
 - [x] All tests passing (80%+ coverage)
 
 **Success Criteria**:
 
 - Zero API keys in client builds
-- All AI calls routed through serverless
+- All AI calls routed through Edge Functions
 - Cost tracking dashboard active
 - Security audit passed
 

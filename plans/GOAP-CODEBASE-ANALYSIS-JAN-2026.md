@@ -26,8 +26,8 @@ remaining and strategic feature opportunities.
 
 ### Key Findings
 
-1. **Security Gap (P0)**: API key still exposed in client code - 6/13 serverless
-   endpoints implemented
+1. **Security Gap (P0)**: API key still exposed in client code - All 13 Edge
+   Functions implemented, client migration pending
 2. **Feature Opportunities**: RAG, AI Agents, Collaboration features not started
 3. **Technical Excellence**: GOAP architecture, 500 LOC policy, TypeScript
    strict mode all enforced
@@ -36,31 +36,31 @@ remaining and strategic feature opportunities.
 
 ## Phase 1: ANALYZE - Current State
 
-### 1.1 Serverless API Migration Status
+### 1.1 Edge Functions API Migration Status
 
-**Implemented Endpoints (6/13 = 46%)**:
+**All Endpoints Implemented (13/13 = 100%)** ✅:
 
-- ✅ `/api/ai/generate.ts` - Generic generation
-- ✅ `/api/ai/brainstorm.ts` - Idea brainstorming
-- ✅ `/api/ai/cost-info.ts` - Cost tracking
-- ✅ `/api/ai/outline.ts` - Outline generation
-- ✅ `/api/ai/chapter.ts` - Chapter writing
-- ✅ `/api/ai/continue.ts` - Continue writing
+- ✅ `/api/ai/generate.ts` - Generic generation (Edge Runtime)
+- ✅ `/api/ai/brainstorm.ts` - Idea brainstorming (Edge Runtime)
+- ✅ `/api/ai/cost-info.ts` - Cost tracking (Edge Runtime)
+- ✅ `/api/ai/outline.ts` - Outline generation (Edge Runtime)
+- ✅ `/api/ai/chapter.ts` - Chapter writing (Edge Runtime)
+- ✅ `/api/ai/continue.ts` - Continue writing (Edge Runtime)
+- ✅ `/api/ai/refine.ts` - Content refinement (Edge Runtime)
+- ✅ `/api/ai/consistency.ts` - Consistency analysis (Edge Runtime)
+- ✅ `/api/ai/image.ts` - Image generation (Edge Runtime)
+- ✅ `/api/ai/translate.ts` - Translation (Edge Runtime)
+- ✅ `/api/ai/characters.ts` - Character development (Edge Runtime)
+- ✅ `/api/ai/world.ts` - World building (Edge Runtime)
+- ✅ `/api/ai/dialogue.ts` - Dialogue polishing (Edge Runtime)
 
-**Missing Endpoints (7/13 = 54%)**:
+**Runtime**: All functions using Edge Runtime (V8) - No 12-function limit ✅
 
-- ❌ `/api/ai/refine.ts` - Content refinement
-- ❌ `/api/ai/consistency.ts` - Consistency analysis
-- ❌ `/api/ai/image.ts` - Image generation
-- ❌ `/api/ai/translate.ts` - Translation
-- ❌ `/api/ai/characters.ts` - Character development
-- ❌ `/api/ai/world.ts` - World building
-- ❌ `/api/ai/dialogue.ts` - Dialogue polishing
-
-**Client Migration Status**: NOT STARTED
+**Client Migration Status**: PENDING
 
 - `VITE_OPENROUTER_API_KEY` still referenced in 8+ files
 - Client code still makes direct API calls
+- All Edge Functions ready, client migration needed
 
 ### 1.2 Feature Module Analysis
 
@@ -114,24 +114,19 @@ remaining and strategic feature opportunities.
 
 **Sub-Goals**:
 
-1. Create remaining 7 serverless endpoints
-2. Migrate all client AI operations to serverless
+1. ✅ All 13 Edge Functions implemented (Edge Runtime)
+2. Migrate all client AI operations to Edge Functions
 3. Remove `VITE_OPENROUTER_API_KEY` from codebase
 4. Validate zero API keys in production bundle
 
 **Atomic Tasks**: | Task | Agent | Duration | Priority |
-|------|-------|----------|----------| | Create `/api/ai/refine.ts` |
-feature-implementer | 30 min | P0 | | Create `/api/ai/consistency.ts` |
-feature-implementer | 30 min | P0 | | Create `/api/ai/image.ts` |
-feature-implementer | 45 min | P0 | | Create `/api/ai/translate.ts` |
-feature-implementer | 30 min | P0 | | Create `/api/ai/characters.ts` |
-feature-implementer | 30 min | P0 | | Create `/api/ai/world.ts` |
-feature-implementer | 30 min | P0 | | Create `/api/ai/dialogue.ts` |
-feature-implementer | 30 min | P0 | | Migrate `ai-operations.ts` | refactorer |
-2 hours | P0 | | Remove VITE_OPENROUTER_API_KEY | refactorer | 1 hour | P0 | |
-Security validation | test-runner | 30 min | P0 |
+|------|-------|----------|----------| | ✅ All 13 Edge Functions created |
+feature-implementer | Complete | P0 | | Migrate `ai-operations.ts` to Edge
+Functions | refactorer | 2 hours | P0 | | Remove VITE_OPENROUTER_API_KEY |
+refactorer | 1 hour | P0 | | Security validation | test-runner | 30 min | P0 |
 
-**Estimated Duration**: 1-2 days
+**Estimated Duration**: 1-2 days (Edge Functions complete, client migration
+remaining)
 
 ---
 
@@ -243,11 +238,12 @@ Week 6-9: AI Agent Framework (P2)
 - [x] Create GOAP plan
 - [x] Update plan documents
 
-**Day 2-3**: Security Hardening - Endpoints
+**Day 2-3**: Security Hardening - Client Migration
 
-- [ ] Create 7 missing serverless endpoints
-- [ ] Test each endpoint locally
-- [ ] Update middleware if needed
+- [x] ✅ All 13 Edge Functions implemented (Edge Runtime)
+- [ ] Migrate `ai-operations.ts` to use Edge Functions
+- [ ] Remove `VITE_OPENROUTER_API_KEY` references
+- [ ] Test client migration
 
 **Day 4**: Security Hardening - Migration
 
@@ -274,11 +270,11 @@ Week 6-9: AI Agent Framework (P2)
 
 ### Security Hardening (P0)
 
-- [ ] 13/13 serverless endpoints implemented
+- [x] 13/13 Edge Functions implemented (Edge Runtime)
 - [ ] Zero `VITE_OPENROUTER_API_KEY` in codebase
 - [ ] Zero API keys in production bundle
-- [ ] Rate limiting active (60 req/hour)
-- [ ] Cost tracking functional
+- [x] Rate limiting active (60 req/hour)
+- [x] Cost tracking functional
 
 ### RAG Phase 1 (P1)
 
