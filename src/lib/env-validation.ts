@@ -1,9 +1,6 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
-  // Optional - required in production but lenient in tests/CI
-  VITE_OPENROUTER_API_KEY: z.string().optional(),
-
   // Optional with defaults
   VITE_DEFAULT_AI_PROVIDER: z
     .enum([
@@ -75,7 +72,6 @@ export function getValidatedEnv(): ValidatedEnv {
     if (import.meta.env.CI) {
       // In CI, return default environment instead of throwing
       return {
-        VITE_OPENROUTER_API_KEY: undefined,
         VITE_DEFAULT_AI_PROVIDER: 'google',
         VITE_DEFAULT_AI_MODEL: 'google/gemini-2.0-flash-exp',
         VITE_THINKING_AI_MODEL: 'anthropic/claude-3-5-sonnet-20241022',

@@ -112,12 +112,10 @@ describe('VoiceInputPanel', () => {
     it('starts recording when microphone button is clicked', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      // Find the large circular mic button
-      const buttons = screen.getAllByRole('button');
-      const micButton = buttons.find(btn => btn.className.includes('h-20 w-20 rounded-full'));
+      const micButton = screen.getByTestId('voice-recording-button');
 
       expect(micButton).toBeDefined();
-      fireEvent.click(micButton!);
+      fireEvent.click(micButton);
 
       await waitFor(
         () => {
@@ -130,11 +128,10 @@ describe('VoiceInputPanel', () => {
     it('stops recording when clicked again', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const buttons = screen.getAllByRole('button');
-      const micButton = buttons.find(btn => btn.className.includes('h-20 w-20 rounded-full'));
+      const micButton = screen.getByTestId('voice-recording-button');
 
       // Start recording
-      fireEvent.click(micButton!);
+      fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
       await waitFor(
@@ -145,7 +142,7 @@ describe('VoiceInputPanel', () => {
       );
 
       // Stop recording
-      fireEvent.click(micButton!);
+      fireEvent.click(micButton);
 
       await waitFor(
         () => {
@@ -158,20 +155,20 @@ describe('VoiceInputPanel', () => {
     it('shows listening state when recording', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const buttons = screen.getAllByRole('button');
-      const micButton = buttons.find(btn => btn.className.includes('h-20 w-20 rounded-full'));
-      fireEvent.click(micButton!);
+      const micButton = screen.getByTestId('voice-recording-button');
 
-      // Simulate start event
+      fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
       await waitFor(
         () => {
           expect(screen.getByText('Listening...')).toBeInTheDocument();
-          expect(screen.getByText(/Say "Stop" to end/)).toBeInTheDocument();
         },
         { timeout: 2000 },
       );
+
+      // Should also show the stop instruction
+      expect(screen.getByText(/Say "Stop" to end recording/)).toBeInTheDocument();
     });
 
     it('configures recognition with correct settings', async () => {
@@ -190,7 +187,7 @@ describe('VoiceInputPanel', () => {
     it('displays interim transcript with italic style', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
@@ -218,7 +215,7 @@ describe('VoiceInputPanel', () => {
     it('accumulates final transcript results', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
@@ -270,7 +267,7 @@ describe('VoiceInputPanel', () => {
     it('calls onTranscript when recording ends', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
@@ -300,7 +297,7 @@ describe('VoiceInputPanel', () => {
     it('shows insert button when transcript is available and not recording', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
@@ -328,7 +325,7 @@ describe('VoiceInputPanel', () => {
     it('inserts transcript when insert button is clicked', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
@@ -357,7 +354,7 @@ describe('VoiceInputPanel', () => {
     it('clears transcript when clear button is clicked', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
@@ -393,7 +390,7 @@ describe('VoiceInputPanel', () => {
     it('detects "save" command', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} onCommand={mockOnCommand} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
@@ -419,7 +416,7 @@ describe('VoiceInputPanel', () => {
     it('detects "new chapter" command', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} onCommand={mockOnCommand} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
@@ -445,7 +442,7 @@ describe('VoiceInputPanel', () => {
     it('stops recording on "stop" command', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} onCommand={mockOnCommand} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
       if (mockRecognition.onstart) mockRecognition.onstart(new Event('start'));
 
@@ -483,7 +480,7 @@ describe('VoiceInputPanel', () => {
     it('displays error message on recognition error', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
 
       // Simulate error
@@ -502,7 +499,7 @@ describe('VoiceInputPanel', () => {
     it('shows appropriate error for no speech detected', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
 
       const errorEvent = {
@@ -520,7 +517,7 @@ describe('VoiceInputPanel', () => {
     it('disables button when microphone access is denied', async () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
-      const micButton = screen.getByRole('button', { name: /microphone/i });
+      const micButton = screen.getByTestId('voice-recording-button');
       fireEvent.click(micButton);
 
       const errorEvent = {
@@ -530,6 +527,12 @@ describe('VoiceInputPanel', () => {
 
       if (mockRecognition.onerror) mockRecognition.onerror(errorEvent);
 
+      // Check that error message appears first
+      await waitFor(() => {
+        expect(screen.getByText('Microphone access denied')).toBeInTheDocument();
+      });
+
+      // Then check that button is disabled
       await waitFor(() => {
         expect(micButton).toBeDisabled();
       });

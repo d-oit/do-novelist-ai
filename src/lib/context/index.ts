@@ -1,19 +1,28 @@
 /**
- * Context System - RAG Phase 1
- * Project context injection for AI operations
+ * Context Management System
+ * RAG Phase 1: Project Context Injection
  *
- * This module provides intelligent context extraction and formatting
- * to make AI generations more accurate and consistent.
+ * This module provides context-aware AI operations by extracting project
+ * information and injecting it into AI prompts for better consistency
+ * and relevance.
  */
 
-export * from './types';
-export * from './extractor';
-export * from './formatter';
-export * from './token-utils';
-export * from './cache';
+export {
+  extractProjectContext,
+  formatContextForPrompt,
+  type ProjectContext,
+  type ContextExtractionOptions,
+} from './contextExtractor';
 
-// Re-export main functions for convenience
-export { extractProjectContext } from './extractor';
-export { formatContextForPrompt, formatMinimalContext, createContextSummary } from './formatter';
-export { getOrExtractContext, invalidateCache, clearCache, getCacheStats } from './cache';
-export { estimateTokens, truncateToTokens, estimatePromptTokens } from './token-utils';
+export {
+  injectProjectContext,
+  ContextAwarePrompts,
+  createContextAwarePrompt,
+  type ContextInjectionOptions,
+  type EnhancedPrompt,
+} from './contextInjector';
+
+export { contextCache } from './contextCache';
+
+// Re-export for convenience
+export { logger } from '@/lib/logging/logger';

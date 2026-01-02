@@ -26,10 +26,14 @@ This index helps you quickly find the documentation you need.
 
 ### For Feature Development
 
-1. [NEW-FEATURES-PLAN-JAN-2026.md](NEW-FEATURES-PLAN-JAN-2026.md) - Upcoming
+1. [GOAP-CODEBASE-ANALYSIS-JAN-2026.md](GOAP-CODEBASE-ANALYSIS-JAN-2026.md) ⭐
+   **NEW** - Comprehensive GOAP analysis with improvements and new features
+2. [NEW-FEATURES-PLAN-JAN-2026.md](NEW-FEATURES-PLAN-JAN-2026.md) - Upcoming
    feature roadmap
-2. [WRITING-ASSISTANT-ENHANCEMENT-PLAN.md](WRITING-ASSISTANT-ENHANCEMENT-PLAN.md) -
-   Writing assistant roadmap
+3. [MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md](MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md) -
+   Detailed implementation plan for missing features
+4. [WRITING-ASSISTANT-ENHANCEMENT-PLAN.md](WRITING-ASSISTANT-ENHANCEMENT-PLAN.md) -
+   Writing assistant roadmap (100% complete)
 
 ### For Quality & Maintenance
 
@@ -43,8 +47,16 @@ This index helps you quickly find the documentation you need.
 
 ### Active Plans
 
+- **GOAP-CODEBASE-ANALYSIS-JAN-2026.md** ⭐ **NEW**
+  - Comprehensive GOAP analysis
+  - Security gap: 6/13 endpoints (46%)
+  - Feature opportunities: RAG, AI Agents, Collaboration
+  - 9-12 week improvement roadmap
+
 - **NEW-FEATURES-PLAN-JAN-2026.md** (60% complete) - Foundation complete, Phase
   2 Quick Wins ready
+- **MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md** (0% - Planning) -
+  Detailed 11-14 week implementation plan
 - **WRITING-ASSISTANT-ENHANCEMENT-PLAN.md** (100% complete) - ✅ All MVP
   features implemented
 

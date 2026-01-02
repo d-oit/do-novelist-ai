@@ -50,17 +50,16 @@ export interface AIServiceConfig {
 /**
  * Get AI service configuration from environment variables
  * Uses validated environment variables for type safety
+ * Note: API keys are now handled server-side for security
  */
 export function getAIConfig(): AIServiceConfig {
   // Get validated environment variables (throws error if invalid)
   const env = getValidatedEnv();
 
-  const openrouterApiKey = env.VITE_OPENROUTER_API_KEY;
-
   return {
     defaultProvider: env.VITE_DEFAULT_AI_PROVIDER,
     enableFallback: env.VITE_ENABLE_AUTO_FALLBACK !== 'false',
-    openrouterApiKey,
+    openrouterApiKey: undefined, // API keys handled server-side
     defaultModel: env.VITE_DEFAULT_AI_MODEL,
     thinkingModel: env.VITE_THINKING_AI_MODEL,
     enableAutoRouting: env.VITE_ENABLE_AUTO_ROUTING === 'true',
@@ -76,7 +75,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'mistral-medium-latest',
           advanced: 'mistral-large-latest',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       openai: {
@@ -87,7 +86,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'gpt-4o',
           advanced: 'gpt-4o',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       anthropic: {
@@ -98,7 +97,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'claude-3-5-sonnet-20241022',
           advanced: 'claude-3-5-sonnet-20241022',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       google: {
@@ -109,7 +108,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'gemini-2.0-flash-exp',
           advanced: 'gemini-exp-1206',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       // Extended Providers (New)
@@ -121,7 +120,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'deepseek-reasoner',
           advanced: 'deepseek-reasoner',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       cohere: {
@@ -132,7 +131,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'command-r-plus',
           advanced: 'command-r-plus',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       ai21: {
@@ -143,7 +142,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'jamba-1.5-large',
           advanced: 'jamba-1.5-large',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       together: {
@@ -154,7 +153,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'meta-llama/llama-3.1-8b-instruct',
           advanced: 'meta-llama/llama-3.1-70b-instruct',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       fireworks: {
@@ -165,7 +164,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'accounts/fireworks/models/llama-v3p1-70b-instruct',
           advanced: 'accounts/fireworks/models/llama-v3p1-70b-instruct',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       perplexity: {
@@ -176,7 +175,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'pplx-70b-online',
           advanced: 'pplx-70b-online',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       xai: {
@@ -187,7 +186,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'grok-beta',
           advanced: 'grok-beta',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       '01-ai': {
@@ -198,7 +197,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: '01-ai/yi-34b',
           advanced: '01-ai/yi-34b',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       nvidia: {
@@ -209,7 +208,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'nvidia/nemotron-3-nano-30b-a3b:free',
           advanced: 'nvidia/llama-3.1-nemotron-70b-instruct',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       amazon: {
@@ -220,7 +219,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'amazon/nova-lite-v1',
           advanced: 'amazon/nova-pro-v1',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
 
       meta: {
@@ -231,7 +230,7 @@ export function getAIConfig(): AIServiceConfig {
           standard: 'meta-llama/llama-3.1-8b-instruct',
           advanced: 'meta-llama/llama-3.1-70b-instruct',
         },
-        enabled: Boolean(openrouterApiKey),
+        enabled: true, // Always enabled - API key handled server-side
       },
     },
   };

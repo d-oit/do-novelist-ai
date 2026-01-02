@@ -1,12 +1,10 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  // AI Configuration
-  readonly VITE_OPENROUTER_API_KEY?: string;
+  // AI Configuration (API keys now handled server-side)
   readonly VITE_DEFAULT_AI_PROVIDER?: string;
   readonly VITE_DEFAULT_AI_MODEL?: string;
   readonly VITE_THINKING_AI_MODEL?: string;
-  readonly VITE_GEMINI_API_KEY?: string;
   readonly VITE_ENABLE_AUTO_FALLBACK?: string;
   readonly VITE_DISABLE_AI_SDK?: string;
 

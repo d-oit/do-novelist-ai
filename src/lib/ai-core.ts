@@ -1,9 +1,8 @@
 /**
  * AI Core Services
  * Base infrastructure for AI operations including configuration, logging, and provider management.
+ * Note: OpenRouter client now handled server-side for security
  */
-
-import { OpenRouter } from '@openrouter/sdk';
 
 import {
   getAIConfig,
@@ -22,11 +21,6 @@ import type { Chapter } from '@/types/index';
 
 // Get configuration
 const config = getAIConfig();
-
-// Create OpenRouter SDK client instance
-const openrouterClient = new OpenRouter({
-  apiKey: config.openrouterApiKey ?? '',
-});
 
 // Create logger for AI module
 export const aiLogger = logger.child({ module: 'ai-service' });
@@ -47,9 +41,9 @@ export const isTestEnvironment = (): boolean => {
 
     const isLocalhost =
       window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const hasApiKey = !!import.meta.env?.VITE_OPENROUTER_API_KEY;
 
-    if (isLocalhost && !hasApiKey) {
+    // In localhost without server-side API, use test mode
+    if (isLocalhost) {
       return true;
     }
 
@@ -244,5 +238,5 @@ export async function executeWithFallback<T>(
   throw lastError ?? new Error(`${operationName} failed with all providers`);
 }
 
-// Export OpenRouter client and config for use in other modules
-export { openrouterClient, config };
+// Export config for use in other modules
+export { config };

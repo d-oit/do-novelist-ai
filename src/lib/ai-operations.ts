@@ -1,32 +1,23 @@
 /**
  * AI Operations
  * Business logic for specific AI tasks: text generation, plot analysis, etc.
+ * All operations now use secure serverless API endpoints with context injection
  */
 
-import {
-  generateBookCover as serviceGenerateBookCover,
-  generateChapterIllustration as serviceGenerateChapterIllustration,
-} from '@/features/generation/services/imageGenerationService';
 import { withCache } from '@/lib/cache';
-import type { Chapter, RefineOptions } from '@/types/index';
+import { ContextAwarePrompts } from '@/lib/context';
+import type { Chapter, RefineOptions, Project } from '@/types/index';
 
-import {
-  openrouterClient,
-  getModelName,
-  aiLogger,
-  isTestEnvironment,
-  isValidOutline,
-  executeWithFallback,
-  config,
-} from './ai-core';
+import { aiLogger, isTestEnvironment, isValidOutline, config } from './ai-core';
 
 /**
  * Generate outline for a book idea
- * Now uses serverless API endpoint for security
+ * Now uses serverless API endpoint with context injection for security and consistency
  */
 const _generateOutline = async (
   idea: string,
   style: string,
+  project?: Project,
 ): Promise<{ title: string; chapters: Partial<Chapter>[] }> => {
   const operationLogger = aiLogger.child({ operation: 'generateOutline', ideaLength: idea.length });
 
@@ -42,12 +33,26 @@ const _generateOutline = async (
     };
   }
 
-  operationLogger.debug('Generating outline via serverless API', {
+  operationLogger.debug('Generating outline via serverless API with context', {
     style,
     ideaPreview: idea.substring(0, 100),
+    hasProject: !!project,
   });
 
   try {
+    let enhancedPrompt;
+
+    if (project) {
+      // Use context-aware prompt generation
+      const contextPrompts = new ContextAwarePrompts(project);
+      enhancedPrompt = await contextPrompts.createOutlinePrompt(idea, style);
+
+      operationLogger.debug('Using context-aware prompt', {
+        estimatedTokens: enhancedPrompt.estimatedTokens,
+        hasContext: !!enhancedPrompt.context,
+      });
+    }
+
     const response = await fetch('/api/ai/outline', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -55,6 +60,11 @@ const _generateOutline = async (
         idea,
         style,
         provider: config.defaultProvider,
+        // Include enhanced prompts if available
+        ...(enhancedPrompt && {
+          systemPrompt: enhancedPrompt.systemPrompt,
+          userPrompt: enhancedPrompt.userPrompt,
+        }),
       }),
     });
 
@@ -72,6 +82,7 @@ const _generateOutline = async (
     operationLogger.info('Outline generated successfully', {
       title: data.title,
       chapterCount: data.chapters?.length ?? 0,
+      contextAware: !!project,
     });
 
     return data;
@@ -87,13 +98,14 @@ export const generateOutline = withCache(_generateOutline, 'generateOutline');
 
 /**
  * Write chapter content
- * Now uses serverless API endpoint for security
+ * Now uses serverless API endpoint with context injection for security and consistency
  */
 export const writeChapterContent = async (
   chapterTitle: string,
   chapterSummary: string,
   style: string,
   previousChapterSummary?: string,
+  project?: Project,
 ): Promise<string> => {
   if (isTestEnvironment()) {
     return `# ${chapterTitle}
@@ -104,6 +116,24 @@ The story continues with detailed narrative, character development, and plot pro
   }
 
   try {
+    let enhancedPrompt;
+
+    if (project) {
+      // Use context-aware prompt generation
+      const contextPrompts = new ContextAwarePrompts(project);
+      enhancedPrompt = await contextPrompts.createChapterPrompt(
+        chapterTitle,
+        chapterSummary,
+        style,
+        previousChapterSummary,
+      );
+
+      aiLogger.debug('Using context-aware chapter prompt', {
+        estimatedTokens: enhancedPrompt.estimatedTokens,
+        hasContext: !!enhancedPrompt.context,
+      });
+    }
+
     const response = await fetch('/api/ai/chapter', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -113,6 +143,11 @@ The story continues with detailed narrative, character development, and plot pro
         style,
         previousChapterSummary,
         provider: config.defaultProvider,
+        // Include enhanced prompts if available
+        ...(enhancedPrompt && {
+          systemPrompt: enhancedPrompt.systemPrompt,
+          userPrompt: enhancedPrompt.userPrompt,
+        }),
       }),
     });
 
@@ -122,6 +157,13 @@ The story continues with detailed narrative, character development, and plot pro
     }
 
     const data = (await response.json()) as { content: string };
+
+    aiLogger.info('Chapter written successfully', {
+      chapterTitle,
+      contentLength: data.content?.length || 0,
+      contextAware: !!project,
+    });
+
     return data.content ?? '';
   } catch (error) {
     aiLogger.error('Chapter writing failed', {
@@ -177,6 +219,7 @@ The adventure unfolds with new challenges and developments that propel the plot 
 
 /**
  * Refine chapter content
+ * Now uses serverless API endpoint for security
  */
 export const refineChapterContent = async (
   content: string,
@@ -196,43 +239,43 @@ This chapter has been refined with improved pacing, better dialogue, and enhance
 - Tightened prose`;
   }
 
-  return executeWithFallback(async provider => {
-    const complexity =
-      options.model?.includes('pro') || options.model?.includes('advanced')
-        ? 'advanced'
-        : 'standard';
-    const model = getModelName(provider, complexity);
-
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: `
-Refine the following chapter content.
-Style: ${style}
-Goal: ${chapterSummary}
-Instructions: Improve flow, prose, and dialogue. Fix grammar. Maintain tone. Do NOT change plot.
-Content: ${content}`,
-        },
-      ],
-      temperature: options.temperature,
-      stream: false,
+  try {
+    const response = await fetch('/api/ai/refine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content,
+        chapterSummary,
+        style,
+        options,
+        provider: config.defaultProvider,
+      }),
     });
 
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `API request failed: ${response.status}`);
+    }
 
-    return responseText ?? content;
-  }, 'refineChapterContent');
+    const data = (await response.json()) as { content: string };
+    return data.content ?? content;
+  } catch (error) {
+    aiLogger.error('Content refinement failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
 /**
  * Analyze consistency across chapters
+ * Now uses serverless API endpoint with context injection for security and consistency
  */
-export const analyzeConsistency = async (chapters: Chapter[], style: string): Promise<string> => {
+export const analyzeConsistency = async (
+  chapters: Chapter[],
+  style: string,
+  project?: Project,
+): Promise<string> => {
   if (isTestEnvironment()) {
     return `## Consistency Analysis
 
@@ -244,35 +287,59 @@ export const analyzeConsistency = async (chapters: Chapter[], style: string): Pr
 Overall: The story shows good consistency with minor suggestions for improvement.`;
   }
 
-  return executeWithFallback(async provider => {
-    const model = getModelName(provider, 'fast');
-    const bookContext = chapters
-      .map(c => `Ch ${c.orderIndex} (${c.title}): ${c.summary}`)
-      .join('\n');
+  try {
+    let enhancedPrompt;
 
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: `
-Analyze this outline for inconsistencies, plot holes, or tonal shifts.
-Style: ${style}
-Outline: ${bookContext}
-INSTRUCTIONS: Identify up to 3 issues. For EACH, provide a "SUGGESTED FIX".`,
-        },
-      ],
-      temperature: 0.3,
-      stream: false,
+    if (project) {
+      // Use context-aware prompt generation
+      const contextPrompts = new ContextAwarePrompts(project);
+      enhancedPrompt = await contextPrompts.createConsistencyPrompt(chapters);
+
+      aiLogger.debug('Using context-aware consistency prompt', {
+        estimatedTokens: enhancedPrompt.estimatedTokens,
+        hasContext: !!enhancedPrompt.context,
+      });
+    }
+
+    const response = await fetch('/api/ai/consistency', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chapters: chapters.map(c => ({
+          orderIndex: c.orderIndex,
+          title: c.title,
+          summary: c.summary,
+        })),
+        style,
+        provider: config.defaultProvider,
+        // Include enhanced prompts if available
+        ...(enhancedPrompt && {
+          systemPrompt: enhancedPrompt.systemPrompt,
+          userPrompt: enhancedPrompt.userPrompt,
+        }),
+      }),
     });
 
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `API request failed: ${response.status}`);
+    }
 
-    return responseText ?? 'No issues found.';
-  }, 'analyzeConsistency');
+    const data = (await response.json()) as { analysis: string };
+
+    aiLogger.info('Consistency analysis completed', {
+      chaptersAnalyzed: chapters.length,
+      analysisLength: data.analysis?.length || 0,
+      contextAware: !!project,
+    });
+
+    return data.analysis ?? 'No issues found.';
+  } catch (error) {
+    aiLogger.error('Consistency analysis failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
 /**
@@ -313,20 +380,39 @@ export const brainstormProject = async (
 };
 
 /**
- * Generate cover image (Google only - has Imagen support)
- * Returns a base64-encoded image for use in the frontend
+ * Generate cover image
+ * Now uses serverless API endpoint for security
  */
 export const generateCoverImage = async (
-  _title: string,
-  _style: string,
-  _idea: string,
+  title: string,
+  style: string,
+  idea: string,
 ): Promise<string | null> => {
   try {
     if (isTestEnvironment()) {
       return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
 
-    return await serviceGenerateBookCover(_title, _idea, _style);
+    const response = await fetch('/api/ai/image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'cover',
+        title,
+        description: idea,
+        style,
+        provider: 'openai',
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      aiLogger.error('Cover image generation failed', { error: error.error });
+      return null;
+    }
+
+    const data = (await response.json()) as { imageUrl: string };
+    return data.imageUrl ?? null;
   } catch (error) {
     aiLogger.error('Cover image generation failed', {
       operation: 'generateCoverImage',
@@ -337,22 +423,39 @@ export const generateCoverImage = async (
 };
 
 /**
- * Generate chapter illustration (Google only - has Imagen support)
- * Returns a base64-encoded image for use in the frontend
+ * Generate chapter illustration
+ * Now uses serverless API endpoint for security
  */
 export const generateChapterIllustration = async (
-  _title: string,
-  _summary: string,
-  _style: string,
+  title: string,
+  summary: string,
+  style: string,
 ): Promise<string | null> => {
   try {
     if (isTestEnvironment()) {
       return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     }
 
-    // Reuse generateBookCover logic for now but pass summary
-    // In a real scenario we might want a different aspect ratio or prompt
-    return await serviceGenerateChapterIllustration(_title, _summary, _style);
+    const response = await fetch('/api/ai/image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'illustration',
+        title,
+        description: summary,
+        style,
+        provider: 'openai',
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      aiLogger.error('Chapter illustration failed', { error: error.error });
+      return null;
+    }
+
+    const data = (await response.json()) as { imageUrl: string };
+    return data.imageUrl ?? null;
   } catch (error) {
     aiLogger.error('Chapter illustration failed', {
       operation: 'generateChapterIllustration',
@@ -364,133 +467,143 @@ export const generateChapterIllustration = async (
 
 /**
  * Translate content
+ * Now uses serverless API endpoint for security
  */
 export const translateContent = async (
   content: string,
   targetLanguage: string,
 ): Promise<string> => {
-  return executeWithFallback(async provider => {
-    const model = getModelName(provider, 'fast');
+  if (isTestEnvironment()) {
+    return `[Translated to ${targetLanguage}] ${content}`;
+  }
 
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: `Translate markdown content to ${targetLanguage}. Maintain formatting and tone.\n\nContent:\n${content}`,
-        },
-      ],
-      temperature: 0.3,
-      stream: false,
+  try {
+    const response = await fetch('/api/ai/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content,
+        targetLanguage,
+        provider: config.defaultProvider,
+      }),
     });
 
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `API request failed: ${response.status}`);
+    }
 
-    return responseText ?? '';
-  }, 'translateContent');
+    const data = (await response.json()) as { translatedContent: string };
+    return data.translatedContent ?? '';
+  } catch (error) {
+    aiLogger.error('Translation failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
 /**
  * Develop characters
+ * Now uses serverless API endpoint with context injection for security and consistency
  */
-export const developCharacters = async (idea: string, style: string): Promise<string> => {
+export const developCharacters = async (
+  idea: string,
+  style: string,
+  project?: Project,
+): Promise<string> => {
   if (isTestEnvironment()) {
     return '**Alice**: A brilliant physicist\n**Bob**: A skilled engineer\n**Charlie**: A mysterious stranger';
   }
 
-  return executeWithFallback(async provider => {
-    const model = getModelName(provider, 'standard');
+  try {
+    let enhancedPrompt;
 
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: `Create a character cast list for: ${idea}\nStyle: ${style}\nOutput Name, Role, Motivation, Conflict.`,
-        },
-      ],
-      temperature: 0.8,
-      stream: false,
+    if (project) {
+      // Use context-aware prompt generation
+      const contextPrompts = new ContextAwarePrompts(project);
+      enhancedPrompt = await contextPrompts.createCharacterPrompt(idea, style);
+
+      aiLogger.debug('Using context-aware character prompt', {
+        estimatedTokens: enhancedPrompt.estimatedTokens,
+        hasContext: !!enhancedPrompt.context,
+      });
+    }
+
+    const response = await fetch('/api/ai/characters', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        idea,
+        style,
+        provider: config.defaultProvider,
+        // Include enhanced prompts if available
+        ...(enhancedPrompt && {
+          systemPrompt: enhancedPrompt.systemPrompt,
+          userPrompt: enhancedPrompt.userPrompt,
+        }),
+      }),
     });
 
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `API request failed: ${response.status}`);
+    }
 
-    return responseText ?? '';
-  }, 'developCharacters');
+    const data = (await response.json()) as { characters: string };
+
+    aiLogger.info('Characters developed successfully', {
+      charactersLength: data.characters?.length || 0,
+      contextAware: !!project,
+    });
+
+    return data.characters ?? '';
+  } catch (error) {
+    aiLogger.error('Character development failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
 /**
  * Build world
+ * Now uses serverless API endpoint for security
  */
 export const buildWorld = async (idea: string, style: string): Promise<string> => {
   if (isTestEnvironment()) {
     return '## Setting\nA futuristic space station orbiting a distant planet.\n\n## Technology\nAdvanced AI systems and FTL travel.\n\n## Society\nA diverse coalition of species working together.';
   }
 
-  return executeWithFallback(async provider => {
-    const model = getModelName(provider, 'standard');
-
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: `Expand setting/lore for: ${idea}\nStyle: ${style}\nFocus on rules, atmosphere, locations.`,
-        },
-      ],
-      temperature: 0.85,
-      stream: false,
+  try {
+    const response = await fetch('/api/ai/world', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        idea,
+        style,
+        provider: config.defaultProvider,
+      }),
     });
 
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `API request failed: ${response.status}`);
+    }
 
-    return responseText ?? '';
-  }, 'buildWorld');
-};
-
-/**
- * Enhance plot
- */
-export const enhancePlot = async (idea: string, style: string): Promise<string> => {
-  if (isTestEnvironment()) {
-    return '## Plot Development\n1. Opening: Establish the protagonist and setting\n2. Rising Action: Conflict emerges\n3. Climax: The main conflict reaches its peak\n4. Falling Action: Consequences of the climax\n5. Resolution: The story concludes';
+    const data = (await response.json()) as { worldBuilding: string };
+    return data.worldBuilding ?? '';
+  } catch (error) {
+    aiLogger.error('World building failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
   }
-
-  return executeWithFallback(async provider => {
-    const model = getModelName(provider, 'advanced');
-
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: `Inject conflict and structure into: ${idea}\nStyle: ${style}\nProvide Inciting Incident, Twist, Climax setup.`,
-        },
-      ],
-      temperature: 0.7,
-      stream: false,
-    });
-
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
-
-    return responseText ?? '';
-  }, 'enhancePlot');
 };
 
 /**
  * Polish dialogue
+ * Now uses serverless API endpoint for security
  */
 export const polishDialogue = async (content: string, style: string): Promise<string> => {
   if (isTestEnvironment()) {
@@ -503,26 +616,28 @@ export const polishDialogue = async (content: string, style: string): Promise<st
 "Absolutely. This is going to be our greatest adventure yet."`;
   }
 
-  return executeWithFallback(async provider => {
-    const model = getModelName(provider, 'standard');
-
-    const response = await openrouterClient.chat.send({
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: `Rewrite ONLY dialogue to be subtext-rich and distinct.\nStyle: ${style}\nText:\n${content}`,
-        },
-      ],
-      temperature: 0.6,
-      stream: false,
+  try {
+    const response = await fetch('/api/ai/dialogue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content,
+        style,
+        provider: config.defaultProvider,
+      }),
     });
 
-    const responseText =
-      typeof response.choices[0]?.message.content === 'string'
-        ? response.choices[0].message.content
-        : '';
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `API request failed: ${response.status}`);
+    }
 
-    return responseText ?? '';
-  }, 'polishDialogue');
+    const data = (await response.json()) as { polishedContent: string };
+    return data.polishedContent ?? '';
+  } catch (error) {
+    aiLogger.error('Dialogue polishing failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };

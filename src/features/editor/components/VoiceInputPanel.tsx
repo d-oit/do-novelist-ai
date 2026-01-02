@@ -241,13 +241,17 @@ export const VoiceInputPanel: React.FC<VoiceInputPanelProps> = ({
             isRecording && 'animate-pulse ring-4 ring-destructive/30',
           )}
           onClick={toggleRecording}
-          disabled={!!error && error.includes('denied')}
+          disabled={!!error && error.includes('Microphone access denied')}
+          aria-label={isRecording ? 'Stop voice recording' : 'Start voice recording'}
+          data-testid='voice-recording-button'
         >
           {isRecording ? <MicOff className='h-8 w-8' /> : <Mic className='h-8 w-8' />}
         </Button>
 
         <div className='text-center'>
-          <p className='font-medium'>{isRecording ? 'Listening...' : 'Click to Start Dictation'}</p>
+          <p className='font-medium' aria-live='polite'>
+            {isRecording ? 'Listening...' : 'Click to Start Dictation'}
+          </p>
           {isRecording && (
             <p className='mt-1 text-sm text-muted-foreground'>Say "Stop" to end recording</p>
           )}

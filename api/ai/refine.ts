@@ -1,24 +1,23 @@
 /**
- * API Gateway - Write Chapter
- * POST /api/ai/chapter
- * Writes full chapter content
+ * API Gateway - Refine Content
+ * Serverless function to refine/improve chapter content via OpenRouter
+ * Implements rate limiting, cost tracking, and request validation
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-interface ChapterRequest {
-  chapterTitle: string;
+interface RefineRequest {
+  content: string;
   chapterSummary: string;
   style: string;
-  previousChapterSummary?: string;
+  options?: {
+    model?: string;
+    temperature?: number;
+  };
   provider?: string;
-  systemPrompt?: string;
-  userPrompt?: string;
 }
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1';
-const DEFAULT_PROVIDER = 'nvidia';
-const DEFAULT_MODEL = 'nemotron-3-nano-30b-a3b:free';
 
 interface RateLimitEntry {
   count: number;
@@ -26,11 +25,6 @@ interface RateLimitEntry {
 }
 
 const rateLimitStore = new Map<string, RateLimitEntry>();
-
-const RATE_LIMIT = {
-  requestsPerMinute: 60,
-  windowSizeMs: 60 * 1000,
-};
 
 function getClientId(req: VercelRequest): string {
   const forwarded = req.headers['x-forwarded-for'] as string;
@@ -40,6 +34,7 @@ function getClientId(req: VercelRequest): string {
 function checkRateLimit(clientId: string): { allowed: boolean; remaining: number } {
   const now = Date.now();
   const entry = rateLimitStore.get(clientId);
+  const RATE_LIMIT = { requestsPerMinute: 60, windowSizeMs: 60 * 1000 };
 
   if (!entry || now >= entry.resetTime) {
     rateLimitStore.set(clientId, {
@@ -62,33 +57,23 @@ function log(
   message: string,
   data?: Record<string, unknown>,
 ): void {
-  const logEntry = {
-    timestamp: new Date().toISOString(),
-    level,
-    message,
-    ...data,
-  };
-  console[level](JSON.stringify(logEntry));
+  console[level](
+    JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      ...data,
+    }),
+  );
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
   const apiKey = process.env.OPENROUTER_API_KEY;
-
   if (!apiKey) {
     log('error', 'OpenRouter API key not configured');
     res.status(500).json({ error: 'API configuration error' });
@@ -96,19 +81,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   const {
-    chapterTitle,
+    content,
     chapterSummary,
     style,
-    previousChapterSummary,
-    provider = DEFAULT_PROVIDER,
-    systemPrompt,
-    userPrompt,
-  } = req.body as ChapterRequest;
+    options = {},
+    provider = 'anthropic',
+  } = req.body as RefineRequest;
 
-  if (!chapterTitle || !chapterSummary || !style) {
-    res.status(400).json({
-      error: 'Missing required fields: chapterTitle, chapterSummary, style',
-    });
+  if (!content || !chapterSummary || !style) {
+    res.status(400).json({ error: 'Missing required fields: content, chapterSummary, style' });
     return;
   }
 
@@ -119,34 +100,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   res.setHeader('X-RateLimit-Remaining', remaining.toString());
 
   if (!allowed) {
-    res.status(429).json({
-      error: 'Rate limit exceeded',
-      retryAfter: 60,
-    });
+    res.status(429).json({ error: 'Rate limit exceeded' });
     return;
   }
 
-  log('info', 'Writing chapter', {
-    provider,
-    style,
-    title: chapterTitle,
-    hasEnhancedPrompts: !!(systemPrompt || userPrompt),
-  });
-
   try {
-    // Use enhanced prompts if provided, otherwise use defaults
-    const finalSystemPrompt =
-      systemPrompt ||
-      `You are a skilled ${style} writer. Write engaging, well-paced chapter content that advances the story and develops characters naturally.`;
+    const model = options.model || 'claude-3-5-sonnet-20241022';
+    const temperature = options.temperature || 0.3;
 
-    const finalUserPrompt =
-      userPrompt ||
-      `Write the full content for the chapter: "${chapterTitle}".
-Context / Summary: ${chapterSummary}
-${previousChapterSummary ? `Previously: ${previousChapterSummary}` : ''}
-Style: ${style}.
-Write in Markdown. Focus on "Show, Don't Tell". Use sensory details.
-Output only the chapter content.`;
+    const systemPrompt = `You are an expert editor helping to refine and improve chapter content. 
+Your task is to enhance the writing while maintaining the author's voice and style.
+
+Style: ${style}
+Chapter Summary: ${chapterSummary}
+
+Focus on:
+- Improving clarity and flow
+- Enhancing character development
+- Strengthening dialogue
+- Maintaining consistency with the chapter summary
+- Preserving the author's unique voice and style`;
+
+    const userPrompt = `Please refine and improve this chapter content:
+
+${content}
+
+Provide the refined version that maintains the same story beats but with improved prose, dialogue, and pacing.`;
 
     const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
       method: 'POST',
@@ -157,18 +136,12 @@ Output only the chapter content.`;
         'X-Title': 'Novelist.ai',
       },
       body: JSON.stringify({
-        model: `${provider}/${DEFAULT_MODEL}`,
+        model: `${provider}/${model}`,
         messages: [
-          {
-            role: 'system',
-            content: finalSystemPrompt,
-          },
-          {
-            role: 'user',
-            content: finalUserPrompt,
-          },
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
         ],
-        temperature: 0.7,
+        temperature,
         stream: false,
       }),
     });
@@ -181,18 +154,28 @@ Output only the chapter content.`;
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '';
+    const refinedContent = data.choices?.[0]?.message?.content || '';
 
-    log('info', 'Chapter written', { title: chapterTitle, length: content.length });
+    const usage = data.usage || {};
+    log('info', 'Content refined successfully', {
+      provider,
+      model: `${provider}/${model}`,
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+    });
 
-    res.status(200).json({ content });
+    res.status(200).json({
+      content: refinedContent,
+      usage: {
+        promptTokens: usage.prompt_tokens,
+        completionTokens: usage.completion_tokens,
+        totalTokens: usage.total_tokens,
+      },
+    });
   } catch (error) {
-    log('error', 'Chapter writing failed', {
+    log('error', 'Refine API error', {
       error: error instanceof Error ? error.message : String(error),
     });
-    res.status(500).json({
-      error: 'Failed to write chapter',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
+    res.status(500).json({ error: 'Internal server error' });
   }
 }

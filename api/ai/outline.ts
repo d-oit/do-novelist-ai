@@ -10,6 +10,8 @@ interface OutlineRequest {
   idea: string;
   style: string;
   provider?: string;
+  systemPrompt?: string;
+  userPrompt?: string;
 }
 
 interface Chapter {
@@ -102,7 +104,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const { idea, style, provider = DEFAULT_PROVIDER } = req.body as OutlineRequest;
+  const {
+    idea,
+    style,
+    provider = DEFAULT_PROVIDER,
+    systemPrompt,
+    userPrompt,
+  } = req.body as OutlineRequest;
 
   if (!idea || !style) {
     res.status(400).json({ error: 'Missing required fields: idea, style' });
@@ -123,9 +131,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  log('info', 'Generating outline', { provider, style, ideaLength: idea.length });
+  log('info', 'Generating outline', {
+    provider,
+    style,
+    ideaLength: idea.length,
+    hasEnhancedPrompts: !!(systemPrompt || userPrompt),
+  });
 
   try {
+    // Use enhanced prompts if provided, otherwise use defaults
+    const finalSystemPrompt =
+      systemPrompt ||
+      `You are an expert Novel Architect.
+Your goal is to take a vague book idea and structurize it into a compelling chapter outline.
+The style of the book is: ${style}.
+Adhere to the "Hero's Journey" or "Save the Cat" beat sheets if applicable to the genre.`;
+
+    const finalUserPrompt =
+      userPrompt ||
+      `Create a title and a chapter outline for this idea: "${idea}"
+
+Return a JSON object with this structure:
+{
+  "title": "Book Title",
+  "chapters": [
+    {
+      "orderIndex": 1,
+      "title": "Chapter Title",
+      "summary": "Detailed paragraph summary of what happens in this chapter"
+    }
+  ]
+}`;
+
     const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -139,26 +176,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         messages: [
           {
             role: 'system',
-            content: `You are an expert Novel Architect.
-Your goal is to take a vague book idea and structurize it into a compelling chapter outline.
-The style of the book is: ${style}.
-Adhere to the "Hero's Journey" or "Save the Cat" beat sheets if applicable to the genre.`,
+            content: finalSystemPrompt,
           },
           {
             role: 'user',
-            content: `Create a title and a chapter outline for this idea: "${idea}"
-
-Return a JSON object with this structure:
-{
-  "title": "Book Title",
-  "chapters": [
-    {
-      "orderIndex": 1,
-      "title": "Chapter Title",
-      "summary": "Detailed paragraph summary of what happens in this chapter"
-    }
-  ]
-}`,
+            content: finalUserPrompt,
           },
         ],
         temperature: 0.7,

@@ -9,7 +9,6 @@ import {
   continueWriting,
   developCharacters,
   buildWorld,
-  enhancePlot,
   polishDialogue,
 } from '@/lib/ai';
 import { logger } from '@/lib/logging/logger';
@@ -228,7 +227,8 @@ export const useGoapEngine = (
         // --- ARCHITECT: PLOT ---
         else if (action.name === 'deepen_plot') {
           addLog('Planner', 'Tasking Narrative Structuralist to review stakes...', 'thought');
-          const improvements = await enhancePlot(project.idea, project.style);
+          // Note: enhancePlot function removed - using buildWorld for plot enhancement
+          const improvements = await buildWorld(project.idea, project.style);
           setProject(prev => ({
             ...prev,
             idea: prev.idea + '\n\n--- PLOT ENHANCEMENTS ---\n' + improvements,

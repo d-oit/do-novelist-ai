@@ -11,6 +11,5 @@ export {
   generateChapterIllustration,
   developCharacters,
   buildWorld,
-  enhancePlot,
   polishDialogue,
 } from '@/lib/ai';
