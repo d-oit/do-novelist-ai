@@ -14,8 +14,8 @@ dependency mapping, and coordinated execution strategy for implementing missing
 features.
 
 **Current Status**: 60% complete (Foundation + Quick Wins mostly done)
-**Missing**: Critical security hardening + Context Intelligence + AI Automation
-phases
+**Missing**: CRITICAL - Security hardening client migration (BLOCKING) + Context
+Intelligence + AI Automation phases
 
 ---
 
@@ -41,19 +41,54 @@ across 3 phases
 
 ### Missing Features Breakdown
 
-#### ⚠️ **CRITICAL (Phase 1 Foundation)** - Blocks Production
+#### ⚠️ **CRITICAL (Phase 1 Foundation)** - BLOCKING PRODUCTION
 
-1. **Phase 1.2: Security Hardening - Serverless API Gateway** (NOT STARTED)
-   - **Risk**: API keys exposed in client builds
-   - **Impact**: Security vulnerability, cost management impossible
-   - **Effort**: 3-5 days
-   - **Priority**: P0 (BLOCKING)
+1. **Phase 1.2: Security Hardening - Serverless API Gateway** (PARTIALLY
+   COMPLETE - 80%)
+   - **Edge Functions**: ✅ COMPLETE - All 14 functions using Edge Runtime
+     (100%)
+   - **Client Migration**: ❌ CRITICAL ISSUE - Features are BROKEN
+
+   **CRITICAL FINDING** (January 3, 2026):
+   - `config.openrouterApiKey` is now `undefined` in `src/lib/ai-config.ts:62`
+     (intentionally removed for security)
+   - Two client files still making direct OpenRouter API calls and will FAIL:
+     1. `src/features/generation/services/imageGenerationService.ts:48-71` -
+        Direct fetch to OpenRouter API
+     2. `src/services/openrouter-models-service.ts:558-563` - Direct fetch to
+        OpenRouter API
+   - Both files use `config.openrouterApiKey` which is now undefined
+   - **Impact**: Image generation and model discovery features are BROKEN (not
+     just security risk!)
+
+   **Required Fix** (1.5 days):
+   - Task 1.6: Migrate `imageGenerationService.ts` to use `/api/ai/image`
+     endpoint (0.5 day)
+   - Task 1.7: Migrate `openrouter-models-service.ts` to use `/api/ai/models`
+     endpoint (0.5 day)
+   - Task 1.8: Test both features end-to-end (0.5 day)
+
+   **Priority**: P0 (BLOCKING) - Features broken, not just security risk
 
 #### 📋 **NOT STARTED (Phase 3: Context Intelligence)**
 
-2. **Phase 3.1: RAG Phase 1 - Project Context Injection** (NOT STARTED)
-   - **Impact**: AI becomes context-aware
-   - **Effort**: 2 weeks
+2. **Phase 3.1: RAG Phase 1 - Project Context Injection** (PARTIALLY COMPLETE -
+   30%)
+   - **Infrastructure**: ✅ COMPLETE (70% of Phase 1):
+     - `src/lib/context/contextExtractor.ts` - Extracts project data, 13 tests
+       passing
+     - `src/lib/context/contextInjector.ts` - Injects context into prompts, 15
+       tests passing
+     - `src/lib/context/cache.ts` - Context caching with hit/miss tracking, 7
+       tests passing
+     - `src/lib/context/types.ts` - Complete type definitions
+   - **Integration**: ❌ MISSING (30% of Phase 1):
+     - Context NOT integrated into any AI endpoints
+     - No UI controls for enabling/disabling context
+     - No settings persistence for context preferences
+     - No context preview component
+   - **Impact**: AI becomes context-aware once integrated
+   - **Effort**: 2 weeks (3 days integration remaining)
    - **Priority**: P1
 
 3. **Phase 3.2: RAG Phase 2 - Semantic Search** (NOT STARTED)
@@ -99,23 +134,34 @@ Implement 6 missing features across 3 phases with security-first approach.
 
 ### Sub-Goals
 
-#### **Sub-Goal 1: Security Hardening (P0)** - BLOCKING
+#### **Sub-Goal 1: Security Hardening (P0)** - CRITICAL BLOCKING
 
-**Success Criteria**: Zero API keys in client, all AI calls through serverless
-**Dependencies**: None **Complexity**: Medium
+**Success Criteria**: Zero API keys in client, all AI calls through Edge
+Functions **Dependencies**: None **Complexity**: Medium **Status**: 80%
+Complete - Edge Functions done, client migration CRITICAL
 
 **Atomic Tasks**:
 
 1. Task 1.1: ✅ Research Vercel Edge Runtime (Complete - Edge Functions
    selected)
 2. Task 1.2: ✅ Design Edge Functions API architecture (Complete)
-3. Task 1.3: ✅ Create Edge Functions for AI calls (Complete - all 13 functions)
+3. Task 1.3: ✅ Create Edge Functions for AI calls (Complete - all 14 functions)
 4. Task 1.4: ✅ Implement rate limiting middleware (Complete)
 5. Task 1.5: ✅ Add cost tracking and alerts (Complete)
-6. Task 1.6: Migrate client AI calls to Edge Functions (refactorer, 1 day)
-7. Task 1.7: Remove API keys from client builds (refactorer, 0.5 day)
+6. Task 1.6: ⚠️ CRITICAL - Migrate client AI calls to Edge Functions
+   (refactorer, 0.5 day)
+   - `src/features/generation/services/imageGenerationService.ts` - BROKEN,
+     needs `/api/ai/image`
+   - `src/services/openrouter-models-service.ts` - BROKEN, needs
+     `/api/ai/models` endpoint
+7. Task 1.7: ⚠️ CRITICAL - Remove API keys from client builds (already done -
+   config.openrouterApiKey is undefined)
+   - NOTE: API key already removed from config, but client code still references
+     it
 8. Task 1.8: ✅ Write tests for Edge Functions (Complete)
-9. Task 1.9: Validate security (code-reviewer, 0.5 day)
+9. Task 1.9: ⚠️ CRITICAL - Validate security (code-reviewer, 0.5 day)
+   - Verify all client AI calls use `/api/ai/*` endpoints
+   - Verify no direct OpenRouter API calls remain
 
 #### **Sub-Goal 2: RAG Phase 1 - Project Context Injection (P1)**
 
@@ -332,27 +378,36 @@ Phase 1: Security Hardening (P0)
    - Quality Gate: Edge Functions working ✅
 
 3. **Days 4-5**: Migration & Validation
-   - Task 1.6: Migrate client AI calls to Edge Functions
-   - Task 1.7: Remove API keys from client builds
+   - Task 1.6: ⚠️ CRITICAL - Migrate `imageGenerationService.ts` to
+     `/api/ai/image`
+   - Task 1.7: ⚠️ CRITICAL - Migrate `openrouter-models-service.ts` to use
+     `/api/ai/models` (needs new endpoint)
    - Task 1.8: ✅ Write tests for Edge Functions (Complete)
-   - Task 1.9: Validate security
-   - Quality Gate: Zero API keys in client, all tests passing
+   - Task 1.9: ⚠️ CRITICAL - Validate security and fix broken features
+   - Quality Gate: Zero API keys in client, all tests passing, all features
+     working
 
 **Quality Gates**:
 
 - [x] Architecture designed and approved
-- [x] Edge Functions implemented and tested (all 13 functions)
-- [ ] Zero API keys in client builds (pending client migration)
-- [ ] All AI calls routed through Edge Functions (pending client migration)
+- [x] Edge Functions implemented and tested (all 14 functions)
+- [ ] Zero API keys in client builds (CRITICAL - client migration pending)
+- [ ] All AI calls routed through Edge Functions (CRITICAL - 2 files still use
+      direct API)
 - [x] Rate limiting and cost tracking active
-- [x] All tests passing (80%+ coverage)
+- [x] All tests passing (80%+ coverage - 812 tests passing)
+- [ ] Image generation feature works (currently BROKEN)
+- [ ] Model discovery feature works (currently BROKEN)
 
 **Success Criteria**:
 
-- Zero API keys in client builds
-- All AI calls routed through Edge Functions
+- Zero API keys in client builds (done - config.openrouterApiKey is undefined)
+- All AI calls routed through Edge Functions (CRITICAL - 2 files still calling
+  OpenRouter directly)
 - Cost tracking dashboard active
 - Security audit passed
+- Image generation feature functional (currently BROKEN)
+- Model discovery feature functional (currently BROKEN)
 
 ---
 

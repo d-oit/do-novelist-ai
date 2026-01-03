@@ -9,14 +9,14 @@ documents in plans/ folder
 
 ### 0. EDGE-FUNCTIONS-MIGRATION-JAN-2026.md ⭐ QUICK FIX
 
-| Attribute    | Value                                                                                                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Status       | ✅ COMPLETE - Edge Runtime Migration                                                                                                                                  |
-| Completion   | 100%                                                                                                                                                                  |
-| Priority     | P0 (BLOCKING DEPLOYMENT) - RESOLVED                                                                                                                                   |
-| Owner        | GOAP Agent                                                                                                                                                            |
-| Last Updated | January 3, 2026                                                                                                                                                       |
-| Notes        | Migrated all 13 Edge Functions to Edge Runtime. Deployment unblocked. No function count limit. Client migration pending. Architecture: Vercel (optional), Turso (DB). |
+| Attribute    | Value                                                                                                                                                                                    |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status       | ✅ COMPLETE - Edge Runtime Migration                                                                                                                                                     |
+| Completion   | 100%                                                                                                                                                                                     |
+| Priority     | P0 (BLOCKING DEPLOYMENT) - RESOLVED                                                                                                                                                      |
+| Owner        | GOAP Agent                                                                                                                                                                               |
+| Last Updated | January 3, 2026                                                                                                                                                                          |
+| Notes        | Migrated all 14 Edge Functions to Edge Runtime. Deployment unblocked. No function count limit. Client migration CRITICAL (features broken). Architecture: Vercel (optional), Turso (DB). |
 
 ---
 
@@ -24,36 +24,36 @@ documents in plans/ folder
 
 ### 1. GOAP-CODEBASE-ANALYSIS-JAN-2026.md ⭐ NEW
 
-| Attribute    | Value                                                                                                                             |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| Status       | 📋 ANALYSIS COMPLETE - Security Hardening DONE                                                                                    |
-| Completion   | 25% (Analysis + Security Complete)                                                                                                |
-| Priority     | P1/P2 (Strategic Features)                                                                                                        |
-| Owner        | GOAP Agent                                                                                                                        |
-| Last Updated | January 2, 2026                                                                                                                   |
-| Notes        | Security hardening (P0) COMPLETE in 1 day. Ready for RAG Phase 1, AI Agents, Collaboration features. 8-10 week roadmap remaining. |
+| Attribute    | Value                                                                                                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Status       | 📋 ANALYSIS COMPLETE - Security Hardening PARTIAL (80%)                                                                                                                                    |
+| Completion   | 25% (Analysis + Security Hardening Partial)                                                                                                                                                |
+| Priority     | P0 (CRITICAL) + P1/P2 (Strategic Features)                                                                                                                                                 |
+| Owner        | GOAP Agent                                                                                                                                                                                 |
+| Last Updated | January 3, 2026                                                                                                                                                                            |
+| Notes        | Security hardening (P0) 80% COMPLETE - Edge Functions done, client migration CRITICAL. 2 client files broken (image generation, model discovery). RAG Phase 1 infrastructure 70% complete. |
 
 ### 2. NEW-FEATURES-PLAN-JAN-2026.md
 
-| Attribute    | Value                                                                                                                                    |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Status       | ✅ FOUNDATION COMPLETE - Quick Wins Ready                                                                                                |
-| Completion   | 60%                                                                                                                                      |
-| Priority     | P1                                                                                                                                       |
-| Owner        | Analysis-Swarm + GOAP Agent                                                                                                              |
-| Last Updated | January 2, 2026                                                                                                                          |
-| Notes        | Phase 1 (Foundation) complete. Multi-Modal AI and PWA already implemented. Ready for Phase 2 Quick Wins or Phase 3 Context Intelligence. |
+| Attribute    | Value                                                                                                                                                                                                          |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status       | ✅ QUICK WINS COMPLETE - Security CRITICAL                                                                                                                                                                     |
+| Completion   | 60%                                                                                                                                                                                                            |
+| Priority     | P0 (CRITICAL) + P1 (Strategic)                                                                                                                                                                                 |
+| Owner        | Analysis-Swarm + GOAP Agent                                                                                                                                                                                    |
+| Last Updated | January 3, 2026                                                                                                                                                                                                |
+| Notes        | Phase 1 (Foundation) 80% complete - Edge Functions done, client migration CRITICAL (2 broken files). Phase 2 (Quick Wins) 100% complete (all 4 features implemented). RAG Phase 1 infrastructure 70% complete. |
 
 ### 3. MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md
 
-| Attribute    | Value                                                                                                                                                                                      |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Status       | 📋 READY FOR EXECUTION - Planning Complete                                                                                                                                                 |
-| Completion   | 0% (Planning Phase)                                                                                                                                                                        |
-| Priority     | P0 (Security) + P1/P2 (Strategic)                                                                                                                                                          |
-| Owner        | GOAP Agent                                                                                                                                                                                 |
-| Last Updated | January 2, 2026                                                                                                                                                                            |
-| Notes        | Systematic GOAP plan for 6 missing features: Security Hardening (P0), RAG Phase 1-2, Shared Views, AI Plot Engine, AI Agent Framework. 11-14 week timeline with hybrid execution strategy. |
+| Attribute    | Value                                                                                                                                                                                                                                         |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status       | 🚧 READY FOR EXECUTION - CRITICAL ISSUE IDENTIFIED                                                                                                                                                                                            |
+| Completion   | 70% (Edge Functions + Infrastructure Complete)                                                                                                                                                                                                |
+| Priority     | P0 (CRITICAL - Features Broken) + P1/P2 (Strategic)                                                                                                                                                                                           |
+| Owner        | GOAP Agent                                                                                                                                                                                                                                    |
+| Last Updated | January 3, 2026                                                                                                                                                                                                                               |
+| Notes        | Security hardening 80% complete (Edge Functions done). CRITICAL: 2 client files broken (imageGenerationService.ts, openrouter-models-service.ts) calling OpenRouter directly with undefined API key. RAG Phase 1 infrastructure 70% complete. |
 
 ### 4. WRITING-ASSISTANT-ENHANCEMENT-PLAN.md
 
@@ -153,18 +153,24 @@ documents in plans/ folder
 
 ## Recent Updates (January 3, 2026)
 
+- **CRITICAL UPDATE**: Identified client migration issue - 2 files broken
+  (imageGenerationService.ts, openrouter-models-service.ts)
 - **NEW**: Created DEPLOYMENT-ARCHITECTURE-JAN-2026.md - Comprehensive
   architecture document clarifying Vercel vs Turso roles
 - **UPDATED**: SERVERLESS-API-ARCHITECTURE-JAN-2026.md - Added architecture
   clarification, updated deployment options
 - **UPDATED**: EDGE-FUNCTIONS-MIGRATION-JAN-2026.md - Added architecture
   clarification (Edge Functions ≠ Database)
+- **UPDATED**: MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md - Updated
+  security hardening to 80% (Edge Functions complete, client CRITICAL)
+- **UPDATED**: NEW-FEATURES-PLAN-JAN-2026.md - Updated to reflect CRITICAL
+  client migration issue, RAG Phase 1 30% complete
 - **UPDATED**: TODO-IMPLEMENTATION-SUMMARY.md - Added architecture note about
   Vercel KV being optional, Turso for data storage
 - **UPDATED**: CODEBASE-STATUS-DEC-2025.md - Added deployment notes explaining
   Vercel (optional) and Turso (database)
-- **UPDATED**: PLAN-INVENTORY.md - Added DEPLOYMENT-ARCHITECTURE-JAN-2026.md to
-  inventory
+- **UPDATED**: PLAN-INVENTORY.md - Updated all plans with accurate current
+  status
 
 ## Previous Updates (January 2, 2026)
 
@@ -203,9 +209,12 @@ documents in plans/ folder
 
 ### Feature Opportunities
 
-- **RAG Implementation**: Context-aware AI (P1)
-- **Shared Views**: Collaboration features (P2)
-- **AI Agent Framework**: Multi-agent workflows (P2)
+- **RAG Phase 1 Implementation**: Context-aware AI (P1) - Infrastructure 70%
+  complete, integration pending
+- **RAG Phase 2 Implementation**: Semantic search (P2) - Not started, depends on
+  Phase 1 integration
+- **Shared Views**: Collaboration features (P2) - Not started
+- **AI Agent Framework**: Multi-agent workflows (P2) - Not started
 
 ### Quality Metrics
 
@@ -255,4 +264,5 @@ documents in plans/ folder
 
 ---
 
-**Last Updated**: December 31, 2025 **Next Review**: January 31, 2026
+**Last Updated**: January 3, 2026 **Next Review**: January 10, 2026 (weekly
+review during client migration)

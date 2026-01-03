@@ -546,44 +546,34 @@ export class OpenRouterModelsService {
   }
 
   /**
-   * Fetch models from OpenRouter API
+   * Fetch models from OpenRouter API via Edge Functions
    */
   private async fetchModelsFromAPI(): Promise<OpenRouterModel[]> {
     try {
-      const config = getAIConfig();
-      if (!config.openrouterApiKey) {
-        throw new Error('OpenRouter API key not configured');
-      }
-
-      const response = await fetch('https://openrouter.ai/api/v1/models', {
+      const response = await fetch('/api/ai/models', {
+        method: 'GET',
         headers: {
-          Authorization: `Bearer ${config.openrouterApiKey}`,
           'Content-Type': 'application/json',
         },
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch models: ${response.status} ${errorText}`);
       }
 
       const data = await response.json();
 
-      if (!data.data || !Array.isArray(data.data)) {
-        throw new Error('Invalid response format from OpenRouter API');
+      if (!data.models || !Array.isArray(data.models)) {
+        throw new Error('Invalid response format from API');
       }
 
-      logger.info('Fetched models from OpenRouter', { modelCount: data.data.length });
-      return data.data;
+      logger.info('Fetched models from Edge API', { modelCount: data.models.length });
+      return data.models;
     } catch (error) {
-      logger.error('Failed to fetch models from OpenRouter API', { error });
+      logger.error('Failed to fetch models from Edge API', { error });
 
       // Return fallback models for development/offline scenarios
-      if (error instanceof Error && error.message.includes('API key')) {
-        logger.warn('Using fallback models due to missing API key');
-        return FALLBACK_MODELS;
-      }
-
-      // For other errors, also fallback but log the issue
       logger.warn('Using fallback models due to API error');
       return FALLBACK_MODELS;
     }

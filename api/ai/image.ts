@@ -9,11 +9,13 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 export const config = { runtime: 'edge' };
 
 interface ImageRequest {
-  type: 'cover' | 'illustration';
-  title: string;
-  description: string;
-  style: string;
+  type: 'cover' | 'illustration' | 'character' | 'custom';
+  title?: string;
+  description?: string;
+  style?: string;
   provider?: string;
+  prompt?: string;
+  aspectRatio?: '1:1' | '2:3' | '3:2' | '4:3' | '4:5' | '9:16' | '16:9';
 }
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1';
@@ -79,15 +81,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const { type, title, description, style } = req.body as ImageRequest;
+  const { type, title, description, style, provider, prompt } = req.body as ImageRequest;
 
-  if (!type || !title || !description || !style) {
-    res.status(400).json({ error: 'Missing required fields: type, title, description, style' });
+  if (!type) {
+    res.status(400).json({ error: 'Missing required field: type' });
     return;
   }
 
-  if (!['cover', 'illustration'].includes(type)) {
-    res.status(400).json({ error: 'Invalid type. Must be "cover" or "illustration"' });
+  if (!['cover', 'illustration', 'character', 'custom'].includes(type)) {
+    res.status(400).json({
+      error: 'Invalid type. Must be "cover", "illustration", "character", or "custom"',
+    });
     return;
   }
 
@@ -103,34 +107,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   try {
-    let prompt: string;
+    let finalPrompt: string;
+    let model = 'black-forest-labs/flux-1.1-pro';
 
-    if (type === 'cover') {
-      prompt = `Create a professional book cover for "${title}". 
-Style: ${style}
-Description: ${description}
+    if (provider === 'openai') model = 'openai/dall-e-3';
+    if (provider === 'google') model = 'google/gemini-2.0-flash-exp';
 
-The cover should be:
-- Professional and marketable
-- Genre-appropriate for ${style}
-- Eye-catching and readable
-- Suitable for both print and digital formats
-- High quality, detailed artwork`;
+    if (type === 'custom' && prompt) {
+      finalPrompt = style ? `${prompt} in the style of ${style}` : prompt;
+    } else if (type === 'character' && title && description && style) {
+      finalPrompt = `A detailed character portrait of ${title}.
+Description: ${description}.
+The style should be: ${style}.
+Focus on facial features and personality.
+Professional character concept art.`;
+    } else if (type === 'cover' && title && description && style) {
+      finalPrompt = `A professional book cover for a novel titled "${title}".
+The book's premise is: ${description}.
+The style should be: ${style}.
+High quality, cinematic lighting, book cover design.
+NO TEXT on the image unless it's artistically integrated.`;
+    } else if (type === 'illustration' && title && description && style) {
+      finalPrompt = `An atmospheric illustration for a book chapter titled "${title}".
+Scene summary: ${description}.
+The style should be: ${style}.
+High quality, evocative digital art.
+NO TEXT on the image.`;
     } else {
-      prompt = `Create an illustration for a ${style} story titled "${title}".
-Scene description: ${description}
-
-The illustration should be:
-- Detailed and atmospheric
-- Consistent with ${style} genre conventions
-- Visually engaging and immersive
-- High quality artwork suitable for publication`;
+      res.status(400).json({
+        error: 'Missing required fields for type',
+      });
+      return;
     }
 
-    // Use DALL-E 3 for image generation
-    const model = 'openai/dall-e-3';
-
-    const response = await fetch(`${OPENROUTER_API_URL}/images/generations`, {
+    const response = await fetch(`${OPENROUTER_API_URL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -140,11 +150,18 @@ The illustration should be:
       },
       body: JSON.stringify({
         model,
-        prompt,
-        n: 1,
-        size: type === 'cover' ? '1024x1792' : '1024x1024', // Portrait for covers, square for illustrations
-        quality: 'standard',
-        style: 'vivid',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: finalPrompt,
+              },
+            ],
+          },
+        ],
+        modalities: ['image'],
       }),
     });
 
@@ -156,27 +173,49 @@ The illustration should be:
     }
 
     const data = await response.json();
-    const imageUrl = data.data?.[0]?.url;
 
-    if (!imageUrl) {
-      log('error', 'No image URL in response', { response: data });
-      res.status(500).json({ error: 'Image generation failed - no URL returned' });
+    const images: Array<{ url: string; revisedPrompt?: string }> = [];
+
+    if (data.choices && data.choices[0]?.message?.content) {
+      const content = data.choices[0].message.content;
+
+      if (Array.isArray(content)) {
+        for (const item of content) {
+          if (item.type === 'image' || item.image_url) {
+            images.push({
+              url: item.image_url?.url || item.image || '',
+              revisedPrompt: item.revised_prompt,
+            });
+          }
+        }
+      } else if (typeof content === 'string' && content.startsWith('data:image')) {
+        images.push({ url: content });
+      }
+    }
+
+    if (images.length === 0 && data.images) {
+      for (const img of data.images) {
+        images.push({ url: typeof img === 'string' ? img : img.url });
+      }
+    }
+
+    if (images.length === 0) {
+      log('error', 'No images found in response', { data });
+      res.status(500).json({ error: 'Image generation failed - no images returned' });
       return;
     }
 
     log('info', 'Image generated successfully', {
       type,
-      title,
       model,
-      imageUrl: imageUrl.substring(0, 50) + '...',
+      imageCount: images.length,
     });
 
     res.status(200).json({
-      imageUrl,
+      images,
       usage: {
         model,
         type,
-        size: type === 'cover' ? '1024x1792' : '1024x1024',
       },
     });
   } catch (error) {
