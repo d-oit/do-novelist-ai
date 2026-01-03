@@ -34,6 +34,14 @@ export const SettingsSchema = z.object({
   aiMaxTokens: z.number().min(100).max(4096).default(2048),
   enableAIAssistance: z.boolean().default(true),
 
+  // Context Injection (RAG Phase 1)
+  enableContextInjection: z.boolean().default(true),
+  contextTokenLimit: z.number().min(1000).max(10000).default(6000),
+  contextIncludeCharacters: z.boolean().default(true),
+  contextIncludeWorldBuilding: z.boolean().default(true),
+  contextIncludeTimeline: z.boolean().default(true),
+  contextIncludeChapters: z.boolean().default(true),
+
   // Editor Preferences
   autoSave: z.boolean().default(true),
   autoSaveInterval: z.number().min(30).max(600).default(60), // seconds
@@ -95,6 +103,14 @@ export const DEFAULT_SETTINGS: Settings = {
   aiTemperature: 0.7,
   aiMaxTokens: 2048,
   enableAIAssistance: true,
+
+  // Context Injection (RAG Phase 1)
+  enableContextInjection: true,
+  contextTokenLimit: 6000,
+  contextIncludeCharacters: true,
+  contextIncludeWorldBuilding: true,
+  contextIncludeTimeline: true,
+  contextIncludeChapters: true,
 
   // Editor Preferences
   autoSave: true,

@@ -7,8 +7,13 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-import { settingsService } from "@/features/settings/services/settingsService"
-import { DEFAULT_SETTINGS, validateSettings, type Settings, type SettingsCategory } from '@/features/settings/types';
+import { settingsService } from '@/features/settings/services/settingsService';
+import {
+  DEFAULT_SETTINGS,
+  validateSettings,
+  type Settings,
+  type SettingsCategory,
+} from '@/features/settings/types';
 
 interface SettingsState {
   // Data
@@ -173,6 +178,12 @@ function getCategoryDefaults(category: SettingsCategory): Partial<Settings> {
         aiTemperature: DEFAULT_SETTINGS.aiTemperature,
         aiMaxTokens: DEFAULT_SETTINGS.aiMaxTokens,
         enableAIAssistance: DEFAULT_SETTINGS.enableAIAssistance,
+        enableContextInjection: DEFAULT_SETTINGS.enableContextInjection,
+        contextTokenLimit: DEFAULT_SETTINGS.contextTokenLimit,
+        contextIncludeCharacters: DEFAULT_SETTINGS.contextIncludeCharacters,
+        contextIncludeWorldBuilding: DEFAULT_SETTINGS.contextIncludeWorldBuilding,
+        contextIncludeTimeline: DEFAULT_SETTINGS.contextIncludeTimeline,
+        contextIncludeChapters: DEFAULT_SETTINGS.contextIncludeChapters,
       };
     case 'editor':
       return {
