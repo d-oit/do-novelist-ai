@@ -1,9 +1,10 @@
-import { Settings, DollarSign, Shield, Zap, Activity } from 'lucide-react';
+import { Settings, DollarSign, Shield, Zap, Activity, Brain } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import { CostDashboard } from '@/components/ai/CostDashboard';
 import { FallbackProviderEditor } from '@/components/ai/FallbackProviderEditor';
 import { ProviderSelector } from '@/components/ai/ProviderSelector';
+import { useSettings } from '@/features/settings/hooks/useSettings';
 import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
 import {
@@ -21,7 +22,10 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
   const [preferences, setPreferences] = useState<ProviderPreferenceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'provider' | 'analytics' | 'health'>('provider');
+  const [activeTab, setActiveTab] = useState<'provider' | 'analytics' | 'health' | 'context'>(
+    'provider',
+  );
+  const { settings, update } = useSettings();
 
   useEffect(() => {
     void loadUserPreferences(userId).then(prefs => {
@@ -105,6 +109,18 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
             )}
           >
             Provider Health
+          </button>
+          <button
+            onClick={() => setActiveTab('context')}
+            className={cn(
+              'border-b-2 px-4 py-2 transition-colors',
+              activeTab === 'context'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900',
+            )}
+          >
+            <Brain className='mr-1 inline h-4 w-4' />
+            Context Injection
           </button>
         </div>
 
@@ -285,6 +301,121 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'context' && (
+          <div className='space-y-6'>
+            <div className='rounded-lg border border-blue-200 bg-blue-50 p-4'>
+              <h3 className='mb-2 font-semibold'>
+                <Brain className='mr-2 inline h-5 w-5' />
+                AI Context-Aware Generation (RAG)
+              </h3>
+              <p className='text-sm text-gray-600'>
+                Enable context injection to make AI aware of your project's characters,
+                world-building, timeline, and chapters. This improves consistency and reduces
+                factual errors in generated content.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor='enable-context-checkbox' className='flex cursor-pointer items-center'>
+                <input
+                  id='enable-context-checkbox'
+                  type='checkbox'
+                  checked={settings.enableContextInjection}
+                  onChange={e => update({ enableContextInjection: e.target.checked })}
+                  className='mr-2 h-4 w-4 rounded border border-input bg-background text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                />
+                <span className='text-sm text-foreground'>Enable Context Injection</span>
+              </label>
+            </div>
+
+            {settings.enableContextInjection && (
+              <>
+                <div>
+                  <label
+                    htmlFor='context-token-limit'
+                    className='mb-2 block text-sm font-medium text-foreground'
+                  >
+                    Context Token Limit
+                  </label>
+                  <input
+                    id='context-token-limit'
+                    type='number'
+                    min='1000'
+                    max='10000'
+                    step='500'
+                    value={settings.contextTokenLimit}
+                    onChange={e => update({ contextTokenLimit: parseInt(e.target.value) })}
+                    className='w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+                    aria-describedby='context-token-limit-help'
+                  />
+                  <p id='context-token-limit-help' className='mt-1 text-xs text-muted-foreground'>
+                    Maximum tokens for project context (1000-10000)
+                  </p>
+                </div>
+
+                <div>
+                  <label className='mb-2 block text-sm font-medium text-foreground'>
+                    Include in Context
+                  </label>
+                  <div className='space-y-2'>
+                    <label className='flex cursor-pointer items-center'>
+                      <input
+                        type='checkbox'
+                        checked={settings.contextIncludeCharacters}
+                        onChange={e => update({ contextIncludeCharacters: e.target.checked })}
+                        className='mr-2 h-4 w-4 rounded border border-input bg-background text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                      />
+                      <span className='text-sm text-foreground'>Characters</span>
+                    </label>
+
+                    <label className='flex cursor-pointer items-center'>
+                      <input
+                        type='checkbox'
+                        checked={settings.contextIncludeWorldBuilding}
+                        onChange={e => update({ contextIncludeWorldBuilding: e.target.checked })}
+                        className='mr-2 h-4 w-4 rounded border border-input bg-background text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                      />
+                      <span className='text-sm text-foreground'>World Building</span>
+                    </label>
+
+                    <label className='flex cursor-pointer items-center'>
+                      <input
+                        type='checkbox'
+                        checked={settings.contextIncludeTimeline}
+                        onChange={e => update({ contextIncludeTimeline: e.target.checked })}
+                        className='mr-2 h-4 w-4 rounded border border-input bg-background text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                      />
+                      <span className='text-sm text-foreground'>Timeline</span>
+                    </label>
+
+                    <label className='flex cursor-pointer items-center'>
+                      <input
+                        type='checkbox'
+                        checked={settings.contextIncludeChapters}
+                        onChange={e => update({ contextIncludeChapters: e.target.checked })}
+                        className='mr-2 h-4 w-4 rounded border border-input bg-background text-primary focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                      />
+                      <span className='text-sm text-foreground'>Chapter Summaries</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className='rounded-lg border border-yellow-200 bg-yellow-50 p-4'>
+                  <h4 className='mb-2 font-medium text-yellow-800'>Performance Note</h4>
+                  <p className='text-sm text-yellow-700'>
+                    Increasing context token limit or including more context types may:
+                  </p>
+                  <ul className='mt-2 list-inside list-disc space-y-1 text-sm text-yellow-700'>
+                    <li>Increase API response time</li>
+                    <li>Increase token usage and costs</li>
+                    <li>Require models with larger context windows</li>
+                  </ul>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
