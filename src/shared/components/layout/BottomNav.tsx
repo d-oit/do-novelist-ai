@@ -1,13 +1,13 @@
 'use client';
 
-import { Edit, Home, Settings } from 'lucide-react';
+import { Edit, Home, Settings, BarChart3 } from 'lucide-react';
 import React from 'react';
 
 import { cn } from '@/lib/utils';
 
 interface BottomNavProps {
-  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building';
-  onNavigate: (view: 'dashboard' | 'projects' | 'settings' | 'world-building') => void;
+  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics';
+  onNavigate: (view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics') => void;
 }
 
 interface NavButtonProps {
@@ -48,16 +48,16 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate })
           onClick={() => onNavigate('projects')}
         />
         <NavButton
+          active={currentView === 'metrics'}
+          icon={<BarChart3 className='h-5 w-5' />}
+          label='Metrics'
+          onClick={() => onNavigate('metrics')}
+        />
+        <NavButton
           active={currentView === 'settings'}
           icon={<Settings className='h-5 w-5' />}
           label='Settings'
           onClick={() => onNavigate('settings')}
-        />
-        <NavButton
-          active={currentView === 'world-building'}
-          icon={<Edit className='h-5 w-5' />}
-          label='World'
-          onClick={() => onNavigate('world-building')}
         />
       </div>
     </nav>

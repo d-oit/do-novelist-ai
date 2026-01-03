@@ -10,8 +10,8 @@ import { AppBackground } from './AppBackground';
 interface MainLayoutProps {
   children: ReactNode;
   className?: string;
-  currentView?: 'dashboard' | 'projects' | 'settings' | 'world-building';
-  onNavigate?: (view: 'dashboard' | 'projects' | 'settings' | 'world-building') => void;
+  currentView?: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics';
+  onNavigate?: (view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics') => void;
 }
 
 const MainLayout: FC<MainLayoutProps> = ({ children, className, currentView, onNavigate }) => {

@@ -13,6 +13,10 @@ const contextCache = new Map<string, ContextCacheEntry>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const MAX_CACHE_SIZE = 50; // Maximum cached projects
 
+// Cache statistics tracking
+let cacheHits = 0;
+let cacheMisses = 0;
+
 /**
  * Generate a hash for cache invalidation
  * Simple hash based on project update time and data counts
@@ -40,18 +44,22 @@ export function getCachedContext(projectId: string, hash: string): ProjectContex
   const entry = contextCache.get(projectId);
 
   if (!entry) {
+    cacheMisses++;
     logger.debug('Context cache miss - no entry', {
       component: 'ContextCache',
       projectId,
+      hitRate: calculateHitRate(),
     });
     return null;
   }
 
   // Check if expired
   if (entry.expiresAt < new Date()) {
+    cacheMisses++;
     logger.debug('Context cache miss - expired', {
       component: 'ContextCache',
       projectId,
+      hitRate: calculateHitRate(),
     });
     contextCache.delete(projectId);
     return null;
@@ -59,20 +67,24 @@ export function getCachedContext(projectId: string, hash: string): ProjectContex
 
   // Check if hash matches (data hasn't changed)
   if (entry.hash !== hash) {
+    cacheMisses++;
     logger.debug('Context cache miss - stale data', {
       component: 'ContextCache',
       projectId,
       cachedHash: entry.hash,
       currentHash: hash,
+      hitRate: calculateHitRate(),
     });
     contextCache.delete(projectId);
     return null;
   }
 
+  cacheHits++;
   logger.debug('Context cache hit', {
     component: 'ContextCache',
     projectId,
     age: Date.now() - entry.createdAt.getTime(),
+    hitRate: calculateHitRate(),
   });
 
   return entry.context;
@@ -142,10 +154,22 @@ export function invalidateCache(projectId: string): void {
 export function clearCache(): void {
   const size = contextCache.size;
   contextCache.clear();
+  // Reset statistics
+  cacheHits = 0;
+  cacheMisses = 0;
   logger.info('Context cache cleared', {
     component: 'ContextCache',
     clearedEntries: size,
   });
+}
+
+/**
+ * Calculate cache hit rate
+ */
+function calculateHitRate(): number {
+  const total = cacheHits + cacheMisses;
+  if (total === 0) return 0;
+  return Math.round((cacheHits / total) * 100) / 100;
 }
 
 /**
@@ -155,6 +179,8 @@ export function getCacheStats(): {
   size: number;
   maxSize: number;
   hitRate: number;
+  hits: number;
+  misses: number;
   entries: Array<{ projectId: string; age: number; tokens: number }>;
 } {
   const entries = Array.from(contextCache.entries()).map(([projectId, entry]) => ({
@@ -166,7 +192,9 @@ export function getCacheStats(): {
   return {
     size: contextCache.size,
     maxSize: MAX_CACHE_SIZE,
-    hitRate: 0, // TODO: Track hit/miss ratio
+    hitRate: calculateHitRate(),
+    hits: cacheHits,
+    misses: cacheMisses,
     entries,
   };
 }

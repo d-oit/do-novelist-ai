@@ -53,11 +53,18 @@ Frontend:     React 19.2 + TypeScript 5.8 + Vite 6.2
 Styling:      Tailwind CSS 3.4 + class-variance-authority
 State:        Zustand 5.0 (slice-based pattern)
 AI:           OpenRouter SDK only (@openrouter/sdk)
-Database:     Turso/libSQL + IndexedDB fallbacks
+Database:     Turso/libSQL + IndexedDB fallbacks (edge database)
+Deployment:   Vite build → Vercel (optional) + Edge Functions
 Testing:      Vitest 4.0 + Playwright 1.57 (E2E)
 CI/CD:        GitHub Actions (4 workflows)
 Build:        Vite with Rollup + Rollup Visualizer
 ```
+
+**Deployment Notes**:
+
+- **Vercel**: Frontend hosting + Edge Functions (Hobby plan sufficient, free)
+- **Turso**: Edge database for data storage (independent of Vercel)
+- **Alternatives**: Netlify, Cloudflare Pages, or custom VPS also supported
 
 ### Feature Modules (12 Active)
 

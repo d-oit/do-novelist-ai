@@ -7,20 +7,26 @@
 
 ## Executive Summary
 
-**Problem**: Vercel Hobby plan limits serverless functions to 12 per deployment.
-Current codebase has **13 Edge Functions** in `/api/ai/`.
+**Problem**: Traditional serverless functions have deployment limits (e.g.,
+Vercel Hobby plan's 12-function limit). Current codebase has **13 Edge
+Functions** in `/api/ai/`.
 
-**Solution**: ✅ Migrated all 13 Edge Functions to **Vercel Edge Runtime**,
-which don't count toward 12-function limit and offer better performance (faster
-cold starts, lower latency).
+**Solution**: ✅ Migrated all 13 Edge Functions to **Edge Runtime**, which
+offers better performance and no function count limits.
+
+**Key Clarification**:
+
+- **Edge Functions** are for secure API routing, not database storage
+- **Vercel** is one deployment platform option for frontend + Edge Functions
+- **Turso** is the edge database (independent of Vercel, works with any hosting)
 
 **Benefits**:
 
-- ✅ Stays on Hobby plan (no cost increase)
+- ✅ No function count limit (works on Hobby plan)
 - ✅ Faster performance (Edge runtime vs Node.js)
 - ✅ Lower latency (global edge distribution)
 - ✅ Same code structure (minimal changes required)
-- ✅ No function count limit on Edge Functions
+- ✅ Flexible deployment (Vercel, Netlify, Cloudflare, etc.)
 
 ---
 
