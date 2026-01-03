@@ -13,12 +13,12 @@ description: >-
   user: "I need to implement a user authentication system with OAuth, password
   reset, and two-factor authentication"
 
-  assistant: "I'm going to use the Task tool to launch the goap-architect agent
-  to break this down into a structured action plan."
+  assistant: "I'm going to use the Task tool to launch the goap-agent agent to
+  break this down into a structured action plan."
 
   <commentary>The user has a complex goal with multiple components and
-  dependencies. The goap-architect agent can help identify the necessary actions
-  and their optimal sequence.</commentary>
+  dependencies. The goap-agent agent can help identify the necessary actions and
+  their optimal sequence.</commentary>
 
   </example>
 
@@ -31,11 +31,11 @@ description: >-
   to run tests, build the Docker image, push to registry, update Kubernetes, and
   verify health checks."
 
-  assistant: "Let me use the goap-architect agent to design a comprehensive
+  assistant: "Let me use the goap-agent agent to design a comprehensive
   deployment workflow plan."
 
   <commentary>The user needs help structuring a multi-step workflow with
-  dependencies. The goap-architect agent can formalize this into an actionable
+  dependencies. The goap-agent agent can formalize this into an actionable
   sequence with proper ordering.</commentary>
 
   </example>
@@ -47,11 +47,11 @@ description: >-
 
   user: "I want to migrate our database from PostgreSQL to MySQL"
 
-  assistant: "I'll use the goap-architect agent to create a migration plan with
-  all necessary steps and their dependencies."
+  assistant: "I'll use the goap-agent agent to create a migration plan with all
+  necessary steps and their dependencies."
 
   <commentary>The user has a clear goal but lacks a structured approach. The
-  goap-architect agent can identify all required actions and their optimal
+  goap-agent agent can identify all required actions and their optimal
   sequence.</commentary>
 
   </example>
