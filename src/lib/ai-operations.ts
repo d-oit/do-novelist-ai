@@ -4,6 +4,7 @@
  * All operations now use secure serverless API endpoints with context injection
  */
 
+import { settingsService } from '@/features/settings/services/settingsService';
 import { withCache } from '@/lib/cache';
 import { ContextAwarePrompts } from '@/lib/context';
 import type { Chapter, RefineOptions, Project } from '@/types/index';
@@ -42,14 +43,21 @@ const _generateOutline = async (
   try {
     let enhancedPrompt;
 
-    if (project) {
-      // Use context-aware prompt generation
+    const settings = settingsService.load();
+
+    if (project && settings.enableContextInjection) {
       const contextPrompts = new ContextAwarePrompts(project);
       enhancedPrompt = await contextPrompts.createOutlinePrompt(idea, style);
 
       operationLogger.debug('Using context-aware prompt', {
         estimatedTokens: enhancedPrompt.estimatedTokens,
         hasContext: !!enhancedPrompt.context,
+        contextEnabled: true,
+        tokenLimit: settings.contextTokenLimit,
+      });
+    } else if (project) {
+      operationLogger.debug('Context injection disabled by user settings', {
+        contextEnabled: false,
       });
     }
 
@@ -82,7 +90,7 @@ const _generateOutline = async (
     operationLogger.info('Outline generated successfully', {
       title: data.title,
       chapterCount: data.chapters?.length ?? 0,
-      contextAware: !!project,
+      contextAware: !!project && settings.enableContextInjection,
     });
 
     return data;
@@ -117,9 +125,9 @@ The story continues with detailed narrative, character development, and plot pro
 
   try {
     let enhancedPrompt;
+    const settings = settingsService.load();
 
-    if (project) {
-      // Use context-aware prompt generation
+    if (project && settings.enableContextInjection) {
       const contextPrompts = new ContextAwarePrompts(project);
       enhancedPrompt = await contextPrompts.createChapterPrompt(
         chapterTitle,
@@ -131,6 +139,12 @@ The story continues with detailed narrative, character development, and plot pro
       aiLogger.debug('Using context-aware chapter prompt', {
         estimatedTokens: enhancedPrompt.estimatedTokens,
         hasContext: !!enhancedPrompt.context,
+        contextEnabled: true,
+        tokenLimit: settings.contextTokenLimit,
+      });
+    } else if (project) {
+      aiLogger.debug('Context injection disabled for chapter writing', {
+        contextEnabled: false,
       });
     }
 
@@ -161,7 +175,7 @@ The story continues with detailed narrative, character development, and plot pro
     aiLogger.info('Chapter written successfully', {
       chapterTitle,
       contentLength: data.content?.length || 0,
-      contextAware: !!project,
+      contextAware: !!project && settings.enableContextInjection,
     });
 
     return data.content ?? '';
@@ -289,15 +303,21 @@ Overall: The story shows good consistency with minor suggestions for improvement
 
   try {
     let enhancedPrompt;
+    const settings = settingsService.load();
 
-    if (project) {
-      // Use context-aware prompt generation
+    if (project && settings.enableContextInjection) {
       const contextPrompts = new ContextAwarePrompts(project);
       enhancedPrompt = await contextPrompts.createConsistencyPrompt(chapters);
 
       aiLogger.debug('Using context-aware consistency prompt', {
         estimatedTokens: enhancedPrompt.estimatedTokens,
         hasContext: !!enhancedPrompt.context,
+        contextEnabled: true,
+        tokenLimit: settings.contextTokenLimit,
+      });
+    } else if (project) {
+      aiLogger.debug('Context injection disabled for consistency analysis', {
+        contextEnabled: false,
       });
     }
 
@@ -330,7 +350,7 @@ Overall: The story shows good consistency with minor suggestions for improvement
     aiLogger.info('Consistency analysis completed', {
       chaptersAnalyzed: chapters.length,
       analysisLength: data.analysis?.length || 0,
-      contextAware: !!project,
+      contextAware: !!project && settings.enableContextInjection,
     });
 
     return data.analysis ?? 'No issues found.';
@@ -518,15 +538,21 @@ export const developCharacters = async (
 
   try {
     let enhancedPrompt;
+    const settings = settingsService.load();
 
-    if (project) {
-      // Use context-aware prompt generation
+    if (project && settings.enableContextInjection) {
       const contextPrompts = new ContextAwarePrompts(project);
       enhancedPrompt = await contextPrompts.createCharacterPrompt(idea, style);
 
       aiLogger.debug('Using context-aware character prompt', {
         estimatedTokens: enhancedPrompt.estimatedTokens,
         hasContext: !!enhancedPrompt.context,
+        contextEnabled: true,
+        tokenLimit: settings.contextTokenLimit,
+      });
+    } else if (project) {
+      aiLogger.debug('Context injection disabled for character development', {
+        contextEnabled: false,
       });
     }
 
@@ -554,7 +580,7 @@ export const developCharacters = async (
 
     aiLogger.info('Characters developed successfully', {
       charactersLength: data.characters?.length || 0,
-      contextAware: !!project,
+      contextAware: !!project && settings.enableContextInjection,
     });
 
     return data.characters ?? '';
