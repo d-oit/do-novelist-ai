@@ -1,23 +1,25 @@
 /**
  * Rate limiting middleware for AI API endpoints
  * Implements token bucket algorithm to prevent abuse
+ * Supports both in-memory (dev) and Vercel KV (production) storage
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-/**
- * Rate limit entry for token bucket
- */
-interface RateLimitEntry {
-  tokens: number;
-  lastRefill: number;
-}
+import { createRateLimitStore } from './_rate-limit-store';
+import type { RateLimitStore } from './_rate-limit-store';
 
 /**
- * In-memory rate limit store
- * TODO: Replace with Redis/Vercel KV in production for distributed rate limiting
+ * Singleton rate limit store instance
  */
-const rateLimitStore = new Map<string, RateLimitEntry>();
+let rateLimitStore: RateLimitStore | null = null;
+
+function getRateLimitStore(): RateLimitStore {
+  if (!rateLimitStore) {
+    rateLimitStore = createRateLimitStore();
+  }
+  return rateLimitStore;
+}
 
 /**
  * Rate limit configuration
@@ -51,15 +53,16 @@ function getUserIdentifier(req: VercelRequest): string {
 /**
  * Rate limiting middleware using token bucket algorithm
  */
-export function rateLimitMiddleware(
+export async function rateLimitMiddleware(
   req: VercelRequest,
   res: VercelResponse,
   next: () => void,
-): void {
+): Promise<void> {
+  const store = getRateLimitStore();
   const identifier = getUserIdentifier(req);
   const now = Date.now();
 
-  let entry = rateLimitStore.get(identifier);
+  let entry = await store.get(identifier);
 
   if (!entry) {
     // First request from this identifier
@@ -67,7 +70,7 @@ export function rateLimitMiddleware(
       tokens: RATE_LIMIT_CONFIG.maxTokens - 1, // Consume 1 token immediately
       lastRefill: now,
     };
-    rateLimitStore.set(identifier, entry);
+    await store.set(identifier, entry);
 
     // Set rate limit headers
     res.setHeader('X-RateLimit-Limit', RATE_LIMIT_CONFIG.maxTokens.toString());
@@ -104,7 +107,7 @@ export function rateLimitMiddleware(
 
   // Consume token
   entry.tokens -= 1;
-  rateLimitStore.set(identifier, entry);
+  await store.set(identifier, entry);
 
   // Set rate limit headers
   res.setHeader('X-RateLimit-Limit', RATE_LIMIT_CONFIG.maxTokens.toString());
@@ -117,15 +120,7 @@ export function rateLimitMiddleware(
  * Cleanup old entries (run periodically to prevent memory leaks)
  * Call this from a cron job or serverless function
  */
-export function cleanupRateLimitStore(): void {
-  const now = Date.now();
-  const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (now - entry.lastRefill > maxAge) {
-      rateLimitStore.delete(key);
-    }
-  }
-
-  console.log(`[Rate Limit] Cleaned up old entries. Current size: ${rateLimitStore.size}`);
+export async function cleanupRateLimitStore(): Promise<void> {
+  const store = getRateLimitStore();
+  await store.cleanup();
 }

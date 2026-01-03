@@ -8,10 +8,16 @@
 ## Executive Summary
 
 Comprehensive serverless API architecture for securing AI operations using
-**Vercel Edge Functions** (migrated from Node.js serverless to resolve Hobby
-plan 12-function limit). This design migrates all 13 client-side AI operations
-to secure server-side endpoints with rate limiting, cost tracking, and error
-handling.
+**Edge Functions** for secure API routing, rate limiting, cost tracking, and
+error handling. This design migrates all 13 client-side AI operations to secure
+server-side endpoints.
+
+**Key Clarification**:
+
+- **Vercel** = Frontend hosting + Edge Functions deployment platform (Hobby plan
+  is sufficient)
+- **Turso** = Edge database (SQLite-based) for data storage
+- **Edge Functions** hide API keys, enforce rate limits, track costs
 
 **Goal**: Zero API keys in client builds, full cost control, production-ready
 security. **Runtime**: Edge Runtime (V8) - faster cold starts, lower latency, no
@@ -50,10 +56,21 @@ functions migrated to Edge Runtime (January 2, 2026)
 
 ## Edge Runtime Migration ✅
 
-**Problem Resolved**: Vercel Hobby plan limits serverless functions to 12. We
-had 13 functions.
+**Problem Resolved**: Traditional serverless functions have limits (e.g., Vercel
+Hobby plan's 12-function limit). We had 13 functions.
 
-**Solution**: Migrated all 13 functions to Edge Runtime (no limit).
+**Solution**: Migrated all 13 functions to Edge Runtime (no function count
+limit).
+
+**Why Edge Functions Are Needed**:
+
+- ✅ **Security**: Hide API keys from client bundles (OpenRouter API key stays
+  server-side)
+- ✅ **Rate Limiting**: Prevent abuse (60 req/hour for authenticated, 10
+  req/hour for anonymous)
+- ✅ **Cost Tracking**: Monitor AI usage and enforce budget limits
+- ✅ **CORS Handling**: Eliminate cross-origin issues for production deployment
+- ✅ **Performance**: 5x faster cold starts, global edge distribution
 
 **Benefits**:
 
@@ -811,7 +828,7 @@ export function setCORSHeaders(res: VercelResponse) {
 
 ## Environment Variables
 
-### Server-Side (Vercel)
+### Server-Side (Edge Functions)
 
 ```bash
 # .env.server (NOT committed to git)
@@ -821,6 +838,14 @@ MONTHLY_AI_BUDGET=50
 ENABLE_RATE_LIMITING=true
 ENABLE_COST_TRACKING=true
 ```
+
+**Deployment Options**:
+
+- **Vercel** (recommended for ease of use): Set via
+  `vercel env add OPENROUTER_API_KEY production`
+- **Alternative**: Cloudflare Workers, AWS Lambda, or any serverless platform
+- **Key Point**: Frontend hosting and Edge Functions can be deployed separately
+  from database (Turso)
 
 ### Client-Side (Removed)
 
@@ -842,9 +867,11 @@ ENABLE_COST_TRACKING=true
 - [ ] Write tests (80%+ coverage)
 - [ ] Remove `VITE_OPENROUTER_API_KEY` from `.env.example`
 - [ ] Update client code to use `/api/ai/*` endpoints
-- [x] Test locally with Vercel CLI ✅
+- [x] Test locally ✅
 
-### Deployment
+### Deployment Options
+
+**Option 1: Vercel (Recommended - Simplest)**
 
 ```bash
 # 1. Install Vercel CLI
@@ -863,6 +890,16 @@ vercel env add OPENROUTER_API_KEY production
 # 5. Deploy to production (Edge Runtime automatically detected)
 vercel --prod
 ```
+
+**Option 2: Alternative Platforms**
+
+- **Cloudflare Workers**: Global edge functions, free tier available
+- **AWS Lambda + API Gateway**: Enterprise-grade, full AWS ecosystem
+- **Netlify Functions**: Similar to Vercel, great DX
+- **Custom Node.js Backend**: Full control, requires server management
+
+**Note**: Turso database is independent of hosting choice. Use Turso credentials
+from your Turso dashboard regardless of deployment platform.
 
 ### After Deployment
 

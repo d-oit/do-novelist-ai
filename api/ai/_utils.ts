@@ -205,11 +205,35 @@ class CostTracker {
       timestamp: Date.now(),
     };
 
-    // Log to console (in production, send to PostHog/Mixpanel/DataDog)
+    // Log to console for debugging
     console.log('[COST]', JSON.stringify(fullEntry));
 
-    // TODO: Send to analytics service
-    // analytics.track('ai_api_call', fullEntry);
+    // Send to analytics service if PostHog is available
+    if (
+      typeof window !== 'undefined' &&
+      'posthog' in window &&
+      window.posthog &&
+      typeof window.posthog === 'object' &&
+      'capture' in window.posthog
+    ) {
+      try {
+        const posthog = window.posthog as {
+          capture: (event: string, properties: Record<string, unknown>) => void;
+        };
+        posthog.capture('ai_api_call', {
+          userId: fullEntry.userId,
+          endpoint: fullEntry.endpoint,
+          provider: fullEntry.provider,
+          model: fullEntry.model,
+          tokensUsed: fullEntry.tokensUsed,
+          estimatedCost: fullEntry.estimatedCost,
+          timestamp: fullEntry.timestamp,
+        });
+      } catch (error) {
+        // Silently fail analytics tracking - don't break API functionality
+        console.error('[COST] Failed to track analytics:', error);
+      }
+    }
   }
 }
 

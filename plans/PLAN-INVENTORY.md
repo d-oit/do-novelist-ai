@@ -9,14 +9,14 @@ documents in plans/ folder
 
 ### 0. EDGE-FUNCTIONS-MIGRATION-JAN-2026.md ⭐ QUICK FIX
 
-| Attribute    | Value                                                                                                |
-| ------------ | ---------------------------------------------------------------------------------------------------- |
-| Status       | ✅ COMPLETE - Edge Runtime Migration                                                                 |
-| Completion   | 100%                                                                                                 |
-| Priority     | P0 (BLOCKING DEPLOYMENT)                                                                             |
-| Owner        | GOAP Agent                                                                                           |
-| Last Updated | January 2, 2026                                                                                      |
-| Notes        | Migrated all 13 serverless functions to Edge Runtime. Deployment unblocked. No function count limit. |
+| Attribute    | Value                                                                                                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Status       | ✅ COMPLETE - Edge Runtime Migration                                                                                                                                  |
+| Completion   | 100%                                                                                                                                                                  |
+| Priority     | P0 (BLOCKING DEPLOYMENT) - RESOLVED                                                                                                                                   |
+| Owner        | GOAP Agent                                                                                                                                                            |
+| Last Updated | January 3, 2026                                                                                                                                                       |
+| Notes        | Migrated all 13 Edge Functions to Edge Runtime. Deployment unblocked. No function count limit. Client migration pending. Architecture: Vercel (optional), Turso (DB). |
 
 ---
 
@@ -130,6 +130,17 @@ documents in plans/ folder
 
 ---
 
+### 9. DEPLOYMENT-ARCHITECTURE-JAN-2026.md ⭐ NEW
+
+| Attribute | Value                                                                |
+| --------- | -------------------------------------------------------------------- |
+| Type      | Architecture                                                         |
+| Purpose   | Clarify Vercel vs Turso roles and deployment options                 |
+| Status    | Current                                                              |
+| Notes     | Explains that Vercel is optional frontend hosting, Turso is database |
+
+---
+
 ## Summary Statistics
 
 | Category            | Count  |
@@ -137,15 +148,37 @@ documents in plans/ folder
 | Active Plans        | 5      |
 | Status & Reference  | 5      |
 | Documentation Index | 1      |
-| **Total**           | **11** |
+| Architecture        | 1      |
+| **Total**           | **12** |
 
-## Recent Updates (January 2, 2026)
+## Recent Updates (January 3, 2026)
+
+- **NEW**: Created DEPLOYMENT-ARCHITECTURE-JAN-2026.md - Comprehensive
+  architecture document clarifying Vercel vs Turso roles
+- **UPDATED**: SERVERLESS-API-ARCHITECTURE-JAN-2026.md - Added architecture
+  clarification, updated deployment options
+- **UPDATED**: EDGE-FUNCTIONS-MIGRATION-JAN-2026.md - Added architecture
+  clarification (Edge Functions ≠ Database)
+- **UPDATED**: TODO-IMPLEMENTATION-SUMMARY.md - Added architecture note about
+  Vercel KV being optional, Turso for data storage
+- **UPDATED**: CODEBASE-STATUS-DEC-2025.md - Added deployment notes explaining
+  Vercel (optional) and Turso (database)
+- **UPDATED**: PLAN-INVENTORY.md - Added DEPLOYMENT-ARCHITECTURE-JAN-2026.md to
+  inventory
+
+## Previous Updates (January 2, 2026)
 
 - **NEW**: Created EDGE-FUNCTIONS-MIGRATION-JAN-2026.md - Migrated all 13
   serverless functions to Edge Runtime to resolve Vercel Hobby plan 12-function
   limit
 - **UPDATED**: SERVERLESS-API-ARCHITECTURE-JAN-2026.md - Marked Edge Runtime
-  migration as complete, updated runtime from Node.js to Edge
+  migration as complete, updated runtime from Node.js to Edge (all 13 functions)
+- **UPDATED**: NEW-FEATURES-PLAN-JAN-2026.md - Updated security hardening
+  section to reflect Edge Functions instead of serverless
+- **UPDATED**: MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md - Updated
+  all serverless references to Edge Functions
+- **UPDATED**: GOAP-CODEBASE-ANALYSIS-JAN-2026.md - Updated endpoint status to
+  show all 13 Edge Functions complete
 - **NEW**: Created GOAP-CODEBASE-ANALYSIS-JAN-2026.md - Comprehensive GOAP
   analysis with improvement recommendations and new feature proposals
 - **NEW**: Created MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md -
@@ -156,17 +189,17 @@ documents in plans/ folder
 - Updated NEW-FEATURES-PLAN-JAN-2026.md to 60% complete (Phase 1 & 2 mostly
   done)
 - Updated DOCUMENTATION-INDEX.md with current metrics
-- Updated PLAN-INVENTORY.md to include Edge Functions Migration and GOAP
-  analysis (5 active plans)
 
 ## Key Findings from GOAP Analysis
 
 ### Security Status (P0 - CRITICAL)
 
-- **Edge Runtime Migration**: ✅ COMPLETE - All 13 functions migrated
-- **Serverless Endpoints**: 13/13 implemented (100%) ✅
-- **API Key Exposure**: Still present in client code
-- **Action Required**: Complete client migration to use `/api/ai/*` endpoints
+- **Edge Runtime Migration**: ✅ COMPLETE - All 13 Edge Functions using Edge
+  Runtime
+- **Edge Functions Endpoints**: 13/13 implemented (100%) ✅
+- **API Key Exposure**: Still present in client code (client migration pending)
+- **Action Required**: Complete client migration to use `/api/ai/*` Edge
+  Functions endpoints
 
 ### Feature Opportunities
 

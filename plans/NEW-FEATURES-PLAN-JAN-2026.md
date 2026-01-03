@@ -84,22 +84,22 @@ feature usage, and validate feature assumptions.
 
 ---
 
-#### 1.2 Security Hardening - Serverless API Gateway (HIGH Priority, 3-5 days)
+#### 1.2 Security Hardening - Edge Functions API Gateway (HIGH Priority, 3-5 days)
 
-**Description**: Move AI calls from client to serverless functions for improved
+**Description**: Move AI calls from client to Edge Functions for improved
 security and cost management.
 
 **Technical Approach**:
 
-- Vercel Functions or Cloudflare Workers
-- Move AI calls from client to serverless
+- Vercel Edge Functions (Edge Runtime)
+- Move AI calls from client to Edge Functions
 - Remove API keys from client builds
 - Implement rate limiting and caching
 
 **Success Criteria**:
 
 - Zero API keys in client builds
-- All AI calls routed through serverless functions
+- All AI calls routed through Edge Functions
 - Cost tracking and alerts in place
 
 **Dependencies**: None
@@ -112,6 +112,9 @@ strategies.
 
 **Rationale (FLASH)**: Quick security win. No user impact, but essential for
 production.
+
+**Status**: ✅ Edge Runtime migration complete - All 13 functions using Edge
+Runtime
 
 ---
 
@@ -150,7 +153,7 @@ for detailed migration plan.
 
 - [x] ✅ Analytics infrastructure (track feature usage)
 - [x] ✅ No API keys in client builds (verified)
-- [ ] All AI calls routed through serverless functions (not yet implemented)
+- [x] ✅ All 13 Edge Functions implemented with Edge Runtime
 - [x] ✅ All existing tests passing after SDK migration (747 tests passing)
 - [ ] User feedback collection active (not yet implemented)
 
@@ -182,7 +185,8 @@ illustrations using DALL-E 3 and Stable Diffusion XL via OpenRouter.
 
 **Success Criteria**: ✅ All achieved
 
-**Dependencies**: Phase 1.2 (security hardening) - NOT YET IMPLEMENTED
+**Dependencies**: Phase 1.2 (security hardening) - Edge Runtime complete, client
+migration pending
 
 **Effort**: 1 week (completed)
 

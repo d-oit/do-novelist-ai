@@ -1,6 +1,6 @@
 # Documentation Index
 
-**Last Updated**: January 2, 2026
+**Last Updated**: January 3, 2026
 
 ---
 
@@ -12,7 +12,9 @@ This index helps you quickly find the documentation you need.
 
 1. [README.md](../README.md) - Project overview and getting started
 2. [AGENTS.md](../AGENTS.md) - Coding guidelines and best practices
-3. [CODEBASE-STATUS-DEC-2025.md](CODEBASE-STATUS-DEC-2025.md) - Current codebase
+3. [DEPLOYMENT-ARCHITECTURE-JAN-2026.md](DEPLOYMENT-ARCHITECTURE-JAN-2026.md) ⭐
+   **NEW** - Vercel vs Turso roles, deployment options
+4. [CODEBASE-STATUS-DEC-2025.md](CODEBASE-STATUS-DEC-2025.md) - Current codebase
    health
 
 ### For Developers
@@ -26,8 +28,8 @@ This index helps you quickly find the documentation you need.
 
 ### For Feature Development
 
-1. [GOAP-CODEBASE-ANALYSIS-JAN-2026.md](GOAP-CODEBASE-ANALYSIS-JAN-2026.md) ⭐
-   **NEW** - Comprehensive GOAP analysis with improvements and new features
+1. [GOAP-CODEBASE-ANALYSIS-JAN-2026.md](GOAP-CODEBASE-ANALYSIS-JAN-2026.md) -
+   Comprehensive GOAP analysis with improvements and new features
 2. [NEW-FEATURES-PLAN-JAN-2026.md](NEW-FEATURES-PLAN-JAN-2026.md) - Upcoming
    feature roadmap
 3. [MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md](MISSING-FEATURES-GOAP-IMPLEMENTATION-PLAN-JAN-2026.md) -
@@ -59,6 +61,14 @@ This index helps you quickly find the documentation you need.
   Detailed 11-14 week implementation plan
 - **WRITING-ASSISTANT-ENHANCEMENT-PLAN.md** (100% complete) - ✅ All MVP
   features implemented
+
+### Architecture Documents
+
+- **DEPLOYMENT-ARCHITECTURE-JAN-2026.md** ⭐ **NEW**
+  - Vercel vs Turso roles explained
+  - Frontend hosting + Edge Functions + Database architecture
+  - Deployment options (Vercel, Netlify, Cloudflare, custom)
+  - Cost comparison and decision framework
 
 ### Status & Reference Documents
 
@@ -165,6 +175,7 @@ This index helps you quickly find the documentation you need.
 - **Active Plans**: `*-PLAN-*.md`
 - **Status & Reference**: `CODEBASE-STATUS-*.md`, `COMPLETED-IMPROVEMENTS-*.md`,
   `FILE-SIZE-*.md`, `UI-UX-ANALYSIS-*.md`, `DEPENDENCY-MANAGEMENT-*.md`
+- **Architecture**: `DEPLOYMENT-ARCHITECTURE-*.md`
 - **Tracking**: `FILE-SIZE-*.md`
 - **Index**: `DOCUMENTATION-INDEX.md`
 

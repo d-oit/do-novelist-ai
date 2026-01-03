@@ -24,6 +24,9 @@ const ProjectsView = lazy(() =>
 const SettingsView = lazy(() =>
   import('@/features/settings/components').then(module => ({ default: module.SettingsView })),
 );
+const MetricsPage = lazy(() =>
+  import('@/pages/MetricsPage').then(module => ({ default: module.MetricsPage })),
+);
 const AgentConsole = lazy(() =>
   import('@/features/generation/components').then(module => ({ default: module.AgentConsole })),
 );
@@ -50,6 +53,19 @@ const SettingsLoader = () => (
       <Skeleton className='h-32 w-full' />
       <Skeleton className='h-32 w-full' />
       <Skeleton className='h-32 w-full' />
+    </div>
+  </div>
+);
+
+const MetricsLoader = () => (
+  <div className='container mx-auto space-y-6 p-6'>
+    <div>
+      <Skeleton className='h-10 w-48' />
+      <Skeleton className='mt-2 h-6 w-96' />
+    </div>
+    <div className='space-y-4'>
+      <Skeleton className='h-64 w-full' />
+      <Skeleton className='h-48 w-full' />
     </div>
   </div>
 );
@@ -175,7 +191,7 @@ const INITIAL_PROJECT: Project = {
   },
 };
 
-type ViewMode = 'dashboard' | 'projects' | 'settings' | 'world-building';
+type ViewMode = 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics';
 
 const App: React.FC = () => {
   const [project, setProject] = useState<Project>(INITIAL_PROJECT);
@@ -384,7 +400,9 @@ const App: React.FC = () => {
               ? 'Projects - Novelist.ai'
               : currentView === 'settings'
                 ? 'Settings - Novelist.ai'
-                : 'Novelist.ai Dashboard'}
+                : currentView === 'metrics'
+                  ? 'System Metrics - Novelist.ai'
+                  : 'Novelist.ai Dashboard'}
         </h1>
         {currentView === 'dashboard' && (
           <div className='animate-in fade-in mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>
@@ -480,6 +498,16 @@ const App: React.FC = () => {
             <LazyLoadErrorBoundary>
               <Suspense fallback={<SettingsLoader />}>
                 <SettingsView />
+              </Suspense>
+            </LazyLoadErrorBoundary>
+          </div>
+        )}
+
+        {currentView === 'metrics' && (
+          <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+            <LazyLoadErrorBoundary>
+              <Suspense fallback={<MetricsLoader />}>
+                <MetricsPage />
               </Suspense>
             </LazyLoadErrorBoundary>
           </div>
