@@ -7,13 +7,15 @@
 import { eq, and, desc, sql } from 'drizzle-orm';
 
 import { getDrizzleClient, schema } from '@/lib/database/drizzle';
-import type { NewVectorRow, VectorRow, VectorEntityType } from '@/lib/database/schemas/vectors';
+import type { NewVectorRow } from '@/lib/database/schemas/vectors';
 import { generateEmbedding } from '@/lib/embeddings/embedding-service';
 import { cosineSimilarity } from '@/lib/embeddings/similarity';
 import { logger } from '@/lib/logging/logger';
 import type {
   VectorContent,
   VectorEmbedding,
+  VectorRow,
+  VectorEntityType,
   SimilaritySearchRequest,
   SimilaritySearchResult,
 } from '@/types/embeddings';

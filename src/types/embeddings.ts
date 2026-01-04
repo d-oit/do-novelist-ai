@@ -62,13 +62,34 @@ export interface EmbeddingResponse {
 }
 
 /**
+ * Entity types that can be vectorized for semantic search
+ */
+export type VectorEntityType = 'chapter' | 'character' | 'world_building' | 'project';
+
+/**
  * Content to be vectorized
  */
 export interface VectorContent {
   projectId: string;
-  entityType: 'chapter' | 'character' | 'world_building' | 'project';
+  entityType: VectorEntityType;
   entityId: string;
   content: string;
+}
+
+/**
+ * Database representation of a vector
+ */
+export interface VectorRow {
+  id: string;
+  projectId: string;
+  entityType: VectorEntityType;
+  entityId: string;
+  content: string;
+  embedding: string;
+  dimensions: number;
+  model: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**

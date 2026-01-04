@@ -21,8 +21,12 @@
     "clean": "rm -rf dist .cache node_modules/.vite",
     "clean:all": "rm -rf dist .cache node_modules/.vite node_modules",
     "lint": "eslint . --fix --cache --cache-location .eslintcache --max-warnings 0 && tsc --noEmit",
-    "lint:ci": "eslint . --max-warnings 2000 && tsc --noEmit",
+    "lint:eslint": "eslint . --max-warnings 0",
+    "lint:typecheck": "tsc --noEmit --incremental",
+    "lint:ci": "npm run lint:eslint && npm run lint:typecheck",
     "lint:fix": "eslint . --fix --cache --cache-location .eslintcache",
+    "lint:ci:fast": "npm run lint:eslint",
+    "typecheck:ci": "tsc --noEmit --incremental",
     "lint:clear-cache": "rm -f .eslintcache",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -116,7 +120,11 @@
     "workbox-window": "^7.4.0"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write",
+      "vitest related --run --api.port 51204 --environment jsdom"
+    ],
     "*.{json,md,css,scss,less,yml,yaml}": ["prettier --write"],
     "*.{md,mdx}": ["prettier --write --parser markdown"]
   },

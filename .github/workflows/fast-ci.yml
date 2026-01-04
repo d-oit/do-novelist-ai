@@ -53,9 +53,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-  # Fast lint and type check
-  lint-and-typecheck:
-    name: 🔍 Lint & Type Check
+  # Fast lint check
+  lint:
+    name: 🔍 ESLint Check
     runs-on: ubuntu-latest
     needs: setup
     timeout-minutes: 10
@@ -83,15 +83,64 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint and type check
-        run: pnpm run lint:ci
+      - name: Cache ESLint
+        uses: actions/cache@v5
+        with:
+          path: .eslintcache
+          key: ${{ runner.os }}-eslint-${{ hashFiles('eslint.config.js', 'src/**/*.ts', 'src/**/*.tsx') }}
 
-  # Unit tests
+      - name: Run ESLint
+        run: pnpm run lint:eslint
+
+  # TypeScript type check
+  typecheck:
+    name: 🟦 Type Check
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Restore pnpm store
+        uses: actions/cache@v5
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache TypeScript build
+        uses: actions/cache@v5
+        with:
+          path: "**/*.tsbuildinfo"
+          key: ${{ runner.os }}-typescript-${{ hashFiles('tsconfig.json', 'src/**/*.ts', 'src/**/*.tsx') }}
+
+      - name: Run TypeScript type check
+        run: pnpm run lint:typecheck
+
+  # Sharded Unit tests
   unit-tests:
-    name: 🧪 Unit Tests
+    name: 🧪 Unit Tests (Shard ${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
     needs: setup
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -117,24 +166,28 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run unit tests
-        run: pnpm run test
+        run: pnpm run test -- --shard=${{ matrix.shard }}/3
+  # Security Audit
+  security:
+    name: 🛡️ Security Audit
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
 
-      - name: Generate coverage
-        run: pnpm run coverage
-
-      - name: Upload coverage
-        uses: actions/upload-artifact@v6
-        if: always()
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          name: coverage-report-${{ github.sha }}
-          path: coverage/
-          retention-days: 7
+          version: 9
 
-  # Fast build
+      - name: Run audit
+        run: pnpm audit --prod
   build:
     name: 🏗️ Build
     runs-on: ubuntu-latest
-    needs: [setup, lint-and-typecheck]
+    needs: setup
     timeout-minutes: 10
     steps:
       - name: Checkout code
@@ -284,7 +337,7 @@ jobs:
   summary:
     name: 📊 Summary
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, unit-tests, build, e2e-quick]
+    needs: [lint, typecheck, unit-tests, security, build, e2e-quick]
     if: always()
     timeout-minutes: 5
     steps:
@@ -301,16 +354,20 @@ jobs:
             echo ""
             echo "| Job | Status |"
             echo "|-----|--------|"
-            echo "| Lint & TypeCheck | ${{ needs.lint-and-typecheck.result }} |"
+            echo "| Lint | ${{ needs.lint.result }} |"
+            echo "| TypeCheck | ${{ needs.typecheck.result }} |"
             echo "| Unit Tests | ${{ needs.unit-tests.result }} |"
+            echo "| Security | ${{ needs.security.result }} |"
             echo "| Build | ${{ needs.build.result }} |"
             echo "| E2E Quick | ${{ needs.e2e-quick.result }} |"
             echo ""
 
             # Overall status
             FAILED=0
-            [ "${{ needs.lint-and-typecheck.result }}" != "success" ] && FAILED=$((FAILED + 1))
+            [ "${{ needs.lint.result }}" != "success" ] && FAILED=$((FAILED + 1))
+            [ "${{ needs.typecheck.result }}" != "success" ] && FAILED=$((FAILED + 1))
             [ "${{ needs.unit-tests.result }}" != "success" ] && FAILED=$((FAILED + 1))
+            [ "${{ needs.security.result }}" != "success" ] && FAILED=$((FAILED + 1))
             [ "${{ needs.build.result }}" != "success" ] && FAILED=$((FAILED + 1))
 
             if [ "$FAILED" -eq 0 ]; then

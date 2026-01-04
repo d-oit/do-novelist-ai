@@ -12,10 +12,11 @@ import type { VectorContent } from '@/types/embeddings';
 export const MIN_CONTENT_LENGTH = 10;
 
 /**
- * Maximum content length before chunking
+ * Maximum content length before chunking for embeddings
  * Text longer than this will be split into chunks
+ * Based on OpenAI embedding model token limits (~8191 tokens)
  */
-export const MAX_CONTENT_LENGTH = 8000;
+export const MAX_EMBEDDING_CHUNK_SIZE = 8000;
 
 /**
  * Content source type
@@ -288,7 +289,7 @@ export function batchExtract(
  */
 export function chunkContent(
   content: string,
-  chunkSize: number = MAX_CONTENT_LENGTH,
+  chunkSize: number = MAX_EMBEDDING_CHUNK_SIZE,
   overlap: number = 200,
 ): string[] {
   if (content.length <= chunkSize) {

@@ -2,7 +2,7 @@
  * VoiceInputPanel Component Tests
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { VoiceInputPanel } from '@/features/editor/components/VoiceInputPanel';
@@ -97,11 +97,15 @@ describe('VoiceInputPanel', () => {
       const micButton = screen.getByTestId('voice-recording-button');
 
       // Start recording
-      fireEvent.click(micButton);
+      await act(async () => {
+        fireEvent.click(micButton);
+      });
 
       // Trigger onstart callback to update isRecording state
       if (mockRecognition.onstart) {
-        mockRecognition.onstart(new Event('start'));
+        await act(async () => {
+          mockRecognition.onstart(new Event('start'));
+        });
       }
 
       // Wait for state update
@@ -110,7 +114,9 @@ describe('VoiceInputPanel', () => {
       });
 
       // Stop recording
-      fireEvent.click(micButton);
+      await act(async () => {
+        fireEvent.click(micButton);
+      });
 
       expect(mockRecognition.stop).toHaveBeenCalled();
     });
@@ -120,11 +126,15 @@ describe('VoiceInputPanel', () => {
 
       const micButton = screen.getByTestId('voice-recording-button');
 
-      fireEvent.click(micButton);
+      await act(async () => {
+        fireEvent.click(micButton);
+      });
 
       // Trigger onstart callback
       if (mockRecognition.onstart) {
-        mockRecognition.onstart(new Event('start'));
+        await act(async () => {
+          mockRecognition.onstart(new Event('start'));
+        });
       }
 
       await waitFor(() => {
@@ -160,7 +170,10 @@ describe('VoiceInputPanel', () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
       const micButton = screen.getByTestId('voice-recording-button');
-      fireEvent.click(micButton);
+
+      await act(async () => {
+        fireEvent.click(micButton);
+      });
 
       // Simulate error
       const errorEvent = {
@@ -169,7 +182,9 @@ describe('VoiceInputPanel', () => {
       } as SpeechRecognitionErrorEvent;
 
       if (mockRecognition.onerror) {
-        mockRecognition.onerror(errorEvent);
+        await act(async () => {
+          mockRecognition.onerror(errorEvent);
+        });
       }
 
       await waitFor(() => {
@@ -181,7 +196,10 @@ describe('VoiceInputPanel', () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
       const micButton = screen.getByTestId('voice-recording-button');
-      fireEvent.click(micButton);
+
+      await act(async () => {
+        fireEvent.click(micButton);
+      });
 
       const errorEvent = {
         error: 'no-speech',
@@ -189,7 +207,9 @@ describe('VoiceInputPanel', () => {
       } as SpeechRecognitionErrorEvent;
 
       if (mockRecognition.onerror) {
-        mockRecognition.onerror(errorEvent);
+        await act(async () => {
+          mockRecognition.onerror(errorEvent);
+        });
       }
 
       await waitFor(() => {
@@ -201,7 +221,10 @@ describe('VoiceInputPanel', () => {
       render(<VoiceInputPanel onTranscript={mockOnTranscript} />);
 
       const micButton = screen.getByTestId('voice-recording-button');
-      fireEvent.click(micButton);
+
+      await act(async () => {
+        fireEvent.click(micButton);
+      });
 
       const errorEvent = {
         error: 'not-allowed',
@@ -209,7 +232,9 @@ describe('VoiceInputPanel', () => {
       } as SpeechRecognitionErrorEvent;
 
       if (mockRecognition.onerror) {
-        mockRecognition.onerror(errorEvent);
+        await act(async () => {
+          mockRecognition.onerror(errorEvent);
+        });
       }
 
       // Check that error message appears first

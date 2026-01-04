@@ -130,7 +130,9 @@
       "Bash(cmd.exe:*)",
       "Bash(CLAUDE_MEM_WORKER_PORT=37888 cd:*)",
       "Bash(npm run dev:*)",
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "Bash(npm run lint:eslint:*)",
+      "Bash(npm run lint:typecheck:*)"
     ],
     "deny": [],
     "ask": []

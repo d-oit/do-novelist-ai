@@ -5,17 +5,9 @@
 
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
+import type { VectorEntityType } from '@/types/embeddings';
+
 import { projects } from './projects';
-
-/**
- * Entity types that can be vectorized for semantic search
- */
-export type VectorEntityType = 'chapter' | 'character' | 'world_building' | 'project';
-
-/**
- * Embedding models supported
- */
-export type EmbeddingModel = 'text-embedding-3-small' | 'text-embedding-3-large';
 
 /**
  * Vectors table schema
