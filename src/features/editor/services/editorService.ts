@@ -6,6 +6,7 @@
  * Enhanced with comprehensive error handling (2024-2025 best practices)
  */
 
+import { semanticSyncService } from '@/features/semantic-search';
 import { createStorageError } from '@/lib/errors/error-types';
 import { logger } from '@/lib/errors/logging';
 import { type SavedDraft, type DraftMetadata } from '@/types';
@@ -150,7 +151,22 @@ class EditorService {
       const store = transaction.objectStore('drafts');
       const request = store.put(draft);
 
-      request.onsuccess = (): void => resolve(draft);
+      request.onsuccess = (): void => {
+        // Trigger semantic search update (non-blocking)
+        semanticSyncService
+          .syncChapter(
+            projectId,
+            chapterId,
+            content,
+            undefined, // Title not available in saveDraft
+            summary,
+          )
+          .catch(error => {
+            this.logger.warn('Failed to sync chapter embedding', { error });
+          });
+
+        resolve(draft);
+      };
       request.onerror = (): void =>
         reject(new Error(request.error?.message ?? 'Database operation failed'));
     });

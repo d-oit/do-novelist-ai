@@ -3,6 +3,7 @@
  * Business logic layer for world-building operations
  */
 
+import { semanticSyncService } from '@/features/semantic-search';
 import { worldBuildingDb } from '@/features/world-building/services/worldBuildingDb';
 import type {
   WorldBuildingProject,
@@ -56,6 +57,7 @@ class WorldBuildingService {
     };
 
     await worldBuildingDb.saveLocation(location);
+    semanticSyncService.syncLocation(projectId, location).catch(console.error);
     return location;
   }
 
@@ -65,6 +67,7 @@ class WorldBuildingService {
 
     const updated = { ...existing, ...updates, updatedAt: Date.now() };
     await worldBuildingDb.saveLocation(updated);
+    semanticSyncService.syncLocation(updated.projectId, updated).catch(console.error);
     return updated;
   }
 
@@ -95,6 +98,7 @@ class WorldBuildingService {
     };
 
     await worldBuildingDb.saveCulture(culture);
+    semanticSyncService.syncCulture(projectId, culture).catch(console.error);
     return culture;
   }
 
@@ -104,6 +108,7 @@ class WorldBuildingService {
 
     const updated = { ...existing, ...updates, updatedAt: Date.now() };
     await worldBuildingDb.saveCulture(updated);
+    semanticSyncService.syncCulture(updated.projectId, updated).catch(console.error);
     return updated;
   }
 

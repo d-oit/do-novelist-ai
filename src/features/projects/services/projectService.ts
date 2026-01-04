@@ -4,6 +4,7 @@
  * Handles project persistence using the Drizzle ORM database layer
  */
 
+import { semanticSyncService } from '@/features/semantic-search';
 import { drizzleDbService } from '@/lib/database';
 import { logger } from '@/lib/logging/logger';
 import { PublishStatus } from '@/types';
@@ -146,6 +147,9 @@ class ProjectService {
     };
 
     await drizzleDbService.saveProject(project);
+    semanticSyncService.syncProject(projectId, project).catch(error => {
+      logger.warn('Failed to sync project embedding', { error });
+    });
     logger.info('Project created successfully', { component: 'ProjectService', projectId });
     return project;
   }
@@ -176,6 +180,9 @@ class ProjectService {
     };
 
     await drizzleDbService.saveProject(updated);
+    semanticSyncService.syncProject(id, updated).catch(error => {
+      logger.warn('Failed to sync project embedding', { error });
+    });
     logger.info('Project updated successfully', { component: 'ProjectService', projectId: id });
   }
 
@@ -225,6 +232,9 @@ class ProjectService {
     };
 
     await drizzleDbService.saveProject(updated);
+    semanticSyncService.syncProject(project.id, updated).catch(error => {
+      logger.warn('Failed to sync project embedding', { error });
+    });
     logger.info('Project saved successfully', {
       component: 'ProjectService',
       projectId: project.id,

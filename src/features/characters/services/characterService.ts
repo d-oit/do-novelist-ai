@@ -1,3 +1,4 @@
+import { semanticSyncService } from '@/features/semantic-search';
 import { type Character, type CharacterRelationship } from '@/types';
 
 /**
@@ -108,6 +109,7 @@ class CharacterService {
       const request = store.add(character);
 
       request.onsuccess = (): void => {
+        semanticSyncService.syncCharacter(character.projectId, character).catch(console.error);
         resolve(character);
       };
       request.onerror = (): void =>
@@ -140,6 +142,7 @@ class CharacterService {
       const request = store.put(updated);
 
       request.onsuccess = (): void => {
+        semanticSyncService.syncCharacter(updated.projectId, updated).catch(console.error);
         resolve(updated);
       };
       request.onerror = (): void =>
