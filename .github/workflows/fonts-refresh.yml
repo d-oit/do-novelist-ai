@@ -30,7 +30,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: pnpm install -g
+        run: pnpm install
 
       - name: Fetch fonts
         run: node scripts/fetch-fonts.mjs
