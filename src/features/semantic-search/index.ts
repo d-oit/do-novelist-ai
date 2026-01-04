@@ -4,3 +4,4 @@
  */
 
 export * from './services/content-processor';
+export * from './services/batch-processor';

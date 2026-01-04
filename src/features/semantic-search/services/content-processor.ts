@@ -334,7 +334,10 @@ export function validateContent(content: string): {
   }
 
   if (isContentTooShort(content)) {
-    return { valid: false, reason: `Content too short (minimum ${MIN_CONTENT_LENGTH} chars)` };
+    return {
+      valid: false,
+      reason: `Content too short (minimum ${MIN_CONTENT_LENGTH} chars)`,
+    };
   }
 
   return { valid: true };
