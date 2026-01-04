@@ -4,5 +4,6 @@
 export * from './projects';
 export * from './generation';
 export * from './publishing';
+export * from './semantic-search';
 export * from './settings';
 export * from './world-building';
