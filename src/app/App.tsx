@@ -6,6 +6,7 @@ import { ActionCard, BookViewer, PlannerControl } from '@/features/generation/co
 import { useGoapEngine } from '@/features/generation/hooks';
 import { ProjectStats, ProjectWizard } from '@/features/projects/components';
 import { db } from '@/features/projects/services';
+import { SearchModal } from '@/features/semantic-search';
 import { logger } from '@/lib/logging/logger';
 import { offlineManager } from '@/lib/pwa';
 import { performanceMonitor } from '@/performance';
@@ -193,12 +194,15 @@ const INITIAL_PROJECT: Project = {
 
 type ViewMode = 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics';
 
+// ... existing imports ...
+
 const App: React.FC = () => {
   const [project, setProject] = useState<Project>(INITIAL_PROJECT);
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>('overview');
   const [showWizard, setShowWizard] = useState(false);
   const [currentView, setCurrentView] = useState<ViewMode>('projects');
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Track performance for view changes
   useEffect(() => {
@@ -264,6 +268,20 @@ const App: React.FC = () => {
     }
     return undefined;
   }, [project, isLoading]);
+
+  // Keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // ... existing code ...
 
   const handleCreateProject = (
     title: string,
@@ -382,6 +400,29 @@ const App: React.FC = () => {
         isOpen={showWizard}
         onCreate={handleCreateProject}
         onCancel={() => setShowWizard(false)}
+      />
+
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        projectId={project.id}
+        onResultSelect={result => {
+          if (result.entityType === 'chapter') {
+            setSelectedChapterId(result.entityId);
+            setCurrentView('dashboard');
+            setIsSearchOpen(false);
+          } else if (result.entityType === 'project') {
+            setCurrentView('dashboard');
+            setSelectedChapterId('overview');
+            setIsSearchOpen(false);
+          } else {
+            // For other types, ideally show in a sidebar or modal.
+            // For now, we'll keep the semantic search open
+            // OR close it if the user explicit action was assumed.
+            // Let's close it for now as per minimal viable implementation.
+            setIsSearchOpen(false);
+          }
+        }}
       />
 
       <Navbar

@@ -61,6 +61,10 @@ class WorldBuildingService {
     return location;
   }
 
+  public async getLocation(id: string): Promise<Location | null> {
+    return await worldBuildingDb.getLocation(id);
+  }
+
   public async updateLocation(id: string, updates: Partial<Location>): Promise<Location | null> {
     const existing = await worldBuildingDb.getLocation(id);
     if (!existing) return null;
@@ -100,6 +104,10 @@ class WorldBuildingService {
     await worldBuildingDb.saveCulture(culture);
     semanticSyncService.syncCulture(projectId, culture).catch(console.error);
     return culture;
+  }
+
+  public async getCulture(id: string): Promise<Culture | null> {
+    return await worldBuildingDb.getCulture(id);
   }
 
   public async updateCulture(id: string, updates: Partial<Culture>): Promise<Culture | null> {

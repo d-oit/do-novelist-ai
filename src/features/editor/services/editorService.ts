@@ -5,7 +5,6 @@
  * Uses IndexedDB for local storage with versioning support.
  * Enhanced with comprehensive error handling (2024-2025 best practices)
  */
-
 import { semanticSyncService } from '@/features/semantic-search';
 import { createStorageError } from '@/lib/errors/error-types';
 import { logger } from '@/lib/errors/logging';

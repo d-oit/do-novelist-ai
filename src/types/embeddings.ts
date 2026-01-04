@@ -119,7 +119,7 @@ export interface SimilaritySearchRequest {
 export interface SimilaritySearchResult {
   id: string;
   projectId: string;
-  entityType: string;
+  entityType: VectorEntityType;
   entityId: string;
   content: string;
   similarity: number;
@@ -132,4 +132,29 @@ export interface CosineSimilarityResult {
   similarity: number;
   normalizedVectorA: VectorEmbedding;
   normalizedVectorB: VectorEmbedding;
+}
+
+/**
+ * Common fields for searchable entities to avoid 'any' casting
+ */
+export interface SearchableEntity {
+  title?: string;
+  name?: string;
+  summary?: string;
+  description?: string;
+  content?: string;
+}
+
+/**
+ * Hydrated search result with full entity data
+ */
+export interface HydratedSearchResult extends SimilaritySearchResult {
+  entity: SearchableEntity; // Improved type for hydrated data
+  context: string; // Formatting context for RAG
+}
+
+export interface SearchFilters {
+  entityTypes?: VectorEntityType[];
+  minScore?: number;
+  limit?: number;
 }
