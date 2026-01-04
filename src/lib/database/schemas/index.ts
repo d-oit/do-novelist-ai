@@ -4,3 +4,4 @@
  */
 export * from './projects';
 export * from './chapters';
+export * from './vectors';
