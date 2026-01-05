@@ -34,6 +34,7 @@ export enum PublishStatus {
 
 export interface Chapter {
   id: string;
+  projectId?: string;
   orderIndex: number;
   title: string;
   summary: string;
@@ -318,3 +319,4 @@ export interface ActionResult {
 
 // Re-export types from schemas for backward compatibility
 export type { WritingStyle } from '@/types/schemas';
+export type { Character } from '@/types/character-schemas';

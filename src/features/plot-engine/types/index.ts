@@ -1,6 +1,6 @@
 /**
  * Plot Engine Types
- * 
+ *
  * Type definitions for AI-powered plot generation and analysis
  */
 
@@ -251,35 +251,3 @@ export interface PlotEngineConfig {
   analysisModel: 'gpt-4' | 'gpt-3.5-turbo' | 'claude-3-sonnet';
   cacheDuration: number; // milliseconds
 }
-
-// ============================================================================
-// Exports
-// ============================================================================
-
-export type {
-  PlotStructure,
-  PlotAct,
-  PlotPoint,
-  PlotPointType,
-  StoryArc,
-  StoryStructure,
-  PacingAnalysis,
-  ChapterPacing,
-  TensionCurve,
-  PlotHole,
-  PlotHoleType,
-  PlotHoleSeverity,
-  PlotHoleAnalysis,
-  CharacterRelationship,
-  RelationshipType,
-  RelationshipEvolution,
-  CharacterGraph,
-  CharacterNode,
-  PlotGenerationRequest,
-  PlotGenerationResult,
-  PlotSuggestion,
-  PlotSuggestionType,
-  AnalysisRequest,
-  AnalysisResult,
-  PlotEngineConfig,
-};

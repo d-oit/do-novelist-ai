@@ -1,16 +1,21 @@
 /**
  * Plot Hole Detector View Component
- * 
+ *
  * Display and manage detected plot holes and inconsistencies
  */
 
 import React, { useState, useMemo } from 'react';
 
+import type {
+  PlotHoleAnalysis,
+  PlotHole,
+  PlotHoleSeverity,
+  PlotHoleType,
+} from '@/features/plot-engine';
+import { cn } from '@/lib/utils';
 import { Badge } from '@/shared/components/ui/Badge';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
-
-import type { PlotHoleAnalysis, PlotHole, PlotHoleSeverity, PlotHoleType } from '@/features/plot-engine';
 
 interface PlotHoleDetectorViewProps {
   analysis: PlotHoleAnalysis;
@@ -33,12 +38,12 @@ export const PlotHoleDetectorView: React.FC<PlotHoleDetectorViewProps> = ({
 
     // Apply severity filter
     if (filterSeverity !== 'all') {
-      holes = holes.filter((h) => h.severity === filterSeverity);
+      holes = holes.filter(h => h.severity === filterSeverity);
     }
 
     // Apply type filter
     if (filterType !== 'all') {
-      holes = holes.filter((h) => h.type === filterType);
+      holes = holes.filter(h => h.type === filterType);
     }
 
     // Sort
@@ -63,10 +68,10 @@ export const PlotHoleDetectorView: React.FC<PlotHoleDetectorViewProps> = ({
   // Statistics
   const stats = useMemo(() => {
     const bySeverity = {
-      critical: analysis.plotHoles.filter((h) => h.severity === 'critical').length,
-      major: analysis.plotHoles.filter((h) => h.severity === 'major').length,
-      moderate: analysis.plotHoles.filter((h) => h.severity === 'moderate').length,
-      minor: analysis.plotHoles.filter((h) => h.severity === 'minor').length,
+      critical: analysis.plotHoles.filter(h => h.severity === 'critical').length,
+      major: analysis.plotHoles.filter(h => h.severity === 'major').length,
+      moderate: analysis.plotHoles.filter(h => h.severity === 'moderate').length,
+      minor: analysis.plotHoles.filter(h => h.severity === 'minor').length,
     };
 
     const byType = analysis.plotHoles.reduce(
@@ -88,98 +93,96 @@ export const PlotHoleDetectorView: React.FC<PlotHoleDetectorViewProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Overview Card */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Plot Quality Analysis</h3>
-        
-        <div className="flex items-center justify-between mb-6">
+      <Card className='p-6'>
+        <h3 className='mb-4 text-lg font-semibold'>Plot Quality Analysis</h3>
+
+        <div className='mb-6 flex items-center justify-between'>
           <div>
-            <p className="text-sm text-muted-foreground">Overall Score</p>
-            <p className={`text-4xl font-bold mt-1 ${getScoreColor(analysis.overallScore)}`}>
+            <p className='text-sm text-muted-foreground'>Overall Score</p>
+            <p className={cn('mt-1 text-4xl font-bold', getScoreColor(analysis.overallScore))}>
               {analysis.overallScore}/100
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Issues Found</p>
-            <p className="text-4xl font-bold mt-1">{analysis.plotHoles.length}</p>
+          <div className='text-right'>
+            <p className='text-sm text-muted-foreground'>Issues Found</p>
+            <p className='mt-1 text-4xl font-bold'>{analysis.plotHoles.length}</p>
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">{analysis.summary}</p>
+        <p className='text-sm text-muted-foreground'>{analysis.summary}</p>
 
         {/* Severity Breakdown */}
-        <div className="grid grid-cols-4 gap-3 mt-6">
-          <SeverityStat severity="critical" count={stats.bySeverity.critical} />
-          <SeverityStat severity="major" count={stats.bySeverity.major} />
-          <SeverityStat severity="moderate" count={stats.bySeverity.moderate} />
-          <SeverityStat severity="minor" count={stats.bySeverity.minor} />
+        <div className='mt-6 grid grid-cols-4 gap-3'>
+          <SeverityStat severity='critical' count={stats.bySeverity.critical} />
+          <SeverityStat severity='major' count={stats.bySeverity.major} />
+          <SeverityStat severity='moderate' count={stats.bySeverity.moderate} />
+          <SeverityStat severity='minor' count={stats.bySeverity.minor} />
         </div>
       </Card>
 
       {/* Filters */}
-      <Card className="p-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Filter by Severity:</span>
+      <Card className='p-6'>
+        <div className='flex flex-wrap items-center gap-4'>
+          <div className='flex items-center gap-2'>
+            <span className='text-sm font-medium'>Filter by Severity:</span>
             <select
               value={filterSeverity}
-              onChange={(e) => setFilterSeverity(e.target.value as PlotHoleSeverity | 'all')}
-              className="px-3 py-1 border rounded-md text-sm bg-background"
-              data-testid="severity-filter"
+              onChange={e => setFilterSeverity(e.target.value as PlotHoleSeverity | 'all')}
+              className='rounded-md border bg-background px-3 py-1 text-sm'
+              data-testid='severity-filter'
             >
-              <option value="all">All</option>
-              <option value="critical">Critical</option>
-              <option value="major">Major</option>
-              <option value="moderate">Moderate</option>
-              <option value="minor">Minor</option>
+              <option value='all'>All</option>
+              <option value='critical'>Critical</option>
+              <option value='major'>Major</option>
+              <option value='moderate'>Moderate</option>
+              <option value='minor'>Minor</option>
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Filter by Type:</span>
+          <div className='flex items-center gap-2'>
+            <span className='text-sm font-medium'>Filter by Type:</span>
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as PlotHoleType | 'all')}
-              className="px-3 py-1 border rounded-md text-sm bg-background"
-              data-testid="type-filter"
+              onChange={e => setFilterType(e.target.value as PlotHoleType | 'all')}
+              className='rounded-md border bg-background px-3 py-1 text-sm'
+              data-testid='type-filter'
             >
-              <option value="all">All</option>
-              <option value="continuity">Continuity</option>
-              <option value="logic">Logic</option>
-              <option value="character_inconsistency">Character</option>
-              <option value="timeline">Timeline</option>
-              <option value="unresolved_thread">Unresolved</option>
-              <option value="contradictory_facts">Contradictions</option>
-              <option value="missing_motivation">Motivation</option>
+              <option value='all'>All</option>
+              <option value='continuity'>Continuity</option>
+              <option value='logic'>Logic</option>
+              <option value='character_inconsistency'>Character</option>
+              <option value='timeline'>Timeline</option>
+              <option value='unresolved_thread'>Unresolved</option>
+              <option value='contradictory_facts'>Contradictions</option>
+              <option value='missing_motivation'>Motivation</option>
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Sort by:</span>
+          <div className='flex items-center gap-2'>
+            <span className='text-sm font-medium'>Sort by:</span>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'severity' | 'confidence' | 'type')}
-              className="px-3 py-1 border rounded-md text-sm bg-background"
-              data-testid="sort-select"
+              onChange={e => setSortBy(e.target.value as 'severity' | 'confidence' | 'type')}
+              className='rounded-md border bg-background px-3 py-1 text-sm'
+              data-testid='sort-select'
             >
-              <option value="severity">Severity</option>
-              <option value="confidence">Confidence</option>
-              <option value="type">Type</option>
+              <option value='severity'>Severity</option>
+              <option value='confidence'>Confidence</option>
+              <option value='type'>Type</option>
             </select>
           </div>
         </div>
       </Card>
 
       {/* Plot Holes List */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">
-          Issues ({filteredHoles.length})
-        </h3>
-        
+      <Card className='p-6'>
+        <h3 className='mb-4 text-lg font-semibold'>Issues ({filteredHoles.length})</h3>
+
         {filteredHoles.length > 0 ? (
-          <div className="space-y-4">
-            {filteredHoles.map((hole) => (
+          <div className='space-y-4'>
+            {filteredHoles.map(hole => (
               <PlotHoleCard
                 key={hole.id}
                 plotHole={hole}
@@ -189,8 +192,8 @@ export const PlotHoleDetectorView: React.FC<PlotHoleDetectorViewProps> = ({
             ))}
           </div>
         ) : (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">
+          <div className='py-8 text-center'>
+            <p className='text-muted-foreground'>
               {analysis.plotHoles.length > 0
                 ? 'No issues match your filters'
                 : 'No plot holes detected! Your story is coherent.'}
@@ -210,16 +213,20 @@ interface SeverityStatProps {
 
 const SeverityStat: React.FC<SeverityStatProps> = ({ severity, count }) => {
   const colors = {
-    critical: 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400',
-    major: 'bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-400',
-    moderate: 'bg-yellow-50 border-yellow-200 text-yellow-700 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-400',
-    minor: 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400',
+    critical:
+      'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400',
+    major:
+      'bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-400',
+    moderate:
+      'bg-yellow-50 border-yellow-200 text-yellow-700 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-400',
+    minor:
+      'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400',
   };
 
   return (
-    <div className={`p-3 border rounded-lg text-center ${colors[severity]}`}>
-      <p className="text-2xl font-bold">{count}</p>
-      <p className="text-xs font-medium capitalize mt-1">{severity}</p>
+    <div className={cn('rounded-lg border p-3 text-center', colors[severity])}>
+      <p className='text-2xl font-bold'>{count}</p>
+      <p className='mt-1 text-xs font-medium capitalize'>{severity}</p>
     </div>
   );
 };
@@ -252,24 +259,20 @@ const PlotHoleCard: React.FC<PlotHoleCardProps> = ({ plotHole, onDismiss, onFix 
   };
 
   return (
-    <div className="border rounded-lg p-4 space-y-3" data-testid="plot-hole-card">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1">
-          <h4 className="font-medium">{plotHole.title}</h4>
-          <p className="text-sm text-muted-foreground mt-1">{plotHole.description}</p>
+    <div className='space-y-3 rounded-lg border p-4' data-testid='plot-hole-card'>
+      <div className='flex items-start justify-between gap-3'>
+        <div className='flex-1'>
+          <h4 className='font-medium'>{plotHole.title}</h4>
+          <p className='mt-1 text-sm text-muted-foreground'>{plotHole.description}</p>
         </div>
-        <div className="flex flex-col gap-2">
-          <Badge className={severityColors[plotHole.severity]}>
-            {plotHole.severity}
-          </Badge>
-          <Badge className={typeColors[plotHole.type]}>
-            {plotHole.type.replace('_', ' ')}
-          </Badge>
+        <div className='flex flex-col gap-2'>
+          <Badge className={severityColors[plotHole.severity]}>{plotHole.severity}</Badge>
+          <Badge className={typeColors[plotHole.type]}>{plotHole.type.replace('_', ' ')}</Badge>
         </div>
       </div>
 
       {/* Metadata */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+      <div className='flex items-center gap-4 text-xs text-muted-foreground'>
         <span>Confidence: {Math.round(plotHole.confidence * 100)}%</span>
         {plotHole.affectedChapters.length > 0 && (
           <span>Affects {plotHole.affectedChapters.length} chapter(s)</span>
@@ -281,35 +284,24 @@ const PlotHoleCard: React.FC<PlotHoleCardProps> = ({ plotHole, onDismiss, onFix 
 
       {/* Suggested Fix */}
       {plotHole.suggestedFix && (
-        <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Suggested Fix:</p>
-          <p className="text-sm">{plotHole.suggestedFix}</p>
+        <div className='rounded-lg bg-muted/50 p-3'>
+          <p className='mb-1 text-sm font-medium text-muted-foreground'>Suggested Fix:</p>
+          <p className='text-sm'>{plotHole.suggestedFix}</p>
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-2 pt-2">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setExpanded(!expanded)}
-        >
+      <div className='flex items-center gap-2 pt-2'>
+        <Button size='sm' variant='outline' onClick={() => setExpanded(!expanded)}>
           {expanded ? 'Hide Details' : 'Show Details'}
         </Button>
         {onFix && (
-          <Button
-            size="sm"
-            onClick={() => onFix(plotHole.id)}
-          >
+          <Button size='sm' onClick={() => onFix(plotHole.id)}>
             Mark as Fixed
           </Button>
         )}
         {onDismiss && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onDismiss(plotHole.id)}
-          >
+          <Button size='sm' variant='ghost' onClick={() => onDismiss(plotHole.id)}>
             Dismiss
           </Button>
         )}
@@ -317,25 +309,25 @@ const PlotHoleCard: React.FC<PlotHoleCardProps> = ({ plotHole, onDismiss, onFix 
 
       {/* Expanded Details */}
       {expanded && (
-        <div className="pt-3 border-t space-y-2">
+        <div className='space-y-2 border-t pt-3'>
           <div>
-            <p className="text-sm font-medium">Detected:</p>
-            <p className="text-sm text-muted-foreground">
+            <p className='text-sm font-medium'>Detected:</p>
+            <p className='text-sm text-muted-foreground'>
               {new Date(plotHole.detected).toLocaleString()}
             </p>
           </div>
           {plotHole.affectedChapters.length > 0 && (
             <div>
-              <p className="text-sm font-medium">Affected Chapters:</p>
-              <p className="text-sm text-muted-foreground">
+              <p className='text-sm font-medium'>Affected Chapters:</p>
+              <p className='text-sm text-muted-foreground'>
                 {plotHole.affectedChapters.join(', ')}
               </p>
             </div>
           )}
           {plotHole.affectedCharacters.length > 0 && (
             <div>
-              <p className="text-sm font-medium">Affected Characters:</p>
-              <p className="text-sm text-muted-foreground">
+              <p className='text-sm font-medium'>Affected Characters:</p>
+              <p className='text-sm text-muted-foreground'>
                 {plotHole.affectedCharacters.join(', ')}
               </p>
             </div>

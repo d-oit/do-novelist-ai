@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import type { Chapter } from '@/shared/types';
-
 import { plotAnalysisService } from '@/features/plot-engine';
+import type { Chapter } from '@/shared/types';
+import { ChapterStatus } from '@/shared/types';
 
 describe('PlotAnalysisService', () => {
   const mockChapters: Chapter[] = [
@@ -13,6 +13,12 @@ describe('PlotAnalysisService', () => {
       content: 'The hero begins their journey. They face a small challenge but overcome it with courage.',
       summary: 'Beginning',
       orderIndex: 0,
+      status: ChapterStatus.DRAFTING,
+      wordCount: 100,
+      characterCount: 10,
+      estimatedReadingTime: 1,
+      tags: [],
+      notes: '',
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -23,6 +29,12 @@ describe('PlotAnalysisService', () => {
       content: 'Complications arise. The hero faces danger and must fight to survive. The tension increases.',
       summary: 'Rising action',
       orderIndex: 1,
+      status: ChapterStatus.DRAFTING,
+      wordCount: 100,
+      characterCount: 10,
+      estimatedReadingTime: 1,
+      tags: [],
+      notes: '',
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -33,6 +45,12 @@ describe('PlotAnalysisService', () => {
       content: 'The climax arrives. The hero confronts the enemy in a final battle. Everything is at stake.',
       summary: 'Climax',
       orderIndex: 2,
+      status: ChapterStatus.DRAFTING,
+      wordCount: 100,
+      characterCount: 10,
+      estimatedReadingTime: 1,
+      tags: [],
+      notes: '',
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -43,6 +61,12 @@ describe('PlotAnalysisService', () => {
       content: 'Peace returns. The hero rests and reflects on their journey. All is calm.',
       summary: 'Resolution',
       orderIndex: 3,
+      status: ChapterStatus.DRAFTING,
+      wordCount: 100,
+      characterCount: 10,
+      estimatedReadingTime: 1,
+      tags: [],
+      notes: '',
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -55,6 +79,7 @@ describe('PlotAnalysisService', () => {
   describe('analyzeProject', () => {
     it('should analyze story structure successfully', async () => {
       const result = await plotAnalysisService.analyzeProject('p1', mockChapters, {
+        projectId: 'p1',
         includeStoryArc: true,
         includePacing: true,
       });
@@ -67,6 +92,7 @@ describe('PlotAnalysisService', () => {
 
     it('should detect 3-act structure for short stories', async () => {
       const result = await plotAnalysisService.analyzeProject('p1', mockChapters, {
+        projectId: 'p1',
         includeStoryArc: true,
       });
 
@@ -75,6 +101,7 @@ describe('PlotAnalysisService', () => {
 
     it('should calculate coherence score', async () => {
       const result = await plotAnalysisService.analyzeProject('p1', mockChapters, {
+        projectId: 'p1',
         includeStoryArc: true,
       });
 
@@ -84,6 +111,7 @@ describe('PlotAnalysisService', () => {
 
     it('should analyze pacing across chapters', async () => {
       const result = await plotAnalysisService.analyzeProject('p1', mockChapters, {
+        projectId: 'p1',
         includePacing: true,
       });
 
@@ -94,12 +122,13 @@ describe('PlotAnalysisService', () => {
 
     it('should generate tension curve', async () => {
       const result = await plotAnalysisService.analyzeProject('p1', mockChapters, {
+        projectId: 'p1',
         includeStoryArc: true,
       });
 
       expect(result.storyArc?.tension).toBeDefined();
       expect(result.storyArc?.tension).toHaveLength(mockChapters.length);
-      
+
       // Check tension increases toward middle
       const tensions = result.storyArc?.tension.map(t => t.tensionLevel) || [];
       expect(tensions[2]).toBeGreaterThan(tensions[0] ?? 0); // Climax > Beginning
@@ -107,6 +136,7 @@ describe('PlotAnalysisService', () => {
 
     it('should provide recommendations', async () => {
       const result = await plotAnalysisService.analyzeProject('p1', mockChapters, {
+        projectId: 'p1',
         includeStoryArc: true,
       });
 
@@ -116,6 +146,7 @@ describe('PlotAnalysisService', () => {
 
     it('should handle empty chapter list', async () => {
       const result = await plotAnalysisService.analyzeProject('p1', [], {
+        projectId: 'p1',
         includeStoryArc: true,
       });
 
@@ -131,11 +162,18 @@ describe('PlotAnalysisService', () => {
         content: '"Hello," she said. "How are you?" "I am fine," he replied. "What about you?" "Good, thanks."',
         summary: 'Lots of dialogue',
         orderIndex: 0,
+        status: ChapterStatus.DRAFTING,
+        wordCount: 100,
+        characterCount: 10,
+        estimatedReadingTime: 1,
+        tags: [],
+        notes: '',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       const result = await plotAnalysisService.analyzeProject('p1', [dialogueChapter], {
+        projectId: 'p1',
         includePacing: true,
       });
 
@@ -151,11 +189,18 @@ describe('PlotAnalysisService', () => {
         content: 'He ran and jumped over the fence. She fought back and kicked the attacker. They rushed to escape.',
         summary: 'Action sequence',
         orderIndex: 0,
+        status: ChapterStatus.DRAFTING,
+        wordCount: 100,
+        characterCount: 10,
+        estimatedReadingTime: 1,
+        tags: [],
+        notes: '',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
       const result = await plotAnalysisService.analyzeProject('p1', [actionChapter], {
+        projectId: 'p1',
         includePacing: true,
       });
 

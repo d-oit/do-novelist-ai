@@ -1,11 +1,8 @@
 /**
  * Character Graph Service
- * 
+ *
  * Analyzes and tracks character relationships across the story
  */
-
-import { logger } from '@/lib/logging/logger';
-import type { Chapter, Character } from '@/shared/types';
 
 import type {
   CharacterGraph,
@@ -14,6 +11,8 @@ import type {
   RelationshipEvolution,
   RelationshipType,
 } from '@/features/plot-engine';
+import { logger } from '@/lib/logging/logger';
+import type { Chapter, Character } from '@/shared/types';
 
 export class CharacterGraphService {
   /**
@@ -45,7 +44,10 @@ export class CharacterGraphService {
   /**
    * Extract relationships between characters from chapters
    */
-  private extractRelationships(chapters: Chapter[], characters: Character[]): CharacterRelationship[] {
+  private extractRelationships(
+    chapters: Chapter[],
+    characters: Character[],
+  ): CharacterRelationship[] {
     const relationships: CharacterRelationship[] = [];
     const relationshipMap = new Map<string, CharacterRelationship>();
 
@@ -101,10 +103,7 @@ export class CharacterGraphService {
         const strength = this.estimateRelationshipStrength(content, char1Name, char2Name);
 
         // Add to evolution if relationship changed or first appearance
-        if (
-          evolution.length === 0 ||
-          evolution[evolution.length - 1]?.type !== relationshipType
-        ) {
+        if (evolution.length === 0 || evolution[evolution.length - 1]?.type !== relationshipType) {
           evolution.push({
             chapterId: chapter.id,
             chapterNumber: index + 1,
@@ -206,11 +205,11 @@ export class CharacterGraphService {
     const positiveWords = ['help', 'support', 'trust', 'care', 'protect', 'love'];
     const negativeWords = ['betray', 'hurt', 'abandon', 'hate', 'kill', 'destroy'];
 
-    positiveWords.forEach((word) => {
+    positiveWords.forEach(word => {
       if (segment.includes(word)) strength += 1;
     });
 
-    negativeWords.forEach((word) => {
+    negativeWords.forEach(word => {
       if (segment.includes(word)) strength -= 1;
     });
 
@@ -220,11 +219,7 @@ export class CharacterGraphService {
   /**
    * Extract text segment between character mentions
    */
-  private extractSegmentBetweenNames(
-    content: string,
-    name1: string,
-    name2: string,
-  ): string {
+  private extractSegmentBetweenNames(content: string, name1: string, name2: string): string {
     const index1 = content.indexOf(name1);
     const index2 = content.indexOf(name2);
 
@@ -253,9 +248,7 @@ export class CharacterGraphService {
 
     // Look for sentences with both names
     const sentences = segment.split(/[.!?]+/);
-    const relevantSentence = sentences.find(
-      (s) => s.includes(char1Name) && s.includes(char2Name),
-    );
+    const relevantSentence = sentences.find(s => s.includes(char1Name) && s.includes(char2Name));
 
     return relevantSentence?.trim().substring(0, 150);
   }
@@ -267,11 +260,10 @@ export class CharacterGraphService {
     characters: Character[],
     relationships: CharacterRelationship[],
   ): CharacterNode[] {
-    return characters.map((character) => {
+    return characters.map(character => {
       // Count connections
       const connectionCount = relationships.filter(
-        (rel) =>
-          rel.character1Id === character.id || rel.character2Id === character.id,
+        rel => rel.character1Id === character.id || rel.character2Id === character.id,
       ).length;
 
       // Estimate importance based on connections and role
@@ -303,7 +295,7 @@ export class CharacterGraphService {
     graph: CharacterGraph,
   ): CharacterRelationship[] {
     return graph.relationships.filter(
-      (rel) => rel.character1Id === characterId || rel.character2Id === characterId,
+      rel => rel.character1Id === characterId || rel.character2Id === characterId,
     );
   }
 
@@ -314,9 +306,7 @@ export class CharacterGraphService {
     graph: CharacterGraph,
     limit: number = 5,
   ): CharacterRelationship[] {
-    return [...graph.relationships]
-      .sort((a, b) => b.strength - a.strength)
-      .slice(0, limit);
+    return [...graph.relationships].sort((a, b) => b.strength - a.strength).slice(0, limit);
   }
 
   /**
@@ -330,7 +320,7 @@ export class CharacterGraphService {
       return { hasChanged: false, pattern: 'stable' };
     }
 
-    const strengths = relationship.evolution.map((e) => e.strength);
+    const strengths = relationship.evolution.map(e => e.strength);
     const first = strengths[0] ?? 5;
     const last = strengths[strengths.length - 1] ?? 5;
 

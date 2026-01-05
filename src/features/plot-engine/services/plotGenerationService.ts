@@ -1,10 +1,8 @@
 /**
  * Plot Generation Service
- * 
+ *
  * AI-powered plot generation and suggestion engine
  */
-
-import { logger } from '@/lib/logging/logger';
 
 import type {
   PlotGenerationRequest,
@@ -15,6 +13,7 @@ import type {
   PlotSuggestion,
   StoryStructure,
 } from '@/features/plot-engine';
+import { logger } from '@/lib/logging/logger';
 
 export class PlotGenerationService {
   /**
@@ -26,7 +25,7 @@ export class PlotGenerationService {
 
       const structure = request.structure || '3-act';
       const plotStructure = await this.createPlotStructure(request, structure);
-      const suggestions = this.generateSuggestions(request, plotStructure);
+      const suggestions = this.generateSuggestions(request);
       const alternatives = await this.generateAlternatives(request, structure);
 
       return {
@@ -418,7 +417,7 @@ export class PlotGenerationService {
    */
   private identifyClimax(acts: PlotAct[]): PlotPoint | undefined {
     for (const act of acts) {
-      const climax = act.plotPoints.find((pp) => pp.type === 'climax');
+      const climax = act.plotPoints.find(pp => pp.type === 'climax');
       if (climax) return climax;
     }
     return undefined;
@@ -429,7 +428,7 @@ export class PlotGenerationService {
    */
   private identifyResolution(acts: PlotAct[]): PlotPoint | undefined {
     for (const act of acts) {
-      const resolution = act.plotPoints.find((pp) => pp.type === 'resolution');
+      const resolution = act.plotPoints.find(pp => pp.type === 'resolution');
       if (resolution) return resolution;
     }
     return undefined;
@@ -438,10 +437,7 @@ export class PlotGenerationService {
   /**
    * Generate plot suggestions
    */
-  private generateSuggestions(
-    request: PlotGenerationRequest,
-    structure: PlotStructure,
-  ): PlotSuggestion[] {
+  private generateSuggestions(request: PlotGenerationRequest): PlotSuggestion[] {
     const suggestions: PlotSuggestion[] = [];
 
     // Suggest subplot based on genre

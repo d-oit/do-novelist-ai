@@ -140,8 +140,9 @@ describe('Vector Service', () => {
       });
 
       expect(results.length).toBe(1);
-      expect(results[0].similarity).toBe(1);
-      expect(results[0].content).toBe('match');
+      const firstResult = results[0];
+      expect(firstResult?.similarity).toBe(1);
+      expect(firstResult?.content).toBe('match');
     });
   });
 });

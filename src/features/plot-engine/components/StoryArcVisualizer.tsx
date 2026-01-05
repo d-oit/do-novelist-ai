@@ -1,15 +1,24 @@
 /**
  * Story Arc Visualizer Component
- * 
+ *
  * Interactive visualization of story structure, tension curve, and plot points
  */
 
 import React, { useMemo } from 'react';
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
+import type { StoryArc, PlotPoint } from '@/features/plot-engine';
+import { cn } from '@/lib/utils';
 import { Card } from '@/shared/components/ui/Card';
-
-import type { StoryArc, TensionCurve, PlotPoint } from '@/features/plot-engine';
 
 interface StoryArcVisualizerProps {
   storyArc: StoryArc;
@@ -22,7 +31,7 @@ export const StoryArcVisualizer: React.FC<StoryArcVisualizerProps> = ({
 }) => {
   // Prepare data for tension curve chart
   const tensionData = useMemo(() => {
-    return storyArc.tension.map((point) => ({
+    return storyArc.tension.map(point => ({
       chapter: `Ch ${point.chapterNumber}`,
       chapterNumber: point.chapterNumber,
       tension: point.tensionLevel,
@@ -32,7 +41,7 @@ export const StoryArcVisualizer: React.FC<StoryArcVisualizerProps> = ({
 
   // Prepare data for pacing chart
   const pacingData = useMemo(() => {
-    return storyArc.pacing.byChapter.map((ch) => ({
+    return storyArc.pacing.byChapter.map(ch => ({
       chapter: `Ch ${ch.chapterNumber}`,
       chapterNumber: ch.chapterNumber,
       pace: ch.pace,
@@ -47,64 +56,52 @@ export const StoryArcVisualizer: React.FC<StoryArcVisualizerProps> = ({
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Story Structure Overview */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Story Structure</h3>
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">Structure</p>
-            <p className="text-xl font-bold capitalize mt-1">
+      <Card className='p-6'>
+        <h3 className='mb-4 text-lg font-semibold'>Story Structure</h3>
+        <div className='mb-6 grid grid-cols-3 gap-4'>
+          <div className='text-center'>
+            <p className='text-sm text-muted-foreground'>Structure</p>
+            <p className='mt-1 text-xl font-bold capitalize'>
               {storyArc.structure.replace('-', ' ')}
             </p>
           </div>
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">Coherence</p>
-            <p className="text-xl font-bold mt-1">
-              {Math.round(storyArc.coherence * 100)}%
-            </p>
+          <div className='text-center'>
+            <p className='text-sm text-muted-foreground'>Coherence</p>
+            <p className='mt-1 text-xl font-bold'>{Math.round(storyArc.coherence * 100)}%</p>
           </div>
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">Pacing</p>
-            <p className="text-xl font-bold capitalize mt-1">
-              {storyArc.pacing.overall}
-            </p>
+          <div className='text-center'>
+            <p className='text-sm text-muted-foreground'>Pacing</p>
+            <p className='mt-1 text-xl font-bold capitalize'>{storyArc.pacing.overall}</p>
           </div>
         </div>
 
         {/* Structure Diagram */}
-        <div className="relative h-24 bg-muted/30 rounded-lg">
-          {storyArc.structure === '3-act' && (
-            <ThreeActDiagram />
-          )}
-          {storyArc.structure === '5-act' && (
-            <FiveActDiagram />
-          )}
-          {storyArc.structure === 'hero-journey' && (
-            <HeroJourneyDiagram />
-          )}
+        <div className='relative h-24 rounded-lg bg-muted/30'>
+          {storyArc.structure === '3-act' && <ThreeActDiagram />}
+          {storyArc.structure === '5-act' && <FiveActDiagram />}
+          {storyArc.structure === 'hero-journey' && <HeroJourneyDiagram />}
         </div>
       </Card>
 
       {/* Tension Curve */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Tension Curve</h3>
-        <ResponsiveContainer width="100%" height={300}>
+      <Card className='p-6'>
+        <h3 className='mb-4 text-lg font-semibold'>Tension Curve</h3>
+        <ResponsiveContainer width='100%' height={300}>
           <LineChart data={tensionData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="chapter" />
+            <CartesianGrid strokeDasharray='3 3' />
+            <XAxis dataKey='chapter' />
             <YAxis domain={[0, 100]} />
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length > 0) {
-                  const data = payload[0]?.payload as typeof tensionData[0];
+                  const data = payload[0]?.payload as (typeof tensionData)[0];
                   return (
-                    <div className="bg-background border rounded-lg p-3 shadow-lg">
-                      <p className="font-medium">{data.chapter}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Tension: {data.tension}/100
-                      </p>
-                      <p className="text-sm text-muted-foreground capitalize">
+                    <div className='rounded-lg border bg-background p-3 shadow-lg'>
+                      <p className='font-medium'>{data.chapter}</p>
+                      <p className='text-sm text-muted-foreground'>Tension: {data.tension}/100</p>
+                      <p className='text-sm capitalize text-muted-foreground'>
                         State: {data.emotional}
                       </p>
                     </div>
@@ -115,38 +112,36 @@ export const StoryArcVisualizer: React.FC<StoryArcVisualizerProps> = ({
             />
             <Legend />
             <Line
-              type="monotone"
-              dataKey="tension"
-              stroke="hsl(var(--primary))"
+              type='monotone'
+              dataKey='tension'
+              stroke='hsl(var(--primary))'
               strokeWidth={2}
               dot={{ r: 4 }}
               activeDot={{ r: 6 }}
-              name="Tension Level"
+              name='Tension Level'
             />
           </LineChart>
         </ResponsiveContainer>
       </Card>
 
       {/* Pacing Analysis */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Pacing Analysis</h3>
-        <ResponsiveContainer width="100%" height={300}>
+      <Card className='p-6'>
+        <h3 className='mb-4 text-lg font-semibold'>Pacing Analysis</h3>
+        <ResponsiveContainer width='100%' height={300}>
           <LineChart data={pacingData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="chapter" />
-            <YAxis yAxisId="left" domain={[0, 100]} />
-            <YAxis yAxisId="right" orientation="right" />
+            <CartesianGrid strokeDasharray='3 3' />
+            <XAxis dataKey='chapter' />
+            <YAxis yAxisId='left' domain={[0, 100]} />
+            <YAxis yAxisId='right' orientation='right' />
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length > 0) {
-                  const data = payload[0]?.payload as typeof pacingData[0];
+                  const data = payload[0]?.payload as (typeof pacingData)[0];
                   return (
-                    <div className="bg-background border rounded-lg p-3 shadow-lg">
-                      <p className="font-medium">{data.chapter}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Pace: {data.pace}/100
-                      </p>
-                      <p className="text-sm text-muted-foreground">
+                    <div className='rounded-lg border bg-background p-3 shadow-lg'>
+                      <p className='font-medium'>{data.chapter}</p>
+                      <p className='text-sm text-muted-foreground'>Pace: {data.pace}/100</p>
+                      <p className='text-sm text-muted-foreground'>
                         Words: {data.wordCount.toLocaleString()}
                       </p>
                     </div>
@@ -157,23 +152,23 @@ export const StoryArcVisualizer: React.FC<StoryArcVisualizerProps> = ({
             />
             <Legend />
             <Line
-              yAxisId="left"
-              type="monotone"
-              dataKey="pace"
-              stroke="hsl(var(--primary))"
+              yAxisId='left'
+              type='monotone'
+              dataKey='pace'
+              stroke='hsl(var(--primary))'
               strokeWidth={2}
               dot={{ r: 4 }}
-              name="Pace"
+              name='Pace'
             />
             <Line
-              yAxisId="right"
-              type="monotone"
-              dataKey="wordCount"
-              stroke="hsl(var(--secondary))"
+              yAxisId='right'
+              type='monotone'
+              dataKey='wordCount'
+              stroke='hsl(var(--secondary))'
               strokeWidth={2}
-              strokeDasharray="5 5"
+              strokeDasharray='5 5'
               dot={{ r: 4 }}
-              name="Word Count"
+              name='Word Count'
             />
           </LineChart>
         </ResponsiveContainer>
@@ -181,10 +176,10 @@ export const StoryArcVisualizer: React.FC<StoryArcVisualizerProps> = ({
 
       {/* Plot Points Timeline */}
       {allPlotPoints.length > 0 && (
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Plot Points</h3>
-          <div className="space-y-3">
-            {allPlotPoints.map((point) => (
+        <Card className='p-6'>
+          <h3 className='mb-4 text-lg font-semibold'>Plot Points</h3>
+          <div className='space-y-3'>
+            {allPlotPoints.map(point => (
               <PlotPointItem
                 key={point.id}
                 plotPoint={point}
@@ -200,30 +195,30 @@ export const StoryArcVisualizer: React.FC<StoryArcVisualizerProps> = ({
 
 // Three Act Structure Diagram
 const ThreeActDiagram: React.FC = () => (
-  <div className="absolute inset-0 flex items-center justify-between px-4">
-    <div className="flex-1 border-t-2 border-primary" />
-    <div className="px-3 py-1 bg-primary text-primary-foreground rounded text-xs font-medium">
+  <div className='absolute inset-0 flex items-center justify-between px-4'>
+    <div className='flex-1 border-t-2 border-primary' />
+    <div className='rounded bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'>
       Act 1: Setup
     </div>
-    <div className="flex-1 border-t-2 border-primary" />
-    <div className="px-3 py-1 bg-primary text-primary-foreground rounded text-xs font-medium">
+    <div className='flex-1 border-t-2 border-primary' />
+    <div className='rounded bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'>
       Act 2: Confrontation
     </div>
-    <div className="flex-1 border-t-2 border-primary" />
-    <div className="px-3 py-1 bg-primary text-primary-foreground rounded text-xs font-medium">
+    <div className='flex-1 border-t-2 border-primary' />
+    <div className='rounded bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'>
       Act 3: Resolution
     </div>
-    <div className="flex-1 border-t-2 border-primary" />
+    <div className='flex-1 border-t-2 border-primary' />
   </div>
 );
 
 // Five Act Structure Diagram
 const FiveActDiagram: React.FC = () => (
-  <div className="absolute inset-0 flex items-center justify-between px-2">
+  <div className='absolute inset-0 flex items-center justify-between px-2'>
     {['Exposition', 'Rising', 'Climax', 'Falling', 'Denouement'].map((act, i) => (
       <React.Fragment key={act}>
-        {i > 0 && <div className="flex-1 border-t-2 border-primary" />}
-        <div className="px-2 py-1 bg-primary text-primary-foreground rounded text-xs font-medium">
+        {i > 0 && <div className='flex-1 border-t-2 border-primary' />}
+        <div className='rounded bg-primary px-2 py-1 text-xs font-medium text-primary-foreground'>
           {act}
         </div>
       </React.Fragment>
@@ -233,20 +228,20 @@ const FiveActDiagram: React.FC = () => (
 
 // Hero's Journey Diagram
 const HeroJourneyDiagram: React.FC = () => (
-  <div className="absolute inset-0 flex items-center justify-between px-4">
-    <div className="flex-1 border-t-2 border-primary" />
-    <div className="px-3 py-1 bg-primary text-primary-foreground rounded text-xs font-medium">
+  <div className='absolute inset-0 flex items-center justify-between px-4'>
+    <div className='flex-1 border-t-2 border-primary' />
+    <div className='rounded bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'>
       Departure
     </div>
-    <div className="flex-1 border-t-2 border-primary" />
-    <div className="px-3 py-1 bg-primary text-primary-foreground rounded text-xs font-medium">
+    <div className='flex-1 border-t-2 border-primary' />
+    <div className='rounded bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'>
       Initiation
     </div>
-    <div className="flex-1 border-t-2 border-primary" />
-    <div className="px-3 py-1 bg-primary text-primary-foreground rounded text-xs font-medium">
+    <div className='flex-1 border-t-2 border-primary' />
+    <div className='rounded bg-primary px-3 py-1 text-xs font-medium text-primary-foreground'>
       Return
     </div>
-    <div className="flex-1 border-t-2 border-primary" />
+    <div className='flex-1 border-t-2 border-primary' />
   </div>
 );
 
@@ -272,27 +267,26 @@ const PlotPointItem: React.FC<PlotPointItemProps> = ({ plotPoint, onClick }) => 
   return (
     <button
       onClick={onClick}
-      className="w-full text-left p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-      data-testid="plot-point-item"
+      className='w-full rounded-lg border p-3 text-left transition-colors hover:bg-muted/50'
+      data-testid='plot-point-item'
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1">
-          <h4 className="font-medium text-sm">{plotPoint.title}</h4>
-          <p className="text-xs text-muted-foreground mt-1">{plotPoint.description}</p>
+      <div className='flex items-start justify-between gap-2'>
+        <div className='flex-1'>
+          <h4 className='text-sm font-medium'>{plotPoint.title}</h4>
+          <p className='mt-1 text-xs text-muted-foreground'>{plotPoint.description}</p>
         </div>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium ${typeColors[plotPoint.type]}`}>
+        <span
+          className={cn('rounded-full px-2 py-1 text-xs font-medium', typeColors[plotPoint.type])}
+        >
           {plotPoint.type.replace('_', ' ')}
         </span>
       </div>
       {plotPoint.position !== undefined && (
-        <div className="mt-2">
-          <div className="h-1 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary"
-              style={{ width: `${plotPoint.position}%` }}
-            />
+        <div className='mt-2'>
+          <div className='h-1 overflow-hidden rounded-full bg-muted'>
+            <div className='h-full bg-primary' style={{ width: `${plotPoint.position}%` }} />
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className='mt-1 text-xs text-muted-foreground'>
             Position: {plotPoint.position}% through story
           </p>
         </div>

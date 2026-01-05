@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 
-import { PlotEngineDashboard } from '../PlotEngineDashboard';
+import { PlotEngineDashboard } from '@/features/plot-engine/components/PlotEngineDashboard';
 
 describe('PlotEngineDashboard', () => {
   const mockProjectId = 'test-project-1';
@@ -49,12 +49,7 @@ describe('PlotEngineDashboard', () => {
       generatedAt: new Date(),
     });
 
-    render(
-      <PlotEngineDashboard
-        projectId={mockProjectId}
-        onGeneratePlot={mockOnGeneratePlot}
-      />,
-    );
+    render(<PlotEngineDashboard projectId={mockProjectId} onGeneratePlot={mockOnGeneratePlot} />);
 
     const generateButton = screen.getByTestId('generate-plot-button');
     fireEvent.click(generateButton);
@@ -73,16 +68,9 @@ describe('PlotEngineDashboard', () => {
   });
 
   it('should disable generate button while generating', async () => {
-    const mockOnGeneratePlot = vi.fn().mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100)),
-    );
+    const mockOnGeneratePlot = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
 
-    render(
-      <PlotEngineDashboard
-        projectId={mockProjectId}
-        onGeneratePlot={mockOnGeneratePlot}
-      />,
-    );
+    render(<PlotEngineDashboard projectId={mockProjectId} onGeneratePlot={mockOnGeneratePlot} />);
 
     const generateButton = screen.getByTestId('generate-plot-button');
     fireEvent.click(generateButton);

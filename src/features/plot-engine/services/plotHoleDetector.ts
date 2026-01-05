@@ -1,16 +1,12 @@
 /**
  * Plot Hole Detector Service
- * 
+ *
  * Detects continuity errors, logical inconsistencies, and unresolved plot threads
  */
 
+import type { PlotHole, PlotHoleAnalysis } from '@/features/plot-engine';
 import { logger } from '@/lib/logging/logger';
 import type { Chapter, Character } from '@/shared/types';
-
-import type {
-  PlotHole,
-  PlotHoleAnalysis,
-} from '@/features/plot-engine';
 
 export class PlotHoleDetector {
   /**
@@ -106,10 +102,7 @@ export class PlotHoleDetector {
   /**
    * Detect character behavior inconsistencies
    */
-  private detectCharacterInconsistencies(
-    chapters: Chapter[],
-    characters: Character[],
-  ): PlotHole[] {
+  private detectCharacterInconsistencies(chapters: Chapter[], characters: Character[]): PlotHole[] {
     const issues: PlotHole[] = [];
 
     for (const character of characters) {
@@ -145,7 +138,7 @@ export class PlotHoleDetector {
       }
 
       // Check for character trait contradictions
-      if (character.personality) {
+      if (character.psychology?.personalityTraits || character.psychology?.flaws) {
         const traitIssues = this.detectTraitContradictions(chapters, character);
         issues.push(...traitIssues);
       }
@@ -170,44 +163,6 @@ export class PlotHoleDetector {
     });
 
     return mentions;
-  }
-
-  /**
-   * Detect trait contradictions
-   */
-  private detectTraitContradictions(chapters: Chapter[], character: Character): PlotHole[] {
-    const issues: PlotHole[] = [];
-
-    // Look for contradictory behavior patterns
-    // This is a simplified check - in reality would use NLP
-    const traits = character.personality?.toLowerCase().split(/[,;]/).map((t) => t.trim()) || [];
-
-    for (const trait of traits) {
-      if (trait.includes('brave') || trait.includes('courageous')) {
-        // Look for cowardly actions
-        const cowardlyActions = chapters.filter((ch) =>
-          ch.content.toLowerCase().includes(`${character.name.toLowerCase()} fled`) ||
-          ch.content.toLowerCase().includes(`${character.name.toLowerCase()} ran away`),
-        );
-
-        if (cowardlyActions.length > 2) {
-          issues.push({
-            id: `trait-contradiction-${character.id}-brave`,
-            type: 'character_inconsistency',
-            severity: 'moderate',
-            title: `${character.name} acts inconsistently`,
-            description: `${character.name} is described as ${trait} but frequently flees from danger`,
-            affectedChapters: cowardlyActions.map((ch) => ch.id),
-            affectedCharacters: [character.id],
-            suggestedFix: `Either adjust ${character.name}'s personality description or show character growth`,
-            confidence: 0.65,
-            detected: new Date(),
-          });
-        }
-      }
-    }
-
-    return issues;
   }
 
   /**
@@ -236,7 +191,7 @@ export class PlotHoleDetector {
 
         if (matches && matches.length > 0) {
           // Check if there's payoff in later chapters
-          const hasPayoff = chapters.slice(index + 1).some((laterChapter) => {
+          const hasPayoff = chapters.slice(index + 1).some(laterChapter => {
             // Simple check: look for resolution words in same context
             return (
               laterChapter.content.toLowerCase().includes('returned') ||
@@ -272,7 +227,7 @@ export class PlotHoleDetector {
   private detectLogicalInconsistencies(chapters: Chapter[]): PlotHole[] {
     const issues: PlotHole[] = [];
 
-    chapters.forEach((chapter) => {
+    chapters.forEach(chapter => {
       const content = chapter.content;
 
       // Look for contradictory statements (simplified)
@@ -291,7 +246,8 @@ export class PlotHoleDetector {
             type: 'logic',
             severity: 'minor',
             title: 'Logical inconsistency: locked door',
-            description: 'Door is described as locked but later opened without mention of unlocking',
+            description:
+              'Door is described as locked but later opened without mention of unlocking',
             affectedChapters: [chapter.id],
             affectedCharacters: [],
             suggestedFix: 'Add mention of unlocking the door or explain how it was opened',
@@ -340,6 +296,47 @@ export class PlotHoleDetector {
   }
 
   /**
+   * Detect trait contradictions
+   */
+  private detectTraitContradictions(chapters: Chapter[], character: Character): PlotHole[] {
+    const issues: PlotHole[] = [];
+
+    // Look for contradictory behavior patterns
+    // This is a simplified check - in reality would use NLP
+    const personalityTraits = character.psychology?.personalityTraits || [];
+    const flaws = character.psychology?.flaws || [];
+    const traits = [...personalityTraits, ...flaws];
+
+    for (const trait of traits) {
+      if (trait === 'brave' || trait === 'confident') {
+        // Look for cowardly actions
+        const cowardlyActions = chapters.filter(
+          ch =>
+            ch.content.toLowerCase().includes(`${character.name.toLowerCase()} fled`) ||
+            ch.content.toLowerCase().includes(`${character.name.toLowerCase()} ran away`),
+        );
+
+        if (cowardlyActions.length > 2) {
+          issues.push({
+            id: `trait-contradiction-${character.id}-${trait}`,
+            type: 'character_inconsistency',
+            severity: 'moderate',
+            title: `${character.name} acts inconsistently`,
+            description: `${character.name} is described as ${trait} but frequently flees from danger`,
+            affectedChapters: cowardlyActions.map(ch => ch.id),
+            affectedCharacters: [character.id],
+            suggestedFix: `Either adjust ${character.name}'s personality description or show character growth`,
+            confidence: 0.65,
+            detected: new Date(),
+          });
+        }
+      }
+    }
+
+    return issues;
+  }
+
+  /**
    * Generate summary of findings
    */
   private generateSummary(plotHoles: PlotHole[], score: number): string {
@@ -347,10 +344,10 @@ export class PlotHoleDetector {
       return 'No significant plot holes detected. The narrative appears coherent and consistent.';
     }
 
-    const critical = plotHoles.filter((h) => h.severity === 'critical').length;
-    const major = plotHoles.filter((h) => h.severity === 'major').length;
-    const moderate = plotHoles.filter((h) => h.severity === 'moderate').length;
-    const minor = plotHoles.filter((h) => h.severity === 'minor').length;
+    const critical = plotHoles.filter(h => h.severity === 'critical').length;
+    const major = plotHoles.filter(h => h.severity === 'major').length;
+    const moderate = plotHoles.filter(h => h.severity === 'moderate').length;
+    const minor = plotHoles.filter(h => h.severity === 'minor').length;
 
     let summary = `Found ${plotHoles.length} potential issue${plotHoles.length > 1 ? 's' : ''}. `;
 

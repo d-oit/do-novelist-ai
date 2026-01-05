@@ -1,19 +1,24 @@
 /**
  * Plot Engine Dashboard Component
- * 
+ *
  * Main dashboard for plot analysis, generation, and management
  */
 
 import React, { useState } from 'react';
 
+import type {
+  AnalysisResult,
+  PlotGenerationResult,
+  PlotGenerationRequest,
+} from '@/features/plot-engine';
+import { cn } from '@/lib/utils';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 
-import type { AnalysisResult, PlotGenerationResult, PlotGenerationRequest } from '@/features/plot-engine';
-import { PlotAnalyzer } from './PlotAnalyzer';
-import { StoryArcVisualizer } from './StoryArcVisualizer';
 import { CharacterGraphView } from './CharacterGraphView';
+import { PlotAnalyzer } from './PlotAnalyzer';
 import { PlotHoleDetectorView } from './PlotHoleDetectorView';
+import { StoryArcVisualizer } from './StoryArcVisualizer';
 
 interface PlotEngineDashboardProps {
   projectId: string;
@@ -61,20 +66,20 @@ export const PlotEngineDashboard: React.FC<PlotEngineDashboardProps> = ({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Header */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
+      <Card className='p-6'>
+        <div className='flex items-center justify-between'>
           <div>
-            <h1 className="text-3xl font-bold">Plot Engine</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className='text-3xl font-bold'>Plot Engine</h1>
+            <p className='mt-1 text-muted-foreground'>
               AI-powered plot analysis, generation, and management
             </p>
           </div>
           <Button
             onClick={() => void handleGeneratePlot()}
             disabled={isGenerating}
-            data-testid="generate-plot-button"
+            data-testid='generate-plot-button'
           >
             {isGenerating ? 'Generating...' : '✨ Generate Plot'}
           </Button>
@@ -82,21 +87,20 @@ export const PlotEngineDashboard: React.FC<PlotEngineDashboardProps> = ({
       </Card>
 
       {/* Tabs */}
-      <Card className="p-2">
-        <div className="flex items-center gap-2">
-          {tabs.map((tab) => (
+      <Card className='p-2'>
+        <div className='flex items-center gap-2'>
+          {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-muted'
-              }`}
+              className={cn(
+                'flex items-center gap-2 rounded-lg px-4 py-2 transition-colors',
+                activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
+              )}
               data-testid={`tab-${tab.id}`}
             >
               <span>{tab.icon}</span>
-              <span className="font-medium">{tab.label}</span>
+              <span className='font-medium'>{tab.label}</span>
             </button>
           ))}
         </div>
@@ -105,10 +109,7 @@ export const PlotEngineDashboard: React.FC<PlotEngineDashboardProps> = ({
       {/* Tab Content */}
       <div>
         {activeTab === 'overview' && (
-          <PlotAnalyzer
-            projectId={projectId}
-            onAnalyze={handleAnalysisComplete}
-          />
+          <PlotAnalyzer projectId={projectId} onAnalyze={handleAnalysisComplete} />
         )}
 
         {activeTab === 'structure' && analysisResult?.storyArc && (
@@ -124,9 +125,9 @@ export const PlotEngineDashboard: React.FC<PlotEngineDashboardProps> = ({
         )}
 
         {activeTab === 'generator' && (
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Plot Generator</h3>
-            <p className="text-muted-foreground mb-4">
+          <Card className='p-6'>
+            <h3 className='mb-4 text-lg font-semibold'>Plot Generator</h3>
+            <p className='mb-4 text-muted-foreground'>
               Generate plot structures and suggestions based on your story premise.
             </p>
             <Button onClick={() => void handleGeneratePlot()} disabled={isGenerating}>
@@ -136,18 +137,10 @@ export const PlotEngineDashboard: React.FC<PlotEngineDashboardProps> = ({
         )}
 
         {/* Empty State */}
-        {activeTab !== 'overview' &&
-          activeTab !== 'generator' &&
-          !analysisResult && (
-          <Card className="p-12 text-center">
-            <p className="text-muted-foreground">
-              Run analysis first to view this section
-            </p>
-            <Button
-              onClick={() => setActiveTab('overview')}
-              variant="outline"
-              className="mt-4"
-            >
+        {activeTab !== 'overview' && activeTab !== 'generator' && !analysisResult && (
+          <Card className='p-12 text-center'>
+            <p className='text-muted-foreground'>Run analysis first to view this section</p>
+            <Button onClick={() => setActiveTab('overview')} variant='outline' className='mt-4'>
               Go to Overview
             </Button>
           </Card>

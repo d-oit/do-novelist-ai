@@ -1,11 +1,8 @@
 /**
  * Plot Analysis Service
- * 
+ *
  * Core service for analyzing story structure, pacing, and narrative coherence
  */
-
-import { logger } from '@/lib/logging/logger';
-import type { Chapter } from '@/shared/types';
 
 import type {
   AnalysisRequest,
@@ -16,6 +13,8 @@ import type {
   StoryStructure,
   TensionCurve,
 } from '@/features/plot-engine';
+import { logger } from '@/lib/logging/logger';
+import type { Chapter } from '@/shared/types';
 
 export class PlotAnalysisService {
   /**
@@ -163,12 +162,25 @@ export class PlotAnalysisService {
    */
   private estimateActionDensity(content: string): number {
     const actionWords = [
-      'ran', 'jumped', 'fought', 'attacked', 'rushed', 'grabbed', 'threw',
-      'kicked', 'punched', 'dodged', 'chased', 'fled', 'sprinted',
+      'ran',
+      'jumped',
+      'fought',
+      'attacked',
+      'rushed',
+      'grabbed',
+      'threw',
+      'kicked',
+      'punched',
+      'dodged',
+      'chased',
+      'fled',
+      'sprinted',
     ];
 
     const words = content.toLowerCase().split(/\s+/);
-    const actionCount = words.filter((word) => actionWords.some((action) => word.includes(action))).length;
+    const actionCount = words.filter(word =>
+      actionWords.some(action => word.includes(action)),
+    ).length;
 
     return Math.min(1, actionCount / 100);
   }
@@ -224,15 +236,15 @@ export class PlotAnalysisService {
 
     // Adjust for content indicators
     const content = chapter.content.toLowerCase();
-    
+
     // Increase tension for conflict words
     const conflictWords = ['fight', 'attack', 'danger', 'threat', 'fear', 'terror', 'death'];
-    const hasConflict = conflictWords.some((word) => content.includes(word));
+    const hasConflict = conflictWords.some(word => content.includes(word));
     if (hasConflict) tension += 10;
 
     // Decrease tension for calm words
     const calmWords = ['peace', 'rest', 'calm', 'safe', 'comfort', 'relief'];
-    const hasCalm = calmWords.some((word) => content.includes(word));
+    const hasCalm = calmWords.some(word => content.includes(word));
     if (hasCalm) tension -= 10;
 
     return Math.max(0, Math.min(100, tension));
@@ -241,7 +253,9 @@ export class PlotAnalysisService {
   /**
    * Categorize emotional state
    */
-  private categorizeEmotionalState(tensionLevel: number): 'calm' | 'tense' | 'climactic' | 'resolution' {
+  private categorizeEmotionalState(
+    tensionLevel: number,
+  ): 'calm' | 'tense' | 'climactic' | 'resolution' {
     if (tensionLevel < 30) return 'calm';
     if (tensionLevel < 60) return 'tense';
     if (tensionLevel < 85) return 'climactic';
@@ -253,12 +267,12 @@ export class PlotAnalysisService {
    */
   private extractKeyEvents(content: string): string[] {
     // Simple extraction: look for sentences with key action verbs
-    const sentences = content.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
     const keyVerbs = ['fought', 'discovered', 'revealed', 'died', 'escaped', 'confronted'];
 
     return sentences
-      .filter((sentence) => keyVerbs.some((verb) => sentence.toLowerCase().includes(verb)))
-      .map((s) => s.trim().substring(0, 100))
+      .filter(sentence => keyVerbs.some(verb => sentence.toLowerCase().includes(verb)))
+      .map(s => s.trim().substring(0, 100))
       .slice(0, 3);
   }
 
@@ -275,17 +289,18 @@ export class PlotAnalysisService {
     if (hasGaps) coherenceScore -= 0.2;
 
     // Check for consistent chapter lengths
-    const wordCounts = chapters.map((ch) => this.countWords(ch.content));
+    const wordCounts = chapters.map(ch => this.countWords(ch.content));
     const avgLength = wordCounts.reduce((a, b) => a + b, 0) / wordCounts.length;
-    const variance = wordCounts.reduce((sum, count) => sum + Math.abs(count - avgLength), 0) / wordCounts.length;
-    
+    const variance =
+      wordCounts.reduce((sum, count) => sum + Math.abs(count - avgLength), 0) / wordCounts.length;
+
     // High variance in chapter length can indicate inconsistent pacing
     if (variance > avgLength * 0.5) {
       coherenceScore -= 0.1;
     }
 
     // Check for empty or very short chapters
-    const tooShort = wordCounts.filter((count) => count < 500).length;
+    const tooShort = wordCounts.filter(count => count < 500).length;
     if (tooShort > chapters.length * 0.2) {
       coherenceScore -= 0.15;
     }
@@ -312,17 +327,17 @@ export class PlotAnalysisService {
     }
 
     // Identify pacing issues in specific chapters
-    const slowChapters = chapterPacing.filter((ch) => ch.pace < 30);
+    const slowChapters = chapterPacing.filter(ch => ch.pace < 30);
     if (slowChapters.length > 0) {
       recommendations.push(
-        `Chapters ${slowChapters.map((ch) => ch.chapterNumber).join(', ')} have slow pacing - consider adding tension or conflict`,
+        `Chapters ${slowChapters.map(ch => ch.chapterNumber).join(', ')} have slow pacing - consider adding tension or conflict`,
       );
     }
 
-    const fastChapters = chapterPacing.filter((ch) => ch.pace > 80);
+    const fastChapters = chapterPacing.filter(ch => ch.pace > 80);
     if (fastChapters.length > 0) {
       recommendations.push(
-        `Chapters ${fastChapters.map((ch) => ch.chapterNumber).join(', ')} move very quickly - consider adding breathing room`,
+        `Chapters ${fastChapters.map(ch => ch.chapterNumber).join(', ')} move very quickly - consider adding breathing room`,
       );
     }
 
@@ -330,7 +345,9 @@ export class PlotAnalysisService {
     const paceVariance =
       chapterPacing.reduce((sum, ch) => sum + Math.abs(ch.pace - 50), 0) / chapterPacing.length;
     if (paceVariance < 15) {
-      recommendations.push('Pacing is somewhat monotonous - vary chapter intensity for better rhythm');
+      recommendations.push(
+        'Pacing is somewhat monotonous - vary chapter intensity for better rhythm',
+      );
     }
 
     return recommendations;
@@ -350,19 +367,25 @@ export class PlotAnalysisService {
     recommendations.push(...pacing.recommendations);
 
     // Tension curve recommendations
-    const maxTension = Math.max(...tension.map((t) => t.tensionLevel));
+    const maxTension = Math.max(...tension.map(t => t.tensionLevel));
     if (maxTension < 70) {
-      recommendations.push('Story lacks a strong climactic moment - consider adding a high-stakes confrontation');
+      recommendations.push(
+        'Story lacks a strong climactic moment - consider adding a high-stakes confrontation',
+      );
     }
 
-    const minTension = Math.min(...tension.map((t) => t.tensionLevel));
+    const minTension = Math.min(...tension.map(t => t.tensionLevel));
     if (minTension > 40) {
-      recommendations.push('Story maintains high tension throughout - consider adding quieter moments for contrast');
+      recommendations.push(
+        'Story maintains high tension throughout - consider adding quieter moments for contrast',
+      );
     }
 
     // Coherence recommendations
     if (coherence < 0.7) {
-      recommendations.push('Narrative coherence could be improved - review chapter flow and consistency');
+      recommendations.push(
+        'Narrative coherence could be improved - review chapter flow and consistency',
+      );
     }
 
     return recommendations.slice(0, 10); // Limit to top 10 recommendations
@@ -372,7 +395,10 @@ export class PlotAnalysisService {
    * Count words in content
    */
   private countWords(content: string): number {
-    return content.trim().split(/\s+/).filter((word) => word.length > 0).length;
+    return content
+      .trim()
+      .split(/\s+/)
+      .filter(word => word.length > 0).length;
   }
 }
 
