@@ -23,187 +23,218 @@ interface PlotHoleDetectorViewProps {
   onFixHole?: (holeId: string) => void;
 }
 
-export const PlotHoleDetectorView: React.FC<PlotHoleDetectorViewProps> = ({
-  analysis,
-  onDismissHole,
-  onFixHole,
-}) => {
-  const [filterSeverity, setFilterSeverity] = useState<PlotHoleSeverity | 'all'>('all');
-  const [filterType, setFilterType] = useState<PlotHoleType | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'severity' | 'confidence' | 'type'>('severity');
+export const PlotHoleDetectorView: React.FC<PlotHoleDetectorViewProps> = React.memo(
+  ({ analysis, onDismissHole, onFixHole }) => {
+    const [filterSeverity, setFilterSeverity] = useState<PlotHoleSeverity | 'all'>('all');
+    const [filterType, setFilterType] = useState<PlotHoleType | 'all'>('all');
+    const [filterChapter, setFilterChapter] = useState<string>('all');
+    const [sortBy, setSortBy] = useState<'severity' | 'confidence' | 'type'>('severity');
 
-  // Filter and sort plot holes
-  const filteredHoles = useMemo(() => {
-    let holes = [...analysis.plotHoles];
+    // Get unique chapters from all plot holes
+    const uniqueChapters = useMemo(() => {
+      const chapters = new Set<string>();
+      analysis.plotHoles.forEach(hole => {
+        hole.affectedChapters.forEach(ch => chapters.add(ch));
+      });
+      return Array.from(chapters).sort();
+    }, [analysis.plotHoles]);
 
-    // Apply severity filter
-    if (filterSeverity !== 'all') {
-      holes = holes.filter(h => h.severity === filterSeverity);
-    }
+    // Filter and sort plot holes
+    const filteredHoles = useMemo(() => {
+      let holes = [...analysis.plotHoles];
 
-    // Apply type filter
-    if (filterType !== 'all') {
-      holes = holes.filter(h => h.type === filterType);
-    }
-
-    // Sort
-    holes.sort((a, b) => {
-      switch (sortBy) {
-        case 'severity': {
-          const severityOrder = { critical: 4, major: 3, moderate: 2, minor: 1 };
-          return severityOrder[b.severity] - severityOrder[a.severity];
-        }
-        case 'confidence':
-          return b.confidence - a.confidence;
-        case 'type':
-          return a.type.localeCompare(b.type);
-        default:
-          return 0;
+      // Apply severity filter
+      if (filterSeverity !== 'all') {
+        holes = holes.filter(h => h.severity === filterSeverity);
       }
-    });
 
-    return holes;
-  }, [analysis.plotHoles, filterSeverity, filterType, sortBy]);
+      // Apply type filter
+      if (filterType !== 'all') {
+        holes = holes.filter(h => h.type === filterType);
+      }
 
-  // Statistics
-  const stats = useMemo(() => {
-    const bySeverity = {
-      critical: analysis.plotHoles.filter(h => h.severity === 'critical').length,
-      major: analysis.plotHoles.filter(h => h.severity === 'major').length,
-      moderate: analysis.plotHoles.filter(h => h.severity === 'moderate').length,
-      minor: analysis.plotHoles.filter(h => h.severity === 'minor').length,
+      // Apply chapter filter
+      if (filterChapter !== 'all') {
+        holes = holes.filter(h => h.affectedChapters.includes(filterChapter));
+      }
+
+      // Sort
+      holes.sort((a, b) => {
+        switch (sortBy) {
+          case 'severity': {
+            const severityOrder = { critical: 4, major: 3, moderate: 2, minor: 1 };
+            return severityOrder[b.severity] - severityOrder[a.severity];
+          }
+          case 'confidence':
+            return b.confidence - a.confidence;
+          case 'type':
+            return a.type.localeCompare(b.type);
+          default:
+            return 0;
+        }
+      });
+
+      return holes;
+    }, [analysis.plotHoles, filterSeverity, filterType, filterChapter, sortBy]);
+
+    // Statistics
+    const stats = useMemo(() => {
+      const bySeverity = {
+        critical: analysis.plotHoles.filter(h => h.severity === 'critical').length,
+        major: analysis.plotHoles.filter(h => h.severity === 'major').length,
+        moderate: analysis.plotHoles.filter(h => h.severity === 'moderate').length,
+        minor: analysis.plotHoles.filter(h => h.severity === 'minor').length,
+      };
+
+      const byType = analysis.plotHoles.reduce(
+        (acc, hole) => {
+          acc[hole.type] = (acc[hole.type] || 0) + 1;
+          return acc;
+        },
+        {} as Record<PlotHoleType, number>,
+      );
+
+      return { bySeverity, byType };
+    }, [analysis.plotHoles]);
+
+    const getScoreColor = (score: number): string => {
+      if (score >= 90) return 'text-green-600 dark:text-green-400';
+      if (score >= 75) return 'text-blue-600 dark:text-blue-400';
+      if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
+      return 'text-red-600 dark:text-red-400';
     };
 
-    const byType = analysis.plotHoles.reduce(
-      (acc, hole) => {
-        acc[hole.type] = (acc[hole.type] || 0) + 1;
-        return acc;
-      },
-      {} as Record<PlotHoleType, number>,
+    return (
+      <div className='space-y-6'>
+        {/* Overview Card */}
+        <Card className='p-6'>
+          <h3 className='mb-4 text-lg font-semibold'>Plot Quality Analysis</h3>
+
+          <div className='mb-6 flex items-center justify-between'>
+            <div>
+              <p className='text-sm text-muted-foreground'>Overall Score</p>
+              <p className={cn('mt-1 text-4xl font-bold', getScoreColor(analysis.overallScore))}>
+                {analysis.overallScore}/100
+              </p>
+            </div>
+            <div className='text-right'>
+              <p className='text-sm text-muted-foreground'>Issues Found</p>
+              <p className='mt-1 text-4xl font-bold'>{analysis.plotHoles.length}</p>
+            </div>
+          </div>
+
+          <p className='text-sm text-muted-foreground'>{analysis.summary}</p>
+
+          {/* Severity Breakdown */}
+          <div className='mt-6 grid grid-cols-4 gap-3'>
+            <SeverityStat severity='critical' count={stats.bySeverity.critical} />
+            <SeverityStat severity='major' count={stats.bySeverity.major} />
+            <SeverityStat severity='moderate' count={stats.bySeverity.moderate} />
+            <SeverityStat severity='minor' count={stats.bySeverity.minor} />
+          </div>
+        </Card>
+
+        {/* Filters */}
+        <Card className='p-6'>
+          <div className='flex flex-wrap items-center gap-4'>
+            <div className='flex items-center gap-2'>
+              <span className='text-sm font-medium'>Filter by Severity:</span>
+              <select
+                value={filterSeverity}
+                onChange={e => setFilterSeverity(e.target.value as PlotHoleSeverity | 'all')}
+                className='rounded-md border bg-background px-3 py-1 text-sm'
+                data-testid='severity-filter'
+              >
+                <option value='all'>All</option>
+                <option value='critical'>Critical</option>
+                <option value='major'>Major</option>
+                <option value='moderate'>Moderate</option>
+                <option value='minor'>Minor</option>
+              </select>
+            </div>
+
+            <div className='flex items-center gap-2'>
+              <span className='text-sm font-medium'>Filter by Type:</span>
+              <select
+                value={filterType}
+                onChange={e => setFilterType(e.target.value as PlotHoleType | 'all')}
+                className='rounded-md border bg-background px-3 py-1 text-sm'
+                data-testid='type-filter'
+              >
+                <option value='all'>All</option>
+                <option value='continuity'>Continuity</option>
+                <option value='logic'>Logic</option>
+                <option value='character_inconsistency'>Character</option>
+                <option value='timeline'>Timeline</option>
+                <option value='unresolved_thread'>Unresolved</option>
+                <option value='contradictory_facts'>Contradictions</option>
+                <option value='missing_motivation'>Motivation</option>
+              </select>
+            </div>
+
+            <div className='flex items-center gap-2'>
+              <span className='text-sm font-medium'>Filter by Chapter:</span>
+              <select
+                value={filterChapter}
+                onChange={e => setFilterChapter(e.target.value)}
+                className='rounded-md border bg-background px-3 py-1 text-sm'
+                data-testid='chapter-filter'
+                disabled={uniqueChapters.length === 0}
+              >
+                <option value='all'>All Chapters</option>
+                {uniqueChapters.map((chapter: string) => (
+                  <option key={chapter} value={chapter}>
+                    {chapter}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className='flex items-center gap-2'>
+              <span className='text-sm font-medium'>Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value as 'severity' | 'confidence' | 'type')}
+                className='rounded-md border bg-background px-3 py-1 text-sm'
+                data-testid='sort-select'
+              >
+                <option value='severity'>Severity</option>
+                <option value='confidence'>Confidence</option>
+                <option value='type'>Type</option>
+              </select>
+            </div>
+          </div>
+        </Card>
+
+        {/* Plot Holes List */}
+        <Card className='p-6'>
+          <h3 className='mb-4 text-lg font-semibold'>Issues ({filteredHoles.length})</h3>
+
+          {filteredHoles.length > 0 ? (
+            <div className='space-y-4'>
+              {filteredHoles.map(hole => (
+                <PlotHoleCard
+                  key={hole.id}
+                  plotHole={hole}
+                  onDismiss={onDismissHole}
+                  onFix={onFixHole}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className='py-8 text-center'>
+              <p className='text-muted-foreground'>
+                {analysis.plotHoles.length > 0
+                  ? 'No issues match your filters'
+                  : 'No plot holes detected! Your story is coherent.'}
+              </p>
+            </div>
+          )}
+        </Card>
+      </div>
     );
-
-    return { bySeverity, byType };
-  }, [analysis.plotHoles]);
-
-  const getScoreColor = (score: number): string => {
-    if (score >= 90) return 'text-green-600 dark:text-green-400';
-    if (score >= 75) return 'text-blue-600 dark:text-blue-400';
-    if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
-  };
-
-  return (
-    <div className='space-y-6'>
-      {/* Overview Card */}
-      <Card className='p-6'>
-        <h3 className='mb-4 text-lg font-semibold'>Plot Quality Analysis</h3>
-
-        <div className='mb-6 flex items-center justify-between'>
-          <div>
-            <p className='text-sm text-muted-foreground'>Overall Score</p>
-            <p className={cn('mt-1 text-4xl font-bold', getScoreColor(analysis.overallScore))}>
-              {analysis.overallScore}/100
-            </p>
-          </div>
-          <div className='text-right'>
-            <p className='text-sm text-muted-foreground'>Issues Found</p>
-            <p className='mt-1 text-4xl font-bold'>{analysis.plotHoles.length}</p>
-          </div>
-        </div>
-
-        <p className='text-sm text-muted-foreground'>{analysis.summary}</p>
-
-        {/* Severity Breakdown */}
-        <div className='mt-6 grid grid-cols-4 gap-3'>
-          <SeverityStat severity='critical' count={stats.bySeverity.critical} />
-          <SeverityStat severity='major' count={stats.bySeverity.major} />
-          <SeverityStat severity='moderate' count={stats.bySeverity.moderate} />
-          <SeverityStat severity='minor' count={stats.bySeverity.minor} />
-        </div>
-      </Card>
-
-      {/* Filters */}
-      <Card className='p-6'>
-        <div className='flex flex-wrap items-center gap-4'>
-          <div className='flex items-center gap-2'>
-            <span className='text-sm font-medium'>Filter by Severity:</span>
-            <select
-              value={filterSeverity}
-              onChange={e => setFilterSeverity(e.target.value as PlotHoleSeverity | 'all')}
-              className='rounded-md border bg-background px-3 py-1 text-sm'
-              data-testid='severity-filter'
-            >
-              <option value='all'>All</option>
-              <option value='critical'>Critical</option>
-              <option value='major'>Major</option>
-              <option value='moderate'>Moderate</option>
-              <option value='minor'>Minor</option>
-            </select>
-          </div>
-
-          <div className='flex items-center gap-2'>
-            <span className='text-sm font-medium'>Filter by Type:</span>
-            <select
-              value={filterType}
-              onChange={e => setFilterType(e.target.value as PlotHoleType | 'all')}
-              className='rounded-md border bg-background px-3 py-1 text-sm'
-              data-testid='type-filter'
-            >
-              <option value='all'>All</option>
-              <option value='continuity'>Continuity</option>
-              <option value='logic'>Logic</option>
-              <option value='character_inconsistency'>Character</option>
-              <option value='timeline'>Timeline</option>
-              <option value='unresolved_thread'>Unresolved</option>
-              <option value='contradictory_facts'>Contradictions</option>
-              <option value='missing_motivation'>Motivation</option>
-            </select>
-          </div>
-
-          <div className='flex items-center gap-2'>
-            <span className='text-sm font-medium'>Sort by:</span>
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value as 'severity' | 'confidence' | 'type')}
-              className='rounded-md border bg-background px-3 py-1 text-sm'
-              data-testid='sort-select'
-            >
-              <option value='severity'>Severity</option>
-              <option value='confidence'>Confidence</option>
-              <option value='type'>Type</option>
-            </select>
-          </div>
-        </div>
-      </Card>
-
-      {/* Plot Holes List */}
-      <Card className='p-6'>
-        <h3 className='mb-4 text-lg font-semibold'>Issues ({filteredHoles.length})</h3>
-
-        {filteredHoles.length > 0 ? (
-          <div className='space-y-4'>
-            {filteredHoles.map(hole => (
-              <PlotHoleCard
-                key={hole.id}
-                plotHole={hole}
-                onDismiss={onDismissHole}
-                onFix={onFixHole}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className='py-8 text-center'>
-            <p className='text-muted-foreground'>
-              {analysis.plotHoles.length > 0
-                ? 'No issues match your filters'
-                : 'No plot holes detected! Your story is coherent.'}
-            </p>
-          </div>
-        )}
-      </Card>
-    </div>
-  );
-};
+  },
+);
 
 // Severity Stat Component
 interface SeverityStatProps {

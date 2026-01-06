@@ -30,3 +30,10 @@ export const preloadCriticalComponents = (): void => {
   preloadComponent(() => import('@/features/analytics/components/AnalyticsDashboard'));
   preloadComponent(() => import('@/features/editor/components/BookViewer'));
 };
+
+// Preload plot engine components on demand
+export const preloadPlotEngineComponents = (): void => {
+  preloadComponent(() => import('@/features/plot-engine/components/PlotEngineDashboard'));
+  preloadComponent(() => import('@/features/plot-engine/components/PlotAnalyzer'));
+  preloadComponent(() => import('@/features/plot-engine/components/PlotGenerator'));
+};

@@ -1,4 +1,3 @@
-
 import { Loader2 } from 'lucide-react';
 import React, { Suspense } from 'react';
 
@@ -47,3 +46,5 @@ export const PublishingLoading: React.FC = () => (
 );
 
 export const BookViewerLoading: React.FC = () => <LazyLoading message='Loading book viewer...' />;
+
+export const PlotEngineLoading: React.FC = () => <LazyLoading message='Loading plot engine...' />;

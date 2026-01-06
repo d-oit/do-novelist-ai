@@ -85,6 +85,6 @@ describe('PlotEngineDashboard', () => {
     fireEvent.click(screen.getByTestId('tab-generator'));
 
     expect(screen.getByText('Plot Generator')).toBeInTheDocument();
-    expect(screen.getByText(/Generate plot structures/i)).toBeInTheDocument();
+    expect(screen.getByTestId('generate-button')).toBeInTheDocument();
   });
 });

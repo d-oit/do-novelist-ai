@@ -19,7 +19,7 @@ interface PlotAnalyzerProps {
   onAnalyze?: (result: AnalysisResult) => void;
 }
 
-export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = ({ projectId, onAnalyze }) => {
+export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = React.memo(({ projectId, onAnalyze }) => {
   // Use the plot analysis hook for state management
   const { analysisResult, isAnalyzing, error, analyze, clearAnalysis } = usePlotAnalysis();
 
@@ -216,7 +216,7 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = ({ projectId, onAnalyze
       </Card>
     </div>
   );
-};
+});
 
 interface PlotHoleItemProps {
   plotHole: PlotHole;
