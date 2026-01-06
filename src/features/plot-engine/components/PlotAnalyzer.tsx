@@ -4,9 +4,11 @@
  * Main UI for analyzing story structure, pacing, and plot holes
  */
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 
 import type { AnalysisResult, PlotHole } from '@/features/plot-engine';
+import { usePlotAnalysis } from '@/features/plot-engine/hooks';
+import { plotStorageService } from '@/features/plot-engine/services';
 import { cn } from '@/lib/utils';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
@@ -18,53 +20,48 @@ interface PlotAnalyzerProps {
 }
 
 export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = ({ projectId, onAnalyze }) => {
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // Use the plot analysis hook for state management
+  const { analysisResult, isAnalyzing, error, analyze, clearAnalysis } = usePlotAnalysis();
+
+  // Load cached analysis result on mount
+  useEffect(() => {
+    const loadCachedAnalysis = async (): Promise<void> => {
+      try {
+        const cached = await plotStorageService.getAnalysisResult(projectId, 'plot-analysis');
+        if (cached && !analysisResult) {
+          // Note: cached is the raw analysis result data
+          // We could restore it to the state, but for now we'll just trigger fresh analysis
+        }
+      } catch (err) {
+        // Silently fail - cached data is optional
+        console.warn('Failed to load cached analysis:', err);
+      }
+    };
+
+    void loadCachedAnalysis();
+  }, [projectId, analysisResult]);
 
   const handleAnalyze = async (): Promise<void> => {
-    setIsAnalyzing(true);
-    setError(null);
-
     try {
-      // TODO: Call plot analysis service
-      // const analysis = await plotAnalysisService.analyzeProject(projectId, chapters, {
-      //   includeStoryArc: true,
-      //   includePlotHoles: true,
-      //   includeCharacterGraph: true,
-      //   includePacing: true,
-      // });
+      // For now, use mock chapters - in real implementation, fetch from project
+      const chapters: never[] = []; // TODO: Fetch chapters from project
 
-      // Mock result for now
-      const mockResult: AnalysisResult = {
-        projectId,
-        analyzedAt: new Date(),
-        storyArc: {
-          structure: '3-act',
-          pacing: {
-            overall: 'moderate',
-            score: 75,
-            byChapter: [],
-            recommendations: [
-              'Consider increasing pace in middle chapters',
-              'Add more tension before climax',
-            ],
-          },
-          tension: [],
-          coherence: 0.85,
-          recommendations: [
-            'Overall story structure is solid',
-            'Consider adding more character development in Act 2',
-          ],
-        },
-      };
+      // Call the analyze function from the hook
+      const result = await analyze(projectId, chapters, {
+        includeStoryArc: true,
+        includePlotHoles: true,
+        includeCharacterGraph: true,
+        includePacing: true,
+      });
 
-      setResult(mockResult);
-      onAnalyze?.(mockResult);
+      // Save result to storage for caching (5 minute TTL)
+      if (result) {
+        await plotStorageService.saveAnalysisResult(projectId, 'plot-analysis', result, 5);
+        onAnalyze?.(result);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Analysis failed');
-    } finally {
-      setIsAnalyzing(false);
+      // Error is already handled by the hook
+      console.error('Analysis failed:', err);
     }
   };
 
@@ -96,6 +93,15 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = ({ projectId, onAnalyze
           >
             <p className='font-medium'>Analysis Error</p>
             <p className='mt-1 text-sm'>{error}</p>
+            <Button
+              onClick={clearAnalysis}
+              variant='ghost'
+              size='sm'
+              className='mt-2'
+              aria-label='Dismiss error'
+            >
+              Dismiss
+            </Button>
           </div>
         )}
 
@@ -106,23 +112,23 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = ({ projectId, onAnalyze
           </div>
         )}
 
-        {result && !isAnalyzing && (
+        {analysisResult && !isAnalyzing && (
           <div className='space-y-6' data-testid='analysis-results'>
             {/* Story Structure */}
-            {result.storyArc && (
+            {analysisResult.storyArc && (
               <div className='space-y-4'>
                 <h3 className='text-lg font-semibold'>Story Structure</h3>
                 <div className='grid grid-cols-2 gap-4'>
                   <Card className='p-4'>
                     <p className='text-sm text-muted-foreground'>Structure Type</p>
                     <p className='mt-1 text-2xl font-bold capitalize'>
-                      {result.storyArc.structure.replace('-', ' ')}
+                      {analysisResult.storyArc.structure.replace('-', ' ')}
                     </p>
                   </Card>
                   <Card className='p-4'>
                     <p className='text-sm text-muted-foreground'>Coherence Score</p>
                     <p className='mt-1 text-2xl font-bold'>
-                      {Math.round(result.storyArc.coherence * 100)}%
+                      {Math.round(analysisResult.storyArc.coherence * 100)}%
                     </p>
                   </Card>
                 </div>
@@ -130,30 +136,30 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = ({ projectId, onAnalyze
             )}
 
             {/* Pacing Analysis */}
-            {result.storyArc?.pacing && (
+            {analysisResult.storyArc?.pacing && (
               <div className='space-y-4'>
                 <h3 className='text-lg font-semibold'>Pacing Analysis</h3>
                 <Card className='p-4'>
                   <div className='mb-2 flex items-center justify-between'>
                     <p className='text-sm text-muted-foreground'>Overall Pace</p>
                     <p className='text-lg font-semibold capitalize'>
-                      {result.storyArc.pacing.overall}
+                      {analysisResult.storyArc.pacing.overall}
                     </p>
                   </div>
-                  <Progress value={result.storyArc.pacing.score} className='w-full' />
+                  <Progress value={analysisResult.storyArc.pacing.score} className='w-full' />
                   <p className='mt-2 text-xs text-muted-foreground'>
-                    Score: {result.storyArc.pacing.score}/100
+                    Score: {analysisResult.storyArc.pacing.score}/100
                   </p>
                 </Card>
               </div>
             )}
 
             {/* Recommendations */}
-            {result.storyArc && result.storyArc.recommendations.length > 0 && (
+            {analysisResult.storyArc && analysisResult.storyArc.recommendations.length > 0 && (
               <div className='space-y-4'>
                 <h3 className='text-lg font-semibold'>Recommendations</h3>
                 <ul className='space-y-2'>
-                  {result.storyArc.recommendations.map((rec, index) => (
+                  {analysisResult.storyArc.recommendations.map((rec: string, index: number) => (
                     <li key={index} className='flex items-start gap-2 rounded-md bg-muted p-3'>
                       <span className='mt-0.5 text-primary'>•</span>
                       <span className='text-sm'>{rec}</span>
@@ -164,22 +170,28 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = ({ projectId, onAnalyze
             )}
 
             {/* Plot Holes */}
-            {result.plotHoleAnalysis && (
+            {analysisResult.plotHoleAnalysis && (
               <div className='space-y-4'>
                 <h3 className='text-lg font-semibold'>Plot Hole Analysis</h3>
                 <Card className='p-4'>
                   <div className='mb-4 flex items-center justify-between'>
                     <p className='text-sm text-muted-foreground'>Quality Score</p>
-                    <p className='text-2xl font-bold'>{result.plotHoleAnalysis.overallScore}/100</p>
+                    <p className='text-2xl font-bold'>
+                      {analysisResult.plotHoleAnalysis.overallScore}/100
+                    </p>
                   </div>
-                  <p className='text-sm text-muted-foreground'>{result.plotHoleAnalysis.summary}</p>
+                  <p className='text-sm text-muted-foreground'>
+                    {analysisResult.plotHoleAnalysis.summary}
+                  </p>
 
-                  {result.plotHoleAnalysis.plotHoles.length > 0 && (
+                  {analysisResult.plotHoleAnalysis.plotHoles.length > 0 && (
                     <div className='mt-4 space-y-2'>
                       <p className='text-sm font-medium'>Issues Found:</p>
-                      {result.plotHoleAnalysis.plotHoles.slice(0, 5).map(hole => (
-                        <PlotHoleItem key={hole.id} plotHole={hole} />
-                      ))}
+                      {analysisResult.plotHoleAnalysis.plotHoles
+                        .slice(0, 5)
+                        .map((hole: PlotHole) => (
+                          <PlotHoleItem key={hole.id} plotHole={hole} />
+                        ))}
                     </div>
                   )}
                 </Card>
@@ -187,13 +199,13 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = ({ projectId, onAnalyze
             )}
 
             {/* Character Graph */}
-            {result.characterGraph && (
+            {analysisResult.characterGraph && (
               <div className='space-y-4'>
                 <h3 className='text-lg font-semibold'>Character Relationships</h3>
                 <Card className='p-4'>
                   <p className='text-sm text-muted-foreground'>
-                    Found {result.characterGraph.relationships.length} relationships between{' '}
-                    {result.characterGraph.nodes.length} characters
+                    Found {analysisResult.characterGraph.relationships.length} relationships between{' '}
+                    {analysisResult.characterGraph.nodes.length} characters
                   </p>
                   {/* TODO: Add character graph visualization */}
                 </Card>

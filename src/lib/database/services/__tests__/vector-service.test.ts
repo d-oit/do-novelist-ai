@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import * as drizzle from '@/lib/database/drizzle';
+import * as vectorService from '@/lib/database/services/vector-service';
 import * as embeddingService from '@/lib/embeddings/embedding-service';
-
-// eslint-disable-next-line import-x/no-relative-parent-imports
-import * as vectorService from '../vector-service';
 
 // Mock drizzle
 vi.mock('@/lib/database/drizzle', () => ({
