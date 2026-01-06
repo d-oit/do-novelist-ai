@@ -4,15 +4,18 @@
  * Main UI for analyzing story structure, pacing, and plot holes
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { AnalysisResult, PlotHole } from '@/features/plot-engine';
 import { usePlotAnalysis } from '@/features/plot-engine/hooks';
 import { plotStorageService } from '@/features/plot-engine/services';
+import { projectService } from '@/features/projects/services/projectService';
+import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 import { Progress } from '@/shared/components/ui/Progress';
+import type { Chapter } from '@/shared/types';
 
 interface PlotAnalyzerProps {
   projectId: string;
@@ -22,6 +25,9 @@ interface PlotAnalyzerProps {
 export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = React.memo(({ projectId, onAnalyze }) => {
   // Use the plot analysis hook for state management
   const { analysisResult, isAnalyzing, error, analyze, clearAnalysis } = usePlotAnalysis();
+
+  // Track data loading state
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   // Load cached analysis result on mount
   useEffect(() => {
@@ -42,9 +48,34 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = React.memo(({ projectId
   }, [projectId, analysisResult]);
 
   const handleAnalyze = async (): Promise<void> => {
+    setIsLoadingData(true);
     try {
-      // For now, use mock chapters - in real implementation, fetch from project
-      const chapters: never[] = []; // TODO: Fetch chapters from project
+      // Fetch project data with chapters
+      const project = await projectService.getById(projectId);
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      // Fetch characters for this project (currently unused but available for future enhancements)
+      // const characters: Character[] = await characterService.getAll(projectId);
+
+      // Extract chapters from project
+      const chapters: Chapter[] = project.chapters || [];
+
+      logger.info('Fetched project data for analysis', {
+        component: 'PlotAnalyzer',
+        projectId,
+        chaptersCount: chapters.length,
+      });
+
+      // Validate that we have data to analyze
+      if (chapters.length === 0) {
+        throw new Error(
+          'No chapters found in this project. Please add some content before analyzing.',
+        );
+      }
+
+      setIsLoadingData(false);
 
       // Call the analyze function from the hook
       const result = await analyze(projectId, chapters, {
@@ -60,8 +91,16 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = React.memo(({ projectId
         onAnalyze?.(result);
       }
     } catch (err) {
-      // Error is already handled by the hook
-      console.error('Analysis failed:', err);
+      setIsLoadingData(false);
+      logger.error('Failed to analyze plot', {
+        component: 'PlotAnalyzer',
+        projectId,
+        error: err,
+      });
+      // Error will be shown in the UI via the hook's error state
+      if (err instanceof Error) {
+        throw err;
+      }
     }
   };
 
@@ -77,11 +116,11 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = React.memo(({ projectId
           </div>
           <Button
             onClick={() => void handleAnalyze()}
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || isLoadingData}
             data-testid='analyze-button'
             aria-label='Analyze plot'
           >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze Plot'}
+            {isLoadingData ? 'Loading Data...' : isAnalyzing ? 'Analyzing...' : 'Analyze Plot'}
           </Button>
         </div>
 
@@ -105,7 +144,14 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = React.memo(({ projectId
           </div>
         )}
 
-        {isAnalyzing && (
+        {isLoadingData && (
+          <div className='space-y-2' data-testid='loading-data-state'>
+            <p className='text-sm text-muted-foreground'>Loading project data...</p>
+            <Progress value={undefined} className='w-full' />
+          </div>
+        )}
+
+        {isAnalyzing && !isLoadingData && (
           <div className='space-y-2' data-testid='analyzing-state'>
             <p className='text-sm text-muted-foreground'>Analyzing your story...</p>
             <Progress value={undefined} className='w-full' />

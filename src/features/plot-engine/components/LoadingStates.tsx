@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { cn } from '@/lib/utils';
 import { Card } from '@/shared/components/ui/Card';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
 
