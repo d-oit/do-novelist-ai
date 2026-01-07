@@ -31,6 +31,14 @@ const MetricsPage = lazy(() =>
 const AgentConsole = lazy(() =>
   import('@/features/generation/components').then(module => ({ default: module.AgentConsole })),
 );
+const PlotEngineDashboard = lazy(() =>
+  import('@/features/plot-engine/components').then(module => ({
+    default: module.LazyPlotEngineDashboard,
+  })),
+);
+const WorldBuildingDashboard = lazy(() =>
+  import('@/features/world-building').then(module => ({ default: module.WorldBuildingDashboard })),
+);
 
 // Loading components for Suspense boundaries
 const ProjectsLoader = () => (
@@ -78,6 +86,38 @@ const ConsoleLoader = () => (
       <Skeleton className='h-4 w-1/2' />
       <Skeleton className='h-4 w-2/3' />
       <Skeleton className='h-4 w-1/3' />
+    </div>
+  </div>
+);
+
+const PlotEngineLoader = () => (
+  <div className='container mx-auto space-y-6 p-6'>
+    <div>
+      <Skeleton className='h-10 w-48' />
+      <Skeleton className='mt-2 h-6 w-96' />
+    </div>
+    <div className='flex gap-2'>
+      <Skeleton className='h-10 w-32' />
+      <Skeleton className='h-10 w-32' />
+      <Skeleton className='h-10 w-32' />
+    </div>
+    <div className='space-y-4'>
+      <Skeleton className='h-64 w-full' />
+      <Skeleton className='h-48 w-full' />
+    </div>
+  </div>
+);
+
+const WorldBuildingLoader = () => (
+  <div className='container mx-auto space-y-6 p-6'>
+    <div>
+      <Skeleton className='h-10 w-64' />
+      <Skeleton className='mt-2 h-6 w-96' />
+    </div>
+    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
+      <Skeleton className='h-48 w-full' />
+      <Skeleton className='h-48 w-full' />
+      <Skeleton className='h-48 w-full' />
     </div>
   </div>
 );
@@ -192,7 +232,13 @@ const INITIAL_PROJECT: Project = {
   },
 };
 
-type ViewMode = 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics';
+type ViewMode =
+  | 'dashboard'
+  | 'projects'
+  | 'settings'
+  | 'world-building'
+  | 'plot-engine'
+  | 'metrics';
 
 // ... existing imports ...
 
@@ -443,7 +489,11 @@ const App: React.FC = () => {
                 ? 'Settings - Novelist.ai'
                 : currentView === 'metrics'
                   ? 'System Metrics - Novelist.ai'
-                  : 'Novelist.ai Dashboard'}
+                  : currentView === 'plot-engine'
+                    ? 'Plot Engine - Novelist.ai'
+                    : currentView === 'world-building'
+                      ? 'World Building - Novelist.ai'
+                      : 'Novelist.ai Dashboard'}
         </h1>
         {currentView === 'dashboard' && (
           <div className='animate-in fade-in mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>
@@ -549,6 +599,26 @@ const App: React.FC = () => {
             <LazyLoadErrorBoundary>
               <Suspense fallback={<MetricsLoader />}>
                 <MetricsPage />
+              </Suspense>
+            </LazyLoadErrorBoundary>
+          </div>
+        )}
+
+        {currentView === 'plot-engine' && (
+          <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+            <LazyLoadErrorBoundary>
+              <Suspense fallback={<PlotEngineLoader />}>
+                <PlotEngineDashboard projectId={project.id} />
+              </Suspense>
+            </LazyLoadErrorBoundary>
+          </div>
+        )}
+
+        {currentView === 'world-building' && (
+          <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+            <LazyLoadErrorBoundary>
+              <Suspense fallback={<WorldBuildingLoader />}>
+                <WorldBuildingDashboard projectId={project.id} />
               </Suspense>
             </LazyLoadErrorBoundary>
           </div>

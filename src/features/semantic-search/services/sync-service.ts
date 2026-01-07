@@ -9,6 +9,7 @@ import * as vectorService from '@/lib/database/services/vector-service';
 import { logger } from '@/lib/logging/logger';
 
 import * as contentProcessor from './content-processor';
+import { queryCache } from './query-cache';
 
 interface WorldBuildingElement {
   id: string;
@@ -171,6 +172,8 @@ class SemanticSyncService {
    * Process and store extracted contents
    */
   private async processContents(contents: contentProcessor.ExtractedContent[]): Promise<void> {
+    const projectIds = new Set<string>();
+
     for (const content of contents) {
       try {
         // Get existing vector or create if missing
@@ -186,6 +189,12 @@ class SemanticSyncService {
           });
 
           await vectorService.updateVector(content);
+
+          // Track project for cache invalidation
+          projectIds.add(content.projectId);
+
+          // Invalidate cache for this entity
+          queryCache.invalidateEntity(content.entityId, content.projectId);
         } else {
           logger.debug('Content unchanged, skipping vector update', {
             entityType: content.entityType,
@@ -199,6 +208,14 @@ class SemanticSyncService {
           error,
         });
       }
+    }
+
+    // Log cache invalidation summary
+    if (projectIds.size > 0) {
+      logger.info('Cache invalidated after content sync', {
+        projectCount: projectIds.size,
+        contentCount: contents.length,
+      });
     }
   }
 }

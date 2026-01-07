@@ -18,6 +18,8 @@ import type {
   SimilaritySearchResult,
 } from '@/types/embeddings';
 
+import { queryCache } from './query-cache';
+
 export class SearchService {
   /**
    * Search and hydrate results
@@ -27,8 +29,28 @@ export class SearchService {
     projectId: string,
     filters?: SearchFilters,
   ): Promise<HydratedSearchResult[]> {
+    const startTime = performance.now();
+
     try {
-      // 1. Perform vector search
+      // Generate cache key (only query, filters applied post-cache)
+      const cacheKey = this.getCacheKey(query);
+
+      // 1. Check cache first (without filters in key for broader hits)
+      const cached = queryCache.get(cacheKey, projectId);
+      if (cached) {
+        const duration = performance.now() - startTime;
+        logger.debug('Search completed (cached)', {
+          query,
+          projectId,
+          resultCount: cached.length,
+          durationMs: Math.round(duration),
+        });
+
+        // Apply filters to cached results if needed
+        return this.applyFilters(cached, filters);
+      }
+
+      // 2. Perform vector search
       const rawResults = await vectorService.semanticSearch({
         projectId,
         queryText: query,
@@ -38,7 +60,7 @@ export class SearchService {
         entityType: filters?.entityTypes?.length === 1 ? filters.entityTypes[0] : undefined,
       });
 
-      // 2. Hydrate results with actual entity data
+      // 3. Hydrate results with actual entity data
       const hydratedResults = await Promise.all(
         rawResults.map(async (result: SimilaritySearchResult) => {
           const entity = await this.hydrateEntity(
@@ -57,16 +79,64 @@ export class SearchService {
         }),
       );
 
-      // 3. Filter valid results and any additional filters
-      return hydratedResults.filter(
-        (r): r is HydratedSearchResult =>
-          r !== null &&
-          (!filters?.entityTypes || filters.entityTypes.includes(r.entityType as VectorEntityType)),
-      );
+      // 4. Filter valid results
+      const validResults = hydratedResults.filter((r): r is HydratedSearchResult => r !== null);
+
+      // 5. Cache results (before applying filters for broader cache utility)
+      queryCache.set(cacheKey, projectId, validResults);
+
+      const duration = performance.now() - startTime;
+      logger.debug('Search completed (uncached)', {
+        query,
+        projectId,
+        resultCount: validResults.length,
+        durationMs: Math.round(duration),
+      });
+
+      // 6. Apply filters and return
+      return this.applyFilters(validResults, filters);
     } catch (error) {
       logger.error('Search failed', { query, projectId, error });
       throw error;
     }
+  }
+
+  /**
+   * Generate cache key from query (normalized, no filters)
+   */
+  private getCacheKey(query: string): string {
+    // Only use query for cache key to maximize cache hits
+    // Filters applied post-cache
+    return query.trim().toLowerCase();
+  }
+
+  /**
+   * Apply filters to search results
+   */
+  private applyFilters(
+    results: HydratedSearchResult[],
+    filters?: SearchFilters,
+  ): HydratedSearchResult[] {
+    let filtered = results;
+
+    // Apply entity type filter
+    if (filters?.entityTypes && filters.entityTypes.length > 0) {
+      filtered = filtered.filter(r =>
+        filters.entityTypes!.includes(r.entityType as VectorEntityType),
+      );
+    }
+
+    // Apply limit
+    if (filters?.limit) {
+      filtered = filtered.slice(0, filters.limit);
+    }
+
+    // Apply minScore filter
+    if (filters?.minScore !== undefined) {
+      filtered = filtered.filter(r => r.similarity >= filters.minScore!);
+    }
+
+    return filtered;
   }
 
   /**

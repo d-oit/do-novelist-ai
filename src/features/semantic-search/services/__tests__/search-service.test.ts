@@ -6,6 +6,22 @@ import * as vectorService from '@/lib/database/services/vector-service';
 
 // Mock dependencies
 
+vi.mock('@/features/semantic-search/services/query-cache', () => ({
+  queryCache: {
+    get: vi.fn(() => null), // Always return null (cache miss) for tests
+    set: vi.fn(),
+    invalidateProject: vi.fn(),
+    getStats: vi.fn(() => ({
+      totalHits: 0,
+      totalMisses: 0,
+      hitRate: 0,
+      entryCount: 0,
+      oldestEntry: null,
+      newestEntry: null,
+    })),
+  },
+}));
+
 vi.mock('@/lib/database/services/vector-service', () => ({
   semanticSearch: vi.fn(),
 }));
@@ -39,6 +55,8 @@ vi.mock('@/lib/logging/logger', () => ({
   logger: {
     error: vi.fn(),
     warn: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
   },
 }));
 

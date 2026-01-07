@@ -10,8 +10,16 @@ import { BottomNav } from './BottomNav';
 interface MainLayoutProps {
   children: ReactNode;
   className?: string;
-  currentView?: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics';
-  onNavigate?: (view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics') => void;
+  currentView?:
+    | 'dashboard'
+    | 'projects'
+    | 'settings'
+    | 'world-building'
+    | 'plot-engine'
+    | 'metrics';
+  onNavigate?: (
+    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics',
+  ) => void;
 }
 
 const MainLayout: FC<MainLayoutProps> = ({ children, className, currentView, onNavigate }) => {

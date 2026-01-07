@@ -65,6 +65,7 @@ export function analyzePacing(content: string): number {
 
   const actionWords = ['ran', 'jumped', 'shouted', 'grabbed', 'rushed', 'burst', 'slammed'];
   const actionCount = actionWords.reduce((count, word) => {
+    // eslint-disable-next-line security/detect-non-literal-regexp -- word comes from controlled actionWords array
     return count + (content.toLowerCase().match(new RegExp(word, 'g')) ?? []).length;
   }, 0);
 

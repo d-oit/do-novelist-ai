@@ -2,6 +2,7 @@ import { Search, Loader2, X } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { searchService } from '@/features/semantic-search';
+import { queryCache } from '@/features/semantic-search/services/query-cache';
 import type { HydratedSearchResult } from '@/types/embeddings';
 
 import { SearchResults } from './SearchResults';
@@ -23,6 +24,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   const [results, setResults] = useState<HydratedSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cacheStats, setCacheStats] = useState(queryCache.getStats());
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -58,7 +60,20 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
+      // Update cache stats when modal opens
+      setCacheStats(queryCache.getStats());
     }
+  }, [isOpen]);
+
+  // Update cache stats periodically while modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const interval = setInterval(() => {
+      setCacheStats(queryCache.getStats());
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, [isOpen]);
 
   // Handle escape key
@@ -127,7 +142,18 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
         {/* Footer */}
         <div className='flex items-center justify-between border-t border-border bg-secondary/20 px-4 py-2 text-xs text-muted-foreground'>
-          <span>Semantic Search Active</span>
+          <div className='flex items-center gap-3'>
+            <span>Semantic Search</span>
+            {cacheStats.totalHits + cacheStats.totalMisses > 0 && (
+              <span
+                className='flex items-center gap-1'
+                title={`${cacheStats.totalHits} hits, ${cacheStats.totalMisses} misses`}
+              >
+                <span className='text-green-600 dark:text-green-400'>●</span>
+                Cache: {Math.round(cacheStats.hitRate * 100)}%
+              </span>
+            )}
+          </div>
           <div className='flex gap-2'>
             <kbd className='rounded border border-border bg-background px-1.5 py-0.5 font-mono shadow-sm'>
               ESC

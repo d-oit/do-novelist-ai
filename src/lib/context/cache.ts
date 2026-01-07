@@ -66,6 +66,7 @@ export function getCachedContext(projectId: string, hash: string): ProjectContex
   }
 
   // Check if hash matches (data hasn't changed)
+  // eslint-disable-next-line security/detect-possible-timing-attacks -- hash comparison is not security-sensitive, only cache validation
   if (entry.hash !== hash) {
     cacheMisses++;
     logger.debug('Context cache miss - stale data', {

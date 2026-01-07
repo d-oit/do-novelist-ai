@@ -6,8 +6,10 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface BottomNavProps {
-  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics';
-  onNavigate: (view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics') => void;
+  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics';
+  onNavigate: (
+    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics',
+  ) => void;
 }
 
 interface NavButtonProps {

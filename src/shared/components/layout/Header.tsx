@@ -10,6 +10,7 @@ import {
   Sparkles,
   Map,
   BarChart3,
+  ChartColumn,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
@@ -20,8 +21,10 @@ import { zIndex } from '@/lib/z-index.config';
 export interface HeaderProps {
   projectTitle: string;
   onNewProject: () => void;
-  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics';
-  onNavigate: (view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics') => void;
+  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics';
+  onNavigate: (
+    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics',
+  ) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView, onNavigate }) => {
@@ -53,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
   useScrollLock(isMenuOpen);
 
   const handleNav = (
-    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics',
+    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics',
   ): void => {
     onNavigate(view);
     setIsMenuOpen(false);
@@ -64,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
     icon: Icon,
     label,
   }: {
-    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'metrics';
+    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics';
     icon: React.ElementType;
     label: string;
   }): React.ReactElement => {
@@ -159,6 +162,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
             <NavLink view='dashboard' icon={LayoutDashboard} label='Dashboard' />
             <NavLink view='projects' icon={Folder} label='Projects' />
             <NavLink view='world-building' icon={Map} label='World Building' />
+            <NavLink view='plot-engine' icon={ChartColumn} label='Plot Engine' />
             <NavLink view='metrics' icon={BarChart3} label='Metrics' />
             <NavLink view='settings' icon={Settings} label='Settings' />
           </motion.div>
@@ -255,6 +259,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
                   <NavLink view='dashboard' icon={LayoutDashboard} label='Dashboard' />
                   <NavLink view='projects' icon={Folder} label='Projects' />
                   <NavLink view='world-building' icon={Map} label='World Building' />
+                  <NavLink view='plot-engine' icon={ChartColumn} label='Plot Engine' />
                   <NavLink view='metrics' icon={BarChart3} label='Metrics' />
                   <NavLink view='settings' icon={Settings} label='Settings' />
                 </div>

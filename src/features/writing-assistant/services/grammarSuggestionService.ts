@@ -294,6 +294,7 @@ class GrammarSuggestionService {
     const lines = content.split('\n');
     lines.forEach((line, lineIndex) => {
       for (const [misspelled, correct] of Object.entries(misspellings)) {
+        // eslint-disable-next-line security/detect-non-literal-regexp -- misspelled comes from controlled hardcoded dictionary
         const pattern = new RegExp(`\\b${misspelled}\\b`, 'gi');
         const match = line.match(pattern);
         if (match) {
@@ -455,6 +456,7 @@ class GrammarSuggestionService {
 
       // Check for wordy phrases
       for (const [wordyPhrase, replacement] of Object.entries(this.WORDY_PHRASES)) {
+        // eslint-disable-next-line security/detect-non-literal-regexp -- wordyPhrase comes from controlled WORDY_PHRASES constant
         const pattern = new RegExp(`\\b${wordyPhrase}\\b`, 'gi');
         const match = line.match(pattern);
         if (match) {
@@ -493,6 +495,7 @@ class GrammarSuggestionService {
 
     // Check for weak words
     for (const [weakWord, suggestion] of Object.entries(this.WEAK_WORDS)) {
+      // eslint-disable-next-line security/detect-non-literal-regexp -- weakWord comes from controlled WEAK_WORDS constant
       const pattern = new RegExp(`\\b${weakWord}\\b`, 'gi');
       const matches = content.matchAll(pattern);
       for (const match of matches) {
@@ -545,6 +548,7 @@ class GrammarSuggestionService {
     for (const { phrase, replacement } of redundantPhrases) {
       // Escape special regex characters in phrase
       const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // eslint-disable-next-line security/detect-non-literal-regexp -- escapedPhrase is sanitized from controlled redundantPhrases array
       const pattern = new RegExp(`\\b${escapedPhrase}\\b`, 'gi');
       const matches = content.matchAll(pattern);
 
@@ -634,6 +638,7 @@ class GrammarSuggestionService {
     // Check for wordy phrases
     let wordyCount = 0;
     for (const phrase of Object.keys(this.WORDY_PHRASES)) {
+      // eslint-disable-next-line security/detect-non-literal-regexp -- phrase comes from controlled WORDY_PHRASES constant
       const matches = content.match(new RegExp(`\\b${phrase}\\b`, 'gi'));
       wordyCount += matches?.length ?? 0;
     }

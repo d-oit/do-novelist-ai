@@ -361,6 +361,17 @@ export default defineConfig(({ mode }) => {
               return 'vendor-date';
             }
 
+            // AI libraries (can be large)
+            if (id.includes('@google/genai') || id.includes('google-ai')) {
+              return 'vendor-google-ai';
+            }
+            if (id.includes('sanitize-html')) {
+              return 'vendor-sanitize';
+            }
+            if (id.includes('posthog')) {
+              return 'vendor-analytics';
+            }
+
             // Large feature chunks - split by major features
             if (id.includes('src/features/analytics')) {
               return 'feature-analytics';

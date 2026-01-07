@@ -264,6 +264,7 @@ class StyleAnalysisService {
     for (const [tone, indicators] of Object.entries(toneIndicators)) {
       let count = 0;
       for (const indicator of indicators) {
+        // eslint-disable-next-line security/detect-non-literal-regexp -- indicator comes from controlled toneIndicators constant
         const regex = new RegExp(indicator, 'gi');
         const matches = lowerContent.match(regex);
         count += matches?.length ?? 0;
