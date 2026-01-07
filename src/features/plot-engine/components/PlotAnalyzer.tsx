@@ -39,8 +39,12 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = React.memo(({ projectId
           // We could restore it to the state, but for now we'll just trigger fresh analysis
         }
       } catch (err) {
-        // Silently fail - cached data is optional
-        console.warn('Failed to load cached analysis:', err);
+        // Cached data is optional - log warning for debugging
+        logger.warn('Failed to load cached analysis', {
+          component: 'PlotAnalyzer',
+          projectId,
+          error: err,
+        });
       }
     };
 

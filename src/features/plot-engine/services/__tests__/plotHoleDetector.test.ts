@@ -6,6 +6,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 
+import type { PlotHole } from '@/features/plot-engine';
 import { PlotHoleDetector } from '@/features/plot-engine/services/plotHoleDetector';
 import type { Chapter, Character } from '@/shared/types';
 
@@ -31,7 +32,7 @@ describe('PlotHoleDetector', () => {
     });
 
     it('should detect plot holes in chapters with content', async () => {
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -52,9 +53,9 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
-      const characters: Character[] = [
+      const characters = [
         {
           id: 'char-1',
           projectId: 'project-1',
@@ -68,7 +69,7 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Character[];
 
       const result = await detector.detectPlotHoles('project-1', chapters, characters);
 
@@ -87,7 +88,7 @@ describe('PlotHoleDetector', () => {
 
   describe('detectTimelineIssues', () => {
     it('should detect no timeline issues in chronological chapters', () => {
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -108,7 +109,7 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const issues = detector['detectTimelineIssues'](chapters);
 
@@ -117,7 +118,7 @@ describe('PlotHoleDetector', () => {
     });
 
     it('should detect timeline contradictions', () => {
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -138,7 +139,7 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const issues = detector['detectTimelineIssues'](chapters);
 
@@ -156,7 +157,7 @@ describe('PlotHoleDetector', () => {
 
   describe('detectCharacterInconsistencies', () => {
     it('should return empty array when no characters provided', () => {
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -167,7 +168,7 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const issues = detector['detectCharacterInconsistencies'](chapters, []);
 
@@ -175,7 +176,7 @@ describe('PlotHoleDetector', () => {
     });
 
     it('should detect character inconsistencies', () => {
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -196,9 +197,9 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
-      const characters: Character[] = [
+      const characters = [
         {
           id: 'char-1',
           projectId: 'project-1',
@@ -212,7 +213,7 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Character[];
 
       const issues = detector['detectCharacterInconsistencies'](chapters, characters);
 
@@ -227,7 +228,7 @@ describe('PlotHoleDetector', () => {
 
   describe('detectUnresolvedThreads', () => {
     it('should return empty array for minimal content', () => {
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -238,7 +239,7 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const issues = detector['detectUnresolvedThreads'](chapters);
 
@@ -246,7 +247,7 @@ describe('PlotHoleDetector', () => {
     });
 
     it('should detect unresolved plot threads', () => {
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -267,7 +268,7 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const issues = detector['detectUnresolvedThreads'](chapters);
 
@@ -281,7 +282,7 @@ describe('PlotHoleDetector', () => {
 
   describe('detectLogicalInconsistencies', () => {
     it('should return empty array for consistent content', () => {
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -292,7 +293,7 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const issues = detector['detectLogicalInconsistencies'](chapters);
 
@@ -300,7 +301,7 @@ describe('PlotHoleDetector', () => {
     });
 
     it('should detect logical contradictions', () => {
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -321,7 +322,7 @@ describe('PlotHoleDetector', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const issues = detector['detectLogicalInconsistencies'](chapters);
 
@@ -362,7 +363,7 @@ describe('PlotHoleDetector', () => {
         },
       ];
 
-      const score = detector['calculateScore'](plotHoles);
+      const score = detector['calculateScore'](plotHoles as any as PlotHole[]);
 
       expect(score).toBeGreaterThanOrEqual(0);
       expect(score).toBeLessThan(100);
@@ -380,7 +381,7 @@ describe('PlotHoleDetector', () => {
         confidence: 0.9,
       }));
 
-      const score = detector['calculateScore'](manyPlotHoles);
+      const score = detector['calculateScore'](manyPlotHoles as any as PlotHole[]);
 
       expect(score).toBeGreaterThanOrEqual(0);
     });
@@ -407,7 +408,7 @@ describe('PlotHoleDetector', () => {
         },
       ];
 
-      const summary = detector['generateSummary'](plotHoles, 40);
+      const summary = detector['generateSummary'](plotHoles as any as PlotHole[], 40);
 
       expect(summary).toBeTruthy();
       expect(summary.length).toBeGreaterThan(20);
@@ -435,7 +436,7 @@ describe('PlotHoleDetector', () => {
         },
       ];
 
-      const summary = detector['generateSummary'](plotHoles, 75);
+      const summary = detector['generateSummary'](plotHoles as any as PlotHole[], 75);
 
       expect(summary).toContain('2');
     });

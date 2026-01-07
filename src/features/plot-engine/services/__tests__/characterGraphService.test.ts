@@ -30,7 +30,7 @@ describe('CharacterGraphService', () => {
     });
 
     it('should build graph with character nodes', async () => {
-      const characters: Character[] = [
+      const characters = [
         {
           id: 'char-1',
           projectId: 'project-1',
@@ -39,7 +39,6 @@ describe('CharacterGraphService', () => {
           aliases: [],
           appearance: 'Main character',
           personality: 'Brave',
-          arc: '',
           motivations: ['save the world'],
           conflicts: [],
           skills: [],
@@ -59,7 +58,6 @@ describe('CharacterGraphService', () => {
           aliases: [],
           appearance: 'Friend',
           personality: 'Loyal',
-          arc: '',
           motivations: ['help Alice'],
           conflicts: [],
           skills: [],
@@ -71,9 +69,9 @@ describe('CharacterGraphService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Character[] as any as Character[];
 
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -84,7 +82,7 @@ describe('CharacterGraphService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const result = await service.buildCharacterGraph('project-1', chapters, characters);
 
@@ -94,7 +92,7 @@ describe('CharacterGraphService', () => {
     });
 
     it('should detect relationships between characters', async () => {
-      const characters: Character[] = [
+      const characters = [
         {
           id: 'char-1',
           projectId: 'project-1',
@@ -121,9 +119,9 @@ describe('CharacterGraphService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Character[];
 
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -134,7 +132,7 @@ describe('CharacterGraphService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const result = await service.buildCharacterGraph('project-1', chapters, characters);
 
@@ -451,7 +449,7 @@ describe('CharacterGraphService', () => {
 
   describe('relationship type detection', () => {
     it('should detect romantic relationships', async () => {
-      const characters: Character[] = [
+      const characters = [
         {
           id: 'char-1',
           projectId: 'project-1',
@@ -478,9 +476,9 @@ describe('CharacterGraphService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Character[];
 
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -491,7 +489,7 @@ describe('CharacterGraphService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const result = await service.buildCharacterGraph('project-1', chapters, characters);
 
@@ -508,7 +506,7 @@ describe('CharacterGraphService', () => {
     });
 
     it('should detect enemy relationships', async () => {
-      const characters: Character[] = [
+      const characters = [
         {
           id: 'char-1',
           projectId: 'project-1',
@@ -535,9 +533,9 @@ describe('CharacterGraphService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Character[];
 
-      const chapters: Chapter[] = [
+      const chapters = [
         {
           id: 'ch-1',
           projectId: 'project-1',
@@ -548,7 +546,7 @@ describe('CharacterGraphService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Chapter[];
 
       const result = await service.buildCharacterGraph('project-1', chapters, characters);
 
@@ -562,7 +560,7 @@ describe('CharacterGraphService', () => {
 
   describe('character importance calculation', () => {
     it('should assign higher importance to protagonists', async () => {
-      const characters: Character[] = [
+      const characters = [
         {
           id: 'char-1',
           projectId: 'project-1',
@@ -589,7 +587,7 @@ describe('CharacterGraphService', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      ];
+      ] as any as Character[];
 
       const result = await service.buildCharacterGraph('project-1', [], characters);
 
