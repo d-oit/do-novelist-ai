@@ -9,6 +9,7 @@ export { CharacterGraphView } from './CharacterGraphView';
 export { PlotHoleDetectorView } from './PlotHoleDetectorView';
 export { PlotGenerator } from './PlotGenerator';
 export { PlotEngineDashboard } from './PlotEngineDashboard';
+export { FeedbackCollector } from './FeedbackCollector';
 
 // Loading States
 export * from './LoadingStates';

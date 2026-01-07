@@ -17,6 +17,7 @@ import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 
 import { CharacterGraphView } from './CharacterGraphView';
+import { FeedbackCollector } from './FeedbackCollector';
 import { PlotAnalyzer } from './PlotAnalyzer';
 import { PlotGenerator } from './PlotGenerator';
 import { PlotHoleDetectorView } from './PlotHoleDetectorView';
@@ -161,6 +162,11 @@ export const PlotEngineDashboard: React.FC<PlotEngineDashboardProps> = React.mem
               </div>
             </Card>
           )}
+        </div>
+
+        {/* Feedback Collector */}
+        <div className='mt-8 flex justify-center'>
+          <FeedbackCollector component='PlotEngineDashboard' className='max-w-2xl' />
         </div>
       </div>
     );
