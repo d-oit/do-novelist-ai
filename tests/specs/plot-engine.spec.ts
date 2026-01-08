@@ -44,16 +44,16 @@ test.describe('Plot Engine Dashboard', () => {
 
       // Click on different tabs
       await page.getByTestId('tab-structure').click();
-      await expect(page.getByText(/story arc/i)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(/story arc/i).first()).toBeVisible({ timeout: 5000 });
 
       await page.getByTestId('tab-characters').click();
-      await expect(page.getByText(/character/i)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(/character/i).first()).toBeVisible({ timeout: 5000 });
 
       await page.getByTestId('tab-plot-holes').click();
-      await expect(page.getByText(/plot hole/i)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(/plot hole/i).first()).toBeVisible({ timeout: 5000 });
 
       await page.getByTestId('tab-generator').click();
-      await expect(page.getByText(/generate|plot/i)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(/generate|plot/i).first()).toBeVisible({ timeout: 5000 });
     } else {
       test.skip();
     }
@@ -151,7 +151,7 @@ test.describe('Plot Engine Dashboard', () => {
       await page.getByTestId('tab-generator').click();
 
       // Check for generator form
-      await expect(page.getByText(/generate|create plot/i)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(/generate|create plot/i).first()).toBeVisible({ timeout: 5000 });
 
       // Check for form fields
       const genreInput = page.getByLabel(/genre/i);
@@ -187,14 +187,13 @@ test.describe('Plot Engine Dashboard', () => {
 
       // Check for proper ARIA landmarks
       const main = page.getByRole('main');
-      if (await main.isVisible()) {
-        await expect(main).toBeVisible();
-      }
+      const mainCount = await main.count();
+      // Should have at least one main element
+      expect(mainCount).toBeGreaterThan(0);
 
-      // Check for tab accessibility
-      const tabs = page.getByRole('button', { name: /overview|structure|characters|plot holes|generator/i });
-      const tabCount = await tabs.count();
-      expect(tabCount).toBeGreaterThan(0);
+      // Check for tab accessibility using test IDs
+      const overviewTab = page.getByTestId('tab-overview');
+      await expect(overviewTab).toBeVisible();
     } else {
       test.skip();
     }

@@ -155,7 +155,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
           <motion.div
             id='navigation'
             className='hidden items-center gap-2 md:flex'
-            role='menubar'
+            role='navigation'
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
