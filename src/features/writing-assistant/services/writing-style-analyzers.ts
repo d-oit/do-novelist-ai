@@ -31,8 +31,8 @@ export function analyzeStyle(content: string): StyleProfile {
 
   const passiveIndicators = ['was', 'were', 'been', 'being'];
   const passiveCount = passiveIndicators.reduce((count, indicator) => {
-    // eslint-disable-next-line security/detect-non-literal-regexp -- indicator comes from controlled passiveIndicators array
     return (
+      // eslint-disable-next-line security/detect-non-literal-regexp -- indicator comes from controlled passiveIndicators array
       count + (content.toLowerCase().match(new RegExp(`\\b${indicator}\\b`, 'g')) ?? []).length
     );
   }, 0);
@@ -252,8 +252,8 @@ export function analyzeTransitions(content: string): TransitionAnalysis {
   ];
 
   const transitionCount = transitions.reduce((count, transition) => {
-    // eslint-disable-next-line security/detect-non-literal-regexp -- transition comes from controlled transitions array
     return (
+      // eslint-disable-next-line security/detect-non-literal-regexp -- transition comes from controlled transitions array
       count + (content.toLowerCase().match(new RegExp(`\\b${transition}\\b`, 'g')) ?? []).length
     );
   }, 0);
