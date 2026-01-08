@@ -17,9 +17,13 @@ test.describe('Semantic Search E2E Tests', () => {
   });
 
   test('should open search modal with Cmd+K keyboard shortcut', async ({ page }) => {
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Trigger keyboard shortcut (Cmd+K on Mac, Ctrl+K on Windows/Linux)
     const isMac = process.platform === 'darwin';
-    await page.keyboard.press(isMac ? 'Meta+KeyK' : 'Control+KeyK');
+    await page.keyboard.press(isMac ? 'Meta+k' : 'Control+k');
 
     // Check if search modal appears
     const searchModal = page.getByTestId('search-modal');
@@ -27,8 +31,12 @@ test.describe('Semantic Search E2E Tests', () => {
   });
 
   test('should have search input field in modal', async ({ page }) => {
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Open search modal
-    await page.keyboard.press('Control+KeyK');
+    await page.keyboard.press('Control+k');
 
     // Wait for modal to appear
     const searchModal = page.getByTestId('search-modal');
@@ -41,8 +49,12 @@ test.describe('Semantic Search E2E Tests', () => {
   });
 
   test('should close search modal with Escape key', async ({ page }) => {
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Open search modal
-    await page.keyboard.press('Control+KeyK');
+    await page.keyboard.press('Control+k');
 
     const searchModal = page.getByTestId('search-modal');
     await expect(searchModal).toBeVisible({ timeout: 3000 });
@@ -55,8 +67,12 @@ test.describe('Semantic Search E2E Tests', () => {
   });
 
   test('should allow typing in search input', async ({ page }) => {
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Open search modal
-    await page.keyboard.press('Control+KeyK');
+    await page.keyboard.press('Control+k');
 
     const searchInput = page.getByTestId('search-input');
     await expect(searchInput).toBeVisible({ timeout: 3000 });
@@ -79,8 +95,12 @@ test.describe('Semantic Search E2E Tests', () => {
       });
     });
 
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Open search modal
-    await page.keyboard.press('Control+KeyK');
+    await page.keyboard.press('Control+k');
 
     const searchInput = page.getByTestId('search-input');
     await searchInput.fill('test query');
@@ -106,8 +126,12 @@ test.describe('Semantic Search E2E Tests', () => {
       });
     });
 
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Open search modal
-    await page.keyboard.press('Control+KeyK');
+    await page.keyboard.press('Control+k');
 
     const searchInput = page.getByTestId('search-input');
     await searchInput.fill('nonexistent query');
@@ -155,8 +179,12 @@ test.describe('Semantic Search E2E Tests', () => {
       });
     });
 
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Open search modal
-    await page.keyboard.press('Control+KeyK');
+    await page.keyboard.press('Control+k');
 
     const searchInput = page.getByTestId('search-input');
     await searchInput.fill('protagonist');
@@ -186,8 +214,12 @@ test.describe('Semantic Search E2E Tests', () => {
       });
     });
 
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Open search modal
-    await page.keyboard.press('Control+KeyK');
+    await page.keyboard.press('Control+k');
 
     const searchInput = page.getByTestId('search-input');
     await searchInput.fill('error query');
@@ -235,8 +267,12 @@ test.describe('Semantic Search E2E Tests', () => {
       });
     });
 
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Open search modal
-    await page.keyboard.press('Control+KeyK');
+    await page.keyboard.press('Control+k');
 
     const searchInput = page.getByTestId('search-input');
     await searchInput.fill('character');
@@ -255,8 +291,12 @@ test.describe('Semantic Search E2E Tests', () => {
   });
 
   test('should have proper ARIA labels for accessibility', async ({ page }) => {
+    // Ensure page is focused
+    await page.click('body');
+    await page.waitForTimeout(100);
+
     // Open search modal
-    await page.keyboard.press('Control+KeyK');
+    await page.keyboard.press('Control+k');
 
     const searchModal = page.getByTestId('search-modal');
     await expect(searchModal).toBeVisible({ timeout: 3000 });
