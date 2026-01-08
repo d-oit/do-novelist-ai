@@ -17,7 +17,7 @@ test.describe('Plot Engine Dashboard', () => {
 
   test('should display plot engine dashboard', async ({ page }) => {
     // Navigate to plot engine (assuming there's a navigation element)
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -37,7 +37,7 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should switch between tabs', async ({ page }) => {
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -60,7 +60,7 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should display empty state when no analysis run', async ({ page }) => {
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -77,7 +77,7 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should handle loading states', async ({ page }) => {
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -98,7 +98,7 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should be keyboard accessible', async ({ page }) => {
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -121,7 +121,7 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should display plot analyzer component', async ({ page }) => {
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -142,7 +142,7 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should display plot generator component', async ({ page }) => {
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -164,7 +164,7 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should handle errors gracefully', async ({ page }) => {
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -180,7 +180,7 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should have proper ARIA labels', async ({ page }) => {
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -204,7 +204,7 @@ test.describe('Plot Engine Dashboard', () => {
     // Test mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
 
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -231,7 +231,7 @@ test.describe('Plot Engine Accessibility', () => {
   test('should pass automated accessibility checks', async ({ page }) => {
     await page.goto('/');
 
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();
@@ -249,7 +249,7 @@ test.describe('Plot Engine Accessibility', () => {
   test('should support screen reader navigation', async ({ page }) => {
     await page.goto('/');
 
-    const plotEngineLink = page.getByRole('link', { name: /plot engine/i });
+    const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
       await plotEngineLink.click();

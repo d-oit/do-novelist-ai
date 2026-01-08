@@ -25,6 +25,7 @@ interface MainLayoutProps {
 const MainLayout: FC<MainLayoutProps> = ({ children, className, currentView, onNavigate }) => {
   return (
     <motion.div
+      data-testid='app-ready'
       className={cn(
         'relative flex min-h-screen flex-col overflow-hidden font-sans text-foreground selection:bg-primary/20',
         className,
