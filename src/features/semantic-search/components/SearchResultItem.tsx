@@ -52,6 +52,7 @@ export const SearchResultItem: React.FC<SearchResultItemProps> = ({
 
   return (
     <div
+      data-testid='search-result-item'
       onClick={() => onClick(result)}
       className={cn(
         'group flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition-colors hover:border-border hover:bg-accent/50',

@@ -93,6 +93,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   return (
     <div className='fixed inset-0 z-50 flex items-start justify-center bg-background/80 p-4 backdrop-blur-sm sm:p-12 md:pt-32'>
       <div
+        data-testid='search-modal'
         className='animate-in fade-in zoom-in-95 w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-card shadow-2xl duration-200'
         onClick={e => e.stopPropagation()}
       >
@@ -100,13 +101,19 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         <div className='relative flex items-center border-b border-border px-4 py-3'>
           <Search className='mr-3 h-5 w-5 text-muted-foreground' />
           <input
+            data-testid='search-input'
             ref={inputRef}
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder='Ask AI or search your story...'
             className='flex-1 bg-transparent text-lg placeholder:text-muted-foreground focus:outline-none'
           />
-          {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin text-muted-foreground' />}
+          {isLoading && (
+            <Loader2
+              data-testid='search-loading'
+              className='mr-2 h-4 w-4 animate-spin text-muted-foreground'
+            />
+          )}
           <button
             onClick={onClose}
             className='rounded-full p-1 text-muted-foreground hover:bg-secondary hover:text-foreground'
