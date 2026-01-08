@@ -64,6 +64,8 @@ const MainLayout: FC<MainLayoutProps> = ({ children, className, currentView, onN
 
       {/* Main content with proper z-index and stagger animation */}
       <motion.div
+        id='main-content'
+        role='main'
         className='relative z-10 flex min-h-screen flex-col pb-16 md:pb-0'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

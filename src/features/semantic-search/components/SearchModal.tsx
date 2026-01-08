@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import { searchService } from '@/features/semantic-search';
 import { queryCache } from '@/features/semantic-search/services/query-cache';
+import { logger } from '@/lib/logging/logger';
 import type { HydratedSearchResult } from '@/types/embeddings';
 
 import { SearchResults } from './SearchResults';
@@ -44,7 +45,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           const searchResults = await searchService.search(query, projectId);
           setResults(searchResults);
         } catch (err) {
-          console.error('Search failed:', err);
+          logger.error('Search failed', { component: 'SearchModal', query, projectId, error: err });
           setError('Failed to perform search. Please try again.');
         } finally {
           setIsLoading(false);

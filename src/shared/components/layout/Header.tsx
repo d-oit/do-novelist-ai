@@ -153,6 +153,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
 
           {/* Desktop Navigation */}
           <motion.div
+            id='navigation'
             className='hidden items-center gap-2 md:flex'
             role='menubar'
             initial={{ opacity: 0, scale: 0.9 }}
