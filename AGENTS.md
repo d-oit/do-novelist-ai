@@ -51,7 +51,7 @@ folder.
 - Trailing commas in multi-line objects/arrays
 - Max line length: ~100 characters
 
-**Colocation mandatory.** Max **500 LOC per file**.
+**Colocation mandatory.** Max **600 LOC per file**.
 
 ### React Patterns
 

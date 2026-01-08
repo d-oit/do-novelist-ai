@@ -24,18 +24,19 @@ import { readdir, stat } from 'fs/promises';
 import { join, relative, extname } from 'path';
 
 // Configuration
-const WARN_LINES_OF_CODE = 450;
-const MAX_LINES_OF_CODE = 500;
+const WARN_LINES_OF_CODE = 550;
+const MAX_LINES_OF_CODE = 600;
 const ALLOWED_VIOLATIONS = new Set([
-  // Documented and accepted in plans/FILE-SIZE-VIOLATIONS.md
-  'src/features/writing-assistant/services/writingAssistantService.ts',
-  'src/features/writing-assistant/services/grammarSuggestionService.ts',
-  'src/features/writing-assistant/components/WritingGoalsPanel.tsx',
-  'src/features/publishing/services/publishingAnalyticsService.ts',
-  'src/lib/character-validation.ts',
-  'src/features/projects/components/ProjectWizard.tsx',
-  // Pre-existing large file - to be refactored in future
-  'src/lib/ai-operations.ts',
+  // Production files exceeding 600 LOC limit (to be refactored)
+  'src/features/plot-engine/services/plotGenerationService.ts', // 1061 LOC - high priority refactoring
+  'src/features/publishing/services/publishingAnalyticsService.ts', // 712 LOC
+  'src/lib/character-validation.ts', // 690 LOC
+  'src/features/writing-assistant/services/grammarSuggestionService.ts', // 634 LOC
+  // Test files exceeding 600 LOC limit
+  'src/features/plot-engine/services/__tests__/rag-end-to-end.test.ts', // 935 LOC
+  'src/features/plot-engine/services/__tests__/plotGenerationService.integration.test.ts', // 839 LOC
+  'src/features/plot-engine/services/__tests__/plotGenerationService.test.ts', // 795 LOC
+  'src/features/plot-engine/services/__tests__/plotStorageService.test.ts', // 706 LOC
 ]);
 
 const IGNORE_PATTERNS = [

@@ -137,7 +137,8 @@
       "Bash(git diff:*)",
       "Bash(pnpm update:*)",
       "Bash(pnpm list:*)",
-      "Bash(pnpm why:*)"
+      "Bash(pnpm why:*)",
+      "Bash(npm run check:file-size:*)"
     ],
     "deny": [],
     "ask": []
