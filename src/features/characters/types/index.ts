@@ -89,7 +89,7 @@ export const CharacterSchema = z.object({
   traits: z.array(CharacterTraitSchema).max(20),
 
   // Relationships
-  relationships: z.array(z.string().uuid()), // IDs of related characters
+  relationships: z.array(CharacterRelationshipSchema).default([]),
 
   // Metadata
   version: z.number().default(1),
@@ -98,7 +98,7 @@ export const CharacterSchema = z.object({
   notes: z.string().max(2000).optional(),
   createdAt: z.number(),
   updatedAt: z.number(),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.string().url().optional().nullable(),
   aiModel: z.string().optional(),
 });
 

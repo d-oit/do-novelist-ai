@@ -137,7 +137,7 @@ export function useWritingAssistant(
         // Background DB sync
         if (enablePersistence) {
           try {
-            const dbConfig = writingAssistantDb.loadPreferences();
+            const dbConfig = await writingAssistantDb.loadPreferences();
             if (dbConfig != null && localConfig == null) {
               setState(prev => ({
                 ...prev,
@@ -174,7 +174,7 @@ export function useWritingAssistant(
         localStorage.setItem('novelist_writing_assistant_config', JSON.stringify(config));
         if (enablePersistence) {
           try {
-            writingAssistantDb.syncPreferences(config);
+            void writingAssistantDb.syncPreferences(config);
           } catch (error) {
             logger.warn('Failed to sync preferences to database', {
               component: 'useWritingAssistant',
@@ -220,7 +220,7 @@ export function useWritingAssistant(
         // Background persistence
         if (enablePersistence && projectId) {
           try {
-            writingAssistantDb.saveAnalysisHistory(
+            void writingAssistantDb.saveAnalysisHistory(
               analysis,
               projectId,
               appliedSuggestions.current.size,
@@ -370,7 +370,7 @@ export function useWritingAssistant(
       // Background persistence
       if (enablePersistence && projectId && chapterId) {
         try {
-          writingAssistantDb.recordSuggestionFeedback(
+          void writingAssistantDb.recordSuggestionFeedback(
             suggestion,
             'accepted',
             chapterId,
@@ -419,7 +419,7 @@ export function useWritingAssistant(
 
       if (enablePersistence && projectId && chapterId) {
         try {
-          writingAssistantDb.recordSuggestionFeedback(
+          void writingAssistantDb.recordSuggestionFeedback(
             suggestion,
             'dismissed',
             chapterId,

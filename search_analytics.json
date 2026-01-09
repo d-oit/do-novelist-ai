@@ -1,0 +1,29 @@
+{
+  "total_searches": 2,
+  "cache_hits": 0,
+  "cache_misses": 2,
+  "avg_latency_ms": 37836.83133125305,
+  "quality_scores": [
+    0.3798636363636364,
+    0.8805000000000001
+  ],
+  "failed_validations": 1,
+  "queries": [
+    {
+      "query": "search for AI model selection strategies OpenAI Claude GPT-4 2026 capabilities comparison",
+      "timestamp": "2026-01-09T07:55:06.090974",
+      "cached": false,
+      "latency_ms": 32137.863159179688,
+      "quality": 0.3798636363636364,
+      "valid": false
+    },
+    {
+      "query": "search for rate limiting AI gateway integration patterns 2026",
+      "timestamp": "2026-01-09T07:56:54.653345",
+      "cached": false,
+      "latency_ms": 43535.799503326416,
+      "quality": 0.8805000000000001,
+      "valid": true
+    }
+  ]
+}

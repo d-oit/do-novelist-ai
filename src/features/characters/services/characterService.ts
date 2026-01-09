@@ -1,176 +1,67 @@
 import { semanticSyncService } from '@/features/semantic-search';
+import { characterService as tursoCharacterService } from '@/lib/database/services';
 import { type Character, type CharacterRelationship } from '@/types';
 
 /**
  * Character Service
  *
- * Handles all character data persistence using IndexedDB.
- * Singleton pattern ensures single database connection.
+ * Handles all character data persistence using Turso database.
+ * Delegates to Turso service layer.
  */
 class CharacterService {
-  private readonly dbName = 'novelist-characters';
-  private readonly version = 1;
+  // Legacy properties removed - now fully using Turso
   private db: IDBDatabase | null = null;
 
   /**
    * Initialize the database
    */
   public async init(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.version);
-
-      request.onerror = (): void =>
-        reject(new Error(request.error?.message ?? 'Failed to open database'));
-      request.onsuccess = (): void => {
-        this.db = request.result;
-        resolve();
-      };
-
-      request.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
-        const db = (event.target as IDBOpenDBRequest).result;
-
-        // Characters store
-        if (!db.objectStoreNames.contains('characters')) {
-          const store = db.createObjectStore('characters', { keyPath: 'id' });
-          store.createIndex('projectId', 'projectId', { unique: false });
-          store.createIndex('role', 'role', { unique: false });
-        }
-
-        // Relationships store
-        if (!db.objectStoreNames.contains('relationships')) {
-          const relStore = db.createObjectStore('relationships', { keyPath: 'id' });
-          relStore.createIndex('characterAId', 'characterAId', { unique: false });
-          relStore.createIndex('characterBId', 'characterBId', { unique: false });
-        }
-      };
-    });
+    // Delegate to Turso service
+    await tursoCharacterService.init();
   }
 
   /**
    * Get all characters for a project
    */
   public async getAll(projectId: string): Promise<Character[]> {
-    if (!this.db) await this.init();
-
-    return new Promise<Character[]>((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
-        return;
-      }
-      const transaction = this.db.transaction(['characters'], 'readonly');
-      const store = transaction.objectStore('characters');
-      const index = store.index('projectId');
-      const request = index.getAll(projectId);
-
-      request.onsuccess = (): void => {
-        resolve(request.result);
-      };
-      request.onerror = (): void =>
-        reject(new Error(request.error?.message ?? 'Failed to get characters'));
-    });
+    return tursoCharacterService.getCharactersByProjectId(projectId);
   }
 
   /**
    * Get a single character by ID
    */
   public async getById(id: string): Promise<Character | null> {
-    if (!this.db) await this.init();
-
-    return new Promise<Character | null>((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
-        return;
-      }
-      const transaction = this.db.transaction(['characters'], 'readonly');
-      const store = transaction.objectStore('characters');
-      const request = store.get(id);
-
-      request.onsuccess = (): void => {
-        resolve(request.result as Character | null);
-      };
-      request.onerror = (): void =>
-        reject(new Error(request.error?.message ?? 'Failed to get character'));
-    });
+    return tursoCharacterService.getCharacterById(id);
   }
 
   /**
    * Create a new character
    */
   public async create(character: Character): Promise<Character> {
-    if (!this.db) await this.init();
-
-    return new Promise<Character>((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
-        return;
-      }
-      const transaction = this.db.transaction(['characters'], 'readwrite');
-      const store = transaction.objectStore('characters');
-      const request = store.add(character);
-
-      request.onsuccess = (): void => {
-        semanticSyncService.syncCharacter(character.projectId, character).catch(console.error);
-        resolve(character);
-      };
-      request.onerror = (): void =>
-        reject(new Error(request.error?.message ?? 'Failed to create character'));
-    });
+    const created = await tursoCharacterService.createCharacter(character);
+    // Sync to semantic search
+    await semanticSyncService.syncCharacter(character.projectId, created).catch(console.error);
+    return created;
   }
 
   /**
    * Update an existing character
    */
   public async update(id: string, data: Partial<Character>): Promise<Character> {
-    if (!this.db) await this.init();
-
-    const existing = await this.getById(id);
-    if (!existing) throw new Error(`Character ${id} not found`);
-
-    const updated: Character = {
-      ...existing,
-      ...data,
-      updatedAt: Date.now(),
-    };
-
-    return new Promise<Character>((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
-        return;
-      }
-      const transaction = this.db.transaction(['characters'], 'readwrite');
-      const store = transaction.objectStore('characters');
-      const request = store.put(updated);
-
-      request.onsuccess = (): void => {
-        semanticSyncService.syncCharacter(updated.projectId, updated).catch(console.error);
-        resolve(updated);
-      };
-      request.onerror = (): void =>
-        reject(new Error(request.error?.message ?? 'Failed to update character'));
-    });
+    await tursoCharacterService.updateCharacter(id, data);
+    const updated = await this.getById(id);
+    if (!updated) throw new Error(`Character ${id} not found after update`);
+    
+    // Sync to semantic search
+    await semanticSyncService.syncCharacter(updated.projectId, updated).catch(console.error);
+    return updated;
   }
 
   /**
    * Delete a character
    */
   public async delete(id: string): Promise<void> {
-    if (!this.db) await this.init();
-
-    return new Promise<void>((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not initialized'));
-        return;
-      }
-      const transaction = this.db.transaction(['characters'], 'readwrite');
-      const store = transaction.objectStore('characters');
-      const request = store.delete(id);
-
-      request.onsuccess = (): void => {
-        resolve();
-      };
-      request.onerror = (): void =>
-        reject(new Error(request.error?.message ?? 'Failed to delete character'));
-    });
+    await tursoCharacterService.deleteCharacter(id);
   }
 
   /**
