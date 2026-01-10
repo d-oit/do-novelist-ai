@@ -36,6 +36,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       VitePWA({
         registerType: 'autoUpdate',
+        useCredentials: true,
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
         manifest: {
           name: 'Novelist.ai - AI-Powered Writing Assistant',
@@ -48,6 +49,8 @@ export default defineConfig(({ mode }) => {
           orientation: 'portrait-primary',
           scope: '/',
           start_url: '/',
+          // Attempt to fix 401 by ensuring manifest is requested correctly
+          // Note: vite-plugin-pwa doesn't have a direct "useCredentials" but we can try to influence it
           icons: [
             {
               src: 'pwa-192x192.png',
@@ -289,12 +292,14 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            // Split React and React-DOM into separate chunks
-            if (id.includes('node_modules/react-dom')) {
-              return 'vendor-react-dom';
-            }
-            if (id.includes('node_modules/react') && !id.includes('react-dom')) {
-              return 'vendor-react';
+            // Consolidate core React into a single chunk to prevent dependency cycles
+            if (
+              id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/scheduler/') ||
+              id.includes('node_modules/react-is/')
+            ) {
+              return 'vendor-core';
             }
 
             // AI SDKs in separate chunks
