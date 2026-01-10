@@ -133,7 +133,7 @@ jobs:
             echo "| Firefox | ${{ needs.e2e-tests.result }} |"
             echo "| WebKit | ${{ needs.e2e-tests.result }} |"
             echo ""
-            
+
             if [ "${{ needs.e2e-tests.result }}" == "success" ]; then
               echo "## ✅ Status: ALL TESTS PASSED"
               echo "All E2E tests completed successfully across all browsers!"
@@ -150,8 +150,8 @@ jobs:
           script: |
             const status = '${{ needs.e2e-tests.result }}';
             const emoji = status === 'success' ? '✅' : '❌';
-            const message = status === 'success' 
-              ? 'All E2E tests passed across Chromium, Firefox, and WebKit!' 
+            const message = status === 'success'
+              ? 'All E2E tests passed across Chromium, Firefox, and WebKit!'
               : 'Some E2E tests failed. Please review the test reports.';
 
             github.rest.issues.createComment({
