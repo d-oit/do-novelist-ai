@@ -382,6 +382,23 @@ class WorldBuildingService {
     }
   }
 
+  public async getLocationById(id: string): Promise<Location | null> {
+    const db = getDrizzleClient();
+    if (!db) return null;
+
+    try {
+      const rows = await db.select().from(locations).where(eq(locations.id, id));
+      return rows.length > 0 && rows[0] ? this.mapRowToLocation(rows[0]) : null;
+    } catch (error) {
+      logger.error(
+        'Failed to get location by ID',
+        { component: 'WorldBuildingService' },
+        error as Error,
+      );
+      return null;
+    }
+  }
+
   public async deleteLocation(id: string): Promise<void> {
     const db = getDrizzleClient();
     if (!db) throw new Error('Database not configured');
@@ -482,6 +499,23 @@ class WorldBuildingService {
         error as Error,
       );
       throw error;
+    }
+  }
+
+  public async getCultureById(id: string): Promise<Culture | null> {
+    const db = getDrizzleClient();
+    if (!db) return null;
+
+    try {
+      const rows = await db.select().from(cultures).where(eq(cultures.id, id));
+      return rows.length > 0 && rows[0] ? this.mapRowToCulture(rows[0]) : null;
+    } catch (error) {
+      logger.error(
+        'Failed to get culture by ID',
+        { component: 'WorldBuildingService' },
+        error as Error,
+      );
+      return null;
     }
   }
 

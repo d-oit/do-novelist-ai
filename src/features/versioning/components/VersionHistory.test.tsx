@@ -61,6 +61,7 @@ const mockVersions = [
     contentHash: 'hash1',
     wordCount: 5,
     charCount: 25,
+    versionNumber: 1,
   },
   {
     id: 'version-2',
@@ -76,6 +77,7 @@ const mockVersions = [
     contentHash: 'hash2',
     wordCount: 8,
     charCount: 40,
+    versionNumber: 2,
   },
 ];
 

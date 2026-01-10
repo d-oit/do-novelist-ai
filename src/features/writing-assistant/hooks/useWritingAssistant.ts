@@ -51,7 +51,7 @@ interface UseWritingAssistantReturn extends WritingAssistantState, WritingAssist
   isAnalyzingLocal: boolean;
   lastAnalyzedAt?: Date;
   analysisError?: string;
-  getWritingAnalytics: (timeRange?: 'week' | 'month' | 'year') => {
+  getWritingAnalytics: (timeRange?: 'week' | 'month' | 'year') => Promise<{
     progressMetrics: WritingProgressMetrics[];
     improvementTrends: {
       readabilityTrend: number;
@@ -63,7 +63,7 @@ interface UseWritingAssistantReturn extends WritingAssistantState, WritingAssist
       acceptanceRate: number;
       commonPatterns: string[];
     };
-  };
+  }>;
   suggestionAcceptanceRate: number;
   learningInsights: {
     preferredCategories: string[];
@@ -118,7 +118,7 @@ export function useWritingAssistant(
 
   // Configuration management
   useEffect(() => {
-    const loadConfiguration = () => {
+    const loadConfiguration = async (): Promise<void> => {
       try {
         const localConfig = localStorage.getItem('novelist_writing_assistant_config');
         const isActive = localStorage.getItem('novelist_writing_assistant_active') === 'true';
@@ -465,7 +465,7 @@ export function useWritingAssistant(
   }, []);
 
   const getWritingAnalytics = useCallback(
-    (timeRange: 'week' | 'month' | 'year' = 'month') => {
+    async (timeRange: 'week' | 'month' | 'year' = 'month') => {
       if (!enablePersistence || !projectId) {
         return {
           progressMetrics: [],
@@ -475,7 +475,7 @@ export function useWritingAssistant(
       }
 
       try {
-        return writingAssistantDb.getWritingAnalytics(projectId, timeRange);
+        return await writingAssistantDb.getWritingAnalytics(projectId);
       } catch (error) {
         logger.error('Failed to get writing analytics', {
           component: 'useWritingAssistant',
