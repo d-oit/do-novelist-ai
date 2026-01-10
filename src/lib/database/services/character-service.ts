@@ -10,7 +10,6 @@ import { logger } from '@/lib/logging/logger';
 import { generateSecureId } from '@/lib/secure-random';
 import type { Character, CharacterRelationship } from '@/types';
 
-
 class CharacterService {
   /**
    * Initialize the service (no-op for Turso, connection is managed by getDrizzleClient)
@@ -29,9 +28,15 @@ class CharacterService {
   private mapRowToCharacter(row: CharacterRow): Character {
     // Reconstruct traits from stored JSON columns
     const traits = [
-      ...(row.personality?.map(name => ({ category: 'personality', name, description: '', intensity: 5 } as const)) || []),
-      ...(row.skills?.map(name => ({ category: 'skill', name, description: '', intensity: 5 } as const)) || []),
-      ...(row.weaknesses?.map(name => ({ category: 'flaw', name, description: '', intensity: 5 } as const)) || [])
+      ...(row.personality?.map(
+        name => ({ category: 'personality', name, description: '', intensity: 5 }) as const,
+      ) || []),
+      ...(row.skills?.map(
+        name => ({ category: 'skill', name, description: '', intensity: 5 }) as const,
+      ) || []),
+      ...(row.weaknesses?.map(
+        name => ({ category: 'flaw', name, description: '', intensity: 5 }) as const,
+      ) || []),
     ];
 
     // Safe date conversion
@@ -45,23 +50,21 @@ class CharacterService {
       aliases: [], // Missing in DB, default to empty
       role: row.role as Character['role'],
       // Map singular fields
-      motivation: '', 
+      motivation: '',
       goal: row.goals?.[0] ?? '',
-      conflict: row.conflicts?.[0] ?? '', 
-      
+      conflict: row.conflicts?.[0] ?? '',
+
       // Mapped fields
       summary: row.description || undefined, // Map DB description -> Domain summary
       backstory: row.background || undefined,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      arc: row.arc as any || undefined, 
+      arc: (row.arc as Character['arc']) || 'flat',
       age: row.age || undefined,
       occupation: row.occupation || undefined,
-      
-      // Traits aggregated
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      traits: traits as any, 
 
-      // Relationships 
+      // Traits aggregated
+      traits: traits as Character['traits'],
+
+      // Relationships
       relationships: (row.relationships as CharacterRelationship[]) || [],
 
       // Metadata
@@ -72,7 +75,7 @@ class CharacterService {
       createdAt: created,
       updatedAt: updated,
       // Optional fields defaulting to empty/undefined
-      aiModel: undefined
+      aiModel: undefined,
     };
   }
 
@@ -90,7 +93,9 @@ class CharacterService {
       const now = new Date().toISOString();
 
       // Extract traits to columns
-      const personality = character.traits.filter(t => t.category === 'personality').map(t => t.name);
+      const personality = character.traits
+        .filter(t => t.category === 'personality')
+        .map(t => t.name);
       const skills = character.traits.filter(t => t.category === 'skill').map(t => t.name);
       const weaknesses = character.traits.filter(t => t.category === 'flaw').map(t => t.name);
 
@@ -139,7 +144,7 @@ class CharacterService {
 
     try {
       const rows = await db.select().from(characters).where(eq(characters.projectId, projectId));
-      return rows.map((row) => this.mapRowToCharacter(row));
+      return rows.map(row => this.mapRowToCharacter(row));
     } catch (error) {
       logger.error(
         'Failed to get characters',
@@ -193,16 +198,19 @@ class CharacterService {
       if (updates.summary !== undefined) updateData.description = updates.summary ?? null;
       if (updates.backstory !== undefined) updateData.background = updates.backstory ?? null;
       if (updates.goal !== undefined) updateData.goals = updates.goal ? [updates.goal] : null;
-      if (updates.conflict !== undefined) updateData.conflicts = updates.conflict ? [updates.conflict] : null;
+      if (updates.conflict !== undefined)
+        updateData.conflicts = updates.conflict ? [updates.conflict] : null;
       if (updates.imageUrl !== undefined) updateData.imageUrl = updates.imageUrl ?? null;
       if (updates.relationships !== undefined) updateData.relationships = updates.relationships;
       if (updates.age !== undefined) updateData.age = updates.age ?? null;
       if (updates.occupation !== undefined) updateData.occupation = updates.occupation ?? null;
       if (updates.notes !== undefined) updateData.notes = updates.notes ?? null;
       if (updates.arc !== undefined) updateData.arc = updates.arc ?? null;
-      
+
       if (updates.traits) {
-        updateData.personality = updates.traits.filter(t => t.category === 'personality').map(t => t.name);
+        updateData.personality = updates.traits
+          .filter(t => t.category === 'personality')
+          .map(t => t.name);
         updateData.skills = updates.traits.filter(t => t.category === 'skill').map(t => t.name);
         updateData.weaknesses = updates.traits.filter(t => t.category === 'flaw').map(t => t.name);
       }
@@ -258,7 +266,7 @@ class CharacterService {
       const lowerSearch = searchTerm.toLowerCase();
 
       return allCharacters.filter(
-        (char) =>
+        char =>
           char.name.toLowerCase().includes(lowerSearch) ||
           (char.summary && char.summary.toLowerCase().includes(lowerSearch)) ||
           char.role.toLowerCase().includes(lowerSearch),
