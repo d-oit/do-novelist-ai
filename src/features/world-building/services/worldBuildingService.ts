@@ -15,6 +15,7 @@ import type {
   WorldBuildingValidationResult,
   ConsistencyIssue,
 } from '@/features/world-building/types';
+import { logger } from '@/lib/logging/logger';
 
 // Type for items that can be filtered by search and tags
 type FilterableWorldElement = Location | Culture | Timeline | LoreEntry;
@@ -57,7 +58,14 @@ class WorldBuildingService {
     };
 
     await worldBuildingDb.saveLocation(location);
-    semanticSyncService.syncLocation(projectId, location).catch(console.error);
+    semanticSyncService.syncLocation(projectId, location).catch(error => {
+      logger.error('Failed to sync location to semantic search', {
+        service: 'WorldBuildingService',
+        locationId: location.id,
+        projectId,
+        error,
+      });
+    });
     return location;
   }
 
@@ -71,7 +79,14 @@ class WorldBuildingService {
 
     const updated = { ...existing, ...updates, updatedAt: Date.now() };
     await worldBuildingDb.saveLocation(updated);
-    semanticSyncService.syncLocation(updated.projectId, updated).catch(console.error);
+    semanticSyncService.syncLocation(updated.projectId, updated).catch(error => {
+      logger.error('Failed to sync location update to semantic search', {
+        service: 'WorldBuildingService',
+        locationId: id,
+        projectId: updated.projectId,
+        error,
+      });
+    });
     return updated;
   }
 
@@ -102,7 +117,14 @@ class WorldBuildingService {
     };
 
     await worldBuildingDb.saveCulture(culture);
-    semanticSyncService.syncCulture(projectId, culture).catch(console.error);
+    semanticSyncService.syncCulture(projectId, culture).catch(error => {
+      logger.error('Failed to sync culture to semantic search', {
+        service: 'WorldBuildingService',
+        cultureId: culture.id,
+        projectId,
+        error,
+      });
+    });
     return culture;
   }
 
@@ -116,7 +138,14 @@ class WorldBuildingService {
 
     const updated = { ...existing, ...updates, updatedAt: Date.now() };
     await worldBuildingDb.saveCulture(updated);
-    semanticSyncService.syncCulture(updated.projectId, updated).catch(console.error);
+    semanticSyncService.syncCulture(updated.projectId, updated).catch(error => {
+      logger.error('Failed to sync culture update to semantic search', {
+        service: 'WorldBuildingService',
+        cultureId: id,
+        projectId: updated.projectId,
+        error,
+      });
+    });
     return updated;
   }
 

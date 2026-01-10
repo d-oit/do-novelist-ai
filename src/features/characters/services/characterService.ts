@@ -1,5 +1,6 @@
 import { semanticSyncService } from '@/features/semantic-search';
 import { characterService as tursoCharacterService } from '@/lib/database/services';
+import { logger } from '@/lib/logging/logger';
 import { type Character, type CharacterRelationship } from '@/types';
 
 /**
@@ -40,7 +41,14 @@ class CharacterService {
   public async create(character: Character): Promise<Character> {
     const created = await tursoCharacterService.createCharacter(character);
     // Sync to semantic search
-    await semanticSyncService.syncCharacter(character.projectId, created).catch(console.error);
+    await semanticSyncService.syncCharacter(character.projectId, created).catch(error => {
+      logger.error('Failed to sync character to semantic search', {
+        service: 'CharacterService',
+        characterId: created.id,
+        projectId: character.projectId,
+        error,
+      });
+    });
     return created;
   }
 
@@ -51,9 +59,16 @@ class CharacterService {
     await tursoCharacterService.updateCharacter(id, data);
     const updated = await this.getById(id);
     if (!updated) throw new Error(`Character ${id} not found after update`);
-    
+
     // Sync to semantic search
-    await semanticSyncService.syncCharacter(updated.projectId, updated).catch(console.error);
+    await semanticSyncService.syncCharacter(updated.projectId, updated).catch(error => {
+      logger.error('Failed to sync character update to semantic search', {
+        service: 'CharacterService',
+        characterId: id,
+        projectId: updated.projectId,
+        error,
+      });
+    });
     return updated;
   }
 

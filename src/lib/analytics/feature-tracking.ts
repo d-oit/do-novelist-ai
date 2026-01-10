@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logging/logger';
+
 import { analytics } from './analytics';
 
 const FEATURE_MODULES = [
@@ -30,7 +32,11 @@ class FeatureTrackingService {
     metadata?: Record<string, unknown>,
   ): void {
     if (!this.isValidFeature(feature)) {
-      console.warn(`Invalid feature module: ${feature}`);
+      logger.warn('Invalid feature module', {
+        service: 'FeatureTrackingService',
+        feature,
+        action,
+      });
       return;
     }
     const startTime = performance.now();
@@ -46,10 +52,19 @@ class FeatureTrackingService {
 
       const duration = performance.now() - startTime;
       if (duration > 50) {
-        console.warn(`Feature tracking for ${feature} took ${duration.toFixed(2)}ms`);
+        logger.warn('Feature tracking performance issue', {
+          service: 'FeatureTrackingService',
+          feature,
+          duration_ms: duration.toFixed(2),
+        });
       }
     } catch (err) {
-      console.error('Failed to track feature usage', err);
+      logger.error('Failed to track feature usage', {
+        service: 'FeatureTrackingService',
+        feature,
+        action,
+        error: err,
+      });
     }
   }
 
@@ -67,7 +82,10 @@ class FeatureTrackingService {
   endFeatureTimer(feature: FeatureModule, metadata?: Record<string, unknown>): void {
     const startTime = this.activeFeatures.get(feature);
     if (!startTime) {
-      console.warn(`No active timer found for feature: ${feature}`);
+      logger.warn('No active timer found for feature', {
+        service: 'FeatureTrackingService',
+        feature,
+      });
       return;
     }
 
