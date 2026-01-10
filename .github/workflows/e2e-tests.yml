@@ -1,6 +1,10 @@
 ---
 name: E2E Tests
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   push:
     branches: [main, develop]
@@ -154,9 +158,13 @@ jobs:
               ? 'All E2E tests passed across Chromium, Firefox, and WebKit!'
               : 'Some E2E tests failed. Please review the test reports.';
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## ${emoji} E2E Test Results\n\n${message}\n\n**Commit**: ${context.sha}`
-            });
+            try {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## ${emoji} E2E Test Results\n\n${message}\n\n**Commit**: ${context.sha}`
+              });
+            } catch (error) {
+              console.log('Could not comment on PR (permissions issue):', error.message);
+            }

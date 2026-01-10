@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 
-import { plotGenerationService } from '@/features/plot-engine';
 import type { PlotGenerationRequest } from '@/features/plot-engine';
+
+import { calculateComplexity, selectModel } from './plotGenerationService.utils';
 
 describe('PlotGenerationService - Model Selection', () => {
   describe('calculateComplexity', () => {
@@ -14,7 +15,7 @@ describe('PlotGenerationService - Model Selection', () => {
         structure: '3-act',
       };
 
-      const plot = plotGenerationService['calculateComplexity'](simpleRequest, 'suggestions');
+      const plot = calculateComplexity(simpleRequest, 'suggestions');
       expect(plot).toBe('fast');
     });
 
@@ -25,10 +26,10 @@ describe('PlotGenerationService - Model Selection', () => {
         genre: 'romance',
         targetLength: 20,
         structure: '3-act',
-        characters: ['char1', 'char2'],
+        characters: ['char1', 'cat2'],
       };
 
-      const complexity = plotGenerationService['calculateComplexity'](typicalRequest, 'plot_structure');
+      const complexity = calculateComplexity(typicalRequest, 'plot_structure');
       expect(complexity).toBe('standard');
     });
 
@@ -43,7 +44,7 @@ describe('PlotGenerationService - Model Selection', () => {
         themes: ['redemption', 'sacrifice', 'fate'],
       };
 
-      const complexity = plotGenerationService['calculateComplexity'](complexRequest, 'plot_structure');
+      const complexity = calculateComplexity(complexRequest, 'plot_structure');
       expect(complexity).toBe('advanced');
     });
 
@@ -57,7 +58,7 @@ describe('PlotGenerationService - Model Selection', () => {
         characters: ['char1', 'char2', 'char3', 'char4', 'char5', 'char6'],
       };
 
-      const complexity = plotGenerationService['calculateComplexity'](complexRequest, 'plot_structure');
+      const complexity = calculateComplexity(complexRequest, 'plot_structure');
       expect(complexity).toBe('advanced');
     });
 
@@ -69,7 +70,7 @@ describe('PlotGenerationService - Model Selection', () => {
         structure: '3-act',
       };
 
-      const complexity = plotGenerationService['calculateComplexity'](request, 'alternatives');
+      const complexity = calculateComplexity(request, 'alternatives');
       expect(complexity).toBe('standard');
     });
 
@@ -83,11 +84,11 @@ describe('PlotGenerationService - Model Selection', () => {
         plotPoints: ['point1', 'point2', 'point3', 'point4', 'point5', 'point6'],
       };
 
-      const complexity = plotGenerationService['calculateComplexity'](customRequest, 'plot_structure');
+      const complexity = calculateComplexity(customRequest, 'plot_structure');
       expect(complexity).toBe('advanced');
     });
 
-    it('should select advanced model for kishotenketsu structure', () => {
+    it('should select standard model for kishotenketsu structure', () => {
       const kishotenketsuRequest: PlotGenerationRequest = {
         projectId: 'test-7',
         premise: 'Japanese-style story',
@@ -96,7 +97,7 @@ describe('PlotGenerationService - Model Selection', () => {
         structure: 'kishotenketsu',
       };
 
-      const complexity = plotGenerationService['calculateComplexity'](kishotenketsuRequest, 'plot_structure');
+      const complexity = calculateComplexity(kishotenketsuRequest, 'plot_structure');
       expect(complexity).toBe('standard');
     });
 
@@ -109,7 +110,7 @@ describe('PlotGenerationService - Model Selection', () => {
         structure: '3-act',
       };
 
-      const complexity = plotGenerationService['calculateComplexity'](longRequest, 'plot_structure');
+      const complexity = calculateComplexity(longRequest, 'plot_structure');
       expect(complexity).toBe('advanced');
     });
 
@@ -123,26 +124,26 @@ describe('PlotGenerationService - Model Selection', () => {
         characters: ['char1', 'char2'],
       };
 
-      const complexity = plotGenerationService['calculateComplexity'](moderateRequest, 'plot_structure');
+      const complexity = calculateComplexity(moderateRequest, 'plot_structure');
       expect(complexity).toBe('standard');
     });
   });
 
   describe('selectModel', () => {
     it('should return Anthropic Haiku for fast complexity', () => {
-      const simpleRequest: PlotGenerationRequest = {
+      const request: PlotGenerationRequest = {
         projectId: 'test-10',
         premise: 'Simple',
         genre: 'fantasy',
         structure: '3-act',
       };
 
-      const model = plotGenerationService['selectModel'](simpleRequest, 'suggestions');
+      const model = selectModel('anthropic', 'fast', 'suggestions', request.structure, request.targetLength);
       expect(model).toBe('claude-3-5-haiku-20241022');
     });
 
     it('should return Anthropic Sonnet for standard complexity', () => {
-      const typicalRequest: PlotGenerationRequest = {
+      const request: PlotGenerationRequest = {
         projectId: 'test-11',
         premise: 'Typical',
         genre: 'fantasy',
@@ -151,12 +152,12 @@ describe('PlotGenerationService - Model Selection', () => {
         characters: ['char1'],
       };
 
-      const model = plotGenerationService['selectModel'](typicalRequest, 'plot_structure');
+      const model = selectModel('anthropic', 'standard', 'plot_structure', request.structure, request.targetLength);
       expect(model).toBe('claude-3-5-sonnet-20241022');
     });
 
     it('should return Anthropic Sonnet for advanced complexity', () => {
-      const complexRequest: PlotGenerationRequest = {
+      const request: PlotGenerationRequest = {
         projectId: 'test-12',
         premise: 'Complex',
         genre: 'fantasy',
@@ -166,7 +167,7 @@ describe('PlotGenerationService - Model Selection', () => {
         themes: ['theme1', 'theme2', 'theme3'],
       };
 
-      const model = plotGenerationService['selectModel'](complexRequest, 'plot_structure');
+      const model = selectModel('anthropic', 'advanced', 'plot_structure', request.structure, request.targetLength);
       expect(model).toBe('claude-3-5-sonnet-20241022');
     });
   });
