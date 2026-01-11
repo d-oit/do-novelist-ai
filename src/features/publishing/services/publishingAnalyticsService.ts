@@ -11,13 +11,12 @@ import type {
   PublishingAlert,
   PublishingPlatform,
 } from '@/features/publishing/types';
+import { publishingService as tursoPublishingService } from '@/lib/database/services';
 import { logger } from '@/lib/logging/logger';
 import type { Project } from '@/types';
 
 class PublishingAnalyticsService {
   private static instance: PublishingAnalyticsService | null = null;
-  private readonly dbName = 'novelist-publishing';
-  private readonly dbVersion = 1;
   private db: IDBDatabase | null = null;
 
   // Mock data for platforms (in real app, this would come from API integrations)
@@ -58,8 +57,14 @@ class PublishingAnalyticsService {
   }
 
   public async init(): Promise<void> {
+    // Delegate to Turso service
+    await tursoPublishingService.init();
+  }
+  
+  /* Legacy IndexedDB init code removed - now using Turso
+  private async initLegacy(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.dbVersion);
+      const request = indexedDB.open('novelist-publishing', 1);
 
       request.onerror = (): void =>
         reject(new Error(request.error?.message ?? 'Database operation failed'));
@@ -104,6 +109,7 @@ class PublishingAnalyticsService {
       };
     });
   }
+  */
 
   // Publication Management
   public async publishProject(

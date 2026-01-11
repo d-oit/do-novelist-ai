@@ -118,7 +118,7 @@ export const CultureSchema = z.object({
   // Core Identity
   description: z.string().max(5000),
   values: z.array(z.string()).max(20),
-  beliefs: z.string().max(2000).optional(),
+  beliefs: z.array(z.string()).max(50).optional(),
   traditions: z.array(z.string()).max(50).optional(),
   
   // Social Structure

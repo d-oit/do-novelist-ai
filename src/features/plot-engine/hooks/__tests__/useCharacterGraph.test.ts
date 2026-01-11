@@ -94,11 +94,13 @@ describe('useCharacterGraph', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    useCharacterGraph.setState({
-      graph: null,
-      projectId: null,
-      isLoading: false,
-      error: null,
+    act(() => {
+      useCharacterGraph.setState({
+        graph: null,
+        projectId: null,
+        isLoading: false,
+        error: null,
+      });
     });
 
     mockCharacterGraphService.buildCharacterGraph.mockResolvedValue(mockGraph);
@@ -169,9 +171,12 @@ describe('useCharacterGraph', () => {
 
       expect(result.current.projectId).toBe('test-project');
 
-      if (resolveBuild) {
-        resolveBuild(mockCharacterGraphService.buildCharacterGraph.mock.results[0]);
-      }
+      // Resolve the promise inside act to prevent state update warnings
+      await act(async () => {
+        if (resolveBuild) {
+          resolveBuild(mockGraph);
+        }
+      });
     });
 
     it('sets loading state during build', async () => {
@@ -191,9 +196,12 @@ describe('useCharacterGraph', () => {
 
       expect(result.current.isLoading).toBe(true);
 
-      if (resolveBuild) {
-        resolveBuild(mockCharacterGraphService.buildCharacterGraph.mock.results[0]);
-      }
+      // Resolve the promise inside act to prevent state update warnings
+      await act(async () => {
+        if (resolveBuild) {
+          resolveBuild(mockGraph);
+        }
+      });
     });
 
     it('handles graph building errors', async () => {
@@ -217,9 +225,11 @@ describe('useCharacterGraph', () => {
     it('resets graph', () => {
       const { result } = renderHook(() => useCharacterGraph());
 
-      useCharacterGraph.setState({
-        graph: mockGraph,
-        projectId: 'test-project',
+      act(() => {
+        useCharacterGraph.setState({
+          graph: mockGraph,
+          projectId: 'test-project',
+        });
       });
 
       act(() => {
@@ -236,8 +246,10 @@ describe('useCharacterGraph', () => {
     it('clears error', () => {
       const { result } = renderHook(() => useCharacterGraph());
 
-      useCharacterGraph.setState({
-        error: 'Some error',
+      act(() => {
+        useCharacterGraph.setState({
+          error: 'Some error',
+        });
       });
 
       act(() => {
@@ -318,11 +330,13 @@ describe('useCharacterGraphHelpers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    useCharacterGraph.setState({
-      graph: mockGraph,
-      projectId: 'test-project',
-      isLoading: false,
-      error: null,
+    act(() => {
+      useCharacterGraph.setState({
+        graph: mockGraph,
+        projectId: 'test-project',
+        isLoading: false,
+        error: null,
+      });
     });
 
     mockCharacterGraphService.getCharacterRelationships.mockReturnValue([
@@ -366,9 +380,11 @@ describe('useCharacterGraphHelpers', () => {
     });
 
     it('returns empty array when graph is null', () => {
-      useCharacterGraph.setState({
-        graph: null,
-        projectId: null,
+      act(() => {
+        useCharacterGraph.setState({
+          graph: null,
+          projectId: null,
+        });
       });
 
       const { result } = renderHook(() => useCharacterGraphHelpers());
@@ -399,9 +415,11 @@ describe('useCharacterGraphHelpers', () => {
     });
 
     it('returns empty array when graph is null', () => {
-      useCharacterGraph.setState({
-        graph: null,
-        projectId: null,
+      act(() => {
+        useCharacterGraph.setState({
+          graph: null,
+          projectId: null,
+        });
       });
 
       const { result } = renderHook(() => useCharacterGraphHelpers());

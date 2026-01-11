@@ -10,8 +10,8 @@ test.describe('Settings Panel E2E Tests', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Wait for navigation to be ready
-    await expect(page.getByRole('navigation')).toBeVisible({ timeout: 10000 });
+    // Wait for app to be ready and navigation to be visible
+    await expect(page.getByTestId('app-ready')).toBeVisible({ timeout: 10000 });
     await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
   });
 

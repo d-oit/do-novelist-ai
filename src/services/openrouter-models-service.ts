@@ -5,6 +5,7 @@
 
 import { getAIConfig } from '@/lib/ai-config';
 import { logger } from '@/lib/logging/logger';
+import { withRetry } from '@/lib/utils/retry';
 
 export interface OpenRouterModel {
   id: string;
@@ -550,17 +551,26 @@ export class OpenRouterModelsService {
    */
   private async fetchModelsFromAPI(): Promise<OpenRouterModel[]> {
     try {
-      const response = await fetch('/api/ai/models', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await withRetry(
+        async () => {
+          const res = await fetch('/api/ai/models', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          if (!res.ok) {
+            // If response is not ok, throw an error to trigger retry.
+            // Attach status to error for intelligent retry in withRetry.
+            const errorText = await res.text();
+            const error = new Error(`Failed to fetch models: ${res.status} ${errorText}`);
+            (error as { status?: number }).status = res.status; // Attach status for retry logic
+            throw error;
+          }
+          return res;
         },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch models: ${response.status} ${errorText}`);
-      }
+        { logLabel: 'OpenRouterModelsService.fetchModelsFromAPI' },
+      );
 
       const data = await response.json();
 
@@ -571,7 +581,7 @@ export class OpenRouterModelsService {
       logger.info('Fetched models from Edge API', { modelCount: data.models.length });
       return data.models;
     } catch (error) {
-      logger.error('Failed to fetch models from Edge API', { error });
+      logger.error('Failed to fetch models from Edge API after multiple retries', { error });
 
       // Return fallback models for development/offline scenarios
       logger.warn('Using fallback models due to API error');
