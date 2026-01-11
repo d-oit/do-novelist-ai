@@ -34,16 +34,18 @@ describe('usePlotAnalysis', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    usePlotAnalysis.setState({
-      analysisResult: null,
-      lastAnalyzedProjectId: null,
-      isLoading: false,
-      isAnalyzing: false,
-      error: null,
-      includeStoryArc: true,
-      includePlotHoles: true,
-      includeCharacterGraph: false,
-      includePacing: true,
+    act(() => {
+      usePlotAnalysis.setState({
+        analysisResult: null,
+        lastAnalyzedProjectId: null,
+        isLoading: false,
+        isAnalyzing: false,
+        error: null,
+        includeStoryArc: true,
+        includePlotHoles: true,
+        includeCharacterGraph: false,
+        includePacing: true,
+      });
     });
 
     mockPlotAnalysisService.analyzeProject.mockResolvedValue({
@@ -160,9 +162,15 @@ describe('usePlotAnalysis', () => {
 
       expect(result.current.isAnalyzing).toBe(true);
 
-      if (resolveAnalysis) {
-        resolveAnalysis(mockPlotAnalysisService.analyzeProject.mock.results[0]);
-      }
+      // Resolve the promise inside act to prevent state update warnings
+      await act(async () => {
+        if (resolveAnalysis) {
+          resolveAnalysis({
+            projectId: 'test-project',
+            analyzedAt: new Date(),
+          });
+        }
+      });
     });
   });
 
@@ -360,11 +368,13 @@ describe('usePlotAnalysis', () => {
     it('clears analysis result', () => {
       const { result } = renderHook(() => usePlotAnalysis());
 
-      usePlotAnalysis.setState({
-        analysisResult: {
-          projectId: 'test',
-          analyzedAt: new Date(),
-        },
+      act(() => {
+        usePlotAnalysis.setState({
+          analysisResult: {
+            projectId: 'test',
+            analyzedAt: new Date(),
+          },
+        });
       });
 
       act(() => {
@@ -379,8 +389,10 @@ describe('usePlotAnalysis', () => {
     it('clears error on clearAnalysis', () => {
       const { result } = renderHook(() => usePlotAnalysis());
 
-      usePlotAnalysis.setState({
-        error: 'Some error',
+      act(() => {
+        usePlotAnalysis.setState({
+          error: 'Some error',
+        });
       });
 
       act(() => {
@@ -405,8 +417,10 @@ describe('usePlotAnalysis', () => {
     it('clears error with null', () => {
       const { result } = renderHook(() => usePlotAnalysis());
 
-      usePlotAnalysis.setState({
-        error: 'Previous error',
+      act(() => {
+        usePlotAnalysis.setState({
+          error: 'Previous error',
+        });
       });
 
       act(() => {
@@ -455,9 +469,11 @@ describe('usePlotAnalysis', () => {
     it('keeps existing options when partial update', () => {
       const { result } = renderHook(() => usePlotAnalysis());
 
-      usePlotAnalysis.setState({
-        includeStoryArc: false,
-        includePlotHoles: false,
+      act(() => {
+        usePlotAnalysis.setState({
+          includeStoryArc: false,
+          includePlotHoles: false,
+        });
       });
 
       act(() => {

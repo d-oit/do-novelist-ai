@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { versioningService } from '@/features/versioning/services/versioningService';
 import { ChapterStatus } from '@/types';
-import type { Chapter, Version  } from '@/types';
+import type { Chapter, Version } from '@/types';
 
 import { createChapter } from '@shared/utils';
 
@@ -54,6 +54,7 @@ describe('VersioningService', () => {
         timestamp: new Date(),
         authorName: 'Test User',
         message: message || generateAutoMessage(type || 'manual', chapter),
+        versionNumber: 1,
         type: type || 'manual',
         contentHash: await generateContentHash(chapter.content),
         wordCount: countWords(chapter.content),

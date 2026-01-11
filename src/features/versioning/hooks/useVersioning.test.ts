@@ -35,6 +35,7 @@ const mockVersion = {
   contentHash: 'hash1',
   wordCount: 4,
   charCount: 20,
+  versionNumber: 1,
 };
 
 describe('useVersioning', () => {

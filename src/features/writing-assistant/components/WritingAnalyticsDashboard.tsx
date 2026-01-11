@@ -187,10 +187,10 @@ export const WritingAnalyticsDashboard: FC<WritingAnalyticsDashboardProps> = ({
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
   useEffect(() => {
-    const loadAnalytics = (): void => {
+    const loadAnalytics = async (): Promise<void> => {
       setLoading(true);
       try {
-        const data = writingAssistantDb.getWritingAnalytics(projectId, timeRange);
+        const data = await writingAssistantDb.getWritingAnalytics(projectId);
         setAnalyticsData(data);
       } catch (error) {
         logger.error('Failed to load analytics', {

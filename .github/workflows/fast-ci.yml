@@ -305,23 +305,23 @@ jobs:
           path: dist/
 
       - name: Run quick E2E tests
-        continue-on-error: true
         run: |
-          echo "🎭 Running quick E2E tests"
+          echo "🎭 Running quick E2E tests (smoke tests)"
 
           # Set environment
           export CI=true
           export PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright
           export NODE_ENV=test
 
-          # Run a subset of tests for quick feedback (chromium only)
-          # Note: E2E tests are non-blocking - they provide feedback but don't fail the CI
+          # Run smoke tests for quick feedback (chromium only)
+          # Tests critical user flows: navigation, settings, and accessibility
           pnpm exec playwright test \
             --project=chromium \
             --reporter=list,html \
-            --grep="accessibility|settings" \
-            --retries=1 \
-            --timeout=30000 --workers=2 --max-failures=1
+            --grep="debug|project-management|settings" \
+            --retries=2 \
+            --timeout=30000 \
+            --workers=2
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
@@ -369,6 +369,7 @@ jobs:
             [ "${{ needs.unit-tests.result }}" != "success" ] && FAILED=$((FAILED + 1))
             [ "${{ needs.security.result }}" != "success" ] && FAILED=$((FAILED + 1))
             [ "${{ needs.build.result }}" != "success" ] && FAILED=$((FAILED + 1))
+            [ "${{ needs.e2e-quick.result }}" != "success" ] && FAILED=$((FAILED + 1))
 
             if [ "$FAILED" -eq 0 ]; then
               echo "## ✅ Status: PASSED"

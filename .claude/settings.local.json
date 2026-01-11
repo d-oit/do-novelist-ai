@@ -138,7 +138,8 @@
       "Bash(pnpm update:*)",
       "Bash(pnpm list:*)",
       "Bash(pnpm why:*)",
-      "Bash(npm run check:file-size:*)"
+      "Bash(npm run check:file-size:*)",
+      "Bash(gh repo view:*)"
     ],
     "deny": [],
     "ask": []

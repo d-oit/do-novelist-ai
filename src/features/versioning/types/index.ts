@@ -15,6 +15,7 @@ export interface Version {
   contentHash: string;
   wordCount: number;
   charCount: number;
+  versionNumber: number;
 }
 
 export interface ChapterVersion extends Version {
