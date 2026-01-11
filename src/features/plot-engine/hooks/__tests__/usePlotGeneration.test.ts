@@ -24,16 +24,18 @@ describe('usePlotGeneration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    usePlotGeneration.setState({
-      generatedPlot: null,
-      suggestions: [],
-      alternatives: [],
-      confidence: 0,
-      lastGeneratedAt: null,
-      isLoading: false,
-      isGeneratingAlternatives: false,
-      isGeneratingSuggestions: false,
-      error: null,
+    act(() => {
+      usePlotGeneration.setState({
+        generatedPlot: null,
+        suggestions: [],
+        alternatives: [],
+        confidence: 0,
+        lastGeneratedAt: null,
+        isLoading: false,
+        isGeneratingAlternatives: false,
+        isGeneratingSuggestions: false,
+        error: null,
+      });
     });
 
     mockPlotGenerationService.generatePlot.mockResolvedValue({
@@ -83,9 +85,24 @@ describe('usePlotGeneration', () => {
 
       expect(result.current.isLoading).toBe(true);
 
-      if (resolveGeneration) {
-        resolveGeneration(mockPlotGenerationService.generatePlot.mock.results[0]);
-      }
+      // Resolve the promise inside act to prevent state update warnings
+      await act(async () => {
+        if (resolveGeneration) {
+          resolveGeneration({
+            plotStructure: {
+              id: 'plot-1',
+              projectId: 'test-project',
+              acts: [],
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            suggestions: [],
+            alternatives: [],
+            confidence: 0.85,
+            generatedAt: new Date(),
+          });
+        }
+      });
     });
 
     it('handles plot generation errors', async () => {
@@ -215,9 +232,24 @@ describe('usePlotGeneration', () => {
       expect(result.current.isGeneratingAlternatives).toBe(true);
       expect(result.current.isLoading).toBe(false);
 
-      if (resolveGeneration) {
-        resolveGeneration(mockPlotGenerationService.generatePlot.mock.results[0]);
-      }
+      // Resolve the promise inside act to prevent state update warnings
+      await act(async () => {
+        if (resolveGeneration) {
+          resolveGeneration({
+            plotStructure: {
+              id: 'plot-1',
+              projectId: 'test-project',
+              acts: [],
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            suggestions: [],
+            alternatives: [],
+            confidence: 0.85,
+            generatedAt: new Date(),
+          });
+        }
+      });
     });
 
     it('handles alternatives generation errors', async () => {
@@ -296,9 +328,24 @@ describe('usePlotGeneration', () => {
       expect(result.current.isLoading).toBe(false);
       expect(result.current.isGeneratingAlternatives).toBe(false);
 
-      if (resolveGeneration) {
-        resolveGeneration(mockPlotGenerationService.generatePlot.mock.results[0]);
-      }
+      // Resolve the promise inside act to prevent state update warnings
+      await act(async () => {
+        if (resolveGeneration) {
+          resolveGeneration({
+            plotStructure: {
+              id: 'plot-1',
+              projectId: 'test-project',
+              acts: [],
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            suggestions: [],
+            alternatives: [],
+            confidence: 0.85,
+            generatedAt: new Date(),
+          });
+        }
+      });
     });
 
     it('handles suggestions generation errors', async () => {
@@ -342,14 +389,23 @@ describe('usePlotGeneration', () => {
     it('resets state', () => {
       const { result } = renderHook(() => usePlotGeneration());
 
-      usePlotGeneration.setState({
-        generatedPlot: { id: 'plot-1', projectId: 'test', acts: [], createdAt: new Date(), updatedAt: new Date() },
-        suggestions: [
-          { id: 'sug-1', type: 'plot_twist', title: 'Twist', description: 'desc', placement: 'early', impact: 'high' },
-        ],
-        alternatives: [],
-        confidence: 0.5,
-        lastGeneratedAt: new Date(),
+      act(() => {
+        usePlotGeneration.setState({
+          generatedPlot: { id: 'plot-1', projectId: 'test', acts: [], createdAt: new Date(), updatedAt: new Date() },
+          suggestions: [
+            {
+              id: 'sug-1',
+              type: 'plot_twist',
+              title: 'Twist',
+              description: 'desc',
+              placement: 'early',
+              impact: 'high',
+            },
+          ],
+          alternatives: [],
+          confidence: 0.5,
+          lastGeneratedAt: new Date(),
+        });
       });
 
       act(() => {
@@ -369,8 +425,10 @@ describe('usePlotGeneration', () => {
     it('clears error', () => {
       const { result } = renderHook(() => usePlotGeneration());
 
-      usePlotGeneration.setState({
-        error: 'Some error',
+      act(() => {
+        usePlotGeneration.setState({
+          error: 'Some error',
+        });
       });
 
       act(() => {

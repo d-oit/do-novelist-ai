@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
 import { PlotEngineDashboard } from '@/features/plot-engine/components/PlotEngineDashboard';
@@ -54,7 +54,9 @@ describe('PlotEngineDashboard', () => {
     const generateButton = screen.getByTestId('generate-plot-button');
     fireEvent.click(generateButton);
 
-    expect(mockOnGeneratePlot).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockOnGeneratePlot).toHaveBeenCalled();
+    });
   });
 
   it('should show empty state when switching to tabs without analysis', () => {
@@ -75,8 +77,10 @@ describe('PlotEngineDashboard', () => {
     const generateButton = screen.getByTestId('generate-plot-button');
     fireEvent.click(generateButton);
 
-    expect(generateButton).toBeDisabled();
-    expect(generateButton).toHaveTextContent(/Generating/i);
+    await waitFor(() => {
+      expect(generateButton).toBeDisabled();
+      expect(generateButton).toHaveTextContent(/Generating/i);
+    });
   });
 
   it('should show generator tab content', () => {
