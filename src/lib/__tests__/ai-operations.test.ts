@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import * as aiOperations from '@/lib/ai-operations';
 import type { Chapter, Project, RefineOptions } from '@/types';
+import { ChapterStatus, PublishStatus } from '@/types';
 
 // Mock dependencies
 vi.mock('@/features/settings/services/settingsService', () => ({
@@ -114,10 +115,11 @@ describe('ai-operations', () => {
 
   describe('writeChapterContent', () => {
     const mockProject: Project = {
-      id: 'test-project',
+      id: 'proj_123',
       title: 'Test Project',
       idea: 'Test idea',
       style: 'Fantasy',
+      coverImage: undefined,
       chapters: [],
       worldState: {
         hasTitle: true,
@@ -126,19 +128,60 @@ describe('ai-operations', () => {
         chaptersCompleted: 0,
         styleDefined: true,
         isPublished: false,
+        hasCharacters: false,
+        hasWorldBuilding: false,
+        hasThemes: false,
+        plotStructureDefined: false,
+        targetAudienceDefined: false,
       },
+      isGenerating: false,
+      status: PublishStatus.DRAFT,
+      language: 'en',
+      targetWordCount: 50000,
+      settings: {},
+      genre: [],
+      targetAudience: 'adult',
+      contentWarnings: [],
+      keywords: [],
+      synopsis: '',
       createdAt: new Date(),
       updatedAt: new Date(),
+      authors: [],
+      analytics: {
+        totalWordCount: 0,
+        averageChapterLength: 0,
+        estimatedReadingTime: 0,
+        generationCost: 0,
+        editingRounds: 0,
+      },
+      version: '1.0.0',
+      changeLog: [],
+      timeline: {
+        id: 'timeline-1',
+        projectId: 'proj_123',
+        events: [],
+        eras: [],
+        settings: {
+          viewMode: 'chronological',
+          zoomLevel: 1,
+          showCharacters: true,
+          showImplicitEvents: false,
+        },
+      },
     };
 
     const mockChapter: Chapter = {
-      id: 'chapter-1',
-      projectId: 'test-project',
+      id: 'proj_123_ch_chapter_1',
       orderIndex: 1,
       title: 'Chapter 1',
       summary: 'First chapter',
       content: '',
-      status: 'pending',
+      status: ChapterStatus.PENDING,
+      wordCount: 0,
+      characterCount: 0,
+      estimatedReadingTime: 0,
+      tags: [],
+      notes: '',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -151,7 +194,13 @@ describe('ai-operations', () => {
         json: async () => ({ content: mockContent }),
       });
 
-      const result = await aiOperations.writeChapterContent(mockChapter, mockProject);
+      const result = await aiOperations.writeChapterContent(
+        mockChapter.title,
+        mockChapter.summary,
+        mockProject.style,
+        undefined,
+        mockProject,
+      );
 
       expect(result).toBe(mockContent);
       expect(global.fetch).toHaveBeenCalledWith(
@@ -170,7 +219,13 @@ describe('ai-operations', () => {
         json: async () => ({ content: 'Content' }),
       });
 
-      const result = await aiOperations.writeChapterContent(chapterWithoutTitle, mockProject);
+      const result = await aiOperations.writeChapterContent(
+        chapterWithoutTitle.title,
+        chapterWithoutTitle.summary,
+        mockProject.style,
+        undefined,
+        mockProject,
+      );
 
       expect(result).toBeDefined();
     });
@@ -182,7 +237,15 @@ describe('ai-operations', () => {
         json: async () => ({ error: 'Rate limit exceeded' }),
       });
 
-      await expect(aiOperations.writeChapterContent(mockChapter, mockProject)).rejects.toThrow('Rate limit exceeded');
+      await expect(
+        aiOperations.writeChapterContent(
+          mockChapter.title,
+          mockChapter.summary,
+          mockProject.style,
+          undefined,
+          mockProject,
+        ),
+      ).rejects.toThrow('Rate limit exceeded');
     });
   });
 
@@ -223,15 +286,34 @@ describe('ai-operations', () => {
         json: async () => ({ content: refinedContent }),
       });
 
-      const result = await aiOperations.refineChapterContent(originalContent, 'Chapter summary', 'Fantasy', {});
+      const defaultOptions: RefineOptions = {
+        model: 'gemini-2.5-flash',
+        temperature: 0.7,
+        maxTokens: 4000,
+        topP: 0.9,
+        focusAreas: ['grammar', 'style'],
+        preserveLength: true,
+      };
+
+      const result = await aiOperations.refineChapterContent(
+        originalContent,
+        'Chapter summary',
+        'Fantasy',
+        defaultOptions,
+      );
 
       expect(result).toBe(refinedContent);
     });
 
     it('should apply custom refine options', async () => {
       const options: RefineOptions = {
+        model: 'gemini-1.5-pro',
         temperature: 0.8,
         maxTokens: 2000,
+        topP: 0.95,
+        focusAreas: ['grammar', 'dialogue', 'pacing'],
+        preserveLength: false,
+        targetTone: 'dramatic',
       };
 
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -256,7 +338,16 @@ describe('ai-operations', () => {
         json: async () => ({ error: 'Invalid content' }),
       });
 
-      await expect(aiOperations.refineChapterContent('Content', 'Summary', 'Fantasy', {})).rejects.toThrow(
+      const invalidOptions: RefineOptions = {
+        model: 'gemini-2.5-flash',
+        temperature: 0.7,
+        maxTokens: 4000,
+        topP: 0.9,
+        focusAreas: ['grammar'],
+        preserveLength: true,
+      };
+
+      await expect(aiOperations.refineChapterContent('Content', 'Summary', 'Fantasy', invalidOptions)).rejects.toThrow(
         'Invalid content',
       );
     });
@@ -265,24 +356,32 @@ describe('ai-operations', () => {
   describe('analyzeConsistency', () => {
     const mockChapters: Chapter[] = [
       {
-        id: 'ch1',
-        projectId: 'proj',
+        id: 'proj_123_ch_chapter_1',
         orderIndex: 1,
         title: 'Chapter 1',
         summary: 'First',
         content: 'Content 1',
-        status: 'complete',
+        status: ChapterStatus.COMPLETE,
+        wordCount: 1000,
+        characterCount: 5000,
+        estimatedReadingTime: 5,
+        tags: [],
+        notes: '',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 'ch2',
-        projectId: 'proj',
+        id: 'proj_123_ch_chapter_2',
         orderIndex: 2,
         title: 'Chapter 2',
         summary: 'Second',
         content: 'Content 2',
-        status: 'complete',
+        status: ChapterStatus.COMPLETE,
+        wordCount: 1200,
+        characterCount: 6000,
+        estimatedReadingTime: 6,
+        tags: [],
+        notes: '',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -366,7 +465,7 @@ describe('ai-operations', () => {
         json: async () => ({ imageUrl: mockImageUrl }),
       });
 
-      const result = await aiOperations.generateChapterIllustration('Chapter summary', 'Fantasy');
+      const result = await aiOperations.generateChapterIllustration('Chapter 1', 'Chapter summary', 'Fantasy');
 
       expect(result).toBe(mockImageUrl);
     });
@@ -382,7 +481,7 @@ describe('ai-operations', () => {
         json: async () => ({ translatedContent: translatedText }),
       });
 
-      const result = await aiOperations.translateContent(originalText, 'en', 'es');
+      const result = await aiOperations.translateContent(`${originalText} (from en to es)`, 'es');
 
       expect(result).toBe(translatedText);
     });
@@ -394,7 +493,7 @@ describe('ai-operations', () => {
         json: async () => ({ error: 'Unsupported language' }),
       });
 
-      await expect(aiOperations.translateContent('Text', 'en', 'xyz')).rejects.toThrow('Unsupported language');
+      await expect(aiOperations.translateContent('Text', 'xyz')).rejects.toThrow('Unsupported language');
     });
   });
 
