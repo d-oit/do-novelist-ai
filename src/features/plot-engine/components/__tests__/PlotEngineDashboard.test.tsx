@@ -3,6 +3,23 @@ import { describe, it, expect, vi } from 'vitest';
 
 import { PlotEngineDashboard } from '@/features/plot-engine/components/PlotEngineDashboard';
 
+// Mock lazy imports to use actual components for testing
+vi.mock('@/features/plot-engine/components/lazy-plot-engine', async () => {
+  const { PlotAnalyzer } = await import('@/features/plot-engine/components/PlotAnalyzer');
+  const { PlotGenerator } = await import('@/features/plot-engine/components/PlotGenerator');
+  const { StoryArcVisualizer } = await import('@/features/plot-engine/components/StoryArcVisualizer');
+  const { CharacterGraphView } = await import('@/features/plot-engine/components/CharacterGraphView');
+  const { PlotHoleDetectorView } = await import('@/features/plot-engine/components/PlotHoleDetectorView');
+
+  return {
+    LazyPlotAnalyzer: PlotAnalyzer,
+    LazyPlotGenerator: PlotGenerator,
+    LazyStoryArcVisualizer: StoryArcVisualizer,
+    LazyCharacterGraphView: CharacterGraphView,
+    LazyPlotHoleDetectorView: PlotHoleDetectorView,
+  };
+});
+
 describe('PlotEngineDashboard', () => {
   const mockProjectId = 'test-project-1';
 

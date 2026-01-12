@@ -1,5 +1,3 @@
-'use client';
-
 import { Edit, Home, Settings, BarChart3 } from 'lucide-react';
 import React from 'react';
 

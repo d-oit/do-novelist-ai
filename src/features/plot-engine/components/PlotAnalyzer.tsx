@@ -7,7 +7,8 @@
 import React, { useEffect, useState } from 'react';
 
 import type { AnalysisResult, PlotHole } from '@/features/plot-engine';
-import { usePlotAnalysis } from '@/features/plot-engine/hooks';
+import { CharacterGraphView } from '@/features/plot-engine/components/CharacterGraphView';
+import { usePlotAnalysis } from '@/features/plot-engine/hooks/usePlotAnalysis';
 import { plotStorageService } from '@/features/plot-engine/services';
 import { projectService } from '@/features/projects/services/projectService';
 import { logger } from '@/lib/logging/logger';
@@ -253,11 +254,11 @@ export const PlotAnalyzer: React.FC<PlotAnalyzerProps> = React.memo(({ projectId
               <div className='space-y-4'>
                 <h3 className='text-lg font-semibold'>Character Relationships</h3>
                 <Card className='p-4'>
-                  <p className='text-sm text-muted-foreground'>
+                  <p className='mb-4 text-sm text-muted-foreground'>
                     Found {analysisResult.characterGraph.relationships.length} relationships between{' '}
                     {analysisResult.characterGraph.nodes.length} characters
                   </p>
-                  {/* TODO: Add character graph visualization */}
+                  <CharacterGraphView characterGraph={analysisResult.characterGraph} />
                 </Card>
               </div>
             )}
