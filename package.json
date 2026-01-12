@@ -81,7 +81,7 @@
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "@types/sanitize-html": "^2.13.0",
-    "@vercel/node": "^5.5.14",
+    "@vercel/node": "^5.5.16",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.14",
     "autoprefixer": "^10.4.23",
