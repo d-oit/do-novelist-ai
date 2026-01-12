@@ -12,7 +12,7 @@ import type {
   PlotSuggestion,
   StoryStructure,
 } from '@/features/plot-engine';
-import { usePlotGeneration } from '@/features/plot-engine/hooks';
+import { usePlotGeneration } from '@/features/plot-engine/hooks/usePlotGeneration';
 import { plotStorageService } from '@/features/plot-engine/services';
 import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';

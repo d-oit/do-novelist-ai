@@ -1,5 +1,3 @@
-'use client';
-
 import { Mic, MicOff, AlertCircle, Volume2, FileText } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
