@@ -1,20 +1,11 @@
 /**
  * Plot Engine Components
+ *
+ * All components are lazy-loaded for optimal code splitting.
+ * This prevents bundling heavy visualizations until they're needed.
  */
 
-// Direct exports (for internal use within plot-engine feature)
-export { PlotAnalyzer } from './PlotAnalyzer';
-export { StoryArcVisualizer } from './StoryArcVisualizer';
-export { CharacterGraphView } from './CharacterGraphView';
-export { PlotHoleDetectorView } from './PlotHoleDetectorView';
-export { PlotGenerator } from './PlotGenerator';
-export { PlotEngineDashboard } from './PlotEngineDashboard';
-export { FeedbackCollector } from './FeedbackCollector';
-
-// Loading States
-export * from './LoadingStates';
-
-// Lazy-loaded exports (recommended for external use)
+// Lazy-loaded components (recommended for all use cases)
 export {
   LazyPlotAnalyzer,
   LazyStoryArcVisualizer,
@@ -23,3 +14,9 @@ export {
   LazyPlotGenerator,
   LazyPlotEngineDashboard,
 } from './lazy-plot-engine';
+
+// Non-lazy exports (lightweight components)
+export { FeedbackCollector } from './FeedbackCollector';
+
+// Loading States
+export * from './LoadingStates';

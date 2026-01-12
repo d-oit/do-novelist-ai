@@ -1,5 +1,3 @@
-'use client';
-
 import { Minimize2, Play, Pause, RotateCcw, Target, Settings } from 'lucide-react';
 import React, { useEffect, useState, useCallback } from 'react';
 

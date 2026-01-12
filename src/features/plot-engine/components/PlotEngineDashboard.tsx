@@ -16,12 +16,14 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 
-import { CharacterGraphView } from './CharacterGraphView';
 import { FeedbackCollector } from './FeedbackCollector';
-import { PlotAnalyzer } from './PlotAnalyzer';
-import { PlotGenerator } from './PlotGenerator';
-import { PlotHoleDetectorView } from './PlotHoleDetectorView';
-import { StoryArcVisualizer } from './StoryArcVisualizer';
+import {
+  LazyPlotAnalyzer,
+  LazyStoryArcVisualizer,
+  LazyCharacterGraphView,
+  LazyPlotHoleDetectorView,
+  LazyPlotGenerator,
+} from './lazy-plot-engine';
 
 interface PlotEngineDashboardProps {
   projectId: string;
@@ -116,31 +118,31 @@ export const PlotEngineDashboard: React.FC<PlotEngineDashboardProps> = React.mem
         <div>
           {activeTab === 'overview' && (
             <SectionErrorBoundary componentName='PlotAnalyzer'>
-              <PlotAnalyzer projectId={projectId} onAnalyze={handleAnalysisComplete} />
+              <LazyPlotAnalyzer projectId={projectId} onAnalyze={handleAnalysisComplete} />
             </SectionErrorBoundary>
           )}
 
           {activeTab === 'structure' && analysisResult?.storyArc && (
             <SectionErrorBoundary componentName='StoryArcVisualizer'>
-              <StoryArcVisualizer storyArc={analysisResult.storyArc} />
+              <LazyStoryArcVisualizer storyArc={analysisResult.storyArc} />
             </SectionErrorBoundary>
           )}
 
           {activeTab === 'characters' && analysisResult?.characterGraph && (
             <SectionErrorBoundary componentName='CharacterGraphView'>
-              <CharacterGraphView characterGraph={analysisResult.characterGraph} />
+              <LazyCharacterGraphView characterGraph={analysisResult.characterGraph} />
             </SectionErrorBoundary>
           )}
 
           {activeTab === 'plot-holes' && analysisResult?.plotHoleAnalysis && (
             <SectionErrorBoundary componentName='PlotHoleDetectorView'>
-              <PlotHoleDetectorView analysis={analysisResult.plotHoleAnalysis} />
+              <LazyPlotHoleDetectorView analysis={analysisResult.plotHoleAnalysis} />
             </SectionErrorBoundary>
           )}
 
           {activeTab === 'generator' && (
             <SectionErrorBoundary componentName='PlotGenerator'>
-              <PlotGenerator projectId={projectId} />
+              <LazyPlotGenerator projectId={projectId} />
             </SectionErrorBoundary>
           )}
 
