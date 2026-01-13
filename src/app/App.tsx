@@ -9,6 +9,7 @@ import { db } from '@/features/projects/services';
 import { SearchModal } from '@/features/semantic-search';
 import { logger } from '@/lib/logging/logger';
 import { offlineManager } from '@/lib/pwa';
+import { queryClient, QueryClientProvider } from '@/lib/react-query';
 import { performanceMonitor } from '@/performance';
 import { MainLayout, Header as Navbar } from '@/shared/components/layout';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
@@ -17,6 +18,13 @@ import { ChapterStatus, PublishStatus } from '@/shared/types';
 import type { Chapter, Project, RefineOptions } from '@/shared/types';
 
 import { createChapter } from '@shared/utils';
+
+// Lazy load React Query Devtools for development
+const ReactQueryDevtools = lazy(() =>
+  import('@tanstack/react-query-devtools').then(module => ({
+    default: module.ReactQueryDevtools,
+  })),
+);
 
 // Lazy load heavy components for better performance
 const ProjectsView = lazy(() =>
@@ -630,4 +638,21 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+/**
+ * App with React Query Provider
+ */
+const AppWithProviders: React.FC = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <App />
+      {/* React Query Devtools - only loads in development */}
+      {import.meta.env.DEV && (
+        <React.Suspense fallback={null}>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </React.Suspense>
+      )}
+    </QueryClientProvider>
+  );
+};
+
+export default AppWithProviders;

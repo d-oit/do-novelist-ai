@@ -1,5 +1,8 @@
 /**
- * Projects Management Hook
+ * Projects Management Hook (Legacy Zustand Store)
+ *
+ * @deprecated Use useProjectsQuery hooks from './useProjectsQuery' instead
+ * This file is kept for backward compatibility during migration
  *
  * Manages project CRUD operations and state
  */
@@ -17,6 +20,9 @@ import {
 import { logger } from '@/lib/logging/logger';
 import { ChapterStatus, PublishStatus } from '@/types';
 import { type Project } from '@/types';
+
+// Re-export new React Query hooks
+export * from './useProjectsQuery';
 
 interface ProjectsState {
   // Data
