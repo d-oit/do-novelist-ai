@@ -6,7 +6,7 @@ architecture**
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.2-61dafb?logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.2-646cff?logo=vite)](https://vitejs.dev/)
-[![Tests](https://img.shields.io/badge/Tests-1105%20passing-green.svg)](https://github.com/d-oit/do-novelist-ai)
+[![Tests](https://img.shields.io/badge/Tests-725%20passing-green.svg)](https://github.com/d-oit/do-novelist-ai)
 [![Documentation](<https://img.shields.io/badge/Docs-90%25%20(A--)-success.svg>)](#-feature-documentation)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
