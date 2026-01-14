@@ -16,9 +16,17 @@ interface MainLayoutProps {
     | 'settings'
     | 'world-building'
     | 'plot-engine'
-    | 'metrics';
+    | 'metrics'
+    | 'dialogue';
   onNavigate?: (
-    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics',
+    view:
+      | 'dashboard'
+      | 'projects'
+      | 'settings'
+      | 'world-building'
+      | 'plot-engine'
+      | 'metrics'
+      | 'dialogue',
   ) => void;
 }
 

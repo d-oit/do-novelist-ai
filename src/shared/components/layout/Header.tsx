@@ -21,9 +21,23 @@ import { zIndex } from '@/lib/z-index.config';
 export interface HeaderProps {
   projectTitle: string;
   onNewProject: () => void;
-  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics';
+  currentView:
+    | 'dashboard'
+    | 'projects'
+    | 'settings'
+    | 'world-building'
+    | 'plot-engine'
+    | 'metrics'
+    | 'dialogue';
   onNavigate: (
-    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics',
+    view:
+      | 'dashboard'
+      | 'projects'
+      | 'settings'
+      | 'world-building'
+      | 'plot-engine'
+      | 'metrics'
+      | 'dialogue',
   ) => void;
 }
 

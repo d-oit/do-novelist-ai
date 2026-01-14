@@ -4,9 +4,23 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface BottomNavProps {
-  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics';
+  currentView:
+    | 'dashboard'
+    | 'projects'
+    | 'settings'
+    | 'world-building'
+    | 'plot-engine'
+    | 'metrics'
+    | 'dialogue';
   onNavigate: (
-    view: 'dashboard' | 'projects' | 'settings' | 'world-building' | 'plot-engine' | 'metrics',
+    view:
+      | 'dashboard'
+      | 'projects'
+      | 'settings'
+      | 'world-building'
+      | 'plot-engine'
+      | 'metrics'
+      | 'dialogue',
   ) => void;
 }
 

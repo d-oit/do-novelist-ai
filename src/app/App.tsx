@@ -47,6 +47,9 @@ const PlotEngineDashboard = lazy(() =>
 const WorldBuildingDashboard = lazy(() =>
   import('@/features/world-building').then(module => ({ default: module.WorldBuildingDashboard })),
 );
+const DialogueDashboard = lazy(() =>
+  import('@/features/dialogue').then(module => ({ default: module.DialogueDashboard })),
+);
 
 // Loading components for Suspense boundaries
 const ProjectsLoader = () => (
@@ -125,6 +128,26 @@ const WorldBuildingLoader = () => (
     <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
       <Skeleton className='h-48 w-full' />
       <Skeleton className='h-48 w-full' />
+      <Skeleton className='h-48 w-full' />
+    </div>
+  </div>
+);
+
+const DialogueLoader = () => (
+  <div className='container mx-auto space-y-6 p-6'>
+    <div>
+      <Skeleton className='h-10 w-64' />
+      <Skeleton className='mt-2 h-6 w-96' />
+    </div>
+    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+      <Skeleton className='h-32 w-full' />
+      <Skeleton className='h-32 w-full' />
+      <Skeleton className='h-32 w-full' />
+      <Skeleton className='h-32 w-full' />
+    </div>
+    <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
+      <Skeleton className='h-64 w-full lg:col-span-2' />
+      <Skeleton className='h-64 w-full' />
       <Skeleton className='h-48 w-full' />
     </div>
   </div>
@@ -246,7 +269,8 @@ type ViewMode =
   | 'settings'
   | 'world-building'
   | 'plot-engine'
-  | 'metrics';
+  | 'metrics'
+  | 'dialogue';
 
 // ... existing imports ...
 
@@ -501,7 +525,9 @@ const App: React.FC = () => {
                     ? 'Plot Engine - Novelist.ai'
                     : currentView === 'world-building'
                       ? 'World Building - Novelist.ai'
-                      : 'Novelist.ai Dashboard'}
+                      : currentView === 'dialogue'
+                        ? 'Dialogue Analysis - Novelist.ai'
+                        : 'Novelist.ai Dashboard'}
         </h1>
         {currentView === 'dashboard' && (
           <div className='animate-in fade-in mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col gap-6 p-4 duration-500 md:flex-row'>
@@ -627,6 +653,16 @@ const App: React.FC = () => {
             <LazyLoadErrorBoundary>
               <Suspense fallback={<WorldBuildingLoader />}>
                 <WorldBuildingDashboard projectId={project.id} />
+              </Suspense>
+            </LazyLoadErrorBoundary>
+          </div>
+        )}
+
+        {currentView === 'dialogue' && (
+          <div className='animate-in fade-in slide-in-from-bottom-4 duration-500'>
+            <LazyLoadErrorBoundary>
+              <Suspense fallback={<DialogueLoader />}>
+                <DialogueDashboard projectId={project.id} />
               </Suspense>
             </LazyLoadErrorBoundary>
           </div>
