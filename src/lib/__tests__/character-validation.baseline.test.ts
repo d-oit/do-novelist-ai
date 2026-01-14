@@ -16,6 +16,7 @@ describe('CharacterValidationService Baseline', () => {
     id: 'char_test_1705170000000' as any,
     projectId: mockProjectId,
     name: 'Test Character',
+    aliases: [],
     role: 'supporting' as CharacterRole,
     importance: 5,
     summary: 'A test character summary',
@@ -118,14 +119,18 @@ describe('CharacterValidationService Baseline', () => {
       const data = { name: 'Existing', role: 'supporting', importance: 5, physicalTraits: {}, psychology: {} };
       const result = service.validateCreateCharacter(data, mockProjectId, existing);
       expect(result.success).toBe(false);
-      expect(result.error).toContain('already exists');
+      if (!result.success) {
+        expect(result.error).toContain('already exists');
+      }
     });
 
     it('should fail if role-importance is mismatched', () => {
       const data = { name: 'Bad Protagonist', role: 'protagonist', importance: 5, physicalTraits: {}, psychology: {} };
       const result = service.validateCreateCharacter(data, mockProjectId);
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Invalid importance level');
+      if (!result.success) {
+        expect(result.error).toContain('Invalid importance level');
+      }
     });
   });
 
@@ -144,7 +149,9 @@ describe('CharacterValidationService Baseline', () => {
       const data = { id: 'char_one_1', name: 'Char 2' };
       const result = service.validateUpdateCharacter(data, existing);
       expect(result.success).toBe(false);
-      expect(result.error).toContain('already exists');
+      if (!result.success) {
+        expect(result.error).toContain('already exists');
+      }
     });
   });
 
@@ -223,7 +230,9 @@ describe('CharacterValidationService Baseline', () => {
       ];
       const result = service.validateProjectCharacters(characters);
       expect(result.success).toBe(false);
-      expect(result.issues[0].message).toContain('at least one protagonist');
+      if (!result.success) {
+        expect(result.issues[0]?.message).toContain('at least one protagonist');
+      }
     });
 
     it('should fail for duplicate names', () => {
