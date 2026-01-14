@@ -73,7 +73,7 @@
     "@eslint/js": "^9.39.2",
     "@faker-js/faker": "^10.1.0",
     "@playwright/test": "^1.57.0",
-    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
