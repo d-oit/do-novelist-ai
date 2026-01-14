@@ -89,7 +89,7 @@
     "autoprefixer": "^10.4.23",
     "axe-core": "^4.11.0",
     "drizzle-kit": "^0.31.8",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^9.1.2",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import-x": "^4.16.1",
