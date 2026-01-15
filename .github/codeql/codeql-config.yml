@@ -24,4 +24,4 @@ paths-ignore:
 # Security-focused query suites
 queries:
   - uses: security-extended
-  - uses: advanced-security/codeql-queries/javascript-typescript
+  - uses: security-and-quality

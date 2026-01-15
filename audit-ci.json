@@ -1,15 +1,13 @@
 {
   "$schema": "https://github.com/IBM/audit-ci/blob/main/docs/schema.json",
   "packageManager": "pnpm@9",
-  "low": true,
   "moderate": true,
   "high": true,
   "critical": true,
-  "allowlist": [],
-  "report-type": "sarif",
-  "output-format": "text",
-  "skip-dev": false,
-  "directories": ["."],
-  "exclude": [".git", "node_modules", ".cache", "dist", "build", ".vscode", ".idea"],
-  "timeout": 120000
+  "report": {
+    "sarif": {
+      "stdout": "security-results.sarif"
+    }
+  },
+  "exclude": ["node_modules", ".git", ".cache", "dist", "build", ".vscode", ".idea"]
 }
