@@ -149,6 +149,27 @@ vi.mock('framer-motion', () => {
   };
 });
 
+// Mock PostHog directly to prevent all network requests
+vi.mock('posthog-js', () => ({
+  default: {
+    init: vi.fn(),
+    identify: vi.fn(),
+    capture: vi.fn(),
+    reset: vi.fn(),
+    register: vi.fn(),
+    unregister: vi.fn(),
+    group: vi.fn(),
+    onFeatureFlags: vi.fn(),
+    isFeatureEnabled: vi.fn(() => false),
+    getFeatureFlag: vi.fn(() => null),
+    reloadFeatureFlags: vi.fn(),
+    opt_out_capturing: vi.fn(),
+    opt_in_capturing: vi.fn(),
+    has_opted_out_capturing: vi.fn(() => false),
+    has_opted_in_capturing: vi.fn(() => true),
+  },
+}));
+
 // Mock analytics module to prevent PostHog network requests during tests
 vi.mock('@/lib/analytics', () => ({
   analytics: {
