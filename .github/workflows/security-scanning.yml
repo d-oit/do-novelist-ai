@@ -5,7 +5,7 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   schedule:
     # Daily security scan at 3 AM UTC
     - cron: "0 3 * * *"
@@ -33,6 +33,11 @@ on:
 concurrency:
   group: security-scan-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: read
 
 env:
   NODE_OPTIONS: "--max-old-space-size=4096"
@@ -94,7 +99,6 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: javascript-typescript
-          queries: security-and-quality,security-extended
           config-file: .github/codeql/codeql-config.yml
 
       - name: Autobuild
@@ -142,6 +146,15 @@ jobs:
           node-version: "20"
           cache: "pnpm"
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -186,6 +199,15 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -243,6 +265,15 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

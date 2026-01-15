@@ -5,12 +5,17 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+  checks: read
 
 env:
   FORCE_COLOR: 1
@@ -42,7 +47,7 @@ jobs:
           cache: "pnpm"
 
       - name: Cache pnpm store
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -75,19 +80,21 @@ jobs:
           cache: "pnpm"
 
       - name: Restore pnpm store
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
 
       - name: Cache ESLint
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: .eslintcache
-          key: ${{ runner.os }}-eslint-${{ hashFiles('eslint.config.js', 'src/**/*.ts', 'src/**/*.tsx') }}
+          key: ${{ runner.os }}-eslint-${{ hashFiles('eslint.config.js', '.eslintrc.*', 'src/**/*.ts', 'src/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-eslint-
 
       - name: Run ESLint
         run: pnpm run lint:eslint
@@ -114,19 +121,24 @@ jobs:
           cache: "pnpm"
 
       - name: Restore pnpm store
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Cache TypeScript build
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: "**/*.tsbuildinfo"
-          key: ${{ runner.os }}-typescript-${{ hashFiles('tsconfig.json', 'src/**/*.ts', 'src/**/*.tsx') }}
+          key: ${{ runner.os }}-typescript-${{ hashFiles('tsconfig.json', 'tsconfig.*.json', 'src/**/*.ts', 'src/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-typescript-
 
       - name: Run TypeScript type check
         run: pnpm run lint:typecheck
@@ -157,13 +169,26 @@ jobs:
           cache: "pnpm"
 
       - name: Restore pnpm store
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Cache Vitest test results
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.vite
+            .vitest-cache
+          key: ${{ runner.os }}-vitest-${{ hashFiles('vitest.config.*', 'src/**/*.test.*') }}
+          restore-keys: |
+            ${{ runner.os }}-vitest-
 
       - name: Run unit tests
         run: pnpm run test -- --shard=${{ matrix.shard }}/3
@@ -205,10 +230,13 @@ jobs:
           cache: "pnpm"
 
       - name: Restore pnpm store
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -220,12 +248,14 @@ jobs:
         run: pnpm run check:file-size
 
       - name: Cache Vite build
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: |
             node_modules/.vite
             dist
-          key: ${{ runner.os }}-vite-${{ hashFiles('src/**', 'vite.config.ts') }}
+          key: ${{ runner.os }}-vite-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'vite.config.ts', 'src/**') }}
+          restore-keys: |
+            ${{ runner.os }}-vite-
 
       - name: Build application
         run: pnpm run build
@@ -285,11 +315,12 @@ jobs:
             ca-certificates fonts-liberation wget
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
+            ${{ runner.os }}-playwright-${{ matrix.browser }}-
             ${{ runner.os }}-playwright-
 
       - name: Install dependencies

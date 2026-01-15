@@ -18,10 +18,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   yamllint:
     name: YAML Syntax Validation
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
 
@@ -43,6 +48,7 @@ jobs:
   actionlint:
     name: GitHub Actions Workflow Validation
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
 
