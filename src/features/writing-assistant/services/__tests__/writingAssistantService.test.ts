@@ -10,6 +10,79 @@ import { describe, expect, it, vi } from 'vitest';
 import { writingAssistantService } from '@/features/writing-assistant/services/writingAssistantService';
 import type { WritingAssistantConfig } from '@/types';
 
+// Mock PostHog to prevent network requests during tests
+vi.mock('posthog-js', () => ({
+  default: {
+    init: vi.fn(),
+    identify: vi.fn(),
+    capture: vi.fn(),
+    reset: vi.fn(),
+    register: vi.fn(),
+    unregister: vi.fn(),
+    group: vi.fn(),
+    onFeatureFlags: vi.fn(),
+    isFeatureEnabled: vi.fn(() => false),
+    getFeatureFlag: vi.fn(() => null),
+    reloadFeatureFlags: vi.fn(),
+    opt_out_capturing: vi.fn(),
+    opt_in_capturing: vi.fn(),
+    has_opted_out_capturing: vi.fn(() => false),
+    has_opted_in_capturing: vi.fn(() => true),
+  },
+}));
+
+// Mock analytics module to prevent PostHog network requests
+vi.mock('@/lib/analytics', () => ({
+  analytics: {
+    init: vi.fn(),
+    identify: vi.fn(),
+    capture: vi.fn(),
+    reset: vi.fn(),
+    trackPageView: vi.fn(),
+    setUserProperties: vi.fn(),
+    enableTracking: vi.fn(),
+    disableTracking: vi.fn(),
+    isTrackingEnabled: vi.fn(() => false),
+    optOut: vi.fn(),
+    optIn: vi.fn(),
+  },
+  featureTracking: {
+    trackFeatureUsage: vi.fn(),
+    startFeatureTimer: vi.fn(),
+    endFeatureTimer: vi.fn(),
+    trackFeatureFlow: vi.fn(),
+    trackError: vi.fn(),
+    trackConversion: vi.fn(),
+    trackRetention: vi.fn(),
+    getActiveFeatures: vi.fn(() => []),
+    clearFeatureTimers: vi.fn(),
+  },
+  experiments: {
+    init: vi.fn().mockResolvedValue(undefined),
+    isFeatureEnabled: vi.fn(() => false),
+    getFeatureFlag: vi.fn(() => null),
+    getAllFeatureFlags: vi.fn(() => ({})),
+    isInExperiment: vi.fn(() => false),
+    getExperimentVariant: vi.fn(() => null),
+    trackExperimentEvent: vi.fn(),
+    reloadFeatureFlags: vi.fn().mockResolvedValue(undefined),
+    waitForFeatureFlag: vi.fn().mockResolvedValue(null),
+  },
+  feedbackService: {
+    submitFeedback: vi.fn(),
+    trackNPS: vi.fn(),
+    trackCSAT: vi.fn(),
+    trackFeatureRating: vi.fn(),
+    shouldShowSurvey: vi.fn(() => false),
+    recordSurveyShown: vi.fn(),
+    recordSurveyDismissed: vi.fn(),
+    trackBugReport: vi.fn(),
+    trackFeatureRequest: vi.fn(),
+    getUserSurveyHistory: vi.fn(() => []),
+    clearSurveyHistory: vi.fn(),
+  },
+}));
+
 vi.mock('@openrouter/sdk', () => ({
   OpenRouter: class MockOpenRouter {
     chat = {
