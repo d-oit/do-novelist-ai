@@ -12,12 +12,22 @@ import { offlineManager } from '@/lib/pwa';
 import { queryClient, QueryClientProvider } from '@/lib/react-query';
 import { performanceMonitor } from '@/performance';
 import { MainLayout, Header as Navbar } from '@/shared/components/layout';
-import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { Toaster } from '@/shared/components/ui/Toaster';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
 import type { Chapter, Project, RefineOptions } from '@/shared/types';
 
 import { createChapter } from '@shared/utils';
+
+import { LazyLoadErrorBoundary } from './error-boundaries';
+import {
+  ProjectsLoader,
+  SettingsLoader,
+  MetricsLoader,
+  ConsoleLoader,
+  PlotEngineLoader,
+  WorldBuildingLoader,
+  DialogueLoader,
+} from './loading-states';
 
 // Lazy load React Query Devtools for development
 const ReactQueryDevtools = lazy(() =>
@@ -52,157 +62,7 @@ const DialogueDashboard = lazy(() =>
 );
 
 // Loading components for Suspense boundaries
-const ProjectsLoader = () => (
-  <div className='flex min-h-[calc(100vh-4rem)] flex-col gap-6 bg-background p-8'>
-    <div className='mb-8 text-center'>
-      <Skeleton className='mx-auto h-12 w-64' />
-      <Skeleton className='mx-auto mt-3 h-6 w-96' />
-    </div>
-    <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
-      {[...Array(6)].map((_, i) => (
-        <Skeleton key={i} className='h-48 w-full' />
-      ))}
-    </div>
-  </div>
-);
-
-const SettingsLoader = () => (
-  <div className='container mx-auto max-w-4xl space-y-8 p-8'>
-    <Skeleton className='h-10 w-48' />
-    <div className='space-y-4'>
-      <Skeleton className='h-32 w-full' />
-      <Skeleton className='h-32 w-full' />
-      <Skeleton className='h-32 w-full' />
-    </div>
-  </div>
-);
-
-const MetricsLoader = () => (
-  <div className='container mx-auto space-y-6 p-6'>
-    <div>
-      <Skeleton className='h-10 w-48' />
-      <Skeleton className='mt-2 h-6 w-96' />
-    </div>
-    <div className='space-y-4'>
-      <Skeleton className='h-64 w-full' />
-      <Skeleton className='h-48 w-full' />
-    </div>
-  </div>
-);
-
-const ConsoleLoader = () => (
-  <div className='h-[300px] w-full rounded-lg border border-border bg-muted/20 p-4'>
-    <div className='space-y-2'>
-      <Skeleton className='h-4 w-3/4' />
-      <Skeleton className='h-4 w-1/2' />
-      <Skeleton className='h-4 w-2/3' />
-      <Skeleton className='h-4 w-1/3' />
-    </div>
-  </div>
-);
-
-const PlotEngineLoader = () => (
-  <div className='container mx-auto space-y-6 p-6'>
-    <div>
-      <Skeleton className='h-10 w-48' />
-      <Skeleton className='mt-2 h-6 w-96' />
-    </div>
-    <div className='flex gap-2'>
-      <Skeleton className='h-10 w-32' />
-      <Skeleton className='h-10 w-32' />
-      <Skeleton className='h-10 w-32' />
-    </div>
-    <div className='space-y-4'>
-      <Skeleton className='h-64 w-full' />
-      <Skeleton className='h-48 w-full' />
-    </div>
-  </div>
-);
-
-const WorldBuildingLoader = () => (
-  <div className='container mx-auto space-y-6 p-6'>
-    <div>
-      <Skeleton className='h-10 w-64' />
-      <Skeleton className='mt-2 h-6 w-96' />
-    </div>
-    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
-      <Skeleton className='h-48 w-full' />
-      <Skeleton className='h-48 w-full' />
-      <Skeleton className='h-48 w-full' />
-    </div>
-  </div>
-);
-
-const DialogueLoader = () => (
-  <div className='container mx-auto space-y-6 p-6'>
-    <div>
-      <Skeleton className='h-10 w-64' />
-      <Skeleton className='mt-2 h-6 w-96' />
-    </div>
-    <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
-      <Skeleton className='h-32 w-full' />
-      <Skeleton className='h-32 w-full' />
-      <Skeleton className='h-32 w-full' />
-      <Skeleton className='h-32 w-full' />
-    </div>
-    <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
-      <Skeleton className='h-64 w-full lg:col-span-2' />
-      <Skeleton className='h-64 w-full' />
-      <Skeleton className='h-48 w-full' />
-    </div>
-  </div>
-);
-
-// Error boundary for lazy loading failures
-class LazyLoadErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ReactNode },
-  { hasError: boolean; error?: Error }
-> {
-  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error: Error } {
-    return { hasError: true, error };
-  }
-
-  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    logger.error('Lazy loading error', {
-      component: 'LazyLoadErrorBoundary',
-      error,
-      errorInfo,
-    });
-  }
-
-  override render(): React.ReactNode {
-    if (this.state.hasError) {
-      return (
-        this.props.fallback || (
-          <div className='flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background p-8 text-foreground'>
-            <div className='max-w-md text-center'>
-              <h2 className='mb-2 text-xl font-semibold text-destructive'>
-                Failed to Load Component
-              </h2>
-              <p className='mb-4 text-muted-foreground'>
-                {this.state.error?.message ||
-                  'An unexpected error occurred while loading this component.'}
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                className='rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90'
-              >
-                Reload Page
-              </button>
-            </div>
-          </div>
-        )
-      );
-    }
-
-    return this.props.children;
-  }
-}
+// (Moved to ./loading-states.tsx and ./error-boundaries.tsx)
 
 // --- Initial Data ---
 

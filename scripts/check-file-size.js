@@ -30,7 +30,7 @@ const ALLOWED_VIOLATIONS = new Set([
   // Production files exceeding 600 LOC limit (to be refactored)
   'src/features/plot-engine/services/plotGenerationService.ts', // 1061 LOC - high priority refactoring
   'src/features/publishing/services/publishingAnalyticsService.ts', // 712 LOC
-  'src/lib/character-validation.ts', // 690 LOC
+
   'src/features/writing-assistant/services/grammarSuggestionService.ts', // 634 LOC
   // Test files exceeding 600 LOC limit
   'src/features/plot-engine/services/__tests__/rag-end-to-end.test.ts', // 935 LOC

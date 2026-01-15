@@ -4,11 +4,8 @@
  */
 
 import { validateRelationship } from '@/types/character-guards';
-import type {
-  Character,
-  CharacterRelationship,
-  CharacterRelationshipSchema,
-} from '@/types/character-schemas';
+import type { Character, CharacterRelationship } from '@/types/character-schemas';
+import { CharacterRelationshipSchema } from '@/types/character-schemas';
 import type { ValidationResult } from '@/types/schemas';
 import { validateData } from '@/types/schemas';
 
