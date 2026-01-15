@@ -224,7 +224,7 @@ jobs:
       - name: Audit-CI Vulnerability Check
         run: |
           echo "[SEARCH] Running audit-ci vulnerability check..."
-          npx audit-ci --config audit-ci.json
+          npx audit-ci -p pnpm -m -h -c
 
       - name: Check for outdated packages with security updates
         run: |
