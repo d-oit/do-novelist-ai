@@ -84,7 +84,18 @@ const GoalCard: FC<{
       return `${goal.current.words.toLocaleString()} / ${goal.target.words.toLocaleString()} words`;
     }
     if (goal.target.time !== undefined) {
-      return `${Math.round(goal.current.time / 60)}h / ${Math.round(goal.target.time / 60)}h`;
+      const currentHours = Math.floor(goal.current.time / 60);
+      const currentMins = goal.current.time % 60;
+      const targetHours = Math.floor(goal.target.time / 60);
+      const targetMins = goal.target.time % 60;
+
+      const formatTime = (h: number, m: number) => {
+        if (h === 0) return `${m}m`;
+        if (m === 0) return `${h}h`;
+        return `${h}h ${m}m`;
+      };
+
+      return `${formatTime(currentHours, currentMins)} / ${formatTime(targetHours, targetMins)}`;
     }
     if (goal.target.chapters !== undefined) {
       return `${goal.current.chapters} / ${goal.target.chapters} chapters`;
@@ -140,15 +151,6 @@ const GoalCard: FC<{
             </button>
             <button
               onClick={() => void onDelete(goal.id)}
-              className={iconButtonTarget(
-                'rounded text-red-500 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-600 group-hover:opacity-100',
-              )}
-              aria-label='Delete goal'
-            >
-              <Trash2 className='h-4 w-4' />
-            </button>
-            <button
-              onClick={() => onDelete(goal.id)}
               className={iconButtonTarget(
                 'rounded text-red-500 opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-600 group-hover:opacity-100',
               )}
@@ -289,7 +291,11 @@ const GoalForm: FC<{
           </Button>
         </div>
 
-        <form onSubmit={e => void handleSubmit(e)} className='space-y-4'>
+        <form
+          onSubmit={e => void handleSubmit(e)}
+          className='space-y-4'
+          aria-label={goal ? 'Edit Goal' : 'Create New Goal'}
+        >
           {/* Goal Type */}
           <div>
             <label className='mb-2 block text-sm font-medium'>Goal Type</label>
@@ -317,11 +323,12 @@ const GoalForm: FC<{
 
           {/* Target Words */}
           <div>
-            <label className='mb-2 block text-sm font-medium'>
+            <label htmlFor='target-words' className='mb-2 block text-sm font-medium'>
               Target Words
               <span className='ml-1 text-muted-foreground'>(optional)</span>
             </label>
             <input
+              id='target-words'
               type='number'
               value={targetWords}
               onChange={e => setTargetWords(e.target.value)}
@@ -332,11 +339,12 @@ const GoalForm: FC<{
 
           {/* Target Time */}
           <div>
-            <label className='mb-2 block text-sm font-medium'>
+            <label htmlFor='target-time' className='mb-2 block text-sm font-medium'>
               Target Time (minutes)
               <span className='ml-1 text-muted-foreground'>(optional)</span>
             </label>
             <input
+              id='target-time'
               type='number'
               value={targetTime}
               onChange={e => setTargetTime(e.target.value)}
@@ -348,11 +356,12 @@ const GoalForm: FC<{
           {/* Target Chapters */}
           {(type === 'monthly' || type === 'project') && (
             <div>
-              <label className='mb-2 block text-sm font-medium'>
+              <label htmlFor='target-chapters' className='mb-2 block text-sm font-medium'>
                 Target Chapters
                 <span className='ml-1 text-muted-foreground'>(optional)</span>
               </label>
               <input
+                id='target-chapters'
                 type='number'
                 value={targetChapters}
                 onChange={e => setTargetChapters(e.target.value)}
@@ -365,11 +374,12 @@ const GoalForm: FC<{
           {/* End Date */}
           {type !== 'daily' && (
             <div>
-              <label className='mb-2 block text-sm font-medium'>
+              <label htmlFor='end-date' className='mb-2 block text-sm font-medium'>
                 End Date
                 <span className='ml-1 text-muted-foreground'>(optional)</span>
               </label>
               <input
+                id='end-date'
                 type='date'
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}

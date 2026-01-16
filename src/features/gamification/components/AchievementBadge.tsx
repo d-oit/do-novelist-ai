@@ -1,4 +1,3 @@
-
 import { Award, Lock } from 'lucide-react';
 import React from 'react';
 
@@ -65,12 +64,12 @@ export const AchievementBadge: React.FC<AchievementBadgeProps> = ({
             {userAchievement?.rewards?.experiencePoints !== undefined && (
               <div className='flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400'>
                 <Award className='h-3 w-3' />
-                <span>{userAchievement.rewards.experiencePoints} XP</span>
+                <span>{userAchievement.rewards.experiencePoints.toLocaleString()} XP</span>
               </div>
             )}
           </div>
 
-          {showProgress && userAchievement && userAchievement.progress < 100 && (
+          {showProgress && userAchievement && (
             <div className='mt-2'>
               <div className='mb-1 flex justify-between text-xs'>
                 <span>Progress</span>

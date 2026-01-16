@@ -47,7 +47,7 @@ const getStoredConfig = (): PlotDbConfig => {
   const useEmbeddedReplica = syncUrl.length > 0 && authToken.length > 0;
 
   return {
-    url: useEmbeddedReplica ? 'file:plot-engine.db' : ':memory:',
+    url: useEmbeddedReplica ? ':memory:' : ':memory:', // Browser LibSQL client doesn't support 'file:' scheme
     syncUrl,
     authToken,
     useEmbeddedReplica,

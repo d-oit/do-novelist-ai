@@ -22,7 +22,7 @@ interface DbProjectRow {
   id: string;
   title: string;
   idea: string;
-  style: string; // JSON string
+  style: string; // WritingStyle enum string
   cover_image: string;
   world_state: string; // JSON string
   status: string;
@@ -287,7 +287,7 @@ export const db = {
           id: pRow.id,
           title: pRow.title,
           idea: pRow.idea,
-          style: JSON.parse(pRow.style || '{}') as WritingStyle,
+          style: pRow.style as WritingStyle,
           coverImage: pRow.cover_image,
 
           worldState: JSON.parse(pRow.world_state || '{}') as WorldState,

@@ -52,7 +52,21 @@ class WorldBuildingService {
     description?: string,
   ): Promise<WorldBuildingProjectRow> {
     const db = getDrizzleClient();
-    if (!db) throw new Error('Database not configured');
+    if (!db) {
+      logger.warn('Database not configured, returning local row', {
+        component: 'WorldBuildingService',
+      });
+      const id = generateSecureId();
+      const now = new Date().toISOString();
+      return {
+        id,
+        projectId,
+        name,
+        description: description || null,
+        createdAt: now,
+        updatedAt: now,
+      } as WorldBuildingProjectRow;
+    }
 
     try {
       const id = generateSecureId();

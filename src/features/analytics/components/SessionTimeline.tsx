@@ -54,7 +54,7 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = React.memo(
         className={className}
       >
         <h3 className='mb-4 flex items-center gap-2 font-serif text-lg font-semibold'>
-          <Brain className='h-5 w-5 text-primary' />
+          <Brain className='h-5 w-5 text-primary' data-testid='header-brain-icon' />
           AI Insights & Recommendations
         </h3>
 
@@ -65,8 +65,8 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = React.memo(
               <div>
                 <h4 className='font-medium text-blue-900 dark:text-blue-100'>Peak Performance</h4>
                 <p className='mt-1 text-sm text-blue-700 dark:text-blue-200'>
-                  You write best between 9-11 AM with an average of {roundedProductivity}{' '}
-                  words/hour.
+                  You write best between 9-11 AM with an average of{' '}
+                  <span data-testid='productivity-value'>{roundedProductivity}</span> words/hour.
                 </p>
               </div>
             </div>
@@ -78,7 +78,8 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = React.memo(
               <div>
                 <h4 className='font-medium text-green-900 dark:text-green-100'>Streak Power</h4>
                 <p className='mt-1 text-sm text-green-700 dark:text-green-200'>
-                  {insights.currentStreak} day streak! You're {streakMessage}.
+                  <span data-testid='streak-header'>{insights.currentStreak} day streak!</span>{' '}
+                  You're <span data-testid='streak-message'>{streakMessage}</span>.
                 </p>
               </div>
             </div>
@@ -90,7 +91,8 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = React.memo(
               <div>
                 <h4 className='font-medium text-purple-900 dark:text-purple-100'>AI Balance</h4>
                 <p className='mt-1 text-sm text-purple-700 dark:text-purple-200'>
-                  {roundedAIAssistance}% AI assistance - {aiBalanceMessage}.
+                  <span data-testid='ai-percentage'>{roundedAIAssistance}%</span> AI assistance -{' '}
+                  <span data-testid='ai-message'>{aiBalanceMessage}</span>.
                 </p>
               </div>
             </div>

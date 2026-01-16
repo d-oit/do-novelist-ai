@@ -28,10 +28,18 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
   const { settings, update } = useSettings();
 
   useEffect(() => {
-    void loadUserPreferences(userId).then(prefs => {
-      setPreferences(prefs);
-      setLoading(false);
-    });
+    const fetchPreferences = async (): Promise<void> => {
+      try {
+        const prefs = await loadUserPreferences(userId);
+        setPreferences(prefs);
+        setLoading(false);
+      } catch (error) {
+        logger.error('Failed to load preferences', { component: 'AISettingsPanel', error, userId });
+        setLoading(false);
+      }
+    };
+
+    void fetchPreferences();
   }, [userId]);
 
   const handleSave = async (updates: Partial<ProviderPreferenceData>): Promise<void> => {
@@ -51,7 +59,7 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
 
   if (loading || !preferences) {
     return (
-      <div className='rounded-lg border bg-white p-6'>
+      <div data-testid='loading-skeleton' className='rounded-lg border bg-white p-6'>
         <div className='animate-pulse space-y-4'>
           <div className='h-4 w-1/4 rounded bg-gray-200' />
           <div className='h-32 rounded bg-gray-200' />
@@ -279,21 +287,21 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
               </p>
             </div>
             <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
-              <div className='rounded-lg border p-4'>
+              <div data-testid='provider-status-openai' className='rounded-lg border p-4'>
                 <h4 className='mb-2 font-medium'>OpenAI</h4>
                 <div className='flex items-center gap-2'>
                   <div className='h-2 w-2 rounded-full bg-green-500' />
                   <span className='text-sm text-gray-600'>Operational</span>
                 </div>
               </div>
-              <div className='rounded-lg border p-4'>
+              <div data-testid='provider-status-anthropic' className='rounded-lg border p-4'>
                 <h4 className='mb-2 font-medium'>Anthropic</h4>
                 <div className='flex items-center gap-2'>
                   <div className='h-2 w-2 rounded-full bg-green-500' />
                   <span className='text-sm text-gray-600'>Operational</span>
                 </div>
               </div>
-              <div className='rounded-lg border p-4'>
+              <div data-testid='provider-status-google' className='rounded-lg border p-4'>
                 <h4 className='mb-2 font-medium'>Google</h4>
                 <div className='flex items-center gap-2'>
                   <div className='h-2 w-2 rounded-full bg-green-500' />
@@ -361,8 +369,12 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
                     Include in Context
                   </label>
                   <div className='space-y-2'>
-                    <label className='flex cursor-pointer items-center'>
+                    <label
+                      htmlFor='context-characters'
+                      className='flex cursor-pointer items-center'
+                    >
                       <input
+                        id='context-characters'
                         type='checkbox'
                         checked={settings.contextIncludeCharacters}
                         onChange={e => update({ contextIncludeCharacters: e.target.checked })}
@@ -371,8 +383,12 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
                       <span className='text-sm text-foreground'>Characters</span>
                     </label>
 
-                    <label className='flex cursor-pointer items-center'>
+                    <label
+                      htmlFor='context-worldbuilding'
+                      className='flex cursor-pointer items-center'
+                    >
                       <input
+                        id='context-worldbuilding'
                         type='checkbox'
                         checked={settings.contextIncludeWorldBuilding}
                         onChange={e => update({ contextIncludeWorldBuilding: e.target.checked })}
@@ -381,8 +397,9 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
                       <span className='text-sm text-foreground'>World Building</span>
                     </label>
 
-                    <label className='flex cursor-pointer items-center'>
+                    <label htmlFor='context-timeline' className='flex cursor-pointer items-center'>
                       <input
+                        id='context-timeline'
                         type='checkbox'
                         checked={settings.contextIncludeTimeline}
                         onChange={e => update({ contextIncludeTimeline: e.target.checked })}
@@ -391,8 +408,9 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
                       <span className='text-sm text-foreground'>Timeline</span>
                     </label>
 
-                    <label className='flex cursor-pointer items-center'>
+                    <label htmlFor='context-chapters' className='flex cursor-pointer items-center'>
                       <input
+                        id='context-chapters'
                         type='checkbox'
                         checked={settings.contextIncludeChapters}
                         onChange={e => update({ contextIncludeChapters: e.target.checked })}
