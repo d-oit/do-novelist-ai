@@ -5,8 +5,12 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { cleanupTestEnvironment } from '../utils/test-cleanup';
 
 test.describe('Application Performance', () => {
+  test.afterEach(async ({ page }) => {
+    await cleanupTestEnvironment(page);
+  });
   test('should load initial page within acceptable time', async ({ page }) => {
     const startTime = Date.now();
 
@@ -135,7 +139,7 @@ test.describe('Application Performance', () => {
           .catch(() => false)
       ) {
         await projectsBtn.first().click();
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
       }
 
       const dashboardBtn = page
@@ -149,7 +153,7 @@ test.describe('Application Performance', () => {
           .catch(() => false)
       ) {
         await dashboardBtn.first().click();
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
       }
     }
 

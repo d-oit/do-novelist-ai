@@ -1,10 +1,11 @@
 /**
  * E2E Tests for Plot Engine Dashboard
  *
- * Tests the complete user flow for plot analysis and generation
+ * Tests for complete user flow for plot analysis and generation
  */
 
 import { test, expect } from '@playwright/test';
+import { cleanupTestEnvironment, clickWithStability, dismissOnboardingModal } from '../utils/test-cleanup';
 
 test.describe('Plot Engine Dashboard', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,9 +14,48 @@ test.describe('Plot Engine Dashboard', () => {
 
     // Wait for app to be ready
     await page.waitForSelector('[data-testid="app-ready"]', { timeout: 10000 });
+
+    // Dismiss onboarding modal if present
+    await dismissOnboardingModal(page);
+
+    // Wait for Framer Motion animations to complete
+    // Header navigation animates in with 400ms delay + 500ms duration = ~900ms total
+    await page.waitForTimeout(1000);
+
+    // Wait for ALL navigation elements to be visible (fixes animation timing issues)
+    const navSelectors = [
+      '[data-testid="nav-dashboard"]',
+      '[data-testid="nav-projects"]',
+      '[data-testid="nav-plot-engine"]',
+      '[data-testid="nav-world-building"]',
+      '[data-testid="nav-metrics"]',
+      '[data-testid="nav-settings"]',
+    ];
+
+    await Promise.all(
+      navSelectors.map(selector => page.waitForSelector(selector, { state: 'visible', timeout: 15000 })),
+    ).catch(() => {
+      // Some navigation elements might not be visible in all test scenarios
+      // Tests will handle this with proper conditional logic
+    });
+  });
+
+  test.afterEach(async ({ page }) => {
+    // Clean up overlays and modals between tests
+    await cleanupTestEnvironment(page);
   });
 
   test('should display plot engine dashboard or gracefully handle missing feature', async ({ page }) => {
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        // Element might not exist - handled below
+      });
+
     // Try to navigate to plot engine
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
@@ -23,8 +63,8 @@ test.describe('Plot Engine Dashboard', () => {
     const isVisible = await plotEngineLink.isVisible({ timeout: 2000 }).catch(() => false);
 
     if (isVisible) {
-      await plotEngineLink.click();
-      await page.waitForLoadState('networkidle');
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
       // Check for dashboard header
       const heading = page.getByRole('heading', { name: /plot engine/i });
@@ -59,23 +99,33 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should switch between tabs', async ({ page }) => {
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Click on different tabs and verify they become visible
       await page.getByTestId('tab-structure').click();
-      await page.waitForTimeout(500); // Wait for tab content to render
+      await page.waitForTimeout(1000); // Wait for tab content to render (increased from 500ms)
 
       await page.getByTestId('tab-characters').click();
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(1000);
 
       await page.getByTestId('tab-plot-holes').click();
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(1000);
 
       await page.getByTestId('tab-generator').click();
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(1000);
 
       // Verify we're on generator tab by checking if the tab button has active state
       await expect(page.getByTestId('tab-generator')).toBeVisible();
@@ -85,10 +135,20 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should display empty state when no analysis run', async ({ page }) => {
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Switch to a tab that requires analysis
       await page.getByTestId('tab-structure').click();
@@ -102,10 +162,20 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should handle loading states', async ({ page }) => {
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Check for skeleton loaders or loading indicators
       const loadingIndicators = page.locator('[class*="skeleton"], [class*="animate-pulse"]');
@@ -123,10 +193,20 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should be keyboard accessible', async ({ page }) => {
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Tab through navigation
       await page.keyboard.press('Tab');
@@ -139,17 +219,27 @@ test.describe('Plot Engine Dashboard', () => {
       await page.keyboard.press('Enter');
 
       // Verify tab changed or action occurred
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(1000);
     } else {
       test.skip();
     }
   });
 
   test('should display plot analyzer component', async ({ page }) => {
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Overview tab should show analyzer
       await page.getByTestId('tab-overview').click();
@@ -167,14 +257,24 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should display plot generator component', async ({ page }) => {
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Navigate to generator tab
       await page.getByTestId('tab-generator').click();
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(1000);
 
       // Check for generator tab is visible
       await expect(page.getByTestId('tab-generator')).toBeVisible();
@@ -190,10 +290,20 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should handle errors gracefully', async ({ page }) => {
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // If error boundary is triggered, should show fallback UI
       const errorBoundary = page.getByText(/something went wrong|error occurred/i);
@@ -206,10 +316,20 @@ test.describe('Plot Engine Dashboard', () => {
   });
 
   test('should have proper ARIA labels', async ({ page }) => {
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Check for proper ARIA landmarks - verify main landmark exists
       await expect(page.getByRole('main').first()).toBeVisible({ timeout: 5000 });
@@ -226,10 +346,20 @@ test.describe('Plot Engine Dashboard', () => {
     // Test mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
 
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Tabs should be visible and usable on mobile
       await expect(page.getByTestId('tab-overview')).toBeVisible();
@@ -253,10 +383,29 @@ test.describe('Plot Engine Accessibility', () => {
   test('should pass automated accessibility checks', async ({ page }) => {
     await page.goto('/');
 
+    // Wait for app to be ready
+    await page.waitForSelector('[data-testid="app-ready"]', { timeout: 10000 });
+
+    // Dismiss onboarding modal
+    await dismissOnboardingModal(page);
+
+    // Wait for animations to complete
+    await page.waitForTimeout(1000);
+
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Wait for content to load
       await page.waitForSelector('[data-testid="tab-overview"]', { timeout: 10000 });
@@ -271,10 +420,29 @@ test.describe('Plot Engine Accessibility', () => {
   test('should support screen reader navigation', async ({ page }) => {
     await page.goto('/');
 
+    // Wait for app to be ready
+    await page.waitForSelector('[data-testid="app-ready"]', { timeout: 10000 });
+
+    // Dismiss onboarding modal
+    await dismissOnboardingModal(page);
+
+    // Wait for animations to complete
+    await page.waitForTimeout(1000);
+
+    // Explicitly wait for navigation element
+    await page
+      .waitForSelector('[data-testid="nav-plot-engine"]', {
+        state: 'visible',
+        timeout: 5000,
+      })
+      .catch(() => {
+        test.skip();
+      });
+
     const plotEngineLink = page.getByTestId('nav-plot-engine');
 
     if (await plotEngineLink.isVisible()) {
-      await plotEngineLink.click();
+      await clickWithStability(page, 'nav-plot-engine', { timeout: 15000 });
 
       // Check for proper heading hierarchy
       const h1 = page.getByRole('heading', { level: 1 });

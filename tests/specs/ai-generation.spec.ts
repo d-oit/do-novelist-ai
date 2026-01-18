@@ -3,6 +3,7 @@ import { expect, test } from '../utils/enhanced-test-fixture';
 import { performanceMonitor } from '../utils/performance-monitor';
 import { dbTransactionManager } from '../utils/database-transaction-manager';
 import { unifiedMockManager } from '../utils/unified-mock-manager';
+import { cleanupTestEnvironment, clickWithStability } from '../utils/test-cleanup';
 
 /**
  * Enhanced AI Generation and GOAP Workflow E2E Tests
@@ -73,24 +74,14 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
     console.log('🧹 Cleaning up test');
 
     try {
+      // Clean up overlays and modals
+      await cleanupTestEnvironment(page);
+
       // End database transaction context with rollback
       await dbTransactionManager.endTransactionContext('test-session');
 
       // Cleanup unified mocking
       await mockManager.cleanupPageRoutes(page, 'test-session');
-
-      // Clear browser state
-      await page.unroute('**/*');
-      await page.evaluate(() => {
-        try {
-          localStorage.clear();
-          sessionStorage.clear();
-        } catch (error) {
-          console.log('Storage clear failed (expected in some contexts):', error);
-        }
-      });
-      await page.context().clearCookies();
-      await page.goto('about:blank', { waitUntil: 'domcontentloaded' });
 
       console.log('✅ Test cleanup complete');
     } catch (error) {
@@ -127,7 +118,7 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
 
   test('should access dashboard via navigation', async ({ page }) => {
     // Navigate to dashboard
-    await page.getByTestId('nav-dashboard').click();
+    await clickWithStability(page, 'nav-dashboard', { timeout: 15000 });
 
     // Verify the dashboard nav is highlighted/active
     await expect(page.getByTestId('nav-dashboard')).toBeVisible();
@@ -135,7 +126,7 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
 
   test('should display action cards when project is loaded', async ({ page }) => {
     // Navigate to dashboard
-    await page.getByTestId('nav-dashboard').click();
+    await clickWithStability(page, 'nav-dashboard', { timeout: 15000 });
 
     // Wait for navigation to settle
     await page.waitForLoadState('domcontentloaded');
@@ -161,7 +152,7 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
   });
 
   test('should have AI-related console or output area', async ({ page }) => {
-    await page.getByTestId('nav-dashboard').click();
+    await clickWithStability(page, 'nav-dashboard', { timeout: 15000 });
 
     // Wait for content to load
     await page.waitForLoadState('domcontentloaded');
@@ -187,17 +178,17 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
 
   test('should handle navigation between dashboard and settings', async ({ page }) => {
     // Start at dashboard
-    await page.getByTestId('nav-dashboard').click();
+    await clickWithStability(page, 'nav-dashboard', { timeout: 15000 });
     await page.waitForLoadState('domcontentloaded');
 
     // Navigate to settings using test ID for reliability
-    await page.getByTestId('nav-settings').click();
+    await clickWithStability(page, 'nav-settings', { timeout: 15000 });
 
     // Wait for settings view to load with intelligent polling
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Navigate back to dashboard
-    await page.getByTestId('nav-dashboard').click();
+    await clickWithStability(page, 'nav-dashboard', { timeout: 15000 });
     await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
   });
 });

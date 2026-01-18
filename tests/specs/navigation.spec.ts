@@ -5,11 +5,22 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { cleanupTestEnvironment, dismissOnboardingModal } from '../utils/test-cleanup';
 
 test.describe('Application Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('[data-testid="app-ready"]', { timeout: 10000 });
+
+    // Dismiss onboarding modal if present
+    await dismissOnboardingModal(page);
+
+    // Wait for Framer Motion animations to complete
+    await page.waitForTimeout(1000);
+  });
+
+  test.afterEach(async ({ page }) => {
+    await cleanupTestEnvironment(page);
   });
 
   test('should load the application successfully', async ({ page }) => {
@@ -43,7 +54,7 @@ test.describe('Application Navigation', () => {
         await link.click();
 
         // Wait for navigation to complete
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
         // Verify we're on the expected page
         await expect(page.locator('body')).toBeVisible();
@@ -59,13 +70,13 @@ test.describe('Application Navigation', () => {
 
     if (await settingsButton.first().isVisible()) {
       await settingsButton.first().click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
       // Navigate back
       await page.goBack();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
-      // Verify we're back at the starting page
+      // Verify we're back at starting page
       const appReady = page.locator('[data-testid="app-ready"]');
       await expect(appReady).toBeVisible();
     }
@@ -82,18 +93,18 @@ test.describe('Application Navigation', () => {
 
     if (await projectsButton.first().isVisible()) {
       await projectsButton.first().click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
       // Use browser back button
       await page.goBack();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
       // Should be back at initial URL
       expect(page.url()).toBe(initialUrl);
 
       // Use browser forward button
       await page.goForward();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
       // URL should have changed again
       expect(page.url()).not.toBe(initialUrl);
@@ -135,10 +146,10 @@ test.describe('Application Navigation', () => {
 
     if (await settingsButton.first().isVisible()) {
       await settingsButton.first().click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
       await page.goBack();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
       // Scroll position might be reset (which is acceptable behavior)
       const newScrollPosition = await page.evaluate(() => window.scrollY);
@@ -153,7 +164,7 @@ test.describe('Navigation Error Handling', () => {
     await page.goto('/non-existent-route');
 
     // Should either show 404 or redirect to home
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
     // Verify page is still functional
     await expect(page.locator('body')).toBeVisible();
@@ -167,7 +178,7 @@ test.describe('Navigation Error Handling', () => {
 
     if (await projectsButton.isVisible({ timeout: 1000 }).catch(() => false)) {
       await projectsButton.click();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
 
       // Should successfully navigate
       await expect(page.locator('body')).toBeVisible();
