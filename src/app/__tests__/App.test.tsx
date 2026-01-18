@@ -408,7 +408,7 @@ describe('App', () => {
       });
 
       await waitFor(() => {
-        expect(performanceMonitor.startTiming).toHaveBeenCalledWith('route-settings');
+        expect(performanceMonitor.startTiming).toHaveBeenCalledWith('route-projects');
       });
     });
   });
