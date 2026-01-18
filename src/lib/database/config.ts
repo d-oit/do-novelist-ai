@@ -45,7 +45,8 @@ const isTestEnvironment = (): boolean => {
 };
 
 /**
- * Get database configuration
+ * Get database configuration from environment variables only
+ * Returns config with useCloud=false if no Turso credentials set
  */
 export const getStoredConfig = (): DbConfig => {
   // In test environment, skip cloud
@@ -53,18 +54,7 @@ export const getStoredConfig = (): DbConfig => {
     return { url: '', authToken: '', useCloud: false };
   }
 
-  // Check localStorage first
-  const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored) as DbConfig;
-      return parsed;
-    } catch {
-      // Invalid JSON, fall through to env check
-    }
-  }
-
-  // Check environment variables
+  // Only check environment variables for Turso cloud config
   const envUrl = (import.meta.env.VITE_TURSO_DATABASE_URL as string | undefined) ?? '';
   const envToken = (import.meta.env.VITE_TURSO_AUTH_TOKEN as string | undefined) ?? '';
 

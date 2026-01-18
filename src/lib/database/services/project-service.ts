@@ -1,10 +1,3 @@
-/**
- * Database service using Drizzle ORM
- * Provides type-safe CRUD operations for projects and chapters
- *
- * This service wraps Drizzle queries with localStorage fallback
- * for offline-first functionality.
- */
 import { eq } from 'drizzle-orm';
 
 import { getDrizzleClient, schema } from '@/lib/database/drizzle';
@@ -13,8 +6,6 @@ import { ChapterStatus, PublishStatus, type Chapter, type Project } from '@/type
 import { type WorldState, type ProjectSettings, ProjectSchema } from '@/types/schemas';
 
 import { parseChapterStatus, parsePublishStatus } from '@shared/utils/validation';
-
-const LOCAL_PROJECTS_KEY = 'novelist_local_projects';
 
 /**
  * Map a database row to a Chapter object
@@ -191,14 +182,10 @@ export const drizzleDbService = {
         );
       }
     } else {
-      // LocalStorage fallback
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
-        string,
-        Project
-      >;
-      projects[project.id] = { ...project, updatedAt: new Date() };
-      localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
-      logger.info('[Drizzle] Local save complete');
+      logger.warn('Database not available for saveProject operation', {
+        component: 'drizzle-service',
+      });
+      throw new Error('Database not available');
     }
   },
 
@@ -251,35 +238,10 @@ export const drizzleDbService = {
         return null;
       }
     } else {
-      // LocalStorage fallback
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
-        string,
-        Project
-      >;
-      const p = projects[projectId];
-      if (!p) return null;
-
-      logger.info(`[Drizzle] Local load success: ${p.title}`);
-      return {
-        ...p,
-        status: p.status ?? PublishStatus.DRAFT,
-        language: p.language ?? 'en',
-        targetWordCount: p.targetWordCount ?? 50000,
-        settings: p.settings ?? { enableDropCaps: true },
-        timeline: p.timeline ?? {
-          id: crypto.randomUUID(),
-          projectId: p.id,
-          events: [],
-          eras: [],
-          settings: {
-            viewMode: 'chronological',
-            zoomLevel: 1,
-            showCharacters: true,
-            showImplicitEvents: false,
-          },
-        },
-        isGenerating: false,
-      };
+      logger.warn('Database not available for loadProject operation', {
+        component: 'drizzle-service',
+      });
+      return null;
     }
   },
 
@@ -318,20 +280,10 @@ export const drizzleDbService = {
         return [];
       }
     } else {
-      // LocalStorage fallback
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
-        string,
-        Project
-      >;
-      return Object.values(projects)
-        .map(p => ({
-          id: p.id,
-          title: p.title,
-          style: p.style as string,
-          updatedAt: p.updatedAt?.toString() ?? new Date().toISOString(),
-          coverImage: p.coverImage,
-        }))
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      logger.warn('Database not available for getAllProjects operation', {
+        component: 'drizzle-service',
+      });
+      return [];
     }
   },
 
@@ -357,14 +309,10 @@ export const drizzleDbService = {
         );
       }
     } else {
-      // LocalStorage fallback
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
-        string,
-        Project
-      >;
-      delete projects[projectId];
-      localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
-      logger.info('[Drizzle] Local delete complete');
+      logger.warn('Database not available for deleteProject operation', {
+        component: 'drizzle-service',
+      });
+      throw new Error('Database not available');
     }
   },
 };

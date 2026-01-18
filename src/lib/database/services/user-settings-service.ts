@@ -67,28 +67,28 @@ export const createUserSettings = async (userId: string): Promise<UserSettings |
   }
 
   try {
-    const newSettings: NewUserSettingsRow = {
-      id: crypto.randomUUID(),
-      userId,
-      theme: 'light',
-      language: 'en',
-      onboardingComplete: false,
-      onboardingStep: 'welcome',
-    };
+     const now = Math.floor(Date.now() / 1000);
+     const newSettings: any = {
+       id: crypto.randomUUID(),
+       userId,
+       theme: 'light',
+       language: 'en',
+       onboardingComplete: false,
+       onboardingStep: 'welcome',
+       createdAt: now,
+       updatedAt: now,
+     };
 
-    await db.insert(userSettings).values(newSettings);
-
-    return {
-      theme: 'light',
-      language: 'en',
-      onboardingComplete: false,
-      onboardingStep: 'welcome',
-    };
-  } catch (e) {
-    logger.error('Failed to create user settings', { userId }, e instanceof Error ? e : undefined);
-    return null;
-  }
-};
+     await db.insert(userSettings).values(newSettings);
+     return newSettings;
+   } catch (e) {
+     logger.error('Failed to create user settings', {
+       component: 'UserSettingsService',
+       error: e,
+     });
+     return null;
+   }
+} as const createUserSettings_export = createUserSettings;
 
 /**
  * Get or create user settings (idempotent)
@@ -153,7 +153,7 @@ export const updateUserSettings = async (
         .update(userSettings)
         .set({
           ...updateData,
-          updatedAt: new Date().toISOString(),
+          updatedAt: Math.floor(Date.now() / 1000),
         })
         .where(eq(userSettings.userId, userId));
     }

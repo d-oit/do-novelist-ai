@@ -4,6 +4,13 @@ import { configureAxe } from 'jest-axe';
 import React from 'react';
 import { afterEach, vi } from 'vitest';
 
+vi.mock('@/lib/database/drizzle', () => ({
+  getDrizzleClient: vi.fn(() => null),
+  getDrizzleConfig: vi.fn(() => null),
+  isCloudDbAvailable: vi.fn(() => false),
+  resetDrizzleClient: vi.fn(),
+}));
+
 // Configure axe-core for testing
 const axeConfig = {
   runOnly: {

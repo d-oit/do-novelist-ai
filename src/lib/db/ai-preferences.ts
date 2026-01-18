@@ -30,7 +30,7 @@ export async function initAIPreferencesDB(): Promise<void> {
       logger.error('Failed to initialize AI Preferences DB', { error: e });
     }
   } else {
-    logger.info('Using LocalStorage for AI Preferences');
+    logger.warn('Database not available for AI preferences');
   }
 }
 
@@ -81,20 +81,8 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
       return null;
     }
   } else {
-    try {
-      const stored = localStorage.getItem(getStorageKey(userId));
-      return stored != null ? (JSON.parse(stored) as UserAIPreference) : null;
-    } catch (e) {
-      // Only log errors in non-test environments to avoid noise in test output
-      if (import.meta.env.NODE_ENV !== 'test') {
-        logger.error('Failed to parse user AI preference from localStorage', {
-          component: 'ai-preferences',
-          error: e,
-          userId,
-        });
-      }
-      return null;
-    }
+    logger.warn('Database not available for AI preferences', { component: 'ai-preferences' });
+    return null;
   }
 }
 
@@ -151,7 +139,7 @@ export async function saveUserAIPreference(preference: UserAIPreference): Promis
       throw e;
     }
   } else {
-    localStorage.setItem(getStorageKey(preference.userId), JSON.stringify(preference));
+    logger.warn('Database not available for AI preferences', { component: 'ai-preferences' });
   }
 }
 

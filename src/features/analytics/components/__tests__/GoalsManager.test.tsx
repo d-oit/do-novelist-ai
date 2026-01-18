@@ -72,7 +72,7 @@ vi.mock('framer-motion', () => {
 
 // Mock lucide-react icons
 vi.mock('lucide-react', async importOriginal => {
-  const actual = await importOriginal();
+  const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
     Target: ({ className }: any) => <div className={className} data-testid='target-icon' />,
@@ -271,7 +271,7 @@ describe('GoalsManager', () => {
       expect(screen.getByText('Edit Goal')).toBeInTheDocument();
     });
 
-    it('deletes goal after confirmation', () => {
+    it('deletes goal after confirmation', async () => {
       const activeGoal: WritingGoals = {
         id: 'goal-1',
         type: 'daily',
@@ -289,7 +289,11 @@ describe('GoalsManager', () => {
       expect(deleteButton).toBeInTheDocument();
       fireEvent.click(deleteButton);
 
-      expect(global.confirm).toHaveBeenCalledWith('Are you sure you want to delete this goal?');
+      // ConfirmDialog should open instead of window.confirm
+      await waitFor(() => {
+        expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+      });
+      expect(screen.getByText(/Are you sure you want to delete this goal/i)).toBeInTheDocument();
     });
   });
 

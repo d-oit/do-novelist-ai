@@ -60,7 +60,8 @@ const isTestEnvironment = (): boolean => {
 };
 
 /**
- * Get database configuration from storage or environment
+ * Get database configuration from environment variables only
+ * Returns null if Turso cloud config is not set (falls back to local file database)
  */
 export const getDrizzleConfig = (): DrizzleConfig | null => {
   // In test environment, skip cloud
@@ -68,20 +69,7 @@ export const getDrizzleConfig = (): DrizzleConfig | null => {
     return null;
   }
 
-  // Check localStorage first
-  const stored = typeof window !== 'undefined' ? localStorage.getItem('novelist_db_config') : null;
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored) as { url: string; authToken: string; useCloud: boolean };
-      if (parsed.useCloud && isValidTursoUrl(parsed.url)) {
-        return { url: parsed.url, authToken: parsed.authToken };
-      }
-    } catch {
-      // Invalid JSON, fall through to env check
-    }
-  }
-
-  // Check environment variables
+  // Only check environment variables for Turso cloud config
   const envUrl = (import.meta.env.VITE_TURSO_DATABASE_URL as string | undefined) ?? '';
   const envToken = (import.meta.env.VITE_TURSO_AUTH_TOKEN as string | undefined) ?? '';
 
@@ -89,6 +77,7 @@ export const getDrizzleConfig = (): DrizzleConfig | null => {
     return { url: envUrl, authToken: envToken };
   }
 
+  // Return null - will use local file database as default
   return null;
 };
 

@@ -204,6 +204,53 @@ export const db = {
             status TEXT
           )
         `);
+
+      // User Settings Table
+      await client.execute(`
+        CREATE TABLE IF NOT EXISTS user_settings (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL UNIQUE,
+          device_id TEXT,
+          theme TEXT DEFAULT 'system',
+          language TEXT DEFAULT 'en',
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        )
+      `);
+
+      // Model Cache Table
+      await client.execute(`
+        CREATE TABLE IF NOT EXISTS model_cache (
+          id TEXT PRIMARY KEY,
+          cache_key TEXT NOT NULL UNIQUE,
+          data TEXT NOT NULL,
+          expires_at INTEGER NOT NULL,
+          created_at INTEGER NOT NULL
+        )
+      `);
+
+      // Device Registry Table
+      await client.execute(`
+        CREATE TABLE IF NOT EXISTS device_registry (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          device_id TEXT NOT NULL UNIQUE,
+          last_seen_at INTEGER NOT NULL,
+          created_at INTEGER NOT NULL
+        )
+      `);
+
+      // Create indexes
+      await client.execute(
+        'CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON user_settings(user_id)',
+      );
+      await client.execute(
+        'CREATE INDEX IF NOT EXISTS idx_model_cache_expires ON model_cache(expires_at)',
+      );
+      await client.execute(
+        'CREATE INDEX IF NOT EXISTS idx_device_registry_user ON device_registry(user_id)',
+      );
+
       logger.info('Database tables initialized');
     } catch (e) {
       logger.error(
@@ -391,35 +438,8 @@ export const db = {
         return null;
       }
     } else {
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
-        string,
-        Project
-      >;
-      const p = projects[projectId];
-      if (p == null) return null;
-      logger.info(`[DB] Local load success: ${(p as { title?: string }).title ?? 'Unknown'}`);
-      // Ensure structure matches Project type (handling legacy data if any)
-      return {
-        ...p,
-        status: p.status ?? PublishStatus.DRAFT,
-        language: p.language ?? 'en',
-        targetWordCount: p.targetWordCount ?? 50000,
-
-        settings: p.settings ?? { enableDropCaps: true },
-        timeline: p.timeline ?? {
-          id: crypto.randomUUID(),
-          projectId: p.id,
-          events: [],
-          eras: [],
-          settings: {
-            viewMode: 'chronological',
-            zoomLevel: 1,
-            showCharacters: true,
-            showImplicitEvents: false,
-          },
-        },
-        isGenerating: false,
-      };
+      logger.warn('Database client not available', { component: 'db' });
+      return null;
     }
   },
 

@@ -8,8 +8,8 @@ import { createChapter } from '@shared/utils';
 
 // Mock @libsql/client/web
 const mocks = vi.hoisted(() => ({
-  execute: vi.fn(),
-  batch: vi.fn(),
+  execute: vi.fn().mockResolvedValue({ rows: [] }),
+  batch: vi.fn().mockResolvedValue([]),
   createClient: vi.fn(),
 }));
 
@@ -18,6 +18,20 @@ vi.mock('@libsql/client/web', () => ({
     execute: mocks.execute,
     batch: mocks.batch,
   }),
+}));
+
+vi.mock('@/lib/database/drizzle', () => ({
+  getDrizzleClient: vi.fn(() => ({
+    execute: mocks.execute,
+    batch: mocks.batch,
+  })),
+  getDrizzleConfig: vi.fn(() => ({
+    url: '',
+    authToken: '',
+    useCloud: false,
+  })),
+  isCloudDbAvailable: vi.fn(() => false),
+  resetDrizzleClient: vi.fn(),
 }));
 
 const { execute: mockExecute, batch: mockBatch, createClient: mockCreateClient } = mocks;
