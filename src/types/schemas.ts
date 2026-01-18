@@ -106,6 +106,7 @@ export const ProjectSettingsSchema = z
 
 export const ChapterSchema = z.object({
   id: ChapterIdSchema,
+  projectId: z.string().optional(), // Optional for backward compatibility, required for new chapters
   orderIndex: z.number().int().min(1),
   title: z.string().min(1).max(200),
   summary: z.string().max(1000),
