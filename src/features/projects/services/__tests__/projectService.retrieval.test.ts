@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { ProjectService } from '@/features/projects/services/projectService';
 import type { IProjectRepository } from '@/lib/repositories/interfaces/IProjectRepository';
-import type { Project, type ProjectCreationData } from '@/types';
+import type { Project, ProjectCreationData } from '@/types';
 import { PublishStatus } from '@/types';
 
 describe('ProjectService - Retrieval', () => {
