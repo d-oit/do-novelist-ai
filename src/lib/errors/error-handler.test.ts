@@ -16,9 +16,9 @@ import {
   shouldRetry,
   createErrorHandler,
 } from '@/lib/errors/error-handler';
-import { toAppError } from '@/lib/errors/error-types';
-import { ok, err, isOk, isErr } from '@/lib/errors/result';
+import { toAppError, createNetworkError } from '@/lib/errors/error-types';
 import { logger } from '@/lib/errors/logging';
+import { ok, err, isOk, isErr } from '@/lib/errors/result';
 
 // Mock logger
 vi.mock('@/lib/errors/logging', () => ({
@@ -284,7 +284,7 @@ describe('ErrorHandler', () => {
         return ok('success');
       });
 
-      await handler.executeWithRetry(operation, {
+      const result = await handler.executeWithRetry(operation, {
         maxAttempts: 3,
         delayMs: 10,
       });
@@ -299,9 +299,12 @@ describe('ErrorHandler', () => {
       const operation = vi.fn(async () => {
         attempts++;
         if (attempts < 3) {
-          // @ts-ignore - testing retryable behavior
-          const error = toAppError(new Error('Retryable'), 'test');
-          error.retryable = true;
+          // Use NetworkError with status code 503 (Service Unavailable) which is retryable
+          const error = createNetworkError('Retryable error', {
+            endpoint: '/test',
+            method: 'GET',
+            statusCode: 503,
+          });
           return err(error);
         }
         return ok('success');

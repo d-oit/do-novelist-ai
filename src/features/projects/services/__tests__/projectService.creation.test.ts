@@ -1,80 +1,90 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { projectService } from '@/features/projects/services/projectService';
-import { drizzleDbService } from '@/lib/database';
+import { ProjectService } from '@/features/projects/services/projectService';
+import type { IProjectRepository } from '@/lib/repositories/interfaces/IProjectRepository';
+import type { Project, type ProjectCreationData } from '@/types';
 import { PublishStatus } from '@/types';
-import { type ProjectCreationData } from '@/types';
-
-// Mock the database service
-vi.mock('@/lib/database', () => ({
-  drizzleDbService: {
-    init: vi.fn().mockResolvedValue(undefined),
-    saveProject: vi.fn().mockResolvedValue(undefined),
-    loadProject: vi.fn().mockResolvedValue(null),
-    getAllProjects: vi.fn().mockResolvedValue([]),
-    deleteProject: vi.fn().mockResolvedValue(undefined),
-  },
-}));
 
 describe('ProjectService - Creation', () => {
-  // In-memory storage for mocked operations
-  let storage: { projects: any[] };
+  let serviceInstance: ProjectService;
+  let mockRepo: IProjectRepository;
+  let storage: { projects: Project[] };
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    localStorage.clear();
 
     // Reset storage
     storage = {
-      projects: [] as any[],
+      projects: [] as Project[],
     };
 
-    // Mock db methods
-    (drizzleDbService.init as any).mockResolvedValue(undefined);
-    (drizzleDbService.saveProject as any).mockImplementation((project: any) => {
-      storage.projects = storage.projects.filter(p => p.id !== project.id);
-      storage.projects.push(project);
+    // Create mock repository
+    const findByIdMock = vi.fn((id: string) => Promise.resolve(storage.projects.find(p => p.id === id) || null));
+    const findAllMock = vi.fn(() => Promise.resolve(storage.projects));
+    const createMock = vi.fn((project: Omit<Project, 'id'>) => {
+      const newProject = { ...project, id: crypto.randomUUID() } as Project;
+      storage.projects.push(newProject);
+      return Promise.resolve(newProject);
     });
-    (drizzleDbService.loadProject as any).mockImplementation((id: string) => {
-      return Promise.resolve(storage.projects.find(p => p.id === id) || null);
+    const updateMock = vi.fn((id: string, data: Partial<Project>) => {
+      const index = storage.projects.findIndex(p => p.id === id);
+      if (index >= 0) {
+        storage.projects[index] = { ...storage.projects[index], ...data } as Project;
+        return Promise.resolve(storage.projects[index]);
+      }
+      return Promise.resolve(null);
     });
-    (drizzleDbService.getAllProjects as any).mockImplementation(() => {
-      return Promise.resolve(
-        storage.projects.map(p => ({
-          id: p.id,
-          title: p.title,
-          style: p.style,
-          updatedAt: p.updatedAt.toISOString(),
-          coverImage: p.coverImage,
-        })),
-      );
-    });
-    (drizzleDbService.deleteProject as any).mockImplementation((id: string) => {
+    const deleteMock = vi.fn((id: string) => {
       storage.projects = storage.projects.filter(p => p.id !== id);
+      return Promise.resolve(true);
+    });
+    const findByStatusMock = vi.fn((status: string) => {
+      return Promise.resolve(storage.projects.filter(p => p.status === (status as PublishStatus)));
     });
 
-    await projectService.init();
-  });
+    mockRepo = {
+      findById: findByIdMock,
+      findAll: findAllMock,
+      create: createMock,
+      update: updateMock,
+      delete: deleteMock,
+      findByStatus: findByStatusMock,
+      getSummaries: vi.fn(),
+      getStats: vi.fn(),
+      findByStyle: vi.fn(),
+      findByLanguage: vi.fn(),
+      findByQuery: vi.fn(),
+      titleExists: vi.fn(),
+      count: vi.fn(),
+      exists: vi.fn(),
+      transaction: vi.fn(),
+      createWithResult: vi.fn(),
+      updateWithResult: vi.fn(),
+      deleteWithResult: vi.fn(),
+      findWhere: vi.fn(),
+    } as unknown as IProjectRepository;
 
-  afterEach(() => {
-    vi.clearAllMocks();
+    // Create service instance with mocked repository
+    serviceInstance = new ProjectService(mockRepo);
+
+    await serviceInstance.init();
   });
 
   describe('Initialization', () => {
     it('should initialize successfully', async () => {
-      await expect(projectService.init()).resolves.toBeUndefined();
+      await expect(serviceInstance.init()).resolves.toBeUndefined();
     });
 
     it('should create projects object store on first init', async () => {
-      await projectService.init();
+      await serviceInstance.init();
       // Service should be initialized without errors
-      expect(projectService).toBeDefined();
+      expect(serviceInstance).toBeDefined();
     });
 
     it('should create required indexes', async () => {
-      await projectService.init();
+      await serviceInstance.init();
       // The service should have created indexes for createdAt, updatedAt, status
-      expect(projectService).toBeDefined();
+      expect(serviceInstance).toBeDefined();
     });
   });
 
@@ -87,7 +97,7 @@ describe('ProjectService - Creation', () => {
         targetWordCount: 80000,
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project).toBeDefined();
       expect(project.id).toBeDefined();
@@ -104,8 +114,8 @@ describe('ProjectService - Creation', () => {
         style: 'Literary Fiction',
       };
 
-      const project1 = await projectService.create(data);
-      const project2 = await projectService.create(data);
+      const project1 = await serviceInstance.create(data);
+      const project2 = await serviceInstance.create(data);
 
       expect(project1.id).not.toBe(project2.id);
     });
@@ -117,7 +127,7 @@ describe('ProjectService - Creation', () => {
         style: 'Mystery & Thriller',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.status).toBe(PublishStatus.DRAFT);
     });
@@ -129,7 +139,7 @@ describe('ProjectService - Creation', () => {
         style: 'Romance',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.chapters).toEqual([]);
     });
@@ -141,7 +151,7 @@ describe('ProjectService - Creation', () => {
         style: 'Science Fiction',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.createdAt).toBeInstanceOf(Date);
       expect(project.updatedAt).toBeInstanceOf(Date);
@@ -154,7 +164,7 @@ describe('ProjectService - Creation', () => {
         style: 'Mystery & Thriller',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.worldState).toBeDefined();
       expect(project.worldState.hasTitle).toBe(true);
@@ -171,7 +181,7 @@ describe('ProjectService - Creation', () => {
         style: 'Horror',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.language).toBe('en');
     });
@@ -184,7 +194,7 @@ describe('ProjectService - Creation', () => {
         language: 'es',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.language).toBe('es');
     });
@@ -196,7 +206,7 @@ describe('ProjectService - Creation', () => {
         style: 'Literary Fiction',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.targetWordCount).toBe(50000);
     });
@@ -208,7 +218,7 @@ describe('ProjectService - Creation', () => {
         style: 'Science Fiction',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.analytics).toBeDefined();
       expect(project.analytics.totalWordCount).toBe(0);
@@ -225,7 +235,7 @@ describe('ProjectService - Creation', () => {
         style: 'Historical Fiction',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.version).toBe('1.0.0');
     });
@@ -237,7 +247,7 @@ describe('ProjectService - Creation', () => {
         style: 'General Fiction',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.changeLog).toEqual([]);
     });
@@ -250,7 +260,7 @@ describe('ProjectService - Creation', () => {
         genre: ['fantasy', 'General Fiction', 'coming-of-age'],
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.genre).toEqual(['fantasy', 'General Fiction', 'coming-of-age']);
     });
@@ -263,7 +273,7 @@ describe('ProjectService - Creation', () => {
         targetAudience: 'young_adult',
       };
 
-      const project = await projectService.create(data);
+      const project = await serviceInstance.create(data);
 
       expect(project.targetAudience).toBe('young_adult');
     });

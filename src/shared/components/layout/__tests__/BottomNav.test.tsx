@@ -21,7 +21,7 @@ describe('BottomNav', () => {
 
       expect(screen.getByText('Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Projects')).toBeInTheDocument();
-      expect(screen.getByText('Metrics')).toBeInTheDocument();
+      expect(screen.getByText('More')).toBeInTheDocument();
       expect(screen.getByText('Settings')).toBeInTheDocument();
     });
 
@@ -55,13 +55,6 @@ describe('BottomNav', () => {
       expect(projectsButton).toHaveClass('text-primary');
     });
 
-    it('should highlight metrics button when on metrics', () => {
-      render(<BottomNav currentView='metrics' onNavigate={mockOnNavigate} />);
-
-      const metricsButton = screen.getByText('Metrics').closest('button');
-      expect(metricsButton).toHaveClass('text-primary');
-    });
-
     it('should highlight settings button when on settings', () => {
       render(<BottomNav currentView='settings' onNavigate={mockOnNavigate} />);
 
@@ -73,12 +66,19 @@ describe('BottomNav', () => {
       render(<BottomNav currentView='dashboard' onNavigate={mockOnNavigate} />);
 
       const projectsButton = screen.getByText('Projects').closest('button');
-      const metricsButton = screen.getByText('Metrics').closest('button');
+      const moreButton = screen.getByText('More').closest('button');
       const settingsButton = screen.getByText('Settings').closest('button');
 
       expect(projectsButton).toHaveClass('text-muted-foreground');
-      expect(metricsButton).toHaveClass('text-muted-foreground');
+      expect(moreButton).toHaveClass('text-muted-foreground');
       expect(settingsButton).toHaveClass('text-muted-foreground');
+    });
+
+    it('should highlight More button when on metrics view', () => {
+      render(<BottomNav currentView='metrics' onNavigate={mockOnNavigate} />);
+
+      const moreButton = screen.getByText('More').closest('button');
+      expect(moreButton).toHaveClass('text-primary');
     });
   });
 
@@ -101,15 +101,6 @@ describe('BottomNav', () => {
       expect(mockOnNavigate).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onNavigate with "metrics" when metrics button clicked', () => {
-      render(<BottomNav {...defaultProps} />);
-
-      fireEvent.click(screen.getByText('Metrics'));
-
-      expect(mockOnNavigate).toHaveBeenCalledWith('metrics');
-      expect(mockOnNavigate).toHaveBeenCalledTimes(1);
-    });
-
     it('should call onNavigate with "settings" when settings button clicked', () => {
       render(<BottomNav {...defaultProps} />);
 
@@ -117,19 +108,6 @@ describe('BottomNav', () => {
 
       expect(mockOnNavigate).toHaveBeenCalledWith('settings');
       expect(mockOnNavigate).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle multiple navigation clicks', () => {
-      render(<BottomNav {...defaultProps} />);
-
-      fireEvent.click(screen.getByText('Projects'));
-      fireEvent.click(screen.getByText('Metrics'));
-      fireEvent.click(screen.getByText('Settings'));
-
-      expect(mockOnNavigate).toHaveBeenCalledTimes(3);
-      expect(mockOnNavigate).toHaveBeenNthCalledWith(1, 'projects');
-      expect(mockOnNavigate).toHaveBeenNthCalledWith(2, 'metrics');
-      expect(mockOnNavigate).toHaveBeenNthCalledWith(3, 'settings');
     });
   });
 

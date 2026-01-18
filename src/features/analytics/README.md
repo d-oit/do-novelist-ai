@@ -8,7 +8,7 @@ their habits and optimize their workflow.
 
 ---
 
-## Overview
+## Feature Overview
 
 The Analytics feature tracks writing activity with:
 
@@ -20,8 +20,6 @@ The Analytics feature tracks writing activity with:
 - 🤖 **AI Tracking**: Monitor AI assistance usage and dependency
 - ⏱️ **Real-Time**: Live keystroke and word count tracking
 - 📤 **Export**: Analytics data as JSON/CSV/PDF
-- 📅 **Time Analysis**: Peak writing hours and preferred days
-- 🎨 **Visual Dashboard**: Beautiful charts and progress indicators
 
 **Key Capabilities**:
 
@@ -39,206 +37,374 @@ The Analytics feature tracks writing activity with:
 
 ## Architecture
 
-```
-Analytics Feature Architecture
-┌─────────────────────────────────────────────────────────────┐
-│                        UI Layer                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │  Analytics   │  │    Goals     │  │  Productivity    │  │
-│  │  Dashboard   │  │   Manager    │  │     Charts       │  │
-│  └──────┬───────┘  └──────┬───────┘  └────────┬─────────┘  │
-└─────────┼──────────────────┼────────────────────┼───────────┘
-          │                  │                    │
-┌─────────┼──────────────────┼────────────────────┼───────────┐
-│         │       Hook Layer │                    │           │
-│  ┌──────▼──────────────────▼────────────────────▼────────┐  │
-│  │              useAnalytics Hook                        │  │
-│  │  • currentSession, weeklyStats, insights, goals      │  │
-│  │  • startSession, endSession                          │  │
-│  │  • trackWordCountChange, trackKeystroke              │  │
-│  │  • trackAIGeneration                                 │  │
-│  │  • loadProjectAnalytics, loadWeeklyStats             │  │
-│  │  • createGoal, updateGoal                            │  │
-│  │  • loadWordCountChart, loadProductivityChart         │  │
-│  │  • exportAnalytics                                   │  │
-│  └──────────────────────┬───────────────────────────────┘  │
-└─────────────────────────┼──────────────────────────────────┘
-                          │
-┌─────────────────────────┼──────────────────────────────────┐
-│       Store Layer       │                                   │
-│  ┌──────────────────────▼──────────────────────────────┐   │
-│  │       useAnalyticsStore (Zustand Store)             │   │
-│  │  • currentSession, isTracking                       │   │
-│  │  • projectAnalytics, weeklyStats, insights, goals   │   │
-│  │  • wordCountChart, productivityChart, streakChart   │   │
-│  │  • Actions: init, startSession, endSession          │   │
-│  │  • loadProjectAnalytics, loadWeeklyStats            │   │
-│  │  • createGoal, updateGoal                           │   │
-│  └──────────────────────┬──────────────────────────────┘   │
-└─────────────────────────┼──────────────────────────────────┘
-                          │
-┌─────────────────────────┼──────────────────────────────────┐
-│       Service Layer     │                                   │
-│  ┌──────────────────────▼──────────────────────────────┐   │
-│  │          analyticsService (Singleton)               │   │
-│  │  • startWritingSession, endWritingSession           │   │
-│  │  • trackProgress                                    │   │
-│  │  • getProjectAnalytics                              │   │
-│  │  • getWeeklyStats, getDailyStats                    │   │
-│  │  • getInsights                                      │   │
-│  │  • createGoal, getGoals, updateGoal                 │   │
-│  │  • calculateProductivity, countWords                │   │
-│  │  Private: updateDailyStatsForSession                │   │
-│  └──────────────────────┬──────────────────────────────┘   │
-└─────────────────────────┼──────────────────────────────────┘
-                          │
-┌─────────────────────────┼──────────────────────────────────┐
-│     Storage Layer       │                                   │
-│  ┌──────────────────────▼──────────────────────────────┐   │
-│  │         In-Memory Maps (Service State)              │   │
-│  │  • sessions: Map<sessionId, WritingSession>         │   │
-│  │  • goals: Map<goalId, WritingGoals>                 │   │
-│  │  • dailyStats: Map<projectId|date, DailyStats>      │   │
-│  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+### System Architecture
 
-Writing Session Flow:
-┌────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│  User  │───▶│  Start   │───▶│  Track   │───▶│   End    │
-│ Writes │    │ Session  │    │ Activity │    │ Session  │
-└────────┘    └──────────┘    └──────────┘    └──────────┘
-                                     │
-                                     ▼
-                              ┌──────────────┐
-                              │   Calculate  │
-                              │   Metrics    │
-                              └──────┬───────┘
-                                     │
-                                     ▼
-                              ┌──────────────┐
-                              │   Update     │
-                              │ Daily Stats  │
-                              └──────────────┘
+```mermaid
+graph TB
+    subgraph "UI Layer"
+        AD[AnalyticsDashboard]
+        GM[GoalsManager]
+        PC[ProductivityChart]
+        WSC[WritingStatsCard]
+        ST[SessionTimeline]
+        GP[GoalsProgress]
+        AH[AnalyticsHeader]
+        ASB[AnalyticsSidebar]
+        AC[AnalyticsContent]
+    end
+
+    subgraph "Hook Layer"
+        UA[useAnalytics Hook]
+    end
+
+    subgraph "Store Layer"
+        ZS[useAnalyticsStore<br/>Zustand Store]
+    end
+
+    subgraph "Service Layer"
+        AS[AnalyticsService<br/>Singleton]
+    end
+
+    subgraph "Storage Layer"
+        IM[In-Memory Maps]
+    end
+
+    AD --> UA
+    GM --> UA
+    PC --> UA
+    WSC --> UA
+    ST --> UA
+    GP --> UA
+    AH --> UA
+    ASB --> UA
+    AC --> UA
+
+    UA --> ZS
+    ZS --> AS
+    AS --> IM
+
+    style UA fill:#e1f5ff
+    style ZS fill:#fff3e0
+    style AS fill:#f3e5f5
+    style IM fill:#e8f5e9
 ```
 
----
+### Component Hierarchy
 
-## Key Components
+```mermaid
+graph TD
+    subgraph "AnalyticsDashboard (Root)"
+        A[AnalyticsDashboard]
+        H[AnalyticsHeader]
+        S[AnalyticsSidebar]
+        C[AnalyticsContent]
+    end
 
-### 1. **AnalyticsDashboard** (`components/AnalyticsDashboard.tsx`)
+    subgraph "AnalyticsContent Views"
+        OV[Overview View]
+        PR[Productivity View]
+        GL[Goals View]
+        TL[Timeline View]
+    end
 
-Main analytics interface with comprehensive insights.
+    subgraph "Shared Components"
+        PC[ProductivityChart]
+        WSC[WritingStatsCard]
+        ST[SessionTimeline]
+        GP[GoalsProgress]
+        GM[GoalsManager]
+    end
 
-**Features**:
+    A --> H
+    A --> S
+    A --> C
+    C --> OV
+    C --> PR
+    C --> GL
+    C --> TL
 
-- Project overview card
-- Weekly statistics summary
-- Goals progress
-- Writing insights panel
-- Charts (word count, productivity, streaks)
-- Session timeline
+    OV --> WSC
+    OV --> ST
+    PR --> PC
+    GL --> GP
+    GL --> GM
 
-**Usage**:
-
-```tsx
-import { AnalyticsDashboard } from '@/features/analytics';
-
-function DashboardPage() {
-  return <AnalyticsDashboard />;
-}
+    style A fill:#3b82f6
+    style H fill:#60a5fa
+    style S fill:#60a5fa
+    style C fill:#60a5fa
+    style PC fill:#10b981
+    style WSC fill:#10b981
+    style ST fill:#10b981
+    style GP fill:#10b981
+    style GM fill:#10b981
 ```
 
-### 2. **GoalsManager** (`components/GoalsManager.tsx`)
+### Data Flow
 
-Goal creation and management interface.
+```mermaid
+sequenceDiagram
+    participant User
+    participant Hook as useAnalytics
+    participant Store as AnalyticsStore
+    participant Service as AnalyticsService
+    participant Storage as In-Memory Storage
 
-**Features**:
+    User->>Hook: startSession(projectId, chapterId)
+    Hook->>Store: startSession(projectId, chapterId)
+    Store->>Service: startWritingSession(projectId, chapterId)
+    Service->>Storage: Create session entry
+    Storage-->>Service: session object
+    Service-->>Store: session object
+    Store-->>Hook: Update state
+    Hook-->>User: Session started
 
-- Create daily/weekly/monthly goals
-- Set word, time, and chapter targets
-- Track progress visually
-- Active/completed goals lists
-- Goal templates
+    User->>Hook: trackKeystroke()
+    Hook->>Hook: Update local metrics
 
-**Usage**:
+    User->>Hook: trackWordCountChange(old, new)
+    Hook->>Hook: Update local metrics
 
-```tsx
-import { GoalsManager } from '@/features/analytics';
-
-function GoalsPage() {
-  return <GoalsManager />;
-}
-```
-
-### 3. **ProductivityChart** (`components/ProductivityChart.tsx`)
-
-Visual representation of productivity over time.
-
-**Features**:
-
-- Line/bar/area charts
-- Customizable date ranges
-- Word count vs. time comparison
-- AI usage overlay
-- Trend lines
-
-**Usage**:
-
-```tsx
-import { ProductivityChart } from '@/features/analytics';
-
-function ChartsPage() {
-  return (
-    <ProductivityChart data={chartData} type="line" title="Words per Day" />
-  );
-}
-```
-
-### 4. **WritingStatsCard** (`components/WritingStatsCard.tsx`)
-
-Compact statistics display card.
-
-**Features**:
-
-- Key metric display (words, time, sessions)
-- Change indicators (+/- from previous period)
-- Icon and color theming
-- Clickable for details
-
-**Usage**:
-
-```tsx
-import { WritingStatsCard } from '@/features/analytics';
-
-function StatsGrid() {
-  return (
-    <div className="grid grid-cols-3 gap-4">
-      <WritingStatsCard
-        title="Words Today"
-        value={1250}
-        change={+15}
-        icon="✍️"
-      />
-      <WritingStatsCard
-        title="Time Spent"
-        value="2h 30m"
-        change={-10}
-        icon="⏱️"
-      />
-    </div>
-  );
-}
+    User->>Hook: endSession()
+    Hook->>Store: endSession(metrics)
+    Store->>Service: endWritingSession(sessionId, metrics)
+    Service->>Storage: Update session
+    Service->>Storage: Update daily stats
+    Service-->>Store: Success
+    Store-->>Hook: Update state
+    Hook-->>User: Session ended
 ```
 
 ---
 
-## Hook
+## Component Hierarchy
 
-### `useAnalytics()`
+### Directory Structure
 
-Main hook for analytics tracking and data access.
+```
+src/features/analytics/
+├── components/
+│   ├── __tests__/
+│   │   ├── AnalyticsDashboard.test.tsx
+│   │   ├── GoalsManager.test.tsx
+│   │   ├── SessionTimeline.test.tsx
+│   │   └── WritingStatsCard.test.tsx
+│   ├── AnalyticsDashboard.tsx      # Main dashboard container
+│   ├── AnalyticsHeader.tsx         # Dashboard header with actions
+│   ├── AnalyticsSidebar.tsx        # Navigation sidebar
+│   ├── AnalyticsContent.tsx        # Content area router
+│   ├── GoalsManager.tsx            # Goal CRUD interface
+│   ├── GoalsProgress.tsx            # Visual progress indicators
+│   ├── ProductivityChart.tsx       # Line charts for analytics
+│   ├── SessionTimeline.tsx         # AI insights and recommendations
+│   ├── WritingStatsCard.tsx        # Statistic display cards
+│   └── index.ts                    # Component exports
+├── hooks/
+│   ├── __tests__/
+│   │   └── useAnalytics.test.ts
+│   └── useAnalytics.ts             # Main analytics hook
+├── services/
+│   ├── __tests__/
+│   │   └── analyticsService.test.ts
+│   └── analyticsService.ts         # Business logic singleton
+├── types/
+│   └── index.ts                     # TypeScript types
+├── index.ts                        # Feature exports
+└── README.md                       # This file
+```
 
-**Returns**:
+### Components
+
+| Component            | Description                                 | Props                                                                                         |
+| -------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `AnalyticsDashboard` | Main dashboard container with modal dialog  | `project`, `onClose`, `className`                                                             |
+| `AnalyticsHeader`    | Header with export, refresh, close actions  | `project`, `isCompact`, `onToggleCompact`, `onExport`, `onRefresh`, `onClose`                 |
+| `AnalyticsSidebar`   | Navigation between analytics views          | `project`, `activeView`, `onViewChange`                                                       |
+| `AnalyticsContent`   | Content router for different views          | `project`, `activeView`                                                                       |
+| `GoalsManager`       | Goal creation and management                | `project`, `goals`                                                                            |
+| `GoalsProgress`      | Visual progress rings                       | `chaptersCompleted`, `totalChapters`, `weeklyWords`, `weeklyGoal`, `consistency`, `className` |
+| `ProductivityChart`  | Line charts for word count and productivity | `wordCountData`, `productivityData`, `className`                                              |
+| `SessionTimeline`    | AI insights and recommendations             | `insights`, `className`                                                                       |
+| `WritingStatsCard`   | Compact stat display card                   | `title`, `value`, `change`, `icon`                                                            |
+
+---
+
+## Service Layer
+
+### AnalyticsService
+
+The `AnalyticsService` is a singleton that manages all analytics business logic
+and data persistence.
+
+#### API Reference
+
+```typescript
+class AnalyticsService {
+  // Session Management
+  async init(): Promise<void>;
+  async startWritingSession(
+    projectId: string,
+    chapterId?: string,
+  ): Promise<WritingSession>;
+  async endWritingSession(
+    sessionId: string,
+    metrics: SessionMetrics,
+  ): Promise<void>;
+  async trackProgress(
+    sessionId: string,
+    progress: SessionProgress,
+  ): Promise<void>;
+
+  // Data Retrieval
+  async getProjectAnalytics(project: Project): Promise<ProjectAnalytics>;
+  async getGoals(projectId: string): Promise<WritingGoals[]>;
+  async getWritingInsights(filter?: AnalyticsFilter): Promise<WritingInsights>;
+  async getWeeklyStats(weekStart: Date): Promise<WeeklyStats>;
+  async getWordCountChartData(
+    projectId: string,
+    days: number,
+  ): Promise<ChartDataPoint[]>;
+
+  // Goal Management
+  async createGoal(
+    goal: Omit<WritingGoals, 'id' | 'current'>,
+  ): Promise<WritingGoals>;
+  async updateGoalProgress(id: string): Promise<void>;
+  async deleteGoal(id: string): Promise<void>;
+}
+```
+
+#### In-Memory Storage
+
+The service maintains three main data structures:
+
+```typescript
+// Map<sessionId, WritingSession>
+private readonly sessions = new Map<string, WritingSession>();
+
+// Map<goalId, WritingGoals>
+private readonly goals = new Map<string, WritingGoals>();
+
+// Map<projectId|date, DailyStats>
+private readonly dailyStats = new Map<string, DailyStats>();
+```
+
+#### Key Algorithms
+
+**Streak Calculation**:
+
+```typescript
+// Computes consecutive writing days
+private computeStreakLength(stats: DailyStats[]): number {
+  if (stats.length === 0) return 0;
+
+  let longest = 0;
+  let current = 0;
+  let previousDate: Date | null = null;
+
+  for (const stat of stats) {
+    if (stat.wordsWritten <= 0) {
+      current = 0;
+      previousDate = null;
+      continue;
+    }
+
+    const currentDate = new Date(`${stat.date}T00:00:00Z`);
+    if (!previousDate) {
+      current = 1;
+    } else {
+      const diff = (currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24);
+      current = diff === 1 ? current + 1 : 1;
+    }
+
+    longest = Math.max(longest, current);
+    previousDate = currentDate;
+  }
+
+  return longest;
+}
+```
+
+---
+
+## State Management
+
+### AnalyticsStore (Zustand)
+
+The analytics store manages global state using Zustand with persistence
+middleware.
+
+#### State Interface
+
+```typescript
+interface AnalyticsState {
+  // Session State
+  currentSession: WritingSession | null;
+  isTracking: boolean;
+
+  // Data State
+  projectAnalytics: ProjectAnalytics | null;
+  goals: WritingGoals[];
+  insights: WritingInsights | null;
+  dailyStats: DailyStats[];
+  weeklyStats: WeeklyStats | null;
+
+  // Chart Data
+  wordCountChart: ChartDataPoint[];
+  productivityChart: ChartDataPoint[];
+  streakChart: ChartDataPoint[];
+
+  // UI State
+  isLoading: boolean;
+  error: string | null;
+
+  // Actions
+  init(): Promise<void>;
+  startSession(projectId: string, chapterId?: string): Promise<WritingSession>;
+  endSession(metrics?: SessionMetrics): Promise<void>;
+  trackProgress(
+    projectId: string,
+    wordsWritten: number,
+    chapterIds: string[],
+  ): Promise<void>;
+  loadProjectAnalytics(project: Project): Promise<void>;
+  loadGoals(projectId: string): Promise<void>;
+  loadInsights(filter?: AnalyticsFilter): Promise<void>;
+  loadWeeklyStats(weekStart?: Date): Promise<void>;
+  loadWordCountChart(projectId: string, days?: number): Promise<void>;
+  loadProductivityChart(days?: number): void;
+  createGoal(goal: Omit<WritingGoals, 'id' | 'current'>): Promise<WritingGoals>;
+  updateGoal(id: string, data: Partial<WritingGoals>): Promise<void>;
+  deleteGoal(id: string): Promise<void>;
+  reset(): void;
+}
+```
+
+#### Persistence Strategy
+
+```typescript
+persist(
+  (set, get) => ({
+    /* store implementation */
+  }),
+  {
+    name: 'analytics-storage',
+    partialize: state => ({
+      goals: state.goals,
+      insights: state.insights,
+      weeklyStats: state.weeklyStats,
+    }),
+  },
+);
+```
+
+---
+
+## API Reference
+
+### Main Hook: `useAnalytics()`
+
+The primary interface for consuming analytics functionality in components.
 
 ```typescript
 export interface UseAnalyticsReturn {
@@ -289,206 +455,311 @@ export interface UseAnalyticsReturn {
 }
 ```
 
-**Example - Basic Session Tracking**:
+### Type Definitions
 
-```tsx
-import { useAnalytics } from '@/features/analytics';
-import { useEffect } from 'react';
+```typescript
+// Session
+interface WritingSession {
+  id: string;
+  projectId: string;
+  chapterId?: string;
+  startTime: Date;
+  endTime: Date;
+  duration: number; // milliseconds
+  wordsAdded: number;
+  wordsRemoved: number;
+  netWordCount: number;
+  charactersTyped: number;
+  backspacesPressed: number;
+  aiAssistanceUsed: boolean;
+  aiWordsGenerated: number;
+}
 
-function WritingEditor({ projectId, chapterId }: Props) {
-  const { startSession, endSession, isTracking } = useAnalytics();
+// Statistics
+interface DailyStats {
+  date: string; // YYYY-MM-DD
+  totalWritingTime: number; // minutes
+  wordsWritten: number;
+  sessionsCount: number;
+  averageSessionLength: number;
+  peakWritingHour: number; // 0-23
+  productivity: number; // words per minute
+  aiAssistancePercentage: number;
+}
 
-  useEffect(() => {
-    // Start session when editor opens
-    startSession(projectId, chapterId);
+interface WeeklyStats {
+  weekStart: string;
+  totalWords: number;
+  totalTime: number;
+  averageDailyWords: number;
+  mostProductiveDay: string;
+  streak: number;
+  goals: {
+    wordsTarget: number;
+    timeTarget: number;
+    wordsAchieved: number;
+    timeAchieved: number;
+  };
+}
 
-    // End session when editor closes
-    return () => {
-      endSession();
-    };
-  }, [projectId, chapterId]);
+interface ProjectAnalytics {
+  projectId: string;
+  title: string;
+  createdAt: Date;
+  totalWords: number;
+  totalChapters: number;
+  completedChapters: number;
+  estimatedReadingTime: number;
+  averageChapterLength: number;
+  writingProgress: number; // 0-100
+  timeSpent: number;
+  lastActivity: Date;
+  wordCountHistory: { date: string; wordCount: number }[];
+  chapterProgress: {
+    chapterId: string;
+    title: string;
+    wordCount: number;
+    status: string;
+    completionDate?: Date;
+  }[];
+}
 
-  return (
-    <div>
-      {isTracking && <span className="status">📊 Tracking session...</span>}
-      {/* Editor content */}
-    </div>
-  );
+// Goals
+interface WritingGoals {
+  id: string;
+  type: 'daily' | 'weekly' | 'monthly' | 'project';
+  target: {
+    words?: number;
+    time?: number; // minutes
+    chapters?: number;
+  };
+  current: {
+    words: number;
+    time: number;
+    chapters: number;
+  };
+  startDate: Date;
+  endDate?: Date;
+  isActive: boolean;
+  projectId?: string;
+}
+
+// Insights
+interface WritingInsights {
+  productivity: {
+    averageWordsPerHour: number;
+    peakWritingHours: number[];
+    preferredWritingDays: string[];
+    consistencyScore: number; // 0-100
+  };
+  patterns: {
+    averageSessionLength: number;
+    sessionsPerDay: number;
+    preferredChapterLength: number;
+    revisionRatio: number;
+  };
+  aiUsage: {
+    totalWordsGenerated: number;
+    assistancePercentage: number;
+    mostAssistedChapters: string[];
+    aiDependencyTrend: number;
+  };
+  streaks: {
+    currentStreak: number;
+    longestStreak: number;
+    streakDates: string[];
+  };
+  milestones: {
+    type: 'word_count' | 'chapter_completion' | 'streak' | 'productivity';
+    title: string;
+    description: string;
+    achievedAt: Date;
+    value: number;
+  }[];
+}
+
+// Filters & Charts
+interface AnalyticsFilter {
+  dateRange: { start: Date; end: Date };
+  projectIds?: string[];
+  includeAI?: boolean;
+  granularity: 'hour' | 'day' | 'week' | 'month';
+}
+
+interface ChartDataPoint {
+  date: string;
+  value: number;
+  label?: string;
 }
 ```
 
-**Example - Real-Time Tracking**:
+---
+
+## Usage Examples
+
+### 1. Editor with Session Tracking
 
 ```tsx
 import { useAnalytics } from '@/features/analytics';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-function TrackedEditor() {
-  const { trackWordCountChange, trackKeystroke, trackAIGeneration } =
-    useAnalytics();
+function TrackedEditor({ project, chapter }: Props) {
+  const {
+    startSession,
+    endSession,
+    trackWordCountChange,
+    trackKeystroke,
+    isTracking,
+  } = useAnalytics();
 
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(chapter.content);
   const [wordCount, setWordCount] = useState(0);
 
-  const handleChange = (newContent: string) => {
+  // Start session on mount
+  useEffect(() => {
+    startSession(project.id, chapter.id);
+    return () => endSession();
+  }, [project.id, chapter.id]);
+
+  const handleContentChange = (newContent: string) => {
     const oldCount = wordCount;
     const newCount = newContent.split(/\s+/).filter(Boolean).length;
 
+    trackWordCountChange(oldCount, newCount);
     setContent(newContent);
     setWordCount(newCount);
-
-    // Track word count change
-    trackWordCountChange(oldCount, newCount);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     trackKeystroke(e.key === 'Backspace');
   };
 
-  const handleAIGenerate = async () => {
-    const aiText = await generateWithAI();
-    const aiWords = aiText.split(/\s+/).filter(Boolean).length;
-
-    trackAIGeneration(aiWords);
-    setContent(content + aiText);
-  };
-
   return (
     <div>
+      {isTracking && <span className="status">📊 Tracking...</span>}
       <textarea
         value={content}
-        onChange={e => handleChange(e.target.value)}
+        onChange={e => handleContentChange(e.target.value)}
         onKeyDown={handleKeyDown}
       />
-      <button onClick={handleAIGenerate}>AI Generate</button>
-      <p>Words: {wordCount}</p>
     </div>
   );
 }
 ```
 
-**Example - Goals Management**:
+### 2. Goals Dashboard
 
 ```tsx
 import { useAnalytics } from '@/features/analytics';
+import { useEffect, useState } from 'react';
 
-function GoalsPanel() {
-  const { goals, createGoal, updateGoal } = useAnalytics();
-
-  const handleCreateDailyGoal = async () => {
-    await createGoal({
-      type: 'daily',
-      target: { words: 1000 },
-      startDate: new Date(),
-      isActive: true,
-    });
-  };
-
-  const handleMarkComplete = async (goalId: string) => {
-    await updateGoal(goalId, { isActive: false });
-  };
-
-  return (
-    <div>
-      <button onClick={handleCreateDailyGoal}>
-        Set Daily Goal (1000 words)
-      </button>
-
-      {goals.map(goal => (
-        <div key={goal.id}>
-          <h3>{goal.type} Goal</h3>
-          <p>Target: {goal.target.words} words</p>
-          <p>
-            Progress: {goal.current.words} / {goal.target.words}
-          </p>
-          <progress value={goal.current.words} max={goal.target.words} />
-          {goal.current.words >= goal.target.words && (
-            <button onClick={() => handleMarkComplete(goal.id)}>
-              ✓ Complete
-            </button>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-```
-
-**Example - Analytics Dashboard**:
-
-```tsx
-import { useAnalytics } from '@/features/analytics';
-import { useEffect } from 'react';
-
-function AnalyticsOverview({ project }: { project: Project }) {
-  const {
-    projectAnalytics,
-    weeklyStats,
-    insights,
-    wordCountChart,
-    loadProjectAnalytics,
-    loadWeeklyStats,
-    loadInsights,
-    loadWordCountChart,
-  } = useAnalytics();
+function GoalsWidget() {
+  const { goals, createGoal, weeklyStats } = useAnalytics();
+  const [dailyGoal, setDailyGoal] = useState<WritingGoals | null>(null);
 
   useEffect(() => {
-    // Load all analytics data
-    loadProjectAnalytics(project);
-    loadWeeklyStats();
-    loadInsights();
-    loadWordCountChart(project.id, 30); // Last 30 days
-  }, [project.id]);
+    const today = goals.find(g => g.type === 'daily' && g.isActive);
+    if (!today) {
+      createGoal({
+        type: 'daily',
+        target: { words: 1000 },
+        startDate: new Date(),
+        isActive: true,
+      }).then(setDailyGoal);
+    } else {
+      setDailyGoal(today);
+    }
+  }, [goals, createGoal]);
 
-  if (!projectAnalytics) return <div>Loading...</div>;
+  if (!dailyGoal) return <div>Loading...</div>;
+
+  const progress = (dailyGoal.current.words / dailyGoal.target.words) * 100;
 
   return (
     <div>
-      <h2>{projectAnalytics.title}</h2>
-      <div>
-        <p>Total Words: {projectAnalytics.totalWords.toLocaleString()}</p>
-        <p>
-          Chapters: {projectAnalytics.completedChapters} /{' '}
-          {projectAnalytics.totalChapters}
-        </p>
-        <p>Progress: {Math.round(projectAnalytics.writingProgress)}%</p>
-        <p>Time Spent: {Math.round(projectAnalytics.timeSpent / 60)}h</p>
-      </div>
+      <h3>Today's Goal</h3>
+      <progress value={progress} max={100} />
+      <p>
+        {dailyGoal.current.words} / {dailyGoal.target.words} words
+      </p>
+      {weeklyStats && <p>🔥 {weeklyStats.streak}-day streak</p>}
+    </div>
+  );
+}
+```
 
-      {weeklyStats && (
-        <div>
-          <h3>This Week</h3>
-          <p>Words: {weeklyStats.totalWords}</p>
-          <p>Time: {weeklyStats.totalTime} minutes</p>
-          <p>Streak: {weeklyStats.streak} days</p>
-        </div>
-      )}
+### 3. Analytics Dashboard
 
-      {insights && (
-        <div>
-          <h3>Writing Insights</h3>
-          <p>
-            Avg Words/Hour:{' '}
-            {Math.round(insights.productivity.averageWordsPerHour)}
-          </p>
-          <p>Peak Hours: {insights.productivity.peakWritingHours.join(', ')}</p>
-          <p>Consistency: {insights.productivity.consistencyScore}/100</p>
-          <p>AI Usage: {Math.round(insights.aiUsage.assistancePercentage)}%</p>
-        </div>
-      )}
+```tsx
+import { AnalyticsDashboard } from '@/features/analytics';
+import { useState } from 'react';
 
-      {wordCountChart.length > 0 && (
-        <div>
-          <h3>Word Count History</h3>
-          {/* Render chart... */}
-        </div>
+function App() {
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [selectedProject] = useState(project);
+
+  return (
+    <div>
+      <button onClick={() => setShowAnalytics(true)}>View Analytics</button>
+
+      {showAnalytics && (
+        <AnalyticsDashboard
+          project={selectedProject}
+          onClose={() => setShowAnalytics(false)}
+        />
       )}
     </div>
   );
 }
 ```
 
-**Example - Export Analytics**:
+### 4. Using Individual Components
+
+```tsx
+import {
+  ProductivityChart,
+  GoalsProgress,
+  SessionTimeline,
+} from '@/features/analytics';
+import { useAnalytics } from '@/features/analytics';
+
+function AnalyticsOverview() {
+  const { wordCountChart, productivityChart, loadWordCountChart } =
+    useAnalytics();
+
+  useEffect(() => {
+    loadWordCountChart('project-123', 30);
+  }, []);
+
+  const insights = {
+    productivity: 500,
+    currentStreak: 7,
+    aiAssistance: 15,
+    totalWords: 25000,
+  };
+
+  return (
+    <div>
+      <ProductivityChart
+        wordCountData={wordCountChart}
+        productivityData={productivityChart}
+      />
+
+      <GoalsProgress
+        chaptersCompleted={5}
+        totalChapters={12}
+        weeklyWords={8500}
+        weeklyGoal={10000}
+        consistency={75}
+      />
+
+      <SessionTimeline insights={insights} />
+    </div>
+  );
+}
+```
+
+### 5. Export Analytics
 
 ```tsx
 import { useAnalytics } from '@/features/analytics';
@@ -520,437 +791,247 @@ function ExportButton() {
 
 ---
 
-## Types
+## Testing Guidelines
 
-### WritingSession
+### Unit Testing
 
-Represents a single writing session.
-
-```typescript
-export interface WritingSession {
-  id: string;
-  projectId: string;
-  chapterId?: string;
-  startTime: Date;
-  endTime: Date;
-  duration: number; // milliseconds
-  wordsAdded: number;
-  wordsRemoved: number;
-  netWordCount: number;
-  charactersTyped: number;
-  backspacesPressed: number;
-  aiAssistanceUsed: boolean;
-  aiWordsGenerated: number;
-}
-```
-
-### DailyStats
-
-Daily writing statistics.
+Service layer tests should be pure unit tests:
 
 ```typescript
-export interface DailyStats {
-  date: string; // YYYY-MM-DD
-  totalWritingTime: number; // minutes
-  wordsWritten: number;
-  sessionsCount: number;
-  averageSessionLength: number; // minutes
-  peakWritingHour: number; // 0-23
-  productivity: number; // words per minute
-  aiAssistancePercentage: number;
-}
+describe('AnalyticsService', () => {
+  let service: AnalyticsService;
+
+  beforeEach(() => {
+    service = new AnalyticsService();
+  });
+
+  describe('startWritingSession', () => {
+    it('should create a new session with valid properties', async () => {
+      const session = await service.startWritingSession(
+        'project-1',
+        'chapter-1',
+      );
+
+      expect(session).toBeDefined();
+      expect(session.projectId).toBe('project-1');
+      expect(session.chapterId).toBe('chapter-1');
+      expect(session.duration).toBe(0);
+      expect(session.netWordCount).toBe(0);
+    });
+  });
+
+  describe('computeStreakLength', () => {
+    it('should calculate consecutive writing days', () => {
+      const stats: DailyStats[] = [
+        { date: '2024-01-01', wordsWritten: 1000 /*...*/ },
+        { date: '2024-01-02', wordsWritten: 1500 /*...*/ },
+        { date: '2024-01-03', wordsWritten: 800 /*...*/ },
+        { date: '2024-01-04', wordsWritten: 0 /*...*/ },
+        { date: '2024-01-05', wordsWritten: 2000 /*...*/ },
+      ];
+
+      const streak = service['computeStreakLength'](stats);
+      expect(streak).toBe(3);
+    });
+  });
+});
 ```
 
-### WeeklyStats
+### Component Testing
 
-Weekly aggregated statistics.
+Use Vitest with React Testing Library:
 
 ```typescript
-export interface WeeklyStats {
-  weekStart: string; // YYYY-MM-DD (Monday)
-  totalWords: number;
-  totalTime: number; // minutes
-  averageDailyWords: number;
-  mostProductiveDay: string;
-  streak: number; // consecutive writing days
-  goals: {
-    wordsTarget: number;
-    timeTarget: number;
-    wordsAchieved: number;
-    timeAchieved: number;
-  };
-}
-```
-
-### ProjectAnalytics
-
-Project-level analytics.
-
-```typescript
-export interface ProjectAnalytics {
-  projectId: string;
-  title: string;
-  createdAt: Date;
-  totalWords: number;
-  totalChapters: number;
-  completedChapters: number;
-  estimatedReadingTime: number; // minutes
-  averageChapterLength: number;
-  writingProgress: number; // 0-100
-  timeSpent: number; // minutes
-  lastActivity: Date;
-  wordCountHistory: {
-    date: string;
-    wordCount: number;
-  }[];
-  chapterProgress: {
-    chapterId: string;
-    title: string;
-    wordCount: number;
-    status: string;
-    completionDate?: Date;
-  }[];
-}
-```
-
-### WritingGoals
-
-Goal tracking structure.
-
-```typescript
-export interface WritingGoals {
-  id: string;
-  type: 'daily' | 'weekly' | 'monthly' | 'project';
-  target: {
-    words?: number;
-    time?: number; // minutes
-    chapters?: number;
-  };
-  current: {
-    words: number;
-    time: number;
-    chapters: number;
-  };
-  startDate: Date;
-  endDate?: Date;
-  isActive: boolean;
-  projectId?: string;
-}
-```
-
-### WritingInsights
-
-Advanced productivity insights.
-
-```typescript
-export interface WritingInsights {
-  productivity: {
-    averageWordsPerHour: number;
-    peakWritingHours: number[]; // hours (0-23)
-    preferredWritingDays: string[]; // day names
-    consistencyScore: number; // 0-100
-  };
-  patterns: {
-    averageSessionLength: number;
-    sessionsPerDay: number;
-    preferredChapterLength: number;
-    revisionRatio: number; // deletions/additions
-  };
-  aiUsage: {
-    totalWordsGenerated: number;
-    assistancePercentage: number;
-    mostAssistedChapters: string[];
-    aiDependencyTrend: number; // +/- change
-  };
-  streaks: {
-    currentStreak: number;
-    longestStreak: number;
-    streakDates: string[];
-  };
-  milestones: {
-    type: 'word_count' | 'chapter_completion' | 'streak' | 'productivity';
-    title: string;
-    description: string;
-    achievedAt: Date;
-    value: number;
-  }[];
-}
-```
-
----
-
-## Common Use Cases
-
-### 1. Editor with Session Tracking
-
-```tsx
-import { useAnalytics } from '@/features/analytics';
-import { useState, useEffect } from 'react';
-
-function SmartEditor({ project, chapter }: Props) {
-  const {
-    startSession,
-    endSession,
-    trackWordCountChange,
-    trackKeystroke,
-    currentSession,
-  } = useAnalytics();
-
-  const [content, setContent] = useState(chapter.content);
-  const [wordCount, setWordCount] = useState(0);
-
-  useEffect(() => {
-    // Start session on mount
-    startSession(project.id, chapter.id);
-
-    // End session on unmount
-    return () => {
-      endSession();
-    };
-  }, [project.id, chapter.id]);
-
-  const handleContentChange = (newContent: string) => {
-    const oldCount = wordCount;
-    const newCount = newContent.split(/\s+/).filter(Boolean).length;
-
-    trackWordCountChange(oldCount, newCount);
-    setContent(newContent);
-    setWordCount(newCount);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    trackKeystroke(e.key === 'Backspace');
-  };
-
-  return (
-    <div>
-      {currentSession && (
-        <div className="session-info">
-          ⏱️ Session:{' '}
-          {Math.round(
-            (Date.now() - currentSession.startTime.getTime()) / 60000,
-          )}
-          m
-        </div>
-      )}
-
-      <textarea
-        value={content}
-        onChange={e => handleContentChange(e.target.value)}
-        onKeyDown={handleKeyDown}
+describe('WritingStatsCard', () => {
+  it('should display title and value', () => {
+    render(
+      <WritingStatsCard
+        title="Words Today"
+        value={1250}
+        change={15}
+        icon="✍️"
       />
+    );
 
-      <div className="stats">
-        <span>Words: {wordCount}</span>
-      </div>
-    </div>
-  );
-}
+    expect(screen.getByText('Words Today')).toBeInTheDocument();
+    expect(screen.getByText('1250')).toBeInTheDocument();
+  });
+
+  it('should show positive change indicator', () => {
+    render(
+      <WritingStatsCard
+        title="Time Spent"
+        value="2h 30m"
+        change={-10}
+        icon="⏱️"
+      />
+    );
+
+    expect(screen.getByText('-10%')).toBeInTheDocument();
+  });
+});
 ```
 
-### 2. Daily Goals Dashboard
+### Hook Testing
 
-```tsx
-import { useAnalytics } from '@/features/analytics';
-import { useEffect, useState } from 'react';
+```typescript
+describe('useAnalytics', () => {
+  it('should start and track sessions', async () => {
+    const { result } = renderHook(() => useAnalytics());
 
-function DailyGoalsWidget() {
-  const { goals, createGoal, weeklyStats } = useAnalytics();
-  const [dailyGoal, setDailyGoal] = useState<WritingGoals | null>(null);
-
-  useEffect(() => {
-    // Find today's active goal
-    const today = goals.find(g => g.type === 'daily' && g.isActive);
-
-    if (!today) {
-      // Create default daily goal
-      createGoal({
-        type: 'daily',
-        target: { words: 500 },
-        startDate: new Date(),
-        isActive: true,
-      }).then(setDailyGoal);
-    } else {
-      setDailyGoal(today);
-    }
-  }, [goals]);
-
-  if (!dailyGoal) return <div>Loading...</div>;
-
-  const progress = (dailyGoal.current.words / dailyGoal.target.words) * 100;
-  const remaining = dailyGoal.target.words - dailyGoal.current.words;
-
-  return (
-    <div className="daily-goals">
-      <h3>Today's Goal</h3>
-      <div className="target">
-        {dailyGoal.current.words} / {dailyGoal.target.words} words
-      </div>
-
-      <progress value={progress} max={100} />
-
-      {remaining > 0 ? (
-        <p>✍️ {remaining} words to go!</p>
-      ) : (
-        <p>🎉 Goal achieved!</p>
-      )}
-
-      {weeklyStats && (
-        <div className="streak">🔥 {weeklyStats.streak}-day streak</div>
-      )}
-    </div>
-  );
-}
-```
-
-### 3. Productivity Insights Panel
-
-```tsx
-import { useAnalytics } from '@/features/analytics';
-import { useEffect } from 'react';
-
-function ProductivityInsights() {
-  const { insights, loadInsights } = useAnalytics();
-
-  useEffect(() => {
-    loadInsights({
-      dateRange: {
-        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-        end: new Date(),
-      },
-      granularity: 'day',
+    await act(async () => {
+      await result.current.startSession('project-1', 'chapter-1');
     });
-  }, []);
 
-  if (!insights) return <div>Loading insights...</div>;
+    expect(result.current.isTracking).toBe(true);
+    expect(result.current.currentSession).toBeDefined();
 
-  return (
-    <div className="insights">
-      <h2>Writing Insights</h2>
-
-      <div className="productivity">
-        <h3>Productivity</h3>
-        <p>
-          Average: {Math.round(insights.productivity.averageWordsPerHour)}{' '}
-          words/hour
-        </p>
-        <p>
-          Peak Hours:{' '}
-          {insights.productivity.peakWritingHours
-            .map(h => `${h}:00`)
-            .join(', ')}
-        </p>
-        <p>
-          Best Days: {insights.productivity.preferredWritingDays.join(', ')}
-        </p>
-        <p>Consistency: {insights.productivity.consistencyScore}/100</p>
-      </div>
-
-      <div className="patterns">
-        <h3>Writing Patterns</h3>
-        <p>
-          Avg Session: {Math.round(insights.patterns.averageSessionLength)}{' '}
-          minutes
-        </p>
-        <p>Sessions/Day: {insights.patterns.sessionsPerDay.toFixed(1)}</p>
-        <p>
-          Preferred Chapter Length:{' '}
-          {Math.round(insights.patterns.preferredChapterLength)} words
-        </p>
-      </div>
-
-      <div className="ai-usage">
-        <h3>AI Assistance</h3>
-        <p>
-          AI-Generated Words:{' '}
-          {insights.aiUsage.totalWordsGenerated.toLocaleString()}
-        </p>
-        <p>Assistance: {Math.round(insights.aiUsage.assistancePercentage)}%</p>
-        <p>
-          Trend:{' '}
-          {insights.aiUsage.aiDependencyTrend > 0
-            ? '📈 Increasing'
-            : '📉 Decreasing'}
-        </p>
-      </div>
-
-      <div className="streaks">
-        <h3>Streaks</h3>
-        <p>Current: {insights.streaks.currentStreak} days 🔥</p>
-        <p>Longest: {insights.streaks.longestStreak} days 🏆</p>
-      </div>
-    </div>
-  );
-}
-```
-
-### 4. Project Comparison Dashboard
-
-```tsx
-import { useAnalytics } from '@/features/analytics';
-import { useState, useEffect } from 'react';
-
-function ProjectComparison({ projects }: { projects: Project[] }) {
-  const { loadProjectAnalytics } = useAnalytics();
-  const [analytics, setAnalytics] = useState<ProjectAnalytics[]>([]);
-
-  useEffect(() => {
-    Promise.all(projects.map(p => loadProjectAnalytics(p))).then(() => {
-      // Analytics loaded for all projects
+    await act(async () => {
+      await result.current.endSession();
     });
-  }, [projects]);
 
-  return (
-    <table>
-      <thead>
-        <tr>
-          <th>Project</th>
-          <th>Words</th>
-          <th>Chapters</th>
-          <th>Progress</th>
-          <th>Time Spent</th>
-        </tr>
-      </thead>
-      <tbody>
-        {analytics.map(a => (
-          <tr key={a.projectId}>
-            <td>{a.title}</td>
-            <td>{a.totalWords.toLocaleString()}</td>
-            <td>
-              {a.completedChapters} / {a.totalChapters}
-            </td>
-            <td>{Math.round(a.writingProgress)}%</td>
-            <td>{Math.round(a.timeSpent / 60)}h</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
+    expect(result.current.isTracking).toBe(false);
+  });
+});
 ```
+
+### E2E Testing
+
+Use Playwright for full integration tests:
+
+```typescript
+test('User can view analytics dashboard', async ({ page }) => {
+  await page.goto('/projects/1');
+  await page.click('button[data-testid="analytics-btn"]');
+
+  await expect(
+    page.locator('[data-testid="analytics-dashboard"]'),
+  ).toBeVisible();
+  await expect(page.locator('text="Writing Insights"')).toBeVisible();
+  await expect(
+    page.locator('[data-testid="productivity-chart"]'),
+  ).toBeVisible();
+});
+
+test('User can create and track a writing goal', async ({ page }) => {
+  await page.goto('/analytics/goals');
+
+  await page.click('button[data-testid="create-goal-btn"]');
+  await page.fill('input[name="target-words"]', '1000');
+  await page.click('button[type="submit"]');
+
+  await expect(page.locator('text="Goal Created"')).toBeVisible();
+  await expect(page.locator('text="1000 words"')).toBeVisible();
+});
+```
+
+### Testing Best Practices
+
+1. **Test Service Logic Separately**: Service methods should be pure and
+   testable without UI
+2. **Mock External Dependencies**: Use `vi.mock()` for external services
+3. **Test Error Handling**: Verify error states and error boundaries
+4. **Test Loading States**: Ensure loading indicators display correctly
+5. **Test Accessibility**: Verify ARIA labels and keyboard navigation
+6. **Test Data Persistence**: Verify store persistence works correctly
 
 ---
 
-## Performance Considerations
+## Future Enhancements
 
-### Optimization Strategies
+### Planned Features
 
-1. **Throttled Tracking**:
-   - Keystroke tracking uses local state
-   - Updates batched on session end
-   - Minimal overhead per keystroke
+1. **Advanced Charts**:
+   - Heatmaps for writing activity by time/day
+   - Multi-series comparison charts
+   - Radar charts for writing balance
 
-2. **Lazy Loading**:
-   - Charts loaded on demand
-   - Historical data paginated
-   - Deep analytics computed async
+2. **AI-Powered Recommendations**:
+   - Personalized productivity tips based on patterns
+   - Optimal writing schedule suggestions
+   - Goal recommendations based on historical data
 
-3. **In-Memory Caching**:
-   - Recent statistics cached
-   - Chart data memoized
-   - Goals loaded once per session
+3. **Social Features**:
+   - Share statistics with friends
+   - Leaderboards and competitions
+   - Writing communities with challenges
 
-### Performance Targets
+4. **Mobile App Integration**:
+   - Sync analytics across devices
+   - Push notifications for goal reminders
+   - Quick session tracking on mobile
+
+5. **External Integrations**:
+   - Export to Google Sheets, Notion, Obsidian
+   - Calendar integration for scheduled writing
+   - Word counter device integration
+
+6. **Advanced Notifications**:
+   - Goal achievement celebrations
+   - Streak milestone alerts
+   - Productivity drop warnings
+
+7. **Voice Commands**:
+   - "Show me this week's stats"
+   - "Start tracking session"
+   - "Set a 1000-word daily goal"
+
+### Technical Improvements
+
+1. **Database Persistence**:
+   - Replace in-memory storage with LibSQL/Turso
+   - Implement proper data migrations
+   - Add data backup/restore functionality
+
+2. **Performance Optimization**:
+   - Implement data pagination for large datasets
+   - Add query result caching with Redis
+   - Optimize chart rendering with virtualization
+
+3. **Offline Support**:
+   - Service worker for offline analytics
+   - Queue operations for sync when online
+   - Local storage fallback
+
+4. **Real-Time Updates**:
+   - WebSocket integration for live stats
+   - Real-time goal progress updates
+   - Collaborative writing analytics
+
+---
+
+## Related Features
+
+- **[Gamification](../gamification/README.md)**: Streak tracking, achievements,
+  and rewards
+- **[Writing Assistant](../writing-assistant/README.md)**: Writing goals
+  integration and suggestions
+- **[Projects](../projects/README.md)**: Project-level analytics and management
+- **[Editor](../editor/README.md)**: Real-time tracking integration in the
+  writing editor
+
+---
+
+## Best Practices
+
+### For Developers
+
+1. **Session Management**: Always call `startSession()` and `endSession()` in
+   pairs
+2. **Use the Hook**: Prefer `useAnalytics()` over direct store access
+3. **Error Handling**: Wrap async analytics calls in try/catch blocks
+4. **Performance**: Use `useMemo` for computed values in components
+5. **Type Safety**: Always import types from the types module
+
+### For Users
+
+1. **Regular Review**: Check insights weekly to understand patterns
+2. **Realistic Goals**: Set achievable goals to maintain motivation
+3. **Track Sessions**: Let the editor auto-track sessions for accurate data
+4. **Data Export**: Export analytics regularly for backup
+5. **Privacy Note**: Current implementation uses in-memory storage
+
+### Performance Considerations
 
 | Operation       | Target | Notes                    |
 | --------------- | ------ | ------------------------ |
@@ -963,40 +1044,68 @@ function ProjectComparison({ projects }: { projects: Project[] }) {
 
 ---
 
-## Future Enhancements
+## Troubleshooting
 
-### Planned Features
+### Common Issues
 
-1. **Advanced Charts**: Heatmaps, multi-series comparisons
-2. **AI Recommendations**: Personalized productivity tips
-3. **Social Features**: Share statistics, compare with friends
-4. **Mobile App**: Track writing sessions on mobile
-5. **Integrations**: Export to Google Sheets, Notion
-6. **Voice Commands**: "Show me this week's stats"
-7. **Notifications**: Goal reminders, streak alerts
+**Issue**: Session not tracking word count changes
+
+**Solution**: Ensure `trackWordCountChange()` is called with both old and new
+counts
+
+```tsx
+const handleChange = (newContent: string) => {
+  const oldCount = wordCount;
+  const newCount = countWords(newContent);
+
+  trackWordCountChange(oldCount, newCount); // Must pass both values
+  setWordCount(newCount);
+};
+```
+
+**Issue**: Analytics data lost on page refresh
+
+**Solution**: Current implementation uses in-memory storage. Enable persistence
+in the store:
+
+```typescript
+// The store already has persistence middleware
+// Only goals, insights, and weeklyStats are persisted
+```
+
+**Issue**: Charts showing no data
+
+**Solution**: Ensure `loadWordCountChart()` is called with valid project ID
+
+```tsx
+useEffect(() => {
+  loadWordCountChart(project.id, 30); // Must load before rendering
+}, [project.id]);
+```
 
 ---
 
-## Related Features
+## Status
 
-- **[Gamification](../gamification/README.md)**: Streak tracking, achievements
-- **[Writing Assistant](../writing-assistant/README.md)**: Writing goals
-  integration
-- **[Projects](../projects/README.md)**: Project-level analytics
-- **[Editor](../editor/README.md)**: Real-time tracking
+**Version**: 1.0.0 **Last Updated**: January 2026 **Status**: ✅ Production
+Ready (MVP - In-Memory Implementation) **Test Coverage**: ~78% **Storage**:
+In-Memory (Database persistence recommended for production)
 
 ---
 
-## Best Practices
+## Contributing
 
-1. **Session Management**: Always start/end sessions properly
-2. **Goal Setting**: Set realistic, achievable goals
-3. **Regular Review**: Check insights weekly
-4. **Data Export**: Backup analytics regularly
-5. **Privacy**: Analytics data stays local (in-memory)
+When making changes to the analytics feature:
+
+1. Update tests for modified code
+2. Update type definitions if needed
+3. Update this README for new features
+4. Run `npm run lint` and `npm run test` before committing
+5. Consider performance implications for tracking operations
+6. Test with realistic data volumes
 
 ---
 
-**Last Updated**: January 2026 **Status**: ✅ Production Ready (MVP - In-Memory
-Implementation) **Test Coverage**: 78% **Note**: Current implementation uses
-in-memory storage. Database persistence recommended for production.
+## License
+
+This feature is part of Novelist.ai. See project license for details.

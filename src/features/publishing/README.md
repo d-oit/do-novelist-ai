@@ -1,657 +1,1317 @@
 # Publishing Feature
 
-The Publishing feature handles exporting novels to various formats (EPUB, PDF,
-MOBI) and provides analytics for tracking reader engagement and platform
-performance.
+The Publishing feature handles exporting novels to various formats and provides
+analytics for tracking reader engagement and platform performance.
 
-## Overview
+## Table of Contents
+
+- [Feature Overview](#feature-overview)
+- [Architecture Diagram](#architecture-diagram)
+- [Component Hierarchy](#component-hierarchy)
+- [Service Layer](#service-layer)
+- [State Management](#state-management)
+- [API Reference](#api-reference)
+- [Usage Examples](#usage-examples)
+- [Testing Guidelines](#testing-guidelines)
+- [Future Enhancements](#future-enhancements)
+
+---
+
+## Feature Overview
 
 The Publishing feature helps authors:
 
 - 📤 **Export Formats** - Export to EPUB, PDF, MOBI, DOCX
 - 📚 **Platform Integration** - Publish to multiple platforms
 - 📊 **Analytics** - Track reader engagement and sales
-- 🎨 **Cover Design** - Integrate custom cover art
+- 🎨 **Cover Design** - Generate AI-powered cover art
 - 📝 **Metadata Management** - ISBN, categories, keywords
 - ✅ **Quality Checks** - Pre-publish validation
-- 🔄 **Version Control** - Manage published versions
+- 🔄 **Translation** - Multi-language translation support
 - 💰 **Revenue Tracking** - Monitor earnings across platforms
 
-## Architecture
+### Key Capabilities
+
+| Capability          | Description                          | Status         |
+| ------------------- | ------------------------------------ | -------------- |
+| EPUB Export         | Generate EPUB 3.0 compliant files    | ✅ Complete    |
+| Analytics Dashboard | Track views, ratings, engagement     | ✅ Complete    |
+| Cover Generation    | AI-powered cover art with Imagen 4.0 | ✅ Complete    |
+| Translation         | Multi-language content translation   | ✅ Complete    |
+| Platform Publishing | Connect to Wattpad, KDP, etc.        | 🚧 In Progress |
+| Revenue Tracking    | Monitor earnings by platform         | 🚧 In Progress |
+
+---
+
+## Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "UI Layer"
+        PD[PublishingDashboard]
+        PP[PublishPanel]
+        CG[CoverGenerator]
+        PF[PublishingMetadataForm]
+        MO[MetricsOverview]
+        FW[FeedbackWidget]
+        PS[PlatformStatusGrid]
+        AS[AlertsSection]
+    end
+
+    subgraph "Hooks Layer"
+        UPA[usePublishingAnalytics]
+    end
+
+    subgraph "Services Layer"
+        ES[epubService]
+        PAS[publishingAnalyticsService]
+        TGS[translationService]
+    end
+
+    subgraph "State Layer"
+        PStore[publishingStore]
+    end
+
+    subgraph "Database Layer"
+        Turso[(Turso DB)]
+        IndexedDB[(IndexedDB)]
+    end
+
+    subgraph "External Services"
+        Imagen[Imagen 4.0 API]
+        Gemini[Gemini API]
+        PlatformAPIs[Platform APIs]
+    end
+
+    PD --> UPA
+    PP --> ES
+    PP --> TGS
+    CG --> Imagen
+    PF --> PStore
+    MO --> UPA
+    FW --> UPA
+    PS --> UPA
+    AS --> UPA
+
+    UPA --> PStore
+    UPA --> PAS
+
+    PStore --> Turso
+    PStore --> IndexedDB
+
+    ES --> PStore
+    PAS --> PStore
+    TGS --> Gemini
+
+    PAS --> PlatformAPIs
+
+    style PD fill:#e1f5ff
+    style PP fill:#e1f5ff
+    style CG fill:#e1f5ff
+    style UPA fill:#fff3e0
+    style ES fill:#f3e5f5
+    style PAS fill:#f3e5f5
+    style PStore fill:#e8f5e9
+    style Turso fill:#ffe0b2
+```
+
+### Data Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant PublishPanel
+    participant epubService
+    participant publishingStore
+    participant Turso
+
+    User->>PublishPanel: Request EPUB Export
+    PublishPanel->>epubService: generateEpub(project)
+    epubService->>epubService: Create ZIP structure
+    epubService->>epubService: Add chapters & metadata
+    epubService->>epubService: Generate TOC
+    epubService->>epubService: Return Blob
+    epubService-->>PublishPanel: EPUB Blob
+    PublishPanel->>User: Download file
+
+    User->>PublishingDashboard: View Analytics
+    PublishingDashboard->>usePublishingAnalytics: loadPublicationData()
+    usePublishingAnalytics->>publishingStore: getPublication(id)
+    publishingStore->>Turso: Query publication data
+    Turso-->>publishingStore: Publication & analytics
+    publishingStore-->>usePublishingAnalytics: Data
+    usePublishingAnalytics-->>PublishingDashboard: Display metrics
+```
+
+---
+
+## Component Hierarchy
+
+### Main Components
 
 ```
-publishing/
-├── components/              # UI Components
-│   ├── PublishingDashboard.tsx     # Main dashboard
-│   ├── PublishingSetup.tsx         # Platform setup wizard
-│   ├── PublishPanel.tsx            # Quick publish panel
-│   ├── PublishView.tsx             # Publish view
-│   ├── PublishingMetadataForm.tsx  # Metadata editor
-│   ├── CoverGenerator.tsx          # Cover creation
-│   ├── PlatformCard.tsx            # Platform status card
-│   ├── PlatformStatusGrid.tsx      # Multi-platform view
-│   ├── MetricsOverview.tsx         # Analytics overview
-│   ├── FeedbackWidget.tsx          # Reader feedback
-│   ├── DetailedFeedbackModal.tsx   # Feedback details
-│   └── AlertsSection.tsx           # Publishing alerts
-│
-├── hooks/                   # React Hooks
-│   └── usePublishingAnalytics.ts   # Analytics hook
-│
-├── services/                # Business Logic
-│   ├── epubService.ts              # EPUB generation
-│   └── publishingAnalyticsService.ts # Analytics service
-│
-└── types/                   # TypeScript Types
-    └── index.ts                    # Publishing types
+src/features/publishing/
+├── components/
+│   ├── PublishingDashboard.tsx      # Main analytics dashboard
+│   ├── PublishingSetup.tsx          # Platform setup wizard
+│   ├── PublishPanel.tsx              # Export & publish panel
+│   ├── PublishView.tsx               # Main publish view
+│   ├── PublishingMetadataForm.tsx    # Metadata editor
+│   ├── CoverGenerator.tsx            # AI cover generation
+│   ├── PlatformCard.tsx              # Individual platform card
+│   ├── PlatformStatusGrid.tsx        # Multi-platform grid
+│   ├── MetricsOverview.tsx           # Analytics overview
+│   ├── FeedbackWidget.tsx            # Reader feedback display
+│   ├── DetailedFeedbackModal.tsx     # Detailed feedback modal
+│   ├── AlertsSection.tsx            # Publishing alerts
+│   └── index.ts                      # Component exports
 ```
 
-## Key Components
+### Component Descriptions
 
-### PublishingDashboard
+#### PublishingDashboard
 
-Main dashboard for managing all publishing activities.
+**Purpose:** Main analytics dashboard for published content
 
-**Features**:
+**Props:**
+
+```typescript
+interface PublishingDashboardProps {
+  project: Project;
+  publicationId?: string;
+  onClose: () => void;
+  className?: string;
+}
+```
+
+**Features:**
 
 - Platform connection status
 - Recent publications
-- Analytics overview
+- Analytics overview with timeframe selection (7d/30d/90d)
 - Revenue summary
-- Reader feedback
+- Reader feedback with sentiment filtering
 - Publishing alerts
-- Quick actions
+- Real-time refresh capability
 
-**Usage**:
+**Usage:**
 
 ```tsx
 import { PublishingDashboard } from '@/features/publishing';
 
 <PublishingDashboard
-  projectId={projectId}
-  onPublishClick={() => openPublishDialog()}
+  project={project}
+  publicationId={publicationId}
+  onClose={() => setShowDashboard(false)}
 />;
 ```
 
----
+#### PublishPanel
 
-### PublishPanel
+**Purpose:** Export and publish management panel
 
-Quick publish panel for exporting and publishing.
-
-**Features**:
-
-- Format selection (EPUB, PDF, MOBI, DOCX)
-- Export preview
-- Metadata editing
-- Platform selection
-- Cover upload
-- One-click publish
-- Download exports
-
-**Usage**:
-
-```tsx
-import { PublishPanel } from '@/features/publishing';
-
-<PublishPanel
-  projectId={projectId}
-  onExport={(format, file) => downloadFile(file)}
-  onPublish={(platform, metadata) => publishToPlatform(platform, metadata)}
-  availableFormats={['epub', 'pdf', 'mobi', 'docx']}
-/>;
-```
-
-**Export Formats**:
-
-- **EPUB**: Industry standard eBook format
-- **PDF**: Print-ready or eBook PDF
-- **MOBI**: Kindle format (legacy)
-- **DOCX**: Microsoft Word format
-- **HTML**: Web-ready format
-- **Markdown**: Plain text with formatting
-
----
-
-### PublishingMetadataForm
-
-Form for editing book metadata (title, author, ISBN, etc.).
-
-**Features**:
-
-- Title and subtitle
-- Author information
-- ISBN assignment
-- Categories and genres
-- Keywords and tags
-- Description/blurb
-- Language and copyright
-- Pricing information
-
-**Usage**:
-
-```tsx
-import { PublishingMetadataForm } from '@/features/publishing';
-
-<PublishingMetadataForm
-  projectId={projectId}
-  initialMetadata={metadata}
-  onSave={metadata => saveMetadata(metadata)}
-  validateISBN={true}
-/>;
-```
-
-**Metadata Structure**:
+**Props:**
 
 ```typescript
-interface PublishingMetadata {
-  title: string;
-  subtitle?: string;
-  author: string;
-  coAuthors?: string[];
-  isbn?: string;
-  categories: string[]; // BISAC categories
-  keywords: string[];
-  description: string;
-  language: string;
-  copyright: string;
-  publishDate?: Date;
-  price?: {
-    amount: number;
-    currency: string;
-  };
-  coverUrl?: string;
+interface PublishPanelProps {
+  project: Project;
+  onUpdateProject: (updates: Partial<Project>) => void;
+  onUpdateChapter: (chapterId: string, updates: Partial<Chapter>) => void;
 }
 ```
 
----
+**Features:**
 
-### PlatformStatusGrid
+- Manuscript status tracking
+- Word count progress
+- Language selection
+- Target word count setting
+- EPUB export with drop caps styling
+- Multi-language translation (AI-powered)
 
-Grid view of all connected publishing platforms.
+**Export Formats Supported:**
 
-**Features**:
+- **EPUB 3.0** - Industry standard eBook format (primary)
+- **PDF** - Print-ready format (planned)
+- **MOBI** - Kindle format (planned)
+- **DOCX** - Microsoft Word (planned)
 
-- Platform connection status
-- Last publish date
-- Version published
-- Platform-specific metrics
-- Quick publish button
-- Platform settings
+#### CoverGenerator
 
-**Usage**:
+**Purpose:** AI-powered book cover generation
+
+**Props:**
+
+```typescript
+interface CoverGeneratorProps {
+  project: Project;
+  onUpdateProject: (updates: Partial<Project>) => void;
+}
+```
+
+**Features:**
+
+- Generate covers using Imagen 4.0 model
+- Uses project title, idea, and style as context
+- Download generated covers
+- Regenerate capability
+
+**Usage:**
 
 ```tsx
-import { PlatformStatusGrid } from '@/features/publishing';
+import { CoverGenerator } from '@/features/publishing';
 
-<PlatformStatusGrid
-  projectId={projectId}
-  platforms={['kdp', 'draft2digital', 'ingramspark', 'smashwords']}
-  onPublish={platform => publishTo(platform)}
+<CoverGenerator
+  project={project}
+  onUpdateProject={updates => updateProject(updates)}
 />;
 ```
 
-**Supported Platforms**:
+#### MetricsOverview
 
-- 📖 **Amazon KDP** - Kindle Direct Publishing
-- 📚 **Draft2Digital** - Multi-platform distributor
-- 🏢 **IngramSpark** - Print and digital distribution
-- 📱 **Smashwords** - eBook distribution
-- 🌐 **Wattpad** - Online reading platform
-- 📓 **Royal Road** - Web serial platform
-- 🎯 **Direct** - Self-hosted/website
+**Purpose:** Display key performance metrics
 
----
-
-### MetricsOverview
-
-Overview of publishing analytics and performance.
-
-**Features**:
-
-- Total downloads/sales
-- Revenue by platform
-- Reader ratings
-- Page reads (KU/KENP)
-- Geographic distribution
-- Trend charts
-- Period comparison
-
-**Usage**:
-
-```tsx
-import { MetricsOverview } from '@/features/publishing';
-
-<MetricsOverview
-  projectId={projectId}
-  timeRange="30d" // '7d' | '30d' | '90d' | 'all'
-  platforms={['kdp', 'draft2digital']}
-/>;
-```
-
-**Metrics Tracked**:
-
-- **Downloads/Sales**: Total units sold
-- **Revenue**: Earnings by platform
-- **Page Reads**: KU/KENP pages read
-- **Ratings**: Average rating and count
-- **Reviews**: Review count and sentiment
-- **Rankings**: Best seller ranks
-- **Conversion**: Click-to-purchase rate
-
----
-
-## Hooks API
-
-### usePublishingAnalytics
-
-Comprehensive publishing analytics hook.
+**Props:**
 
 ```typescript
-const {
-  // Data
-  analytics, // Current analytics data
-  isLoading, // Loading state
-  error, // Error state
-
-  // Metrics
-  totalSales, // Total units sold
-  totalRevenue, // Total earnings
-  averageRating, // Average reader rating
-  totalReviews, // Total review count
-
-  // By Platform
-  platformMetrics, // Metrics per platform
-  topPlatform, // Best performing platform
-
-  // Trends
-  salesTrend, // Sales over time
-  revenueTrend, // Revenue over time
-  ratingTrend, // Rating over time
-
-  // Actions
-  refreshAnalytics, // Reload analytics
-  exportReport, // Export analytics report
-  setTimeRange, // Change time period
-
-  // Filters
-  timeRange, // Current time range
-  platforms, // Selected platforms
-  setPlatforms, // Update platforms
-} = usePublishingAnalytics(projectId);
+interface MetricsOverviewProps {
+  analytics: PublishingAnalytics;
+  engagement: EngagementMetrics | null;
+  averageRating: number;
+}
 ```
 
-**Example - View Analytics**:
+**Metrics Displayed:**
+
+- Total views
+- Unique visitors
+- Average rating
+- Downloads
+- Average reading time
+- Completion rate
+- Social shares
+
+#### FeedbackWidget
+
+**Purpose:** Reader feedback display and management
+
+**Props:**
 
 ```typescript
-const { analytics, totalSales, totalRevenue, platformMetrics, salesTrend } =
-  usePublishingAnalytics(projectId);
-
-console.log(`Total Sales: ${totalSales} units`);
-console.log(`Total Revenue: $${totalRevenue.toFixed(2)}`);
-
-// Platform breakdown
-platformMetrics.forEach(platform => {
-  console.log(
-    `${platform.name}: ${platform.sales} sales, $${platform.revenue}`,
-  );
-});
-
-// Sales trend
-console.log('Last 7 days:', salesTrend.slice(-7));
+interface FeedbackWidgetProps {
+  feedback: ReaderFeedback[];
+  totalReviews: number;
+  sentimentBreakdown: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  feedbackFilter: 'all' | 'positive' | 'negative';
+  onFilterChange: (filter: 'all' | 'positive' | 'negative') => void;
+}
 ```
+
+**Features:**
+
+- Filter by sentiment
+- Search feedback
+- Display sentiment breakdown
+- Show rating distributions
+- Detailed feedback modal
+
+#### PlatformStatusGrid
+
+**Purpose:** Display connected publishing platforms
+
+**Props:**
+
+```typescript
+interface PlatformStatusGridProps {
+  insights: ReaderInsights | null;
+}
+```
+
+**Supported Platforms:**
+
+- 📖 **Wattpad** - Social reading platform
+- 📚 **Archive of Our Own (AO3)** - Fan fiction archive
+- 🌐 **Amazon KDP** - Kindle Direct Publishing
+- 🏠 **Personal Website** - Self-hosted distribution
 
 ---
 
-## Services
+## Service Layer
 
 ### epubService
 
-Generates EPUB files from project content.
+**Location:** `src/features/publishing/services/epubService.ts`
+
+**Purpose:** Generate EPUB 3.0 compliant eBook files
+
+**API:**
 
 ```typescript
-import { epubService } from '@/features/publishing';
-
-// Generate EPUB
-const epubBlob = await epubService.generateEPUB({
-  projectId,
-  metadata: {
-    title: 'My Novel',
-    author: 'J. Smith',
-    language: 'en',
-    isbn: '978-1-234567-89-0',
-  },
-  chapters: chapterIds,
-  coverImage: coverUrl,
-  includeTableOfContents: true,
-  includeCopyright: true,
-});
-
-// Download EPUB
-const url = URL.createObjectURL(epubBlob);
-const a = document.createElement('a');
-a.href = url;
-a.download = 'my-novel.epub';
-a.click();
-
-// Validate EPUB
-const validation = await epubService.validateEPUB(epubBlob);
-if (!validation.isValid) {
-  console.error('EPUB errors:', validation.errors);
-}
+/**
+ * Generates a standard EPUB 3.0 file from the project data.
+ * @param project The project to export
+ * @param enableDropCaps Whether to style the first letter of chapters
+ * @returns A Promise resolving to a Blob containing the .epub file
+ */
+export const generateEpub = async (
+  project: Project,
+  enableDropCaps = false
+): Promise<Blob>
 ```
 
-**EPUB Features**:
+**Features:**
 
-- ✅ EPUB 3.0 compliant
-- ✅ Embedded fonts
-- ✅ Table of contents (NCX + NAV)
-- ✅ Cover image
+- ✅ EPUB 3.0 compliant structure
+- ✅ Embedded table of contents (NCX + NAV)
+- ✅ Cover image support (if present)
 - ✅ Chapter navigation
-- ✅ Metadata (Dublin Core)
-- ✅ Responsive layout
-- ✅ Image optimization
+- ✅ Dublin Core metadata
+- ✅ Responsive CSS styling
+- ✅ Optional drop caps styling
+- ✅ Lazy-loaded JSZip dependency
 
----
+**Example Usage:**
+
+```typescript
+import { generateEpub } from '@/features/publishing/services/epubService';
+
+const blob = await generateEpub(project, true);
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `${project.title}.epub`;
+a.click();
+```
+
+**EPUB Structure Generated:**
+
+```
+.epub
+├── mimetype (uncompressed)
+├── META-INF/
+│   └── container.xml
+└── OEBPS/
+    ├── content.opf (metadata & manifest)
+    ├── toc.ncx (table of contents)
+    ├── styles.css
+    ├── title.xhtml
+    ├── cover.xhtml (if cover image exists)
+    ├── images/
+    │   └── cover.png
+    └── chapter-1.xhtml, chapter-2.xhtml, ...
+```
 
 ### publishingAnalyticsService
 
-Tracks and aggregates publishing metrics.
+**Location:** `src/features/publishing/services/publishingAnalyticsService.ts`
+
+**Purpose:** Track and aggregate publishing metrics from multiple platforms
+
+**API:**
 
 ```typescript
-import { publishingAnalyticsService } from '@/features/publishing';
+// Singleton instance
+export const publishingAnalyticsService = PublishingAnalyticsService.getInstance();
+
+// Publication Management
+publishProject(
+  project: Project,
+  platforms: string[],
+  metadata: Publication['metadata']
+): Promise<Publication>
+
+// Analytics Retrieval
+getPublicationAnalytics(publicationId: string): Promise<PlatformAnalytics>
+getEngagementMetrics(
+  publicationId: string,
+  timeframe: { start: Date; end: Date }
+): EngagementMetrics
+getReaderFeedback(publicationId: string, limit?: number): Promise<ReaderFeedback[]>
+getReaderInsights(publicationId: string): Promise<ReaderInsights>
+
+// Trends & Predictions
+getPublishingTrends(publicationId: string, days?: number): PublishingTrends
+
+// Goals & Alerts
+createPublishingGoal(goal: Omit<PublishingGoals, 'id' | 'current'>): Promise<PublishingGoals>
+getPublishingGoals(publicationId: string): Promise<PublishingGoals[]>
+getPublishingAlerts(limit?: number): Promise<PublishingAlert[]>
+
+// Export
+exportPublishingAnalytics(
+  publicationIds: string[],
+  format: 'json' | 'csv' | 'xlsx'
+): Promise<string>
+
+// Platform Integration
+connectPlatform(platformId: string, credentials: Credentials): boolean
+getConnectedPlatforms(): PublishingPlatform[]
+getAllPlatforms(): PublishingPlatform[]
+```
+
+**Example Usage:**
+
+```typescript
+import { publishingAnalyticsService } from '@/features/publishing/services/publishingAnalyticsService';
+
+// Publish to platform
+const publication = await publishingAnalyticsService.publishProject(
+  project,
+  ['wattpad', 'kindle'],
+  {
+    genre: ['Fantasy', 'Adventure'],
+    tags: ['magic', 'dragons'],
+    language: 'en',
+    wordCount: 75000,
+    chapterCount: 25,
+  },
+);
 
 // Get analytics
-const analytics = await publishingAnalyticsService.getAnalytics({
-  projectId,
-  startDate: new Date('2024-01-01'),
-  endDate: new Date(),
-  platforms: ['kdp', 'draft2digital'],
-});
+const analytics = await publishingAnalyticsService.getPublicationAnalytics(
+  publication.id,
+);
+console.log(`Total views: ${analytics.views}`);
+console.log(`Average rating: ${analytics.rating.average}`);
 
-// Record sale
-await publishingAnalyticsService.recordSale({
-  projectId,
-  platform: 'kdp',
-  quantity: 1,
-  revenue: 2.99,
-  currency: 'USD',
-  date: new Date(),
-});
+// Get insights
+const insights = await publishingAnalyticsService.getReaderInsights(
+  publication.id,
+);
+console.log(
+  `Primary demographic: ${insights.audienceProfile.primaryDemographic}`,
+);
+console.log(
+  `Top countries: ${insights.audienceProfile.topCountries.join(', ')}`,
+);
 
-// Get platform comparison
-const comparison = await publishingAnalyticsService.comparePlatforms({
-  projectId,
-  platforms: ['kdp', 'draft2digital', 'smashwords'],
-  metric: 'revenue', // or 'sales', 'ratings'
-  timeRange: '30d',
-});
-
-// Export report
-const reportPDF = await publishingAnalyticsService.exportReport({
-  projectId,
-  format: 'pdf', // or 'csv', 'xlsx'
-  includeCharts: true,
-  timeRange: 'all',
-});
-```
-
----
-
-## Data Flow
-
-### Export Flow
-
-```
-Project Content → Format Converter → Validation → File Generation → Download
-       ↓
-  Chapters + Metadata + Cover → EPUB/PDF/MOBI → File
-```
-
-### Publishing Flow
-
-```
-Project → Export → Metadata Form → Platform Selection → Upload → Published
-                                           ↓
-                                    Platform API
-                                           ↓
-                                   Publishing Complete
-```
-
-### Analytics Flow
-
-```
-Platform APIs → Data Sync → Aggregation → Database
-                                 ↓
-                         Analytics Dashboard
-                                 ↓
-                         Charts + Metrics
-```
-
----
-
-## Database Schema
-
-### Publishing Metadata Table
-
-```sql
-CREATE TABLE publishing_metadata (
-  id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL,
-  title TEXT NOT NULL,
-  subtitle TEXT,
-  author TEXT NOT NULL,
-  isbn TEXT,
-  categories JSON,
-  keywords JSON,
-  description TEXT,
-  language TEXT DEFAULT 'en',
-  copyright TEXT,
-  cover_url TEXT,
-  price_amount REAL,
-  price_currency TEXT,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL,
-  FOREIGN KEY (project_id) REFERENCES projects(id)
+// Export data
+const jsonReport = await publishingAnalyticsService.exportPublishingAnalytics(
+  [publication.id],
+  'json',
 );
 ```
 
-### Publications Table
-
-```sql
-CREATE TABLE publications (
-  id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL,
-  platform TEXT NOT NULL,
-  version TEXT NOT NULL,
-  format TEXT NOT NULL,     -- 'epub' | 'pdf' | 'mobi'
-  status TEXT NOT NULL,      -- 'draft' | 'published' | 'unpublished'
-  published_at INTEGER,
-  metadata JSON,
-  platform_id TEXT,          -- ID on external platform
-  url TEXT,                  -- Public URL
-  created_at INTEGER NOT NULL,
-  FOREIGN KEY (project_id) REFERENCES projects(id)
-);
-```
-
-### Publishing Analytics Table
-
-```sql
-CREATE TABLE publishing_analytics (
-  id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL,
-  platform TEXT NOT NULL,
-  date INTEGER NOT NULL,
-  sales INTEGER DEFAULT 0,
-  revenue REAL DEFAULT 0,
-  currency TEXT DEFAULT 'USD',
-  page_reads INTEGER DEFAULT 0,
-  downloads INTEGER DEFAULT 0,
-  rating REAL,
-  reviews INTEGER DEFAULT 0,
-  rank INTEGER,
-  FOREIGN KEY (project_id) REFERENCES projects(id)
-);
-
-CREATE INDEX idx_analytics_date ON publishing_analytics(date);
-CREATE INDEX idx_analytics_platform ON publishing_analytics(platform);
-```
-
 ---
 
-## Export Formats
+## State Management
 
-### EPUB (Electronic Publication)
+### publishingStore
 
-- **Use**: Standard eBook format
-- **Platforms**: All major eBook platforms
-- **Features**: Reflowable text, images, TOC
-- **File Size**: ~500KB - 5MB
+**Location:** `src/lib/stores/publishingStore.ts`
 
-### PDF (Portable Document Format)
+**Purpose:** Centralized state management for publishing data
 
-- **Use**: Print-ready or fixed-layout eBook
-- **Platforms**: Universal
-- **Features**: Fixed layout, fonts embedded
-- **File Size**: ~2MB - 20MB
-
-### MOBI (Mobipocket)
-
-- **Use**: Legacy Kindle format
-- **Platforms**: Amazon Kindle (older devices)
-- **Features**: Similar to EPUB
-- **File Size**: ~500KB - 5MB
-- **Note**: Being phased out by Amazon (use EPUB instead)
-
-### DOCX (Microsoft Word)
-
-- **Use**: Editing, manuscript submissions
-- **Platforms**: Desktop
-- **Features**: Full formatting, comments
-- **File Size**: ~100KB - 2MB
-
----
-
-## Platform Integration
-
-### Amazon KDP (Kindle Direct Publishing)
+**State Structure:**
 
 ```typescript
-const kdpConfig = {
-  apiKey: process.env.KDP_API_KEY,
-  marketplace: 'us', // or 'uk', 'de', etc.
-  pricing: {
-    us: { amount: 2.99, currency: 'USD' },
-    uk: { amount: 1.99, currency: 'GBP' },
-  },
-  enrollment: {
-    kdpSelect: true, // KU exclusive
-    enableLending: true,
-  },
-};
+interface PublishingStoreState {
+  // Publications
+  publications: Publication[];
+  currentPublication: Publication | null;
 
-// Publish to KDP
-await publishingService.publishToKDP({
-  projectId,
-  metadata,
-  epub: epubFile,
-  config: kdpConfig,
-});
+  // Analytics Data
+  analytics: PlatformAnalytics | null;
+  engagement: EngagementMetrics | null;
+  insights: ReaderInsights | null;
+  trends: PublishingTrends | null;
+
+  // Feedback & Reviews
+  feedback: ReaderFeedback[];
+
+  // Goals & Performance
+  goals: PublishingGoals[];
+  alerts: PublishingAlert[];
+
+  // Platforms
+  platforms: PublishingPlatform[];
+
+  // Loading States
+  isLoading: boolean;
+  isPublishing: boolean;
+
+  // Error State
+  error: string | null;
+}
 ```
 
-### Draft2Digital
+**Actions:**
 
 ```typescript
-const d2dConfig = {
-  apiKey: process.env.D2D_API_KEY,
-  channels: ['apple', 'kobo', 'barnes-noble', 'scribd'],
-  pricing: {
-    amount: 2.99,
-    currency: 'USD',
-  },
-};
+const store = usePublishingStore();
 
-// Publish to D2D
-await publishingService.publishToD2D({
-  projectId,
-  metadata,
-  epub: epubFile,
-  config: d2dConfig,
-});
+// Initialization
+await store.init();
+
+// Publications
+store.publishProject(project, platforms, metadata);
+store.loadPublicationData(publicationId);
+store.getPublications(projectId);
+
+// Analytics
+store.loadTrends(publicationId, days);
+store.loadFeedback(publicationId, limit);
+store.refreshAnalytics(publicationId);
+
+// Goals & Alerts
+store.createGoal(goal);
+store.addAlert(alert);
+store.markAlertAsRead(alertId);
+store.dismissAlert(alertId);
+
+// Platforms
+store.connectPlatform(platformId, credentials);
+```
+
+### usePublishingAnalytics Hook
+
+**Location:** `src/features/publishing/hooks/usePublishingAnalytics.ts`
+
+**Purpose:** React hook for accessing publishing analytics
+
+**API:**
+
+```typescript
+const {
+  // State
+  publications,
+  currentPublication,
+  analytics,
+  engagement,
+  insights,
+  trends,
+  feedback,
+  goals,
+  alerts,
+  platforms,
+  connectedPlatforms,
+  isLoading,
+  error,
+  isPublishing,
+
+  // Computed
+  averageRating,
+  totalReviews,
+  sentimentBreakdown,
+
+  // Actions
+  publishProject,
+  loadPublicationData,
+  createGoal,
+  connectPlatform,
+  refreshAnalytics,
+  loadTrends,
+  loadFeedback,
+  markAlertAsRead,
+  dismissAlert,
+  exportAnalytics,
+  generateReport,
+  filterFeedback,
+  searchFeedback,
+} = usePublishingAnalytics();
+```
+
+**Example Usage:**
+
+```typescript
+import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
+
+function MyComponent() {
+  const {
+    analytics,
+    feedback,
+    totalReviews,
+    sentimentBreakdown,
+    filterFeedback,
+    refreshAnalytics
+  } = usePublishingAnalytics();
+
+  const positiveFeedback = filterFeedback(undefined, 'positive');
+
+  return (
+    <div>
+      <h3>Total Reviews: {totalReviews}</h3>
+      <div>
+        <span>Positive: {sentimentBreakdown.positive}</span>
+        <span>Neutral: {sentimentBreakdown.neutral}</span>
+        <span>Negative: {sentimentBreakdown.negative}</span>
+      </div>
+      <button onClick={() => refreshAnalytics(publicationId)}>
+        Refresh
+      </button>
+    </div>
+  );
+}
 ```
 
 ---
 
-## Quality Checks
+## API Reference
 
-### Pre-Publishing Validation
+### Type Definitions
 
-**Content Checks**:
+**Location:** `src/features/publishing/types/index.ts`
 
-- ✅ All chapters have content
-- ✅ Chapter order correct
-- ✅ No placeholder text
-- ✅ Images optimized
-- ✅ Links functional
+#### Core Types
 
-**Metadata Checks**:
+```typescript
+// Platform representation
+interface PublishingPlatform {
+  id: string;
+  name: string;
+  type: 'self_hosted' | 'marketplace' | 'social' | 'subscription';
+  apiEndpoint?: string;
+  isConnected: boolean;
+  credentials?: {
+    apiKey?: string;
+    username?: string;
+    token?: string;
+  };
+  supportedFormats: PublishingFormat[];
+}
 
-- ✅ Title and author present
-- ✅ Valid ISBN (if provided)
-- ✅ Categories selected (2-3 recommended)
-- ✅ Keywords provided (7 recommended)
-- ✅ Description 150-4000 characters
-- ✅ Cover meets platform requirements
+// Export format type
+type PublishingFormat = 'epub' | 'pdf' | 'html' | 'markdown' | 'docx' | 'mobi';
 
-**Format Checks**:
+// Publication record
+interface Publication {
+  id: string;
+  projectId: string;
+  title: string;
+  description: string;
+  coverImageUrl?: string;
+  publishedAt: Date;
+  platforms: PublishedInstance[];
+  status: 'draft' | 'published' | 'updated' | 'archived';
+  metadata: {
+    isbn?: string;
+    genre: string[];
+    tags: string[];
+    language: string;
+    mature: boolean;
+    wordCount: number;
+    chapterCount: number;
+    price?: number;
+    currency?: string;
+  };
+}
 
-- ✅ EPUB passes EPUBCheck validation
-- ✅ PDF page count correct
-- ✅ File size within limits
-- ✅ Fonts embedded properly
-- ✅ Table of contents generated
+// Platform instance
+interface PublishedInstance {
+  id: string;
+  platformId: string;
+  platformName: string;
+  publicationUrl: string;
+  publishedAt: Date;
+  lastUpdated: Date;
+  status: 'active' | 'pending' | 'rejected' | 'archived';
+  analytics: PlatformAnalytics;
+}
+
+// Analytics data
+interface PlatformAnalytics {
+  views: number;
+  uniqueVisitors: number;
+  downloads: number;
+  bookmarks: number;
+  shares: number;
+  rating: {
+    average: number;
+    count: number;
+    distribution: Record<number, number>;
+  };
+  revenue?: {
+    total: number;
+    currency: string;
+    salesCount: number;
+  };
+  geographics: Record<string, number>;
+  demographics: {
+    ageGroups: Record<string, number>;
+    genderDistribution: Record<string, number>;
+  };
+  lastUpdated: Date;
+}
+
+// Reader feedback
+interface ReaderFeedback {
+  id: string;
+  publicationId: string;
+  platformId: string;
+  type: 'review' | 'comment' | 'rating' | 'bookmark' | 'share';
+  content?: string;
+  rating?: number; // 1-5 stars
+  author: {
+    id: string;
+    name: string;
+    avatar?: string;
+    isVerified?: boolean;
+  };
+  timestamp: Date;
+  likes: number;
+  replies: ReaderFeedback[];
+  isPublic: boolean;
+  sentiment: 'positive' | 'neutral' | 'negative';
+  topics: string[];
+  chapterReference?: string;
+}
+
+// Engagement metrics
+interface EngagementMetrics {
+  publicationId: string;
+  timeframe: {
+    start: Date;
+    end: Date;
+  };
+  totalViews: number;
+  uniqueReaders: number;
+  averageReadingTime: number; // minutes
+  completionRate: number; // percentage
+  dropOffPoints: {
+    chapterIndex: number;
+    dropOffRate: number;
+  }[];
+  peakReadingTimes: {
+    hour: number;
+    dayOfWeek: number;
+    activityLevel: number;
+  }[];
+  readerRetention: {
+    day1: number;
+    day7: number;
+    day30: number;
+  };
+  socialEngagement: {
+    shares: number;
+    discussions: number;
+    fanArt: number;
+    communityPosts: number;
+  };
+}
+
+// Publishing goals
+interface PublishingGoals {
+  id: string;
+  publicationId: string;
+  type: 'views' | 'downloads' | 'rating' | 'revenue' | 'engagement';
+  target: number;
+  current: number;
+  timeframe: {
+    start: Date;
+    end: Date;
+  };
+  isActive: boolean;
+  milestones: {
+    value: number;
+    achievedAt?: Date;
+    reward?: string;
+  }[];
+}
+
+// Reader insights
+interface ReaderInsights {
+  publicationId: string;
+  audienceProfile: {
+    primaryDemographic: string;
+    topCountries: string[];
+    peakReadingTimes: string[];
+    averageSessionDuration: number;
+  };
+  contentPerformance: {
+    mostPopularChapters: {
+      chapterIndex: number;
+      title: string;
+      engagementScore: number;
+    }[];
+    sentimentTrends: {
+      chapter: number;
+      sentiment: number; // -1 to 1
+      topics: string[];
+    }[];
+    dropOffAnalysis: {
+      chapter: number;
+      dropOffRate: number;
+      commonFeedback: string[];
+    }[];
+  };
+  marketInsights: {
+    competitorComparison: {
+      title: string;
+      rating: number;
+      views: number;
+      similarityScore: number;
+    }[];
+    genrePerformance: {
+      ranking: number;
+      percentile: number;
+      trendingTopics: string[];
+    };
+    recommendations: {
+      type: 'content' | 'marketing' | 'pricing' | 'timing';
+      priority: 'high' | 'medium' | 'low';
+      suggestion: string;
+      expectedImpact: string;
+    }[];
+  };
+}
+
+// Publishing alerts
+interface PublishingAlert {
+  id: string;
+  type: 'milestone' | 'negative_feedback' | 'opportunity' | 'issue';
+  priority: 'urgent' | 'high' | 'medium' | 'low';
+  title: string;
+  message: string;
+  actionRequired: boolean;
+  suggestedActions?: string[];
+  relatedMetric?: string;
+  timestamp: Date;
+  isRead: boolean;
+  publicationId?: string;
+}
+
+// Trends
+interface PublishingTrends {
+  timeframe: {
+    start: Date;
+    end: Date;
+  };
+  metrics: {
+    date: string;
+    views: number;
+    engagement: number;
+    rating: number;
+    revenue?: number;
+  }[];
+  seasonality: {
+    period: string;
+    multiplier: number;
+    confidence: number;
+  }[];
+  predictions: {
+    metric: string;
+    nextPeriod: number;
+    confidence: number;
+    factors: string[];
+  }[];
+}
+```
 
 ---
 
-## Testing
+## Usage Examples
+
+### Example 1: Export to EPUB
+
+```typescript
+import { generateEpub } from '@/features/publishing/services/epubService';
+
+async function exportToEPUB(project: Project) {
+  try {
+    const blob = await generateEpub(project, true); // Enable drop caps
+
+    // Download file
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${project.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.epub`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log('EPUB exported successfully');
+  } catch (error) {
+    console.error('Failed to export EPUB:', error);
+  }
+}
+```
+
+### Example 2: Publish to Platforms
+
+```typescript
+import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
+
+function PublishButton({ project }: { project: Project }) {
+  const { publishProject, isPublishing } = usePublishingAnalytics();
+
+  const handlePublish = async () => {
+    const metadata = {
+      genre: ['Fantasy', 'Adventure'],
+      tags: ['magic', 'dragons', 'epic'],
+      language: 'en',
+      wordCount: calculateWordCount(project),
+      chapterCount: project.chapters.length,
+    };
+
+    const publication = await publishProject(
+      project,
+      ['wattpad', 'kindle'],
+      metadata
+    );
+
+    console.log('Published:', publication.id);
+  };
+
+  return (
+    <button onClick={handlePublish} disabled={isPublishing}>
+      {isPublishing ? 'Publishing...' : 'Publish'}
+    </button>
+  );
+}
+```
+
+### Example 3: Display Analytics Dashboard
+
+```typescript
+import { PublishingDashboard } from '@/features/publishing';
+import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
+
+function AnalyticsView({ project }: { project: Project }) {
+  const [publicationId, setPublicationId] = useState<string | undefined>();
+
+  // Load publication data on mount
+  useEffect(() => {
+    const loadPub = async () => {
+      // Get or create publication
+      // setPublicationId(pubId);
+    };
+    loadPub();
+  }, [project.id]);
+
+  return (
+    <PublishingDashboard
+      project={project}
+      publicationId={publicationId}
+      onClose={() => navigate('/projects')}
+    />
+  );
+}
+```
+
+### Example 4: Generate Cover Art
+
+```typescript
+import { CoverGenerator } from '@/features/publishing';
+
+function CoverArtSection({ project }: { project: Project }) {
+  const handleUpdateProject = (updates: Partial<Project>) => {
+    // Update project in store
+  };
+
+  return (
+    <CoverGenerator
+      project={project}
+      onUpdateProject={handleUpdateProject}
+    />
+  );
+}
+```
+
+### Example 5: Filter and Search Feedback
+
+```typescript
+import { usePublishingAnalytics } from '@/features/publishing/hooks/usePublishingAnalytics';
+
+function FeedbackManager() {
+  const {
+    feedback,
+    filterFeedback,
+    searchFeedback,
+    sentimentBreakdown
+  } = usePublishingAnalytics();
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Get positive feedback
+  const positiveFeedback = filterFeedback(undefined, 'positive');
+
+  // Search feedback
+  const searchResults = searchFeedback('character development');
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search feedback..."
+      />
+      <div>
+        <h4>Positive: {sentimentBreakdown.positive}</h4>
+        <h4>Neutral: {sentimentBreakdown.neutral}</h4>
+        <h4>Negative: {sentimentBreakdown.negative}</h4>
+      </div>
+      <ul>
+        {searchResults.map(item => (
+          <li key={item.id}>{item.content}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+---
+
+## Testing Guidelines
 
 ### Unit Tests
 
-- `epubService.test.ts` - EPUB generation
-- `publishingAnalyticsService.test.ts` - Analytics aggregation
+**Location:** Tests should be in `src/features/publishing/**/__tests__/` or
+`src/features/publishing/**/*.test.ts`
+
+#### epubService Tests
+
+```typescript
+// src/features/publishing/services/__tests__/epubService.test.ts
+import { describe, it, expect, vi } from 'vitest';
+import { generateEpub } from '../epubService';
+
+describe('epubService', () => {
+  it('should generate valid EPUB structure', async () => {
+    const project = createMockProject();
+    const blob = await generateEpub(project, false);
+
+    expect(blob).toBeInstanceOf(Blob);
+    expect(blob.type).toBe('application/epub+zip');
+  });
+
+  it('should include cover image when available', async () => {
+    const project = createMockProjectWithCover();
+    const blob = await generateEpub(project, false);
+
+    // Verify cover is included in EPUB structure
+    const content = await blob.text();
+    expect(content).toContain('cover.xhtml');
+  });
+
+  it('should apply drop caps styling when enabled', async () => {
+    const project = createMockProject();
+    const blob = await generateEpub(project, true);
+
+    // Verify drop caps CSS is included
+    const content = await blob.text();
+    expect(content).toContain('.first-letter');
+  });
+});
+```
+
+#### publishingAnalyticsService Tests
+
+```typescript
+// src/features/publishing/services/__tests__/publishingAnalyticsService.test.ts
+import { describe, it, expect, beforeEach } from 'vitest';
+import { publishingAnalyticsService } from '../publishingAnalyticsService';
+
+describe('publishingAnalyticsService', () => {
+  beforeEach(async () => {
+    await publishingAnalyticsService.init();
+  });
+
+  it('should publish project to platforms', async () => {
+    const project = createMockProject();
+    const publication = await publishingAnalyticsService.publishProject(
+      project,
+      ['wattpad'],
+      {
+        genre: ['Fiction'],
+        tags: [],
+        language: 'en',
+        wordCount: 5000,
+        chapterCount: 5,
+      },
+    );
+
+    expect(publication).toBeDefined();
+    expect(publication.status).toBe('published');
+    expect(publication.platforms).toHaveLength(1);
+  });
+
+  it('should aggregate analytics from multiple platforms', async () => {
+    const analytics =
+      await publishingAnalyticsService.getPublicationAnalytics('pub_123');
+
+    expect(analytics.views).toBeGreaterThan(0);
+    expect(analytics.rating.average).toBeGreaterThanOrEqual(0);
+    expect(analytics.rating.average).toBeLessThanOrEqual(5);
+  });
+});
+```
 
 ### Integration Tests
 
-- Full export workflow
-- Platform API integration
-- Analytics data sync
+```typescript
+// src/features/publishing/__tests__/publishing-flow.test.ts
+import { describe, it, expect } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { PublishPanel } from '../components/PublishPanel';
 
-**Run Tests**:
+describe('Publishing Flow Integration', () => {
+  it('should export EPUB and update project', async () => {
+    const project = createMockProject();
+    const onUpdateProject = vi.fn();
+
+    render(<PublishPanel project={project} onUpdateProject={onUpdateProject} />);
+
+    const exportButton = screen.getByTestId('export-epub-btn');
+    fireEvent.click(exportButton);
+
+    await waitFor(() => {
+      // Verify download was triggered
+      const links = document.querySelectorAll('a[href$=".epub"]');
+      expect(links.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('should generate cover art', async () => {
+    const project = createMockProject();
+    const onUpdateProject = vi.fn();
+
+    render(<CoverGenerator project={project} onUpdateProject={onUpdateProject} />);
+
+    const generateButton = screen.getByTestId('generate-cover-btn');
+    fireEvent.click(generateButton);
+
+    await waitFor(() => {
+      expect(onUpdateProject).toHaveBeenCalledWith(
+        expect.objectContaining({
+          coverImage: expect.stringContaining('data:image')
+        })
+      );
+    });
+  });
+});
+```
+
+### Component Tests
+
+```typescript
+// src/features/publishing/components/__tests__/MetricsOverview.test.tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { MetricsOverview } from '../MetricsOverview';
+
+describe('MetricsOverview Component', () => {
+  it('should display all metrics correctly', () => {
+    const analytics = createMockAnalytics();
+    const engagement = createMockEngagement();
+
+    render(
+      <MetricsOverview
+        analytics={analytics}
+        engagement={engagement}
+        averageRating={4.5}
+      />
+    );
+
+    expect(screen.getByText('Total Views')).toBeInTheDocument();
+    expect(screen.getByText('Unique Readers')).toBeInTheDocument();
+    expect(screen.getByText('Average Rating')).toBeInTheDocument();
+  });
+
+  it('should handle null engagement gracefully', () => {
+    const analytics = createMockAnalytics();
+
+    render(
+      <MetricsOverview
+        analytics={analytics}
+        engagement={null}
+        averageRating={0}
+      />
+    );
+
+    // Engagement section should not render
+    expect(screen.queryByText('Reader Engagement')).not.toBeInTheDocument();
+  });
+});
+```
+
+### Running Tests
 
 ```bash
-# All publishing tests
+# Run all publishing tests
 npm run test -- publishing
 
-# EPUB generation
+# Run specific test file
 vitest run src/features/publishing/services/__tests__/epubService.test.ts
+
+# Run with coverage
+npm run test -- --coverage src/features/publishing
+
+# Watch mode
+npm run test -- --watch src/features/publishing
 ```
 
 ---
 
-## Performance Considerations
+## Future Enhancements
 
-- **Lazy Loading**: Export generated on-demand
-- **Caching**: Metadata cached for quick access
-- **Async Processing**: Large exports processed in background
-- **Image Optimization**: Cover and content images compressed
+### Short Term (Q1 2026)
 
-**Performance Targets**:
+- [ ] **PDF Export** - Add PDF generation support
+- [ ] **MOBI Export** - Support for Kindle MOBI format
+- [ ] **Pre-publish Validation** - Quality checks before export
+- [ ] **Version History** - Track different publication versions
+- [ ] **Platform Connectors** - Actual API integration with platforms
+- [ ] **Batch Publishing** - Publish to multiple platforms at once
 
-- EPUB generation (50 chapters): <10s
-- PDF generation: <15s
-- Analytics load: <2s
-- Platform sync: <5s
+### Medium Term (Q2-Q3 2026)
+
+- [ ] **Print-on-Demand** - KDP Print and IngramSpark integration
+- [ ] **Audiobook Export** - Text-to-speech narration
+- [ ] **Advanced Formatting** - Custom chapter styles, fonts, layouts
+- [ ] **Series Management** - Multi-book series support
+- [ ] **Pre-order Scheduling** - Schedule future releases
+- [ ] **Marketing Materials** - Generate blurbs, press releases
+
+### Long Term (Q4 2026+)
+
+- [ ] **A/B Testing** - Test different covers, descriptions, pricing
+- [ ] **Automated Pricing** - Dynamic pricing optimization
+- [ ] **Advanced Analytics** - Predictive modeling, AI insights
+- [ ] **Cross-promotion** - Network with similar authors
+- [ ] **Revenue Tracking** - Earnings dashboard by platform
+- [ ] **Crowdfunding** - Integration with Patreon, Kickstarter
+
+### Technical Improvements
+
+- [ ] **Web Workers** - Process large exports in background
+- [ ] **Service Worker Cache** - Cache export results
+- [ ] **Real-time Updates** - WebSocket for live analytics
+- [ ] **Data Sync** - Automatic platform data synchronization
+- [ ] **Error Recovery** - Better handling of platform failures
+- [ ] **Performance Optimization** - Faster exports for large novels
+
+---
+
+## Related Features
+
+- **Editor** (`src/features/editor`) - Content source for publishing
+- **Projects** (`src/features/projects`) - Project management
+- **Characters** (`src/features/characters`) - Character export to metadata
+- **World Building** (`src/features/world-building`) - World guide export
+- **Generation** (`src/features/generation`) - AI content and cover generation
+
+---
+
+## Contributing
+
+When modifying the Publishing feature:
+
+1. **Export Testing** - Test generated EPUBs on multiple e-reader devices
+2. **Validation** - Ensure EPUB passes EPUBCheck validation
+3. **Platform APIs** - Handle platform API changes gracefully
+4. **Security** - Secure API keys and credentials properly
+5. **File Size** - Monitor export file sizes (target < 50MB)
+6. **Testing** - Add comprehensive tests for new features
+7. **Documentation** - Update this README with any API changes
 
 ---
 
@@ -664,6 +1324,11 @@ vitest run src/features/publishing/services/__tests__/epubService.test.ts
 KDP_API_KEY=your_key_here
 DRAFT2DIGITAL_API_KEY=your_key_here
 INGRAMSPARK_API_KEY=your_key_here
+WATTPAD_API_KEY=your_key_here
+
+# AI Services
+GEMINI_API_KEY=your_gemini_key
+IMAGEN_API_KEY=your_imagen_key
 
 # Export Settings
 MAX_EPUB_SIZE_MB=50
@@ -690,87 +1355,100 @@ const LIMITS = {
 
 ---
 
-## Common Issues & Solutions
+## Performance Considerations
 
-### Issue: EPUB validation errors
+| Operation                     | Target Time | Optimization                        |
+| ----------------------------- | ----------- | ----------------------------------- |
+| EPUB Generation (50 chapters) | < 10s       | Lazy load JSZip, async processing   |
+| PDF Generation                | < 15s       | Planned - use PDFKit or jsPDF       |
+| Analytics Load                | < 2s        | Turso DB, IndexedDB cache           |
+| Platform Sync                 | < 5s        | Background sync, retries            |
+| Cover Generation              | < 30s       | Imagen 4.0 API, display loading     |
+| Translation (full novel)      | < 5 min     | Batch API calls, progress indicator |
 
-**Solution**: Check for unsupported HTML tags or malformed content
+### Optimization Strategies
+
+- **Lazy Loading** - Only load JSZip when exporting
+- **Caching** - Cache metadata and analytics in IndexedDB
+- **Async Processing** - Process large exports in background
+- **Image Optimization** - Compress cover and content images
+- **Debouncing** - Debounce search and filter inputs
+- **Virtual Scrolling** - For long feedback lists
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### EPUB Validation Errors
+
+**Problem:** EPUBCheck reports errors in generated file
+
+**Solution:**
 
 ```typescript
-const validation = await epubService.validateEPUB(epub);
+import { EPubValidator } from 'epubcheck-validator';
+
+const validation = await EPubValidator.validate(blob);
 validation.errors.forEach(error => {
   console.error(`Line ${error.line}: ${error.message}`);
 });
 ```
 
-### Issue: Cover image too large
+#### Cover Image Too Large
 
-**Solution**: Compress image before upload
+**Problem:** Cover image exceeds platform size limits
+
+**Solution:**
 
 ```typescript
+import { compressImage } from '@/lib/utils/image';
+
 const compressedCover = await compressImage(coverFile, {
   maxWidth: 2400,
   maxHeight: 3600,
   quality: 0.85,
+  maxSize: 10 * 1024 * 1024, // 10MB
 });
 ```
 
-### Issue: Platform API rate limits
+#### Platform API Rate Limits
 
-**Solution**: Implement retry with exponential backoff
+**Problem:** Platform API returns 429 Too Many Requests
+
+**Solution:**
 
 ```typescript
-await retryWithBackoff(() => publishToKDP(data), {
+import { retryWithBackoff } from '@/lib/utils/retry';
+
+await retryWithBackoff(() => publishToPlatform(platform, data), {
   maxRetries: 3,
   baseDelay: 1000,
 });
 ```
 
----
+#### Translation Fails Midway
 
-## Future Enhancements
+**Problem:** Translation stops partway through
 
-- [ ] Print-on-demand integration (KDP Print, IngramSpark)
-- [ ] Audiobook export (text-to-speech)
-- [ ] Advanced formatting options (drop caps, chapter styles)
-- [ ] Multi-book series management
-- [ ] Pre-order scheduling
-- [ ] Marketing material generation (press releases, blurbs)
-- [ ] A/B testing for covers and descriptions
-- [ ] Automated pricing optimization
-- [ ] Reader segment analysis
-- [ ] Cross-promotion recommendations
+**Solution:**
 
----
-
-## Related Features
-
-- **Editor** (`src/features/editor`) - Content source
-- **Projects** (`src/features/projects`) - Project management
-- **Characters** (`src/features/characters`) - Character export
-- **World Building** (`src/features/world-building`) - World guide export
-
----
-
-## Contributing
-
-When modifying Publishing:
-
-1. Test exports thoroughly on multiple devices
-2. Validate EPUB/PDF compliance
-3. Handle platform API changes gracefully
-4. Secure API keys properly
-5. Monitor export file sizes
-6. Add comprehensive tests
+- Check API quota
+- Implement progress tracking
+- Add resume capability for interrupted translations
 
 ---
 
 ## Resources
 
-- [EPUB 3 Specification](https://www.w3.org/publishing/epub3/)
+- [EPUB 3.0 Specification](https://www.w3.org/publishing/epub3/)
 - [EPUBCheck Validator](https://github.com/w3c/epubcheck)
-- [KDP Help & Documentation](https://kdp.amazon.com/en_US/help)
-- [Draft2Digital API Docs](https://www.draft2digital.com/)
+- [Amazon KDP Help](https://kdp.amazon.com/en_US/help)
+- [Draft2Digital API Docs](https://www.draft2digital.com/api)
+- [JSZip Documentation](https://stuk.github.io/jszip/)
+- [Gemini API Reference](https://ai.google.dev/docs)
+- [Imagen API Documentation](https://cloud.google.com/ai-platform/generative-ai/docs)
 
 ---
 

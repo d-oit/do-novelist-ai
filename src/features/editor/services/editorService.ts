@@ -105,6 +105,13 @@ class EditorService {
 
   /**
    * Check if database is initialized and healthy
+   *
+   * Verifies IndexedDB connection is functional by performing a test operation.
+   *
+   * @returns true if database is healthy and initialized, false otherwise
+   * @example
+   * const healthy = await editorService.isHealthy();
+   * if (!healthy) console.error('Database not accessible');
    */
   public async isHealthy(): Promise<boolean> {
     if (!this.db) {
@@ -122,6 +129,26 @@ class EditorService {
 
   /**
    * Save a draft to IndexedDB
+   *
+   * Saves or updates a chapter draft with content and summary.
+   * Automatically increments version number on updates.
+   *
+   * Side effects:
+   * - Writes to IndexedDB
+   * - Triggers semantic search synchronization (async, non-blocking)
+   *
+   * @param chapterId - The unique chapter identifier
+   * @param projectId - The unique project identifier
+   * @param content - The chapter content text
+   * @param summary - Summary of the chapter content
+   * @returns The saved draft with metadata
+   * @example
+   * const draft = await editorService.saveDraft(
+   *   'chapter-id',
+   *   'project-id',
+   *   'Chapter content text...',
+   *   'Chapter summary...'
+   * );
    */
   public async saveDraft(
     chapterId: string,
@@ -173,6 +200,16 @@ class EditorService {
 
   /**
    * Load a draft from IndexedDB
+   *
+   * Retrieves a specific chapter draft including content and metadata.
+   *
+   * @param chapterId - The unique chapter identifier
+   * @returns The draft if found, null otherwise
+   * @example
+   * const draft = await editorService.loadDraft('chapter-id');
+   * if (draft) {
+   *   console.log(`Loaded draft v${draft.version}`);
+   * }
    */
   public async loadDraft(chapterId: string): Promise<SavedDraft | null> {
     const db = await this.init();
@@ -190,6 +227,14 @@ class EditorService {
 
   /**
    * Get all drafts for a project
+   *
+   * Retrieves all saved drafts for a specific project.
+   *
+   * @param projectId - The unique project identifier
+   * @returns Array of all drafts for the project
+   * @example
+   * const drafts = await editorService.getDraftsByProject('project-id');
+   * console.log(`Found ${drafts.length} saved drafts`);
    */
   public async getDraftsByProject(projectId: string): Promise<SavedDraft[]> {
     const db = await this.init();
@@ -208,6 +253,15 @@ class EditorService {
 
   /**
    * Get draft metadata without loading full content
+   *
+   * Retrieves lightweight metadata for a draft (word count, version, timestamp)
+   * without loading the full content.
+   *
+   * @param chapterId - The unique chapter identifier
+   * @returns Draft metadata if found, null otherwise
+   * @example
+   * const meta = await editorService.getDraftMetadata('chapter-id');
+   * if (meta) console.log(`Draft v${meta.version}, ${meta.wordCount} words`);
    */
   public async getDraftMetadata(chapterId: string): Promise<DraftMetadata | null> {
     if (!this.db) await this.init();
@@ -222,6 +276,13 @@ class EditorService {
 
   /**
    * Delete a draft
+   *
+   * Permanently removes a draft from IndexedDB.
+   *
+   * @param chapterId - The unique chapter identifier
+   * @returns Promise that resolves when deletion is complete
+   * @example
+   * await editorService.deleteDraft('chapter-id');
    */
   public async deleteDraft(chapterId: string): Promise<void> {
     const db = await this.init();
@@ -239,6 +300,13 @@ class EditorService {
 
   /**
    * Delete all drafts for a project
+   *
+   * Permanently removes all drafts associated with a project.
+   *
+   * @param projectId - The unique project identifier
+   * @returns Promise that resolves when all drafts are deleted
+   * @example
+   * await editorService.deleteDraftsByProject('project-id');
    */
   public async deleteDraftsByProject(projectId: string): Promise<void> {
     const db = await this.init();
@@ -270,6 +338,14 @@ class EditorService {
 
   /**
    * Check if a draft exists
+   *
+   * Checks whether a saved draft exists for a chapter.
+   *
+   * @param chapterId - The unique chapter identifier
+   * @returns true if draft exists, false otherwise
+   * @example
+   * const exists = await editorService.hasDraft('chapter-id');
+   * if (!exists) console.log('No draft saved');
    */
   public async hasDraft(chapterId: string): Promise<boolean> {
     const draft = await this.loadDraft(chapterId);
@@ -278,6 +354,14 @@ class EditorService {
 
   /**
    * Get all draft metadata for a project (lightweight operation)
+   *
+   * Retrieves metadata for all drafts in a project without loading content.
+   *
+   * @param projectId - The unique project identifier
+   * @returns Array of draft metadata
+   * @example
+   * const metaList = await editorService.getAllDraftMetadata('project-id');
+   * metaList.forEach(meta => console.log(`Draft v${meta.version}`));
    */
   public async getAllDraftMetadata(projectId: string): Promise<DraftMetadata[]> {
     const drafts = await this.getDraftsByProject(projectId);
@@ -287,6 +371,14 @@ class EditorService {
 
   /**
    * Clear all drafts (use with caution!)
+   *
+   * Permanently removes ALL drafts from IndexedDB. This operation cannot be undone.
+   * Use only for testing or data cleanup scenarios.
+   *
+   * @returns Promise that resolves when all drafts are cleared
+   * @example
+   * await editorService.clearAllDrafts();
+   * console.log('All drafts cleared');
    */
   public async clearAllDrafts(): Promise<void> {
     const db = await this.init();

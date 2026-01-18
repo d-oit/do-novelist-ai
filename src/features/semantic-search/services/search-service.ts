@@ -23,6 +23,35 @@ import { queryCache } from './query-cache';
 export class SearchService {
   /**
    * Search and hydrate results
+   *
+   * Performs semantic search across all entities in a project and hydrates
+   * results with full entity data. Results are cached for improved performance.
+   *
+   * The search process:
+   * 1. Check cache for existing results
+   * 2. If not cached, perform vector similarity search
+   * 3. Hydrate results with full entity data
+   * 4. Apply filters to results
+   * 5. Cache results for future use
+   *
+   * Side effects:
+   * - Caches search results (in-memory)
+   * - Reads from database for entity hydration
+   *
+   * @param query - The search query text
+   * @param projectId - The unique project identifier to search within
+   * @param filters - Optional search filters (entity types, limit, minimum score)
+   * @returns Array of hydrated search results with full entity data
+   * @throws {Error} When search or hydration fails
+   * @example
+   * const results = await searchService.search('protagonist backstory', 'project-uuid', {
+   *   entityTypes: ['character', 'chapter'],
+   *   limit: 5,
+   *   minScore: 0.7
+   * });
+   * results.forEach(result => {
+   *   console.log(`${result.entityType}: ${result.similarity.toFixed(2)}`);
+   * });
    */
   public async search(
     query: string,

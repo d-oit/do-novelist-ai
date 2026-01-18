@@ -69,7 +69,7 @@ export const AchievementBadge: React.FC<AchievementBadgeProps> = ({
             )}
           </div>
 
-          {showProgress && userAchievement && (
+          {showProgress && userAchievement && userAchievement.progress < 100 && (
             <div className='mt-2'>
               <div className='mb-1 flex justify-between text-xs'>
                 <span>Progress</span>

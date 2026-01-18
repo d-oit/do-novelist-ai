@@ -98,6 +98,18 @@ const DEFAULT_PREFERENCES: ProviderPreferenceData = {
 
 /**
  * Load user AI preferences
+ *
+ * Retrieves a user's AI provider and model preferences from the database.
+ * Returns default preferences if the user has no saved preferences or if
+ * loading fails.
+ *
+ * @param userId - The unique user identifier
+ * @returns User's AI provider preferences
+ * @throws {Error} When unable to load from database (returns defaults instead)
+ * @example
+ * const prefs = await loadUserPreferences('user-123');
+ * console.log(`Selected provider: ${prefs.selectedProvider}`);
+ * console.log(`Temperature: ${prefs.temperature}`);
  */
 export async function loadUserPreferences(userId: string): Promise<ProviderPreferenceData> {
   try {
@@ -120,6 +132,23 @@ export async function loadUserPreferences(userId: string): Promise<ProviderPrefe
 
 /**
  * Save user AI preferences
+ *
+ * Updates a user's AI provider preferences. Partial updates are supported -
+ * only the fields specified will be modified. Invalid values will be rejected.
+ *
+ * Side effects:
+ * - Writes to database
+ *
+ * @param userId - The unique user identifier
+ * @param preferences - Partial preference data to update
+ * @returns Promise that resolves when save is complete
+ * @throws {Error} When validation fails or database write fails
+ * @example
+ * await saveUserPreferences('user-123', {
+ *   selectedProvider: 'google',
+ *   temperature: 0.8,
+ *   maxTokens: 4000
+ * });
  */
 export async function saveUserPreferences(
   userId: string,
@@ -147,6 +176,15 @@ export async function saveUserPreferences(
 
 /**
  * Get active providers based on user preferences
+ *
+ * Returns a list of available AI providers based on user preferences,
+ * including the selected provider and enabled fallback providers.
+ *
+ * @param prefs - User's AI provider preferences
+ * @returns Array of enabled AI providers in priority order
+ * @example
+ * const providers = getActivePreferences(userPrefs);
+ * console.log(`Available providers: ${providers.join(', ')}`);
  */
 export function getActiveProviders(prefs: ProviderPreferenceData): AIProvider[] {
   const providers: AIProvider[] = [];
@@ -167,6 +205,20 @@ export function getActiveProviders(prefs: ProviderPreferenceData): AIProvider[] 
 
 /**
  * Validate provider and model combination
+ *
+ * Checks if a specific AI provider and model combination is valid and
+ * available for use.
+ *
+ * @param provider - The AI provider to validate
+ * @param model - The model name to validate
+ * @returns Validation result with valid flag and optional error message
+ * @example
+ * const result = validateProviderModel('google', 'gemini-2.0-flash-exp');
+ * if (result.valid) {
+ *   console.log('Provider and model are valid');
+ * } else {
+ *   console.error(`Error: ${result.error}`);
+ * }
  */
 export function validateProviderModel(
   provider: AIProvider,
@@ -198,6 +250,17 @@ export function validateProviderModel(
 
 /**
  * Get optimal model for a task type
+ *
+ * Returns the recommended model for a specific task type (fast, standard,
+ * or advanced) based on the provider's configuration.
+ *
+ * @param provider - The AI provider
+ * @param taskType - The task type (fast for quick tasks, standard for normal tasks, advanced for complex tasks)
+ * @param _prefs - User preferences (reserved for future use)
+ * @returns The recommended model name for the task type
+ * @example
+ * const model = getOptimalModel('google', 'standard', userPrefs);
+ * console.log(`Recommended model: ${model}`);
  */
 export function getOptimalModel(
   provider: AIProvider,

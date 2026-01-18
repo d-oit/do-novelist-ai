@@ -87,7 +87,7 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = React.memo(
 
           <Card className='border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50 p-4 dark:border-purple-800 dark:from-purple-950/20 dark:to-violet-950/20'>
             <div className='flex items-start gap-3'>
-              <Brain className='mt-1 h-5 w-5 text-purple-600' />
+              <Brain className='mt-1 h-5 w-5 text-purple-600' data-testid='card-brain-icon' />
               <div>
                 <h4 className='font-medium text-purple-900 dark:text-purple-100'>AI Balance</h4>
                 <p className='mt-1 text-sm text-purple-700 dark:text-purple-200'>

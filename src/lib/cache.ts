@@ -12,6 +12,10 @@ export const setCached = (key: string, value: unknown): void => {
   cache.set(key, value);
 };
 
+export const clearCache = (): void => {
+  cache.clear();
+};
+
 export const withCache = <T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
   fnName: string,

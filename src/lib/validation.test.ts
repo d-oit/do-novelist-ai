@@ -978,19 +978,16 @@ describe('Convenience functions', () => {
       };
 
       // assertValid uses validate.project internally
-      expect(() => {
-        assertValid.project(mockProject);
-      }).not.toThrow();
+      const projectAssertion: (data: unknown) => void = assertValid.project;
+      expect(() => projectAssertion(mockProject)).not.toThrow();
     });
 
     it('should assert valid chapter without throwing', () => {
       const mockChapter = { id: 'ch1' } as any;
 
       // assertValid uses validate.chapter internally
-      expect(() => {
-        // @ts-expect-error - Testing with mock data
-        assertValid.chapter(mockChapter);
-      }).not.toThrow();
+      const chapterAssertion: (data: unknown) => void = assertValid.chapter;
+      expect(() => chapterAssertion(mockChapter)).not.toThrow();
     });
 
     it('should throw on invalid project', () => {
@@ -1000,11 +997,9 @@ describe('Convenience functions', () => {
       validate.project = vi.fn(() => failingResult) as any;
 
       const mockProject: unknown = { id: 'invalid' };
+      const projectAssertion: (data: unknown) => void = assertValid.project;
 
-      expect(() => {
-        // @ts-expect-error - Testing with mock data
-        assertValid.project(mockProject);
-      }).toThrow('Invalid project');
+      expect(() => projectAssertion(mockProject)).toThrow('Invalid project');
 
       // Restore original
       validate.project = originalValidateProject;
@@ -1017,11 +1012,9 @@ describe('Convenience functions', () => {
       validate.chapter = vi.fn(() => failingResult) as any;
 
       const mockChapter: unknown = { id: 'invalid' };
+      const chapterAssertion: (data: unknown) => void = assertValid.chapter;
 
-      expect(() => {
-        // @ts-expect-error - Testing with mock data
-        assertValid.chapter(mockChapter);
-      }).toThrow('Invalid chapter');
+      expect(() => chapterAssertion(mockChapter)).toThrow('Invalid chapter');
 
       // Restore original
       validate.chapter = originalValidateChapter;

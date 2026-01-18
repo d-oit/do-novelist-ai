@@ -10,3 +10,4 @@ export * from './world-building';
 export * from './versioning';
 export * from './publishing';
 export * from './writing-assistant';
+export * from './plots';

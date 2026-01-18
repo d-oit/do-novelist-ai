@@ -94,13 +94,16 @@ describe('AISettingsPanel', () => {
   };
 
   describe('Loading State', () => {
-    it('renders loading skeleton while loading', () => {
+    it('renders loading skeleton while loading', async () => {
       render(<AISettingsPanel userId={mockUserId} />);
 
       expect(screen.queryByText('AI Provider Settings')).not.toBeInTheDocument();
 
       const skeletons = document.querySelectorAll('.animate-pulse');
       expect(skeletons.length).toBeGreaterThan(0);
+
+      // Wait for the async component to finish updating to avoid act warnings
+      await screen.findByText('AI Provider Settings');
     });
   });
 

@@ -2,6 +2,7 @@
 export { default as Header } from './Header';
 export { AppBackground } from './AppBackground';
 export { BottomNav } from './BottomNav';
+export { MoreSheet } from './MoreSheet';
 export { default as MainLayout } from './MainLayout';
 export { default as Sidebar } from './Sidebar';
 

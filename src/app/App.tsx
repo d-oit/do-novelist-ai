@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { ProjectsErrorBoundary } from '@/components/error-boundary';
 import { ActionCard, BookViewer, PlannerControl } from '@/features/generation/components';
 import { useGoapEngine } from '@/features/generation/hooks';
+import { OnboardingModal, useOnboarding } from '@/features/onboarding';
 import { ProjectStats, ProjectWizard } from '@/features/projects/components';
 import { db } from '@/features/projects/services';
 import { SearchModal } from '@/features/semantic-search';
@@ -11,6 +12,7 @@ import { logger } from '@/lib/logging/logger';
 import { offlineManager } from '@/lib/pwa';
 import { queryClient, QueryClientProvider } from '@/lib/react-query';
 import { performanceMonitor } from '@/performance';
+import { LiveRegion } from '@/shared/components/a11y';
 import { MainLayout, Header as Navbar } from '@/shared/components/layout';
 import { Toaster } from '@/shared/components/ui/Toaster';
 import { ChapterStatus, PublishStatus } from '@/shared/types';
@@ -141,6 +143,9 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewMode>('projects');
   const [isLoading, setIsLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Onboarding for new users
+  const onboarding = useOnboarding();
 
   // Track performance for view changes
   useEffect(() => {
@@ -340,6 +345,17 @@ const App: React.FC = () => {
         onCancel={() => setShowWizard(false)}
       />
 
+      <OnboardingModal
+        isOpen={onboarding.isOpen}
+        currentStep={onboarding.currentStep}
+        currentStepNumber={onboarding.currentStepNumber}
+        totalSteps={onboarding.totalSteps}
+        onNext={onboarding.nextStep}
+        onPrevious={onboarding.previousStep}
+        onSkip={onboarding.skipOnboarding}
+        onComplete={onboarding.completeOnboarding}
+      />
+
       <SearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -530,6 +546,7 @@ const App: React.FC = () => {
       </main>
 
       <Toaster />
+      <LiveRegion />
     </MainLayout>
   );
 };

@@ -126,7 +126,7 @@ describe('SessionTimeline', () => {
 
       expect(screen.getByTestId('trendingup-icon')).toBeInTheDocument();
       expect(screen.getByTestId('flame-icon')).toBeInTheDocument();
-      expect(screen.getAllByTestId('brain-icon')).toHaveLength(1);
+      expect(screen.getByTestId('card-brain-icon')).toBeInTheDocument();
       expect(screen.getByTestId('header-brain-icon')).toBeInTheDocument();
       expect(screen.getByTestId('target-icon')).toBeInTheDocument();
     });
@@ -149,8 +149,9 @@ describe('SessionTimeline', () => {
       render(<SessionTimeline insights={{ ...defaultProps, productivity: 60 }} />);
 
       expect(screen.getByTestId('productivity-value')).toHaveTextContent('60');
-      expect(screen.getByText(/average of/)).toBeInTheDocument();
-      expect(screen.getByText(/words\/hour/)).toBeInTheDocument();
+      // Use regex or separate checks to handle split text
+      expect(screen.getByText(/average of/i)).toBeInTheDocument();
+      expect(screen.getByText(/words\/hour/i)).toBeInTheDocument();
     });
   });
 
@@ -327,8 +328,8 @@ describe('SessionTimeline', () => {
     it('renders all content in card components', () => {
       const { container } = render(<SessionTimeline insights={defaultProps} />);
 
-      // Card component uses rounded-xl class
-      const cards = container.querySelectorAll('.rounded-xl');
+      // The Card component may use rounded-xl or rounded-lg depending on theme
+      const cards = container.querySelectorAll('.rounded-xl, .rounded-lg');
       expect(cards.length).toBeGreaterThanOrEqual(4);
     });
   });

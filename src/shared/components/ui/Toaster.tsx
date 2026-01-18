@@ -1,7 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
+import {
+  announceToScreenReader,
+  announceToScreenReaderAssertive,
+} from '@/lib/hooks/useLiveAnnounce';
 import { useToastStore, type Toast } from '@/lib/stores/toastStore';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +24,30 @@ export const Toaster = () => {
 };
 
 const ToastItem = ({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) => {
+  const hasAnnounced = useRef(false);
+
+  // Announce toast to screen readers
+  useEffect(() => {
+    if (!hasAnnounced.current) {
+      hasAnnounced.current = true;
+      const message = toast.title
+        ? toast.description
+          ? `${toast.title}: ${toast.description}`
+          : toast.title
+        : toast.description || '';
+
+      if (message) {
+        // Use assertive for errors, polite for everything else
+        if (toast.variant === 'destructive') {
+          announceToScreenReaderAssertive(message);
+        } else {
+          announceToScreenReader(message);
+        }
+      }
+    }
+  }, [toast]);
+
+  // Auto-dismiss timer
   useEffect(() => {
     if (toast.duration !== Infinity) {
       const timer = setTimeout(() => {

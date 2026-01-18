@@ -104,11 +104,11 @@ describe('AchievementBadge', () => {
       expect(screen.queryByText('50%')).not.toBeInTheDocument();
     });
 
-    it('shows progress even when progress is 100%', () => {
+    it('hides progress when progress is 100%', () => {
       render(<AchievementBadge achievement={mockAchievement} userAchievement={mockUserAchievement} showProgress />);
 
-      expect(screen.getByText('100%')).toBeInTheDocument();
-      expect(screen.getByText('Progress')).toBeInTheDocument();
+      expect(screen.queryByText('100%')).not.toBeInTheDocument();
+      expect(screen.queryByText('Progress')).not.toBeInTheDocument();
     });
   });
 
@@ -256,13 +256,13 @@ describe('AchievementBadge', () => {
       expect(progressBar).toBeNull();
     });
 
-    it('renders progress bar when progress is 100%', () => {
+    it('does not render progress bar when progress is 100%', () => {
       const { container } = render(
         <AchievementBadge achievement={mockAchievement} userAchievement={mockUserAchievement} showProgress />,
       );
 
       const progressBar = container.querySelector('.bg-blue-500');
-      expect(progressBar).not.toBeNull();
+      expect(progressBar).toBeNull();
     });
 
     it('renders progress bar with 0% width', () => {
@@ -278,21 +278,6 @@ describe('AchievementBadge', () => {
 
       const progressBar = container.querySelector('.bg-blue-500');
       expect(progressBar).toHaveStyle({ width: '0%' });
-    });
-
-    it('renders progress bar with 100% width', () => {
-      const completeProgress: UserAchievement = {
-        ...mockUserAchievement,
-        progress: 100,
-        value: 1,
-      };
-
-      const { container } = render(
-        <AchievementBadge achievement={mockAchievement} userAchievement={completeProgress} showProgress />,
-      );
-
-      const progressBar = container.querySelector('.bg-blue-500');
-      expect(progressBar).toHaveStyle({ width: '100%' });
     });
   });
 
