@@ -187,7 +187,7 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
                   min='1'
                   max='128000'
                   value={preferences.maxTokens}
-                  onChange={e => void handleSave({ maxTokens: parseInt(e.target.value) })}
+                  onChange={e => void handleSave({ maxTokens: parseInt(e.target.value, 10) })}
                   className='w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                   aria-describedby='max-tokens-help'
                 />
@@ -355,7 +355,7 @@ export const AISettingsPanel: React.FC<AISettingsPanelProps> = ({ userId }) => {
                     max='10000'
                     step='500'
                     value={settings.contextTokenLimit}
-                    onChange={e => update({ contextTokenLimit: parseInt(e.target.value) })}
+                    onChange={e => update({ contextTokenLimit: parseInt(e.target.value, 10) })}
                     className='w-full rounded-md border border-input bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     aria-describedby='context-token-limit-help'
                   />

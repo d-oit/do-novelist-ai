@@ -15,6 +15,7 @@ import type {
 import { publishingService as tursoPublishingService } from '@/lib/database/services';
 import { logger } from '@/lib/logging/logger';
 import type { Project } from '@/types';
+
 import * as analyticsModules from './analytics';
 
 /**

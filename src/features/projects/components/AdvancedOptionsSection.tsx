@@ -113,7 +113,7 @@ export const AdvancedOptionsSection: React.FC<AdvancedOptionsSectionProps> = ({
                 className='w-full rounded-md border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary'
                 placeholder='e.g. 50000'
                 value={targetWordCount}
-                onChange={e => onTargetWordCountChange(parseInt(e.target.value) || 0)}
+                onChange={e => onTargetWordCountChange(parseInt(e.target.value, 10) || 0)}
               />
             </div>
           </div>

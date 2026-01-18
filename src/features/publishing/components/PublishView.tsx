@@ -187,7 +187,7 @@ const PublishView: FC<PublishViewProps> = ({ project, onUpdateProject, onUpdateC
                   className='mt-1 w-full rounded border border-border bg-secondary/20 px-3 py-2 text-sm focus:border-primary focus:outline-none'
                   value={targetWords}
                   onChange={e =>
-                    onUpdateProject({ targetWordCount: parseInt(e.target.value) ?? 0 })
+                    onUpdateProject({ targetWordCount: parseInt(e.target.value, 10) ?? 0 })
                   }
                 />
               </div>

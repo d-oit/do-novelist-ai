@@ -11,13 +11,18 @@ import { getDrizzleClient } from '@/lib/database/drizzle';
 import { characters } from '@/lib/database/schemas/characters';
 import { toAppError } from '@/lib/errors/error-types';
 import { logger } from '@/lib/logging/logger';
+import type {
+  CharacterQueryOptions,
+  CharacterRelationshipQueryOptions,
+} from '@/lib/repositories/interfaces/ICharacterRepository';
 import { RepositoryError, type FindAllOptions } from '@/lib/repositories/interfaces/IRepository';
 import type { Character } from '@/types';
+
 import {
   findByProjectIdQuery,
   findByRoleQuery,
   findByProjectIdAndRoleQuery,
-  findByOccupationQuery as findByOccupation,
+  findByOccupationQuery,
   findByAgeRangeQuery,
   searchQuery,
   findByQuery as findByQueryComplex,

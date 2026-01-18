@@ -74,10 +74,10 @@ export const getStoredConfig = (): DbConfig => {
     return parsed;
   }
 
-  // In test environment without localStorage config, use local storage
+  // In test environment without localStorage config, use in-memory database
   if (isTestEnvironment()) {
     return {
-      url: '',
+      url: ':memory:',
       authToken: '',
       useCloud: false,
     };
@@ -87,14 +87,24 @@ export const getStoredConfig = (): DbConfig => {
   const envUrl = (import.meta.env.VITE_TURSO_DATABASE_URL as string | undefined) ?? '';
   const envToken = (import.meta.env.VITE_TURSO_AUTH_TOKEN as string | undefined) ?? '';
 
-  // Only use cloud if URL is valid and token exists
+  // Check if cloud config is available
   const validUrl = isValidTursoUrl(envUrl);
   const hasToken = (envToken?.length ?? 0) > 0;
 
+  if (validUrl && hasToken) {
+    // Use cloud configuration
+    return {
+      url: envUrl,
+      authToken: envToken,
+      useCloud: true,
+    };
+  }
+
+  // Default: Use local file database
   return {
-    url: validUrl ? envUrl : '',
-    authToken: hasToken ? envToken : '',
-    useCloud: validUrl && hasToken,
+    url: 'file:novelist.db',
+    authToken: '',
+    useCloud: false,
   };
 };
 
@@ -106,35 +116,37 @@ export const saveStoredConfig = (config: DbConfig): void => {
 
 let dbClient: Client | null = null;
 
-const getClient = (): Client | null => {
+const getClient = (): Client => {
   if (dbClient) return dbClient;
 
   const config = getStoredConfig();
-  if (!config.useCloud || !config.url) return null;
 
   try {
     dbClient = createClient({
       url: config.url,
-      authToken: config.authToken,
+      authToken: config.authToken || undefined,
+    });
+    logger.info('Database client created', {
+      mode: config.useCloud ? 'cloud' : 'local',
+      url: config.url.startsWith('file:') ? 'local file' : config.url,
     });
     return dbClient;
   } catch (e) {
     logger.error(
       'Failed to create Turso client',
-      { component: 'db' },
+      { component: 'db', config },
       e instanceof Error ? e : undefined,
     );
-    return null;
+    throw new Error('Database initialization failed');
   }
 };
 
 export const db = {
   init: async (): Promise<void> => {
     const client = getClient();
-    if (client) {
-      try {
-        // Projects Table
-        await client.execute(`
+    try {
+      // Projects Table
+      await client.execute(`
           CREATE TABLE IF NOT EXISTS projects (
             id TEXT PRIMARY KEY,
             title TEXT,
@@ -151,37 +163,37 @@ export const db = {
           )
         `);
 
-        // Attempt to add columns for existing tables (ignoring errors if they exist)
-        try {
-          await client.execute("ALTER TABLE projects ADD COLUMN status TEXT DEFAULT 'Draft'");
-        } catch {
-          // Column already exists
-        }
-        try {
-          await client.execute("ALTER TABLE projects ADD COLUMN language TEXT DEFAULT 'en'");
-        } catch {
-          // Column already exists
-        }
-        try {
-          await client.execute(
-            'ALTER TABLE projects ADD COLUMN target_word_count INTEGER DEFAULT 50000',
-          );
-        } catch {
-          // Column already exists
-        }
-        try {
-          await client.execute('ALTER TABLE projects ADD COLUMN settings TEXT');
-        } catch {
-          // Column already exists
-        }
-        try {
-          await client.execute('ALTER TABLE projects ADD COLUMN timeline TEXT');
-        } catch {
-          // Column already exists
-        }
+      // Attempt to add columns for existing tables (ignoring errors if they exist)
+      try {
+        await client.execute("ALTER TABLE projects ADD COLUMN status TEXT DEFAULT 'Draft'");
+      } catch {
+        // Column already exists
+      }
+      try {
+        await client.execute("ALTER TABLE projects ADD COLUMN language TEXT DEFAULT 'en'");
+      } catch {
+        // Column already exists
+      }
+      try {
+        await client.execute(
+          'ALTER TABLE projects ADD COLUMN target_word_count INTEGER DEFAULT 50000',
+        );
+      } catch {
+        // Column already exists
+      }
+      try {
+        await client.execute('ALTER TABLE projects ADD COLUMN settings TEXT');
+      } catch {
+        // Column already exists
+      }
+      try {
+        await client.execute('ALTER TABLE projects ADD COLUMN timeline TEXT');
+      } catch {
+        // Column already exists
+      }
 
-        // Chapters Table
-        await client.execute(`
+      // Chapters Table
+      await client.execute(`
           CREATE TABLE IF NOT EXISTS chapters (
             id TEXT PRIMARY KEY,
             project_id TEXT,
@@ -192,74 +204,62 @@ export const db = {
             status TEXT
           )
         `);
-        logger.info('Turso DB Connection Established');
-      } catch (e) {
-        logger.error(
-          'Turso Init Error (Falling back to local)',
-          { component: 'db' },
-          e instanceof Error ? e : undefined,
-        );
-      }
-    } else {
-      logger.info('Using LocalStorage Persistence');
+      logger.info('Database tables initialized');
+    } catch (e) {
+      logger.error(
+        'Database initialization error',
+        { component: 'db' },
+        e instanceof Error ? e : undefined,
+      );
+      throw e;
     }
   },
 
   saveProject: async (project: Project): Promise<void> => {
     logger.info(`[DB] Saving project: ${project.title} (${project.id})`);
     const client = getClient();
-    if (client) {
-      try {
-        // Upsert Project
-        await client.execute({
-          sql: `INSERT INTO projects (id, title, idea, style, cover_image, world_state, status, language, target_word_count, settings, timeline, updated_at) 
+    try {
+      // Upsert Project
+      await client.execute({
+        sql: `INSERT INTO projects (id, title, idea, style, cover_image, world_state, status, language, target_word_count, settings, timeline, updated_at) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) 
                 ON CONFLICT(id) DO UPDATE SET 
                 title=excluded.title, idea=excluded.idea, style=excluded.style, cover_image=excluded.cover_image, world_state=excluded.world_state, 
                 status=excluded.status, language=excluded.language, target_word_count=excluded.target_word_count, settings=excluded.settings, timeline=excluded.timeline, updated_at=CURRENT_TIMESTAMP`,
-          args: [
-            project.id,
-            project.title,
-            project.idea,
-            project.style,
-            project.coverImage ?? '',
-            JSON.stringify(project.worldState),
-            project.status,
-            project.language,
-            project.targetWordCount,
-            JSON.stringify(project.settings ?? {}),
-            JSON.stringify(project.timeline ?? {}),
-          ],
-        });
+        args: [
+          project.id,
+          project.title,
+          project.idea,
+          project.style,
+          project.coverImage ?? '',
+          JSON.stringify(project.worldState),
+          project.status,
+          project.language,
+          project.targetWordCount,
+          JSON.stringify(project.settings ?? {}),
+          JSON.stringify(project.timeline ?? {}),
+        ],
+      });
 
-        // Upsert Chapters
-        if (project.chapters.length > 0) {
-          const stmts = project.chapters.map(c => ({
-            sql: `INSERT INTO chapters (id, project_id, order_index, title, summary, content, status)
+      // Upsert Chapters
+      if (project.chapters.length > 0) {
+        const stmts = project.chapters.map(c => ({
+          sql: `INSERT INTO chapters (id, project_id, order_index, title, summary, content, status)
                   VALUES (?, ?, ?, ?, ?, ?, ?)
                   ON CONFLICT(id) DO UPDATE SET
                   title=excluded.title, summary=excluded.summary, content=excluded.content, status=excluded.status`,
-            args: [c.id, project.id, c.orderIndex, c.title, c.summary, c.content, c.status],
-          }));
-          await client.batch(stmts, 'write');
-        }
-        logger.info(`[DB] Cloud save complete.`);
-      } catch (e) {
-        logger.error(
-          'Failed to save to Cloud',
-          { component: 'db' },
-          e instanceof Error ? e : undefined,
-        );
+          args: [c.id, project.id, c.orderIndex, c.title, c.summary, c.content, c.status],
+        }));
+        await client.batch(stmts, 'write');
       }
-    } else {
-      // Local Save
-      const projects = JSON.parse(localStorage.getItem(LOCAL_PROJECTS_KEY) ?? '{}') as Record<
-        string,
-        Project
-      >;
-      projects[project.id] = { ...project, updatedAt: new Date() };
-      localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(projects));
-      logger.info(`[DB] Local save complete.`);
+      logger.info(`[DB] Project saved successfully`);
+    } catch (e) {
+      logger.error(
+        'Failed to save project',
+        { component: 'db' },
+        e instanceof Error ? e : undefined,
+      );
+      throw e;
     }
   },
 

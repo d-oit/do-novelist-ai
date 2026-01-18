@@ -6,6 +6,7 @@ import type {
   PlatformAnalytics,
   Publication,
   PublishingAlert,
+  PublishingExport,
   PublishingGoals,
   PublishingPlatform,
   PublishingTrends,
@@ -126,7 +127,18 @@ export const usePublishingAnalytics = (): UsePublishingAnalyticsReturn => {
   const exportAnalytics = useCallback(
     async (publicationIds: string[], format: 'json' | 'csv' | 'xlsx'): Promise<string> => {
       try {
-        return await publishingAnalyticsService.exportPublishingAnalytics(publicationIds, format);
+        // Create proper PublishingExport config object
+        const exportConfig: PublishingExport = {
+          format: format as 'json' | 'csv' | 'pdf' | 'xlsx',
+          dateRange: {
+            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+            end: new Date(),
+          },
+          includeCharts: true,
+          sections: ['overview', 'engagement', 'feedback', 'revenue', 'insights'],
+          publicationIds,
+        };
+        return await publishingAnalyticsService.exportPublishingAnalytics(publicationIds, exportConfig);
       } catch (err) {
         // We might want to set error in store or throw
         throw new Error(err instanceof Error ? err.message : 'Failed to export analytics');

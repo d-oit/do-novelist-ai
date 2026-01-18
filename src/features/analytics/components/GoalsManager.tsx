@@ -19,6 +19,7 @@ import { useState, useMemo } from 'react';
 import { useAnalytics } from '@/features/analytics/hooks/useAnalytics';
 import { logger } from '@/lib/logging/logger';
 import { cn, iconButtonTarget } from '@/lib/utils';
+import { ConfirmDialog } from '@/shared/components/ui';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 import type { WritingGoals } from '@/types';
@@ -407,6 +408,8 @@ const GoalsManager: FC<GoalsManagerProps> = ({ projectId, onClose, className }) 
   const analytics = useAnalytics();
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<WritingGoals | undefined>();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
 
   const handleCreateGoal = async (
     goalData: Omit<WritingGoals, 'id' | 'current'>,
@@ -426,9 +429,15 @@ const GoalsManager: FC<GoalsManagerProps> = ({ projectId, onClose, className }) 
   };
 
   const handleDeleteGoal = (goalId: string): void => {
-    if (window.confirm('Are you sure you want to delete this goal?')) {
+    setGoalToDelete(goalId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteGoal = (): void => {
+    if (goalToDelete) {
       // Implementation would call analytics service to delete goal
-      logger.info('Delete goal:', { goalId });
+      logger.info('Delete goal:', { goalId: goalToDelete });
+      setGoalToDelete(null);
     }
   };
 
@@ -529,6 +538,18 @@ const GoalsManager: FC<GoalsManagerProps> = ({ projectId, onClose, className }) 
           />
         )}
       </AnimatePresence>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Goal"
+        description="Are you sure you want to delete this goal? This action cannot be undone."
+        variant="destructive"
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDeleteGoal}
+      />
     </div>
   );
 };

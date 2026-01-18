@@ -20,7 +20,8 @@ import type { Character } from '@/types';
 /**
  * Database client type
  */
-type DbClient = ReturnType<typeof import('@/lib/database/drizzle').getDrizzleClient>;
+import { getDrizzleClient } from '@/lib/database/drizzle';
+type DbClient = Awaited<ReturnType<typeof getDrizzleClient>>;
 
 /**
  * Mapper function type

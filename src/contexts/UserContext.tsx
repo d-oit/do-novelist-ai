@@ -1,8 +1,17 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+
+import {
+  getTheme,
+  setTheme,
+  getOrCreateUserSettings,
+} from '@/lib/database/services/user-settings-service';
+import { logger } from '@/lib/logging/logger';
 
 interface UserContextType {
   userId: string;
   setUserId: (userId: string) => void;
+  theme: 'light' | 'dark' | 'system';
+  setTheme: (theme: 'light' | 'dark' | 'system') => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -37,9 +46,59 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     return newUserId;
   });
 
+  const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('light');
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load theme from Turso/localStorage on mount
+  useEffect(() => {
+    const loadTheme = async (): Promise<void> => {
+      try {
+        const userTheme = await getTheme(userId);
+        setThemeState(userTheme);
+
+        // Initialize user settings in Turso if they don't exist
+        await getOrCreateUserSettings(userId);
+      } catch (error) {
+        logger.error('Failed to load theme from database, using localStorage fallback', {
+          component: 'UserContext',
+          error,
+        });
+        // Fallback to localStorage if Turso fails
+        const storedTheme = localStorage.getItem('novelist-theme') as
+          | 'light'
+          | 'dark'
+          | 'system'
+          | null;
+        setThemeState(storedTheme ?? 'light');
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+
+    void loadTheme();
+  }, [userId]);
+
+  const handleSetTheme = async (newTheme: 'light' | 'dark' | 'system'): Promise<void> => {
+    setThemeState(newTheme);
+
+    try {
+      // Try to save to Turso
+      await setTheme(userId, newTheme);
+    } catch (error) {
+      logger.error('Failed to save theme to database, using localStorage fallback', {
+        component: 'UserContext',
+        error,
+      });
+      // Fallback to localStorage if Turso fails
+      localStorage.setItem('novelist-theme', newTheme);
+    }
+  };
+
   const value: UserContextType = {
     userId,
     setUserId,
+    theme: isInitialized ? theme : 'light', // Show default while initializing
+    setTheme: handleSetTheme,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

@@ -144,7 +144,7 @@ export const WorldElementEditor: React.FC<WorldElementEditorProps> = ({
                     type='number'
                     value={(formData as Location).population ?? ''}
                     onChange={e =>
-                      setFormData({ ...formData, population: parseInt(e.target.value) ?? 0 })
+                      setFormData({ ...formData, population: parseInt(e.target.value, 10) ?? 0 })
                     }
                     className='w-full rounded-md border border-input bg-background p-2 text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                     placeholder='Population size'

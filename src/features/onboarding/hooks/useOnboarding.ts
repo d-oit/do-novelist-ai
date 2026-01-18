@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import {
+  getOnboardingStatus,
+  setOnboardingComplete,
+  getOnboardingStep,
+  setOnboardingStep,
+} from '@/lib/database/services/user-settings-service';
+import { logger } from '@/lib/logging/logger';
+import { useUser } from '@/contexts/UserContext';
+
 const ONBOARDING_STORAGE_KEY = 'novelist-onboarding-completed';
 const ONBOARDING_STEP_KEY = 'novelist-onboarding-step';
 
@@ -30,11 +39,11 @@ interface UseOnboardingReturn {
   /** Skip to a specific step */
   goToStep: (step: OnboardingStep) => void;
   /** Complete and close onboarding */
-  completeOnboarding: () => void;
+  completeOnboarding: () => Promise<void>;
   /** Skip onboarding without completing */
   skipOnboarding: () => void;
   /** Reset onboarding to show again */
-  resetOnboarding: () => void;
+  resetOnboarding: () => Promise<void>;
   /** Close the modal temporarily */
   closeModal: () => void;
 }
@@ -54,41 +63,84 @@ const STEPS: OnboardingStep[] = ['welcome', 'create-project', 'explore-dashboard
  * ```
  */
 export function useOnboarding(): UseOnboardingReturn {
-  const [isCompleted, setIsCompleted] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const { userId } = useUser();
+  const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const [currentStep, setCurrentStep] = useState<OnboardingStep>(() => {
-    try {
-      const saved = localStorage.getItem(ONBOARDING_STEP_KEY);
-      if (saved && STEPS.includes(saved as OnboardingStep)) {
-        return saved as OnboardingStep;
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
-    return 'welcome';
-  });
-
-  const [isOpen, setIsOpen] = useState<boolean>(!isCompleted);
-
-  // Persist step to localStorage
+  // Load onboarding state from Turso on mount
   useEffect(() => {
-    try {
-      localStorage.setItem(ONBOARDING_STEP_KEY, currentStep);
-    } catch {
-      // Ignore localStorage errors
-    }
-  }, [currentStep]);
+    const loadState = async (): Promise<void> => {
+      try {
+        const completed = await getOnboardingStatus(userId);
+        const step = await getOnboardingStep(userId);
+
+        setIsCompleted(completed);
+        setCurrentStep(completed ? 'welcome' : (step as OnboardingStep) || 'welcome');
+        setIsOpen(!completed);
+      } catch (error) {
+        logger.error('Failed to load onboarding state from Turso, using localStorage fallback', {
+          error,
+        });
+        // Fallback to localStorage if Turso fails
+        try {
+          const completed = localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true';
+          const saved = localStorage.getItem(ONBOARDING_STEP_KEY);
+          if (saved && STEPS.includes(saved as OnboardingStep)) {
+            setCurrentStep(saved as OnboardingStep);
+          } else {
+            setCurrentStep('welcome');
+          }
+          setIsCompleted(completed);
+          setIsOpen(!completed);
+        } catch (localError) {
+          logger.error('Failed to load onboarding state from localStorage', { error: localError });
+          setIsCompleted(false);
+          setCurrentStep('welcome');
+          setIsOpen(true);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadState();
+  }, [userId]);
+
+  // Persist step to Turso (debounced to avoid excessive writes)
+  useEffect(() => {
+    if (isLoading) return;
+
+    const saveStep = async (): Promise<void> => {
+      try {
+        await setOnboardingStep(userId, currentStep);
+      } catch (error) {
+        logger.error('Failed to save onboarding step to Turso, using localStorage fallback', {
+          error,
+        });
+        // Fallback to localStorage if Turso fails
+        try {
+          localStorage.setItem(ONBOARDING_STEP_KEY, currentStep);
+        } catch (localError) {
+          logger.error('Failed to save onboarding step to localStorage', { error: localError });
+        }
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      void saveStep();
+    }, 300); // Debounce for 300ms
+
+    return (): void => clearTimeout(timeoutId);
+  }, [currentStep, userId, isLoading]);
 
   const startOnboarding = useCallback((): void => {
     setCurrentStep('welcome');
     setIsOpen(true);
     setIsCompleted(false);
+
+    // Clear localStorage as backup
     try {
       localStorage.removeItem(ONBOARDING_STORAGE_KEY);
     } catch {
@@ -117,33 +169,51 @@ export function useOnboarding(): UseOnboardingReturn {
     setCurrentStep(step);
   }, []);
 
-  const completeOnboarding = useCallback((): void => {
+  const completeOnboarding = useCallback(async (): Promise<void> => {
     setIsCompleted(true);
     setIsOpen(false);
     setCurrentStep('welcome');
+
     try {
-      localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
-      localStorage.removeItem(ONBOARDING_STEP_KEY);
-    } catch {
-      // Ignore localStorage errors
+      // Try to save to Turso
+      await setOnboardingComplete(userId);
+    } catch (error) {
+      logger.error('Failed to complete onboarding in Turso, using localStorage fallback', {
+        error,
+      });
+      // Fallback to localStorage if Turso fails
+      try {
+        localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
+        localStorage.removeItem(ONBOARDING_STEP_KEY);
+      } catch (localError) {
+        logger.error('Failed to complete onboarding in localStorage', { error: localError });
+      }
     }
-  }, []);
+  }, [userId]);
 
   const skipOnboarding = useCallback((): void => {
     completeOnboarding();
   }, [completeOnboarding]);
 
-  const resetOnboarding = useCallback((): void => {
+  const resetOnboarding = useCallback(async (): Promise<void> => {
     setIsCompleted(false);
     setCurrentStep('welcome');
     setIsOpen(true);
+
     try {
-      localStorage.removeItem(ONBOARDING_STORAGE_KEY);
-      localStorage.removeItem(ONBOARDING_STEP_KEY);
-    } catch {
-      // Ignore localStorage errors
+      // Try to reset in Turso by setting back to welcome step
+      await setOnboardingStep(userId, 'welcome');
+    } catch (error) {
+      logger.error('Failed to reset onboarding in Turso, using localStorage fallback', { error });
+      // Fallback to localStorage if Turso fails
+      try {
+        localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+        localStorage.removeItem(ONBOARDING_STEP_KEY);
+      } catch (localError) {
+        logger.error('Failed to reset onboarding in localStorage', { error: localError });
+      }
     }
-  }, []);
+  }, [userId]);
 
   const closeModal = useCallback((): void => {
     setIsOpen(false);

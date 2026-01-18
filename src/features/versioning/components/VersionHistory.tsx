@@ -19,6 +19,7 @@ import React, { useState, useMemo } from 'react';
 import { useVersioning } from '@/features/versioning/hooks/useVersioning';
 import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
+import { ConfirmDialog } from '@/shared/components/ui';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 import type { Chapter, ChapterVersion, VersionFilter, SortOrder } from '@/types';
@@ -80,6 +81,8 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
   const [selectedSort, setSelectedSort] = useState<SortOrder>('newest');
   const [selectedVersion, setSelectedVersion] = useState<ChapterVersion | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [versionToDelete, setVersionToDelete] = useState<string | null>(null);
 
   const filteredVersions = useMemo(() => {
     const result = searchQuery
@@ -105,11 +108,15 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
     }
   };
 
-  const handleDeleteVersion = async (versionId: string): Promise<void> => {
-    if (
-      window.confirm('Are you sure you want to delete this version? This action cannot be undone.')
-    ) {
-      await deleteVersion(versionId);
+  const handleDeleteVersion = (versionId: string): void => {
+    setVersionToDelete(versionId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteVersion = async (): Promise<void> => {
+    if (versionToDelete) {
+      await deleteVersion(versionToDelete);
+      setVersionToDelete(null);
     }
   };
 
@@ -444,6 +451,18 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title='Delete Version'
+        description='Are you sure you want to delete this version? This action cannot be undone.'
+        variant='destructive'
+        confirmLabel='Delete'
+        cancelLabel='Cancel'
+        onConfirm={() => void confirmDeleteVersion()}
+      />
     </motion.div>
   );
 };

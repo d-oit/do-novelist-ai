@@ -11,3 +11,6 @@ export * from './versioning';
 export * from './publishing';
 export * from './writing-assistant';
 export * from './plots';
+export * from './user-settings';
+export * from './agent-coordination';
+export * from './plot-engine-feedback';

@@ -201,7 +201,7 @@ const PublishPanel: FC<PublishPanelProps> = ({ project, onUpdateProject, onUpdat
                   className='w-full rounded border border-border bg-secondary/20 px-3 py-2 text-xs focus:border-primary focus:outline-none'
                   value={targetWords}
                   onChange={e =>
-                    onUpdateProject({ targetWordCount: parseInt(e.target.value) ?? 0 })
+                    onUpdateProject({ targetWordCount: parseInt(e.target.value, 10) ?? 0 })
                   }
                 />
               </div>
