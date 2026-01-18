@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { useUser } from '@/contexts/UserContext';
-import {
-  getOnboardingStatus,
-  setOnboardingComplete,
-  getOnboardingStep,
-  setOnboardingStep,
-} from '@/lib/database/services/user-settings-service';
+import { getUserSettings, updateUserSettings } from '@/lib/database/services/user-settings-service';
 import { logger } from '@/lib/logging/logger';
 
 const ONBOARDING_STORAGE_KEY = 'novelist-onboarding-completed';
@@ -19,18 +14,20 @@ export type OnboardingStep =
   | 'ai-features'
   | 'complete';
 
+const STEPS: OnboardingStep[] = ['welcome', 'create-project', 'explore-dashboard', 'ai-features'];
+
 interface UseOnboardingReturn {
   /** Whether onboarding has been completed */
   isCompleted: boolean;
   /** Whether onboarding modal should be shown */
   isOpen: boolean;
-  /** Current step in the onboarding flow */
+  /** Current step in onboarding flow */
   currentStep: OnboardingStep;
   /** Total number of steps (excluding complete) */
   totalSteps: number;
   /** Current step number (1-indexed) */
   currentStepNumber: number;
-  /** Start the onboarding flow */
+  /** Start onboarding flow */
   startOnboarding: () => void;
   /** Go to next step */
   nextStep: () => void;
@@ -44,14 +41,12 @@ interface UseOnboardingReturn {
   skipOnboarding: () => Promise<void>;
   /** Reset onboarding to show again */
   resetOnboarding: () => Promise<void>;
-  /** Close the modal temporarily */
+  /** Close modal temporarily */
   closeModal: () => void;
 }
 
-const STEPS: OnboardingStep[] = ['welcome', 'create-project', 'explore-dashboard', 'ai-features'];
-
 /**
- * Hook for managing the onboarding flow.
+ * Hook for managing onboarding flow.
  *
  * Usage:
  * ```tsx
@@ -73,12 +68,16 @@ export function useOnboarding(): UseOnboardingReturn {
   useEffect(() => {
     const loadState = async (): Promise<void> => {
       try {
-        const completed = await getOnboardingStatus(userId);
-        const step = await getOnboardingStep(userId);
+        const settings = await getUserSettings(userId);
 
-        setIsCompleted(completed);
-        setCurrentStep(completed ? 'welcome' : (step as OnboardingStep) || 'welcome');
-        setIsOpen(!completed);
+        if (settings) {
+          const completed = settings.onboardingComplete;
+          const step = settings.onboardingStep as OnboardingStep;
+
+          setIsCompleted(completed);
+          setCurrentStep(completed ? 'complete' : step || 'welcome');
+          setIsOpen(!completed);
+        }
       } catch (error) {
         logger.error('Failed to load onboarding state from Turso, using localStorage fallback', {
           error,
@@ -114,7 +113,7 @@ export function useOnboarding(): UseOnboardingReturn {
 
     const saveStep = async (): Promise<void> => {
       try {
-        await setOnboardingStep(userId, currentStep);
+        await updateUserSettings(userId, { onboardingStep: currentStep });
       } catch (error) {
         logger.error('Failed to save onboarding step to Turso, using localStorage fallback', {
           error,
@@ -153,10 +152,9 @@ export function useOnboarding(): UseOnboardingReturn {
     if (currentIndex >= 0 && currentIndex < STEPS.length - 1) {
       setCurrentStep(STEPS[currentIndex + 1] as OnboardingStep);
     } else if (currentIndex === STEPS.length - 1) {
-      // Last step, move to complete
-      setCurrentStep('complete');
+      void completeOnboarding();
     }
-  }, [currentStep]);
+  }, [currentStep, completeOnboarding]);
 
   const previousStep = useCallback((): void => {
     const currentIndex = STEPS.indexOf(currentStep);
@@ -171,25 +169,27 @@ export function useOnboarding(): UseOnboardingReturn {
 
   const completeOnboarding = useCallback(async (): Promise<void> => {
     setIsCompleted(true);
+    setCurrentStep('complete');
     setIsOpen(false);
-    setCurrentStep('welcome');
 
     try {
-      // Try to save to Turso
-      await setOnboardingComplete(userId);
+      await updateUserSettings(userId, {
+        onboardingComplete: true,
+        onboardingStep: 'complete',
+      });
     } catch (error) {
-      logger.error('Failed to complete onboarding in Turso, using localStorage fallback', {
+      logger.error('Failed to mark onboarding as complete in Turso, using localStorage fallback', {
         error,
       });
       // Fallback to localStorage if Turso fails
       try {
         localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
-        localStorage.removeItem(ONBOARDING_STEP_KEY);
+        localStorage.setItem(ONBOARDING_STEP_KEY, 'complete');
       } catch (localError) {
-        logger.error('Failed to complete onboarding in localStorage', { error: localError });
+        logger.error('Failed to save onboarding complete to localStorage', { error: localError });
       }
     }
-  }, [userId]);
+  }, [userId, currentStep]);
 
   const skipOnboarding = useCallback(async (): Promise<void> => {
     await completeOnboarding();
@@ -201,17 +201,12 @@ export function useOnboarding(): UseOnboardingReturn {
     setIsOpen(true);
 
     try {
-      // Try to reset in Turso by setting back to welcome step
-      await setOnboardingStep(userId, 'welcome');
+      await updateUserSettings(userId, {
+        onboardingComplete: false,
+        onboardingStep: 'welcome',
+      });
     } catch (error) {
-      logger.error('Failed to reset onboarding in Turso, using localStorage fallback', { error });
-      // Fallback to localStorage if Turso fails
-      try {
-        localStorage.removeItem(ONBOARDING_STORAGE_KEY);
-        localStorage.removeItem(ONBOARDING_STEP_KEY);
-      } catch (localError) {
-        logger.error('Failed to reset onboarding in localStorage', { error: localError });
-      }
+      logger.error('Failed to reset onboarding in Turso', { error });
     }
   }, [userId]);
 

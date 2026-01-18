@@ -5,7 +5,7 @@
 import { eq } from 'drizzle-orm';
 
 import { getDrizzleClient } from '@/lib/database/drizzle';
-import { userSettings, type NewUserSettingsRow } from '@/lib/database/schemas';
+import { userSettings } from '@/lib/database/schemas';
 import { logger } from '@/lib/logging/logger';
 
 /**
@@ -67,50 +67,31 @@ export const createUserSettings = async (userId: string): Promise<UserSettings |
   }
 
   try {
-     const now = Math.floor(Date.now() / 1000);
-     const newSettings: any = {
-       id: crypto.randomUUID(),
-       userId,
-       theme: 'light',
-       language: 'en',
-       onboardingComplete: false,
-       onboardingStep: 'welcome',
-       createdAt: now,
-       updatedAt: now,
-     };
+    const now = new Date();
+    await db.insert(userSettings).values({
+      id: crypto.randomUUID(),
+      userId,
+      theme: 'light',
+      language: 'en',
+      onboardingComplete: false,
+      onboardingStep: 'welcome',
+      createdAt: now,
+      updatedAt: now,
+    });
 
-     await db.insert(userSettings).values(newSettings);
-     return newSettings;
-   } catch (e) {
-     logger.error('Failed to create user settings', {
-       component: 'UserSettingsService',
-       error: e,
-     });
-     return null;
-   }
-} as const createUserSettings_export = createUserSettings;
-
-/**
- * Get or create user settings (idempotent)
- */
-export const getOrCreateUserSettings = async (userId: string): Promise<UserSettings> => {
-  const existing = await getUserSettings(userId);
-  if (existing) {
-    return existing;
+    return {
+      theme: 'light',
+      language: 'en',
+      onboardingComplete: false,
+      onboardingStep: 'welcome',
+    };
+  } catch (e) {
+    logger.error('Failed to create user settings', {
+      component: 'UserSettingsService',
+      error: e,
+    });
+    return null;
   }
-
-  const created = await createUserSettings(userId);
-  if (created) {
-    return created;
-  }
-
-  // Fallback to defaults if database fails
-  return {
-    theme: 'light',
-    language: 'en',
-    onboardingComplete: false,
-    onboardingStep: 'welcome',
-  };
 };
 
 /**
@@ -127,14 +108,7 @@ export const updateUserSettings = async (
   }
 
   try {
-    const existing = await getUserSettings(userId);
-    if (!existing) {
-      logger.warn('User settings not found, creating new', { userId });
-      await createUserSettings(userId);
-    }
-
-    const updateData: Partial<NewUserSettingsRow> = {};
-
+    const updateData: Record<string, unknown> = {};
     if (updates.theme !== undefined) {
       updateData.theme = updates.theme;
     }
@@ -153,82 +127,60 @@ export const updateUserSettings = async (
         .update(userSettings)
         .set({
           ...updateData,
-          updatedAt: Math.floor(Date.now() / 1000),
+          updatedAt: new Date(),
         })
         .where(eq(userSettings.userId, userId));
+      return true;
     }
 
-    return true;
+    return false;
   } catch (e) {
-    logger.error(
-      'Failed to update user settings',
-      { userId, updates },
-      e instanceof Error ? e : undefined,
-    );
+    logger.error('Failed to update user settings', {
+      component: 'UserSettingsService',
+      error: e,
+    });
     return false;
   }
 };
 
 /**
- * Get theme preference
+ * Get user theme preference
  */
 export const getTheme = async (userId: string): Promise<'light' | 'dark' | 'system'> => {
-  const settings = await getOrCreateUserSettings(userId);
-  return settings.theme;
+  const settings = await getUserSettings(userId);
+  return settings?.theme ?? 'light';
 };
 
 /**
- * Set theme preference
+ * Set user theme preference
  */
 export const setTheme = async (
   userId: string,
   theme: 'light' | 'dark' | 'system',
-): Promise<boolean> => {
-  return updateUserSettings(userId, { theme });
+): Promise<void> => {
+  await updateUserSettings(userId, { theme });
 };
 
 /**
- * Get onboarding completion status
+ * Get or create user settings (used by UserContext on mount)
  */
-export const getOnboardingStatus = async (userId: string): Promise<boolean> => {
-  const settings = await getOrCreateUserSettings(userId);
-  return settings.onboardingComplete;
-};
-
-/**
- * Set onboarding complete
- */
-export const setOnboardingComplete = async (userId: string): Promise<boolean> => {
-  return updateUserSettings(userId, { onboardingComplete: true });
-};
-
-/**
- * Get current onboarding step
- */
-export const getOnboardingStep = async (userId: string): Promise<string> => {
-  const settings = await getOrCreateUserSettings(userId);
-  return settings.onboardingStep;
-};
-
-/**
- * Set current onboarding step
- */
-export const setOnboardingStep = async (userId: string, step: string): Promise<boolean> => {
-  return updateUserSettings(userId, { onboardingStep: step });
-};
-
-/**
- * Export all user settings service functions
- */
-export const userSettingsService = {
-  getUserSettings,
-  createUserSettings,
-  getOrCreateUserSettings,
-  updateUserSettings,
-  getTheme,
-  setTheme,
-  getOnboardingStatus,
-  setOnboardingComplete,
-  getOnboardingStep,
-  setOnboardingStep,
+export const getOrCreateUserSettings = async (userId: string): Promise<UserSettings> => {
+  let settings = await getUserSettings(userId);
+  if (!settings) {
+    const created = await createUserSettings(userId);
+    settings = created ?? {
+      theme: 'light',
+      language: 'en',
+      onboardingComplete: false,
+      onboardingStep: 'welcome',
+    };
+  }
+  return (
+    settings ?? {
+      theme: 'light',
+      language: 'en',
+      onboardingComplete: false,
+      onboardingStep: 'welcome',
+    }
+  );
 };
