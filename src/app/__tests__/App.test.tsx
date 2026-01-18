@@ -223,7 +223,15 @@ describe('App', () => {
       const { db } = await import('@/features/projects/services');
       const { logger } = await import('@/lib/logging/logger');
 
-      vi.mocked(db.init).mockImplementation(() => new Promise(resolve => setTimeout(resolve, 20000)));
+      // Simulate timeout by making init never resolve
+      // @ts-expect-error - we know this is a mock
+      db.init.mockImplementationOnce(() => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(undefined);
+          }, 20000);
+        });
+      });
 
       await act(async () => {
         render(
@@ -232,6 +240,17 @@ describe('App', () => {
           </UserProvider>,
         );
       });
+
+      await waitFor(
+        () => {
+          expect(logger.warn).toHaveBeenCalled();
+        },
+        { timeout: 3000 },
+      );
+
+      // Should still render even if database times out
+      expect(screen.getByTestId('main-layout')).toBeInTheDocument();
+    });
 
       await waitFor(
         () => {

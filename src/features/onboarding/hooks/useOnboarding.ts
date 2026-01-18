@@ -147,15 +147,6 @@ export function useOnboarding(): UseOnboardingReturn {
     }
   }, []);
 
-  const nextStep = useCallback((): void => {
-    const currentIndex = STEPS.indexOf(currentStep);
-    if (currentIndex >= 0 && currentIndex < STEPS.length - 1) {
-      setCurrentStep(STEPS[currentIndex + 1] as OnboardingStep);
-    } else if (currentIndex === STEPS.length - 1) {
-      void completeOnboarding();
-    }
-  }, [currentStep, completeOnboarding]);
-
   const previousStep = useCallback((): void => {
     const currentIndex = STEPS.indexOf(currentStep);
     if (currentIndex > 0) {
@@ -190,6 +181,15 @@ export function useOnboarding(): UseOnboardingReturn {
       }
     }
   }, [userId, currentStep]);
+
+  const nextStep = useCallback((): void => {
+    const currentIndex = STEPS.indexOf(currentStep);
+    if (currentIndex >= 0 && currentIndex < STEPS.length - 1) {
+      setCurrentStep(STEPS[currentIndex + 1] as OnboardingStep);
+    } else {
+      void completeOnboarding();
+    }
+  }, [currentStep, completeOnboarding]);
 
   const skipOnboarding = useCallback(async (): Promise<void> => {
     await completeOnboarding();
