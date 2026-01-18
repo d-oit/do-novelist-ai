@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { useUser } from '@/contexts/UserContext';
 import {
   getOnboardingStatus,
   setOnboardingComplete,
@@ -7,7 +8,6 @@ import {
   setOnboardingStep,
 } from '@/lib/database/services/user-settings-service';
 import { logger } from '@/lib/logging/logger';
-import { useUser } from '@/contexts/UserContext';
 
 const ONBOARDING_STORAGE_KEY = 'novelist-onboarding-completed';
 const ONBOARDING_STEP_KEY = 'novelist-onboarding-step';
@@ -41,7 +41,7 @@ interface UseOnboardingReturn {
   /** Complete and close onboarding */
   completeOnboarding: () => Promise<void>;
   /** Skip onboarding without completing */
-  skipOnboarding: () => void;
+  skipOnboarding: () => Promise<void>;
   /** Reset onboarding to show again */
   resetOnboarding: () => Promise<void>;
   /** Close the modal temporarily */
@@ -191,8 +191,8 @@ export function useOnboarding(): UseOnboardingReturn {
     }
   }, [userId]);
 
-  const skipOnboarding = useCallback((): void => {
-    completeOnboarding();
+  const skipOnboarding = useCallback(async (): Promise<void> => {
+    await completeOnboarding();
   }, [completeOnboarding]);
 
   const resetOnboarding = useCallback(async (): Promise<void> => {

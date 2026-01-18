@@ -141,7 +141,8 @@
       "Bash(npm run check:file-size:*)",
       "Bash(gh repo view:*)",
       "Bash(for readme in src/features/*/README.md)",
-      "Bash(do wc -l \"$readme\")"
+      "Bash(do wc -l \"$readme\")",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": []

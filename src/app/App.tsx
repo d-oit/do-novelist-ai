@@ -352,7 +352,7 @@ const App: React.FC = () => {
         totalSteps={onboarding.totalSteps}
         onNext={onboarding.nextStep}
         onPrevious={onboarding.previousStep}
-        onSkip={onboarding.skipOnboarding}
+        onSkip={() => void onboarding.skipOnboarding()}
         onComplete={onboarding.completeOnboarding}
       />
 

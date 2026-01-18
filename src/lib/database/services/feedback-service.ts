@@ -4,7 +4,6 @@
  */
 import { eq } from 'drizzle-orm';
 
-import { logger } from '@/lib/logging/logger';
 
 import { getDrizzleClient } from '@/lib/database/drizzle';
 import {
@@ -13,6 +12,7 @@ import {
   type NewPlotEngineFeedbackRow,
   type FeedbackContent,
 } from '@/lib/database/schemas';
+import { logger } from '@/lib/logging/logger';
 
 /**
  * Feedback type

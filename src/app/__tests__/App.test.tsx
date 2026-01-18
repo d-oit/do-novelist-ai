@@ -1,9 +1,26 @@
+import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import App from '@/app/App';
+import { UserProvider } from '@/contexts/UserContext';
 
 // Mock all external dependencies
+vi.mock('@/lib/database/services/user-settings-service', () => ({
+  getTheme: vi.fn().mockResolvedValue('light'),
+  setTheme: vi.fn().mockResolvedValue(undefined),
+  getOrCreateUserSettings: vi.fn().mockResolvedValue({
+    id: 'test-id',
+    userId: 'test-user-id',
+    theme: 'light',
+    language: 'en',
+    onboardingCompleted: false,
+    onboardingStep: 'welcome',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }),
+}));
+
 vi.mock('@/features/projects/services', () => ({
   db: {
     init: vi.fn().mockResolvedValue(undefined),
@@ -142,7 +159,11 @@ describe('App', () => {
   describe('Initialization', () => {
     it('should render without crashing', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -154,7 +175,11 @@ describe('App', () => {
       const { db } = await import('@/features/projects/services');
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -166,7 +191,11 @@ describe('App', () => {
       const { offlineManager } = await import('@/lib/pwa');
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -178,7 +207,11 @@ describe('App', () => {
       const { performanceMonitor } = await import('@/performance');
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -193,7 +226,11 @@ describe('App', () => {
       vi.mocked(db.init).mockImplementation(() => new Promise(resolve => setTimeout(resolve, 20000)));
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(
@@ -211,7 +248,11 @@ describe('App', () => {
       vi.mocked(db.init).mockRejectedValueOnce(new Error('Database error'));
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -228,7 +269,11 @@ describe('App', () => {
   describe('View Navigation', () => {
     it('should render projects view by default', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -238,7 +283,11 @@ describe('App', () => {
 
     it('should switch to settings view when settings nav is clicked', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -256,7 +305,11 @@ describe('App', () => {
 
     it('should switch to metrics view', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -274,7 +327,11 @@ describe('App', () => {
 
     it('should switch to plot engine view', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -292,7 +349,11 @@ describe('App', () => {
 
     it('should switch to world building view', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -312,7 +373,11 @@ describe('App', () => {
       const { performanceMonitor } = await import('@/performance');
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -332,7 +397,11 @@ describe('App', () => {
   describe('Lazy Loading', () => {
     it('should render lazy-loaded components after suspense resolves', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -344,7 +413,11 @@ describe('App', () => {
   describe('UI Elements', () => {
     it('should render main layout', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -354,7 +427,11 @@ describe('App', () => {
 
     it('should render navbar', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -364,7 +441,11 @@ describe('App', () => {
 
     it('should render toaster for notifications', async () => {
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -379,7 +460,11 @@ describe('App', () => {
       vi.mocked(db.init).mockRejectedValueOnce(new Error('DB Error'));
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -394,7 +479,11 @@ describe('App', () => {
       vi.mocked(db.init).mockRejectedValueOnce(new Error('Test error'));
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {
@@ -411,7 +500,11 @@ describe('App', () => {
       const { performanceMonitor } = await import('@/performance');
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       expect(performanceMonitor.startTiming).toHaveBeenCalledWith('app-initialization');
@@ -421,7 +514,11 @@ describe('App', () => {
       const { performanceMonitor } = await import('@/performance');
 
       await act(async () => {
-        render(<App />);
+        render(
+          <UserProvider>
+            <App />
+          </UserProvider>,
+        );
       });
 
       await waitFor(() => {

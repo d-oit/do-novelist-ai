@@ -35,19 +35,23 @@ function generateUserId(): string {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [userId, setUserId] = useState<string>(() => {
+  const [userId, setUserId] = useState<string>((): string => {
     // Initialize with existing userId or generate new one
     const storedUserId = localStorage.getItem(STORAGE_KEY);
     if (storedUserId !== null && storedUserId !== '') {
       return storedUserId;
     }
-    const newUserId = generateUserId();
-    localStorage.setItem(STORAGE_KEY, newUserId);
-    return newUserId;
+    return generateUserId();
   });
 
-  const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('light');
-  const [isInitialized, setIsInitialized] = useState(false);
+  // Store userId to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, userId);
+  }, [userId]);
+
+  // eslint-disable-next-line react/hook-use-state
+  const [theme, setThemeState] = useState('light' as 'light' | 'dark' | 'system');
+  const [isInitialized, setIsInitialized] = useState(false as boolean);
 
   // Load theme from Turso/localStorage on mount
   useEffect(() => {

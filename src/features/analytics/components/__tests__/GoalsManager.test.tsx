@@ -71,20 +71,24 @@ vi.mock('framer-motion', () => {
 });
 
 // Mock lucide-react icons
-vi.mock('lucide-react', () => ({
-  Target: ({ className }: any) => <div className={className} data-testid='target-icon' />,
-  Plus: ({ className }: any) => <div className={className} data-testid='plus-icon' />,
-  Edit3: ({ className }: any) => <div className={className} data-testid='edit-icon' />,
-  Trash2: ({ className }: any) => <div className={className} data-testid='trash-icon' />,
-  Calendar: ({ className }: any) => <div className={className} data-testid='calendar-icon' />,
-  BookOpen: ({ className }: any) => <div className={className} data-testid='bookopen-icon' />,
-  TrendingUp: ({ className }: any) => <div className={className} data-testid='trendingup-icon' />,
-  CheckCircle2: ({ className }: any) => <div className={className} data-testid='checkcircle-icon' />,
-  AlertCircle: ({ className }: any) => <div className={className} data-testid='alertcircle-icon' />,
-  Trophy: ({ className }: any) => <div className={className} data-testid='trophy-icon' />,
-  Flame: ({ className }: any) => <div className={className} data-testid='flame-icon' />,
-  X: ({ className }: any) => <div className={className} data-testid='x-icon' />,
-}));
+vi.mock('lucide-react', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    Target: ({ className }: any) => <div className={className} data-testid='target-icon' />,
+    Plus: ({ className }: any) => <div className={className} data-testid='plus-icon' />,
+    Edit3: ({ className }: any) => <div className={className} data-testid='edit-icon' />,
+    Trash2: ({ className }: any) => <div className={className} data-testid='trash-icon' />,
+    Calendar: ({ className }: any) => <div className={className} data-testid='calendar-icon' />,
+    BookOpen: ({ className }: any) => <div className={className} data-testid='bookopen-icon' />,
+    TrendingUp: ({ className }: any) => <div className={className} data-testid='trendingup-icon' />,
+    CheckCircle2: ({ className }: any) => <div className={className} data-testid='checkcircle-icon' />,
+    AlertCircle: ({ className }: any) => <div className={className} data-testid='alertcircle-icon' />,
+    Trophy: ({ className }: any) => <div className={className} data-testid='trophy-icon' />,
+    Flame: ({ className }: any) => <div className={className} data-testid='flame-icon' />,
+    X: ({ className }: any) => <div className={className} data-testid='x-icon' />,
+  };
+});
 
 // Mock UI components
 vi.mock('@/shared/components/ui/Button', () => ({

@@ -7,6 +7,7 @@
 
 import { eq, and, or, sql, gte, lte } from 'drizzle-orm';
 
+import type { getDrizzleClient } from '@/lib/database/drizzle';
 import { characters } from '@/lib/database/schemas/characters';
 import { toAppError } from '@/lib/errors/error-types';
 import { logger } from '@/lib/logging/logger';
@@ -20,7 +21,6 @@ import type { Character } from '@/types';
 /**
  * Database client type
  */
-import { getDrizzleClient } from '@/lib/database/drizzle';
 type DbClient = Awaited<ReturnType<typeof getDrizzleClient>>;
 
 /**

@@ -16,7 +16,7 @@ interface OnboardingModalProps {
   onNext: () => void;
   onPrevious: () => void;
   onSkip: () => void;
-  onComplete: () => void;
+  onComplete: () => Promise<void>;
 }
 
 /**
@@ -54,7 +54,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         onSkip();
       } else if (e.key === 'ArrowRight' || e.key === 'Enter') {
         if (currentStep === 'complete') {
-          onComplete();
+          void onComplete();
         } else {
           onNext();
         }
@@ -136,7 +136,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
               <div className='flex items-center justify-between gap-3'>
                 {isComplete ? (
-                  <Button onClick={onComplete} className='w-full' size='lg'>
+                  <Button onClick={() => void onComplete()} className='w-full' size='lg'>
                     Get Started
                   </Button>
                 ) : (
