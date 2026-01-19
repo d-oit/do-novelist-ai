@@ -107,6 +107,32 @@ vi.mock('@/shared/components/ui/Card', () => ({
   ),
 }));
 
+vi.mock('@/shared/components/ui', () => ({
+  Button: ({ children, onClick, variant, size, className }: any) => (
+    <button onClick={onClick} data-variant={variant} data-size={size} className={className}>
+      {children}
+    </button>
+  ),
+  Card: ({ children, className }: any) => (
+    <div data-testid='card' className={className}>
+      {children}
+    </div>
+  ),
+  ConfirmDialog: ({ open, onConfirm, onCancel, title, description }: any) =>
+    open ? (
+      <div role='alertdialog' aria-labelledby='confirm-title' aria-describedby='confirm-desc'>
+        <h2 id='confirm-title'>{title}</h2>
+        <p id='confirm-desc'>{description}</p>
+        <button onClick={onConfirm} data-testid='confirm-button'>
+          Confirm
+        </button>
+        <button onClick={onCancel} data-testid='cancel-button'>
+          Cancel
+        </button>
+      </div>
+    ) : null,
+}));
+
 // Mock useAnalytics hook
 const mockCreateGoal = vi.fn();
 const mockAnalytics: { goals: WritingGoals[]; createGoal: ReturnType<typeof vi.fn> } = {

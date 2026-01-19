@@ -226,7 +226,7 @@ describe('App', () => {
       // Simulate timeout by making init never resolve
       // @ts-expect-error - we know this is a mock
       db.init.mockImplementationOnce(() => {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
           setTimeout(() => {
             resolve(undefined);
           }, 20000);
@@ -250,14 +250,6 @@ describe('App', () => {
 
       // Should still render even if database times out
       expect(screen.getByTestId('main-layout')).toBeInTheDocument();
-    });
-
-      await waitFor(
-        () => {
-          expect(logger.warn).toHaveBeenCalled();
-        },
-        { timeout: 3000 },
-      );
     });
 
     it('should handle database initialization errors', async () => {

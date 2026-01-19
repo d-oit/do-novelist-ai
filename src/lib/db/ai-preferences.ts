@@ -81,8 +81,17 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
       return null;
     }
   } else {
-    logger.warn('Database not available for AI preferences', { component: 'ai-preferences' });
-    return null;
+    // Fallback to localStorage
+    try {
+      const stored = localStorage.getItem(getStorageKey(userId));
+      return stored != null ? (JSON.parse(stored) as UserAIPreference) : null;
+    } catch {
+      logger.warn('Failed to parse user AI preference from localStorage', {
+        component: 'ai-preferences',
+        userId,
+      });
+      return null;
+    }
   }
 }
 
@@ -139,7 +148,8 @@ export async function saveUserAIPreference(preference: UserAIPreference): Promis
       throw e;
     }
   } else {
-    logger.warn('Database not available for AI preferences', { component: 'ai-preferences' });
+    // Fallback to localStorage
+    localStorage.setItem(getStorageKey(preference.userId), JSON.stringify(preference));
   }
 }
 

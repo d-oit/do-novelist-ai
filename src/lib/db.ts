@@ -394,7 +394,6 @@ export const db = {
             characterCount: 0,
             estimatedReadingTime: 0,
             tags: [],
-            lastEdited: new Date().toISOString(),
             notes: '',
             createdAt: new Date(),
             updatedAt: new Date(),

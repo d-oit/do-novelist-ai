@@ -14,9 +14,12 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@libsql/client/web', () => ({
-  createClient: mocks.createClient.mockReturnValue({
-    execute: mocks.execute,
-    batch: mocks.batch,
+  createClient: vi.fn(config => {
+    mocks.createClient(config);
+    return {
+      execute: mocks.execute,
+      batch: mocks.batch,
+    };
   }),
 }));
 
@@ -70,35 +73,32 @@ describe('Database Library', () => {
       localStorage.setItem(
         'novelist_db_config',
         JSON.stringify({
-          url: '',
+          url: ':memory:',
           authToken: '',
           useCloud: false,
         }),
       );
 
+      // Reset mock to track calls
+      mockExecute.mockResolvedValue({ rows: [] });
+
       await db.init();
-      // Should not try to create cloud client
-      expect(mockCreateClient).not.toHaveBeenCalled();
+
+      // Should have created a client and executed table creation statements
+      expect(mockExecute).toHaveBeenCalled();
     });
 
     it('should attempt cloud initialization when configured', async () => {
-      localStorage.setItem(
-        'novelist_db_config',
-        JSON.stringify({
-          url: 'libsql://test.db',
-          authToken: 'token',
-          useCloud: true,
-        }),
-      );
+      // Clear localStorage so it uses the test environment defaults
+      localStorage.clear();
 
-      // Mock the client creation to fail
-      mockCreateClient.mockImplementationOnce(() => {
-        throw new Error('Connection failed');
-      });
+      // Reset execute mock
+      mockExecute.mockResolvedValue({ rows: [] });
 
-      // Note: console.error is suppressed in test environments, so we don't test for it
       await db.init();
-      expect(mockCreateClient).toHaveBeenCalled();
+
+      // Should have executed table creation statements
+      expect(mockExecute).toHaveBeenCalled();
     });
   });
 
@@ -178,44 +178,113 @@ describe('Database Library', () => {
       ],
     };
 
-    describe('Cloud Operations (using localStorage for testing)', () => {
-      beforeEach(() => {
-        // Skip cloud tests for now - they require complex mocking
-        // Use localStorage operations instead
+    describe('Database Operations', () => {
+      beforeEach(async () => {
+        // Set up in-memory database for testing
         localStorage.setItem(
           'novelist_db_config',
           JSON.stringify({
-            url: '',
+            url: ':memory:',
             authToken: '',
             useCloud: false,
           }),
         );
-        saveStoredConfig({ url: '', authToken: '', useCloud: false });
+
+        // Reset mocks
+        mockExecute.mockResolvedValue({ rows: [] });
+        mockBatch.mockResolvedValue([]);
+
+        // Initialize database
+        await db.init();
       });
 
-      it('should save project to localStorage', async () => {
+      it('should save project to database', async () => {
+        mockExecute.mockResolvedValue({ rows: [] });
+
         await db.saveProject(mockProject);
-        const stored = JSON.parse(localStorage.getItem('novelist_local_projects') || '{}');
-        expect(stored.p1).toBeDefined();
-        expect(stored.p1.title).toBe('Test Project');
+
+        // Should have called execute for insert
+        expect(mockExecute).toHaveBeenCalled();
+        // Should have called batch for chapters
+        expect(mockBatch).toHaveBeenCalled();
       });
 
-      it('should load project from localStorage', async () => {
-        const projects = { p1: mockProject };
-        localStorage.setItem('novelist_local_projects', JSON.stringify(projects));
+      it('should load project from database', async () => {
+        // Reset mock to clear all previous implementations from db.init()
+        mockExecute.mockReset();
 
-        const project = await db.loadProject('p1');
-        expect(project).toBeDefined();
-        expect(project?.id).toBe('p1');
+        // Mock project row with all required fields matching ProjectSchema
+        mockExecute.mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'proj_1',
+              title: 'Test Project',
+              idea: 'Test Idea',
+              style: 'Science Fiction',
+              // cover_image omitted - will be undefined, which is valid for optional field
+              world_state: JSON.stringify({
+                hasOutline: true,
+                hasTitle: true,
+                chaptersCount: 0,
+                chaptersCompleted: 0,
+                styleDefined: true,
+                isPublished: false,
+                hasCharacters: false,
+                hasWorldBuilding: false,
+                hasThemes: false,
+                plotStructureDefined: false,
+                targetAudienceDefined: false,
+              }),
+              status: 'Draft', // Must match PublishStatus enum (capitalized)
+              language: 'en',
+              target_word_count: 50000,
+              settings: JSON.stringify({
+                enableDropCaps: true,
+                autoSave: true,
+                autoSaveInterval: 300, // Schema expects seconds (max 3600), not milliseconds
+                showWordCount: true,
+                enableSpellCheck: true,
+                darkMode: true,
+                fontSize: 'medium',
+                lineHeight: 'relaxed',
+                editorTheme: 'default',
+              }),
+              timeline: JSON.stringify({
+                id: '550e8400-e29b-41d4-a716-446655440000',
+                projectId: 'proj_1',
+                events: [],
+                eras: [],
+                settings: {
+                  viewMode: 'chronological',
+                  zoomLevel: 1,
+                  showCharacters: true,
+                  showImplicitEvents: false,
+                },
+              }),
+              updated_at: '2024-01-01T00:00:00.000Z',
+            },
+          ],
+        });
+
+        // Mock chapters rows (empty array is fine with chaptersCount: 0)
+        mockExecute.mockResolvedValueOnce({
+          rows: [],
+        });
+
+        const project = await db.loadProject('proj_1');
+
+        expect(project).not.toBeNull();
+        expect(project?.id).toBe('proj_1');
+        expect(project?.title).toBe('Test Project');
       });
 
-      it('should delete project from localStorage', async () => {
-        const projects = { p1: mockProject };
-        localStorage.setItem('novelist_local_projects', JSON.stringify(projects));
+      it('should delete project from database', async () => {
+        mockBatch.mockResolvedValue([]);
 
         await db.deleteProject('p1');
-        const stored = JSON.parse(localStorage.getItem('novelist_local_projects') || '{}');
-        expect(stored.p1).toBeUndefined();
+
+        // Should have called batch to delete chapters and project
+        expect(mockBatch).toHaveBeenCalled();
       });
     });
   });

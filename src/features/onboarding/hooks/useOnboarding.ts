@@ -180,7 +180,7 @@ export function useOnboarding(): UseOnboardingReturn {
         logger.error('Failed to save onboarding complete to localStorage', { error: localError });
       }
     }
-  }, [userId, currentStep]);
+  }, [userId]);
 
   const nextStep = useCallback((): void => {
     const currentIndex = STEPS.indexOf(currentStep);
