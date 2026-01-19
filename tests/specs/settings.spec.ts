@@ -2,7 +2,83 @@ import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-openrouter';
 
+/**
+ * Helper function to find and click the settings button
+ * Tries multiple strategies for maximum reliability
+ */
+async function navigateToSettings(page: import('@playwright/test').Page): Promise<void> {
+  const errors: string[] = [];
+
+  // Strategy 1: Dashboard settings icon (only visible when dashboard view is active)
+  try {
+    const settingsIcon = page.getByTestId('dashboard-settings-icon');
+    await settingsIcon.waitFor({ state: 'visible', timeout: 5000 });
+    await settingsIcon.click();
+    return;
+  } catch {
+    errors.push('Dashboard settings icon not visible');
+  }
+
+  // Strategy 2: Try BottomNav settings button directly (mobile only, visible by default)
+  try {
+    const bottomNavSettings = page.locator('nav').getByTestId('nav-settings');
+    await bottomNavSettings.waitFor({ state: 'visible', timeout: 2000 });
+    await bottomNavSettings.click();
+    return;
+  } catch {
+    errors.push('BottomNav settings button not visible');
+  }
+
+  // Strategy 3: Try opening mobile menu and clicking settings link
+  try {
+    const menuToggle = page.getByTestId('mobile-menu-toggle');
+    if (await menuToggle.isVisible({ timeout: 2000 })) {
+      await menuToggle.click();
+      // Wait for menu to open
+      await page.waitForTimeout(500);
+
+      // Try to find and click settings in the mobile menu
+      const mobileMenuSettings = page.locator('div[role="menu"]').getByTestId('nav-settings');
+      await mobileMenuSettings.waitFor({ state: 'visible', timeout: 2000 });
+      await mobileMenuSettings.click();
+      return;
+    }
+  } catch {
+    errors.push('Mobile menu strategy failed');
+  }
+
+  // Strategy 4: Header settings link (desktop, visible by default)
+  try {
+    const headerSettings = page.getByTestId('nav-settings').first();
+    await headerSettings.waitFor({ state: 'visible', timeout: 2000 });
+    await headerSettings.click();
+    return;
+  } catch {
+    errors.push('Header settings link not visible');
+  }
+
+  // Strategy 5: Any button with Settings text
+  try {
+    const settingsButton = page.getByRole('button', { name: /settings/i }).first();
+    await settingsButton.waitFor({ state: 'visible', timeout: 2000 });
+    await settingsButton.click();
+    return;
+  } catch {
+    errors.push('Settings button by role not found');
+  }
+
+  // All strategies failed - provide diagnostic information
+  throw new Error(
+    `Settings navigation failed. Tried strategies: ${errors.join(', ')}\n` +
+      `Viewport: ${page.viewportSize()?.width}x${page.viewportSize()?.height}\n` +
+      `Page URL: ${page.url()}\n` +
+      `Available nav-settings elements: ${await page.locator('[data-testid*="nav-settings"]').count()}`,
+  );
+}
+
 test.describe('Settings Panel E2E Tests', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test.beforeEach(async ({ page }) => {
     await setupGeminiMock(page);
 
@@ -15,34 +91,32 @@ test.describe('Settings Panel E2E Tests', () => {
     await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
   });
 
-  test('should access settings view', async ({ page }) => {
-    // Direct navigation test with fallback strategies
-    const strategies = [
-      () => page.getByTestId('nav-settings'),
-      () => page.getByRole('button', { name: /settings/i }),
-      () => page.getByText('Settings'),
-    ];
+  test('should access settings view on desktop', async ({ page }) => {
+    // Set desktop viewport
+    await page.setViewportSize({ width: 1280, height: 720 });
 
-    let settingsButton = null;
-    for (const strategy of strategies) {
-      try {
-        settingsButton = strategy();
-        await settingsButton.click({ timeout: 3000 });
-        break;
-      } catch {
-        continue;
-      }
-    }
+    // Wait a moment for viewport to apply
+    await page.waitForTimeout(100);
 
-    if (!settingsButton) {
-      // Try alternative approach - look for Settings button in header
-      const headerSettingsButton = page.locator('header').getByText('Settings');
-      if (await headerSettingsButton.isVisible()) {
-        await headerSettingsButton.click();
-      } else {
-        throw new Error('Settings navigation button not found');
-      }
-    }
+    // Navigate to settings
+    await navigateToSettings(page);
+
+    // Wait for navigation and settings view to appear
+    await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 15000 });
+
+    // Verify main heading is present
+    await expect(page.getByRole('heading', { name: 'Settings', exact: true }).first()).toBeVisible();
+  });
+
+  test('should access settings view on mobile', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+
+    // Wait a moment for viewport to apply
+    await page.waitForTimeout(100);
+
+    // Navigate to settings
+    await navigateToSettings(page);
 
     // Wait for navigation and settings view to appear
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 15000 });
@@ -52,7 +126,7 @@ test.describe('Settings Panel E2E Tests', () => {
   });
 
   test('should display database persistence section', async ({ page }) => {
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Check for Database Persistence section
@@ -64,7 +138,7 @@ test.describe('Settings Panel E2E Tests', () => {
   });
 
   test('should toggle between local and cloud storage', async ({ page }) => {
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Click on Turso Cloud to switch
@@ -82,7 +156,7 @@ test.describe('Settings Panel E2E Tests', () => {
   });
 
   test('should display appearance section with theme toggle', async ({ page }) => {
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Check for Appearance section
@@ -94,7 +168,7 @@ test.describe('Settings Panel E2E Tests', () => {
   });
 
   test('should toggle between light and dark theme', async ({ page }) => {
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Click Light theme
@@ -112,7 +186,7 @@ test.describe('Settings Panel E2E Tests', () => {
   });
 
   test('should display AI Provider Settings section', async ({ page }) => {
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Check for AI Provider Settings section (use first() since there are two matching elements)
@@ -120,7 +194,7 @@ test.describe('Settings Panel E2E Tests', () => {
   });
 
   test('should display Writing Gamification section', async ({ page }) => {
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Check for Gamification section
@@ -128,7 +202,7 @@ test.describe('Settings Panel E2E Tests', () => {
   });
 
   test('should display Google GenAI Configuration section', async ({ page }) => {
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Check for API configuration section
@@ -137,7 +211,7 @@ test.describe('Settings Panel E2E Tests', () => {
   });
 
   test('should save database configuration', async ({ page }) => {
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Click Save Configuration button (for local mode)
@@ -150,7 +224,7 @@ test.describe('Settings Panel E2E Tests', () => {
   });
 
   test('should navigate away and back to settings', async ({ page }) => {
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Navigate to dashboard
@@ -160,7 +234,7 @@ test.describe('Settings Panel E2E Tests', () => {
     await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
 
     // Navigate back to settings
-    await page.getByTestId('nav-settings').click();
+    await navigateToSettings(page);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
     // Settings should still show all sections
