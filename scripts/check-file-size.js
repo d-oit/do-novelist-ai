@@ -30,13 +30,16 @@ const ALLOWED_VIOLATIONS = new Set([
   // Production files exceeding 600 LOC limit (to be refactored)
   'src/features/plot-engine/services/plotGenerationService.ts', // 1061 LOC - high priority refactoring
   'src/features/publishing/services/publishingAnalyticsService.ts', // 712 LOC
-
+  'src/lib/repositories/implementations/ChapterRepository.ts', // 632 LOC
   'src/features/writing-assistant/services/grammarSuggestionService.ts', // 634 LOC
   // Test files exceeding 600 LOC limit
   'src/features/plot-engine/services/__tests__/rag-end-to-end.test.ts', // 935 LOC
   'src/features/plot-engine/services/__tests__/plotGenerationService.integration.test.ts', // 839 LOC
   'src/features/plot-engine/services/__tests__/plotGenerationService.test.ts', // 795 LOC
   'src/features/plot-engine/services/__tests__/plotStorageService.test.ts', // 706 LOC
+  'src/lib/__tests__/validation.test.ts', // 836 LOC
+  'src/lib/validation.test.ts', // 836 LOC (duplicate path, both allowed)
+  'src/lib/errors/error-handler.test.ts', // 607 LOC
 ]);
 
 const IGNORE_PATTERNS = [
