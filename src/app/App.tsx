@@ -329,7 +329,10 @@ const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className='flex min-h-screen flex-col items-center justify-center bg-background text-foreground'>
+      <div
+        className='flex min-h-screen flex-col items-center justify-center bg-background text-foreground'
+        data-testid='app-loading'
+      >
         <Loader2 className='mb-4 h-12 w-12 animate-spin text-primary' />
         <h2 className='font-serif text-xl font-bold'>Initializing GOAP Engine...</h2>
         <p className='text-muted-foreground'>Connecting to database...</p>

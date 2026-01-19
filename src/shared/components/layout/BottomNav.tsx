@@ -31,11 +31,13 @@ interface NavButtonProps {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
+  dataTestId?: string;
 }
 
-const NavButton: React.FC<NavButtonProps> = ({ active, icon, label, onClick }) => (
+const NavButton: React.FC<NavButtonProps> = ({ active, icon, label, onClick, dataTestId }) => (
   <button
     onClick={onClick}
+    data-testid={dataTestId}
     className={cn(
       'flex flex-1 flex-col items-center justify-center p-2 text-xs font-medium transition-colors',
       active ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
@@ -82,6 +84,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate })
             icon={<Settings className='h-5 w-5' />}
             label='Settings'
             onClick={() => onNavigate('settings')}
+            dataTestId='nav-settings'
           />
         </div>
       </nav>

@@ -102,6 +102,7 @@ const SettingsView: React.FC = () => {
             </div>
             <div className='flex rounded-lg bg-secondary/50 p-1'>
               <button
+                data-testid='storage-local-btn'
                 onClick={() => setDbConfig(p => ({ ...p, useCloud: false }))}
                 className={cn(
                   'rounded-md px-4 py-1.5 text-xs font-bold transition-all',
@@ -113,6 +114,7 @@ const SettingsView: React.FC = () => {
                 Local (Browser)
               </button>
               <button
+                data-testid='storage-cloud-btn'
                 onClick={() => setDbConfig(p => ({ ...p, useCloud: true }))}
                 className={cn(
                   'rounded-md px-4 py-1.5 text-xs font-bold transition-all',
@@ -176,6 +178,7 @@ const SettingsView: React.FC = () => {
 
           <div className='flex justify-end pt-2'>
             <button
+              data-testid='save-config-btn'
               onClick={() => void handleSaveDbConfig()}
               className='flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-all hover:opacity-90'
             >
@@ -201,6 +204,7 @@ const SettingsView: React.FC = () => {
         </h3>
         <div className='grid max-w-sm grid-cols-2 rounded-lg border border-border bg-card p-1'>
           <button
+            data-testid='theme-light-btn'
             onClick={() => handleThemeChange('light')}
             className={cn(
               'flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all',
@@ -212,6 +216,7 @@ const SettingsView: React.FC = () => {
             <Sun className='h-4 w-4' /> Light
           </button>
           <button
+            data-testid='theme-dark-btn'
             onClick={() => handleThemeChange('dark')}
             className={cn(
               'flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all',

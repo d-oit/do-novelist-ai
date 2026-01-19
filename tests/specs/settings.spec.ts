@@ -45,7 +45,6 @@ test.describe('Settings Panel E2E Tests', () => {
     }
 
     // Wait for navigation and settings view to appear
-    await page.waitForTimeout(2000);
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 15000 });
 
     // Verify main heading is present
