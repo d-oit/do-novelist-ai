@@ -59,32 +59,38 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate })
 
   return (
     <>
-      <nav className='fixed bottom-0 left-0 right-0 z-50 border-t bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 md:hidden'>
+      <nav
+        aria-label='Bottom navigation'
+        className='fixed bottom-0 left-0 right-0 z-50 border-t bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 md:hidden'
+      >
         <div className='pb-safe flex h-16 items-center justify-around'>
           <NavButton
             active={currentView === 'dashboard'}
             icon={<Home className='h-5 w-5' />}
             label='Dashboard'
             onClick={() => onNavigate('dashboard')}
+            dataTestId='mobile-nav-dashboard'
           />
           <NavButton
             active={currentView === 'projects'}
             icon={<Edit className='h-5 w-5' />}
             label='Projects'
             onClick={() => onNavigate('projects')}
+            dataTestId='mobile-nav-projects'
           />
           <NavButton
             active={isMoreActive}
             icon={<MoreHorizontal className='h-5 w-5' />}
             label='More'
             onClick={() => setIsMoreOpen(true)}
+            dataTestId='mobile-nav-more'
           />
           <NavButton
             active={currentView === 'settings'}
             icon={<Settings className='h-5 w-5' />}
             label='Settings'
             onClick={() => onNavigate('settings')}
-            dataTestId='nav-settings'
+            dataTestId='mobile-nav-settings'
           />
         </div>
       </nav>

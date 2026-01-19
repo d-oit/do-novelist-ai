@@ -94,7 +94,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             className='fixed inset-4 z-50 m-auto flex h-fit max-h-[90vh] max-w-lg flex-col overflow-hidden rounded-2xl border bg-card shadow-2xl md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2'
             role='dialog'
             aria-modal='true'
-            aria-labelledby='onboarding-title'
+            aria-label='Onboarding'
           >
             {/* Header */}
             <div className='flex items-center justify-between border-b px-6 py-4'>

@@ -5,13 +5,32 @@ import { cn } from '@/lib/utils';
 interface NavbarProps {
   projectTitle: string;
   onNewProject: () => void;
-  currentView: 'dashboard' | 'projects' | 'settings' | 'world-building';
-  onNavigate: (view: 'dashboard' | 'projects' | 'settings' | 'world-building') => void;
+  currentView:
+    | 'dashboard'
+    | 'projects'
+    | 'settings'
+    | 'world-building'
+    | 'plot-engine'
+    | 'metrics'
+    | 'dialogue';
+  onNavigate: (
+    view:
+      | 'dashboard'
+      | 'projects'
+      | 'settings'
+      | 'world-building'
+      | 'plot-engine'
+      | 'metrics'
+      | 'dialogue',
+  ) => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView, onNavigate }) => {
   return (
-    <nav className='flex items-center justify-between border-b border-border/40 bg-card/50 px-4 py-2 backdrop-blur-sm'>
+    <nav
+      aria-label='Main navigation'
+      className='flex items-center justify-between border-b border-border/40 bg-card/50 px-4 py-2 backdrop-blur-sm'
+    >
       <div className='flex items-center gap-4'>
         <div className='text-lg font-bold text-primary'>Novelist.ai</div>
         <div className='text-sm text-muted-foreground'>{projectTitle}</div>
@@ -29,6 +48,19 @@ const Navbar: React.FC<NavbarProps> = ({ projectTitle, onNewProject, currentView
           data-testid='nav-dashboard'
         >
           Dashboard
+        </button>
+
+        <button
+          onClick={() => onNavigate('settings')}
+          className={cn(
+            'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+            currentView === 'settings'
+              ? 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+          )}
+          data-testid='nav-settings'
+        >
+          Settings
         </button>
 
         <button

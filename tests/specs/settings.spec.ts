@@ -34,10 +34,10 @@ async function navigateToSettings(page: import('@playwright/test').Page): Promis
     const menuToggle = page.getByTestId('mobile-menu-toggle');
     if (await menuToggle.isVisible({ timeout: 2000 })) {
       await menuToggle.click();
-      // Wait for menu to open
-      await page.waitForTimeout(500);
+      // Wait for menu to open using smart wait
+      await expect(page.locator('div[role="menu"]')).toBeVisible({ timeout: 2000 });
 
-      // Try to find and click settings in the mobile menu
+      // Try to find and click settings in mobile menu
       const mobileMenuSettings = page.locator('div[role="menu"]').getByTestId('nav-settings');
       await mobileMenuSettings.waitFor({ state: 'visible', timeout: 2000 });
       await mobileMenuSettings.click();
@@ -95,8 +95,8 @@ test.describe('Settings Panel E2E Tests', () => {
     // Set desktop viewport
     await page.setViewportSize({ width: 1280, height: 720 });
 
-    // Wait a moment for viewport to apply
-    await page.waitForTimeout(100);
+    // Wait for viewport to apply using smart wait
+    await page.waitForLoadState('domcontentloaded');
 
     // Navigate to settings
     await navigateToSettings(page);
@@ -112,8 +112,8 @@ test.describe('Settings Panel E2E Tests', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
 
-    // Wait a moment for viewport to apply
-    await page.waitForTimeout(100);
+    // Wait for viewport to apply using smart wait
+    await page.waitForLoadState('domcontentloaded');
 
     // Navigate to settings
     await navigateToSettings(page);

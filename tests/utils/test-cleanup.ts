@@ -109,8 +109,9 @@ export async function waitForElementStability(
 }
 
 /**
- * Click element with stability guarantee
- * Ensures element is ready before clicking
+ * Click an element with stability checks
+ * Ensures the element is visible and stable before clicking
+ * Automatically converts testid names to data-testid selectors
  */
 export async function clickWithStability(
   page: Page,
@@ -119,12 +120,18 @@ export async function clickWithStability(
 ): Promise<void> {
   const { timeout = 15000, force = false } = options;
 
+  // Convert testid to data-testid selector if needed
+  const dataTestIdSelector =
+    selector.startsWith('[') || selector.startsWith('.') || selector.startsWith('#')
+      ? selector
+      : `[data-testid="${selector}"]`;
+
   // Wait for element to be visible
-  await page.waitForSelector(selector, { state: 'visible', timeout });
+  await page.waitForSelector(dataTestIdSelector, { state: 'visible', timeout });
 
   // Small delay for animations
   await page.waitForTimeout(100);
 
   // Click with stability check
-  await page.locator(selector).click({ timeout, force });
+  await page.locator(dataTestIdSelector).click({ timeout, force });
 }

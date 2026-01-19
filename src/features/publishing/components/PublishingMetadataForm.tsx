@@ -99,7 +99,12 @@ export const PublishingMetadataForm: React.FC<PublishingMetadataFormProps> = ({
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className='space-y-6'>
+          <form
+            onSubmit={handleSubmit}
+            role='form'
+            aria-label='Publishing metadata form'
+            className='space-y-6'
+          >
             {/* Description */}
             <div>
               <label className='mb-2 block text-sm font-medium'>

@@ -119,6 +119,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
               )}
               role='dialog'
               aria-modal='true'
+              aria-labelledby={props['aria-labelledby'] || 'dialog-title'}
               {...props}
             >
               {children}

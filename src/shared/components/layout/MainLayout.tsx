@@ -33,7 +33,7 @@ interface MainLayoutProps {
 const MainLayout: FC<MainLayoutProps> = ({ children, className, currentView, onNavigate }) => {
   return (
     <motion.div
-      data-testid='app-ready'
+      data-testid='app-layout'
       className={cn(
         'relative flex min-h-screen flex-col overflow-hidden font-sans text-foreground selection:bg-primary/20',
         className,
@@ -74,7 +74,6 @@ const MainLayout: FC<MainLayoutProps> = ({ children, className, currentView, onN
       {/* Main content with proper z-index and stagger animation */}
       <motion.div
         id='main-content'
-        role='main'
         className='relative z-10 flex min-h-screen flex-col pb-16 md:pb-0'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -83,7 +82,9 @@ const MainLayout: FC<MainLayoutProps> = ({ children, className, currentView, onN
         {children}
       </motion.div>
 
-      {currentView && onNavigate && <BottomNav currentView={currentView} onNavigate={onNavigate} />}
+      {currentView && onNavigate && (
+        <BottomNav currentView={currentView} onNavigate={onNavigate} aria-label='Main navigation' />
+      )}
 
       <PWAStatus />
     </motion.div>

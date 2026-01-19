@@ -178,17 +178,17 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
 
   test('should handle navigation between dashboard and settings', async ({ page }) => {
     // Start at dashboard
-    await clickWithStability(page, 'nav-dashboard', { timeout: 15000 });
+    await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
     await page.waitForLoadState('domcontentloaded');
 
-    // Navigate to settings using test ID for reliability
-    await clickWithStability(page, 'nav-settings', { timeout: 15000 });
+    // Navigate to settings using top navigation (Header) to avoid duplicate ID issue
+    await page.getByRole('navigation').getByTestId('nav-settings').click({ timeout: 15000 });
 
     // Wait for settings view to load with intelligent polling
     await expect(page.getByTestId('settings-view')).toBeVisible({ timeout: 10000 });
 
-    // Navigate back to dashboard
-    await clickWithStability(page, 'nav-dashboard', { timeout: 15000 });
+    // Navigate back to dashboard using top navigation
+    await page.getByRole('navigation').getByTestId('nav-dashboard').click({ timeout: 15000 });
     await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10000 });
   });
 });

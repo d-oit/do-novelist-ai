@@ -114,7 +114,7 @@ export const CharacterEditor: FC<CharacterEditorProps> = ({
             </button>
           </CardHeader>
 
-          <form onSubmit={e => void handleSubmit(e)}>
+          <form onSubmit={e => void handleSubmit(e)} role='form' aria-label='Character editor form'>
             <CardContent className='space-y-6 pt-6'>
               {error !== null ? (
                 <div className='flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive'>

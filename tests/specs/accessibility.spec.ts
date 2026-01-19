@@ -42,7 +42,8 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
     } catch {
       // Fallback: wait for any content to be visible
       await page.waitForLoadState('domcontentloaded');
-      await page.waitForTimeout(1000);
+      // Smart wait: ensure body is interactive
+      await expect(page.locator('body')).toBeVisible({ timeout: 3000 });
     }
   });
 
@@ -328,8 +329,8 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
         try {
           await expect(page.getByRole('main')).toBeVisible({ timeout: 5000 });
         } catch {
-          // In CI, main role may not be present
-          await page.waitForTimeout(1000);
+          // In CI, main role may not be present, ensure body is ready
+          await expect(page.locator('body')).toBeVisible({ timeout: 3000 });
         }
 
         // Check that new content doesn't introduce accessibility issues - CI resilient
@@ -387,7 +388,7 @@ test.describe('E2E Accessibility Audit - WCAG 2.1 AA Compliance', () => {
           await expect(page.getByRole('main')).toBeVisible({ timeout: 5000 });
         } catch {
           // In CI, main role may not be present
-          await page.waitForTimeout(500);
+          await expect(page.locator('body')).toBeVisible({ timeout: 3000 });
         }
 
         // Run accessibility scan for each viewport - CI resilient

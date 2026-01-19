@@ -137,7 +137,12 @@ export const FeedbackCollector: React.FC<FeedbackCollectorProps> = React.memo(
             </p>
           </div>
         ) : (
-          <form onSubmit={e => void handleSubmit(e)} className='mt-6 space-y-4'>
+          <form
+            onSubmit={e => void handleSubmit(e)}
+            role='form'
+            aria-label='Feedback form'
+            className='mt-6 space-y-4'
+          >
             {/* Feedback Type */}
             <div>
               <label className='mb-2 block text-sm font-medium'>Feedback Type</label>

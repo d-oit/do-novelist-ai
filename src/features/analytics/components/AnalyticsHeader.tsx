@@ -37,7 +37,9 @@ const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
       )}
     >
       <div className='flex items-center gap-3'>
-        <h2 className='text-xl font-semibold text-foreground'>Analytics Dashboard</h2>
+        <h2 id='analytics-dashboard-title' className='text-xl font-semibold text-foreground'>
+          Analytics Dashboard
+        </h2>
         <span className='text-sm text-muted-foreground'>{project.title}</span>
       </div>
 

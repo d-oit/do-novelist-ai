@@ -98,7 +98,6 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
           'shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.12)]',
           'transition-all duration-300',
         )}
-        role='banner'
         style={{ '--header-height': '4rem' } as React.CSSProperties}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -149,6 +148,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
           <motion.div
             className='hidden items-center gap-2 md:flex'
             role='menubar'
+            aria-label='Main navigation'
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}

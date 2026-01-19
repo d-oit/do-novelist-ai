@@ -15,8 +15,9 @@ test.describe('Application Navigation', () => {
     // Dismiss onboarding modal if present
     await dismissOnboardingModal(page);
 
-    // Wait for Framer Motion animations to complete
-    await page.waitForTimeout(1000);
+    // Wait for Framer Motion animations to complete using smart wait
+    // Wait for navigation to be interactive instead of fixed timeout
+    await expect(page.getByRole('navigation')).toBeVisible({ timeout: 5000 });
   });
 
   test.afterEach(async ({ page }) => {
@@ -124,12 +125,12 @@ test.describe('Application Navigation', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
 
-    // Wait for responsive layout
-    await page.waitForTimeout(500);
+    // Wait for responsive layout using smart wait
+    await page.waitForLoadState('domcontentloaded');
 
     // Check for mobile navigation (hamburger menu or bottom nav)
     const mobileNav = page.locator('nav').first();
-    await expect(mobileNav).toBeVisible();
+    await expect(mobileNav).toBeVisible({ timeout: 5000 });
   });
 
   test('should preserve scroll position on navigation', async ({ page }) => {

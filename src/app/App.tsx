@@ -392,7 +392,7 @@ const App: React.FC = () => {
       <main
         id='main-content'
         data-testid='app-ready'
-        role='main'
+        aria-label='Main content'
         className='relative flex-1 pb-16 md:pb-0'
       >
         {/* Page Title - Hidden visually but available to screen readers */}

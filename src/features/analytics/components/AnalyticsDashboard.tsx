@@ -93,6 +93,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = React.memo(
         exit={{ opacity: 0, scale: 0.95 }}
         role='dialog'
         aria-modal='true'
+        aria-labelledby='analytics-dashboard-title'
         className={cn(
           'fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm',
           className,
