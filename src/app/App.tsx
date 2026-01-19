@@ -435,7 +435,6 @@ const App: React.FC = () => {
                     <Settings
                       className='h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground'
                       onClick={() => setCurrentView('settings')}
-                      data-testid='dashboard-settings-icon'
                     />
                   </div>
 
