@@ -39,7 +39,9 @@ test.describe('Mock Infrastructure Validation', () => {
 
     // Navigate to a view that would use AI mocks
     await page.getByTestId('nav-dashboard').click({ timeout: 15000 });
-    await expect(page.getByTestId('project-dashboard')).toBeVisible({ timeout: 10000 });
+    // Wait for dashboard to appear (fix flaky Firefox tests)
+    await page.waitForSelector('[data-testid="project-dashboard"]', { timeout: 10000 });
+    await expect(page.getByTestId('project-dashboard')).toBeVisible({ timeout: 5000 });
 
     // Verify mock manager was initialized by checking console logs
     const hasMockLogs = consoleLogs.some(
