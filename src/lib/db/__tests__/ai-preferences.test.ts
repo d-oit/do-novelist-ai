@@ -81,7 +81,8 @@ describe('AI Preferences Database Service', () => {
     it('should save user AI preference to localStorage', async () => {
       await saveUserAIPreference(mockPreference);
 
-      const stored = localStorage.getItem(`novelist_ai_preferences_${mockPreference.userId}`);
+      // Storage adapter uses key format: novelist_{namespace}_{key}_{userId}
+      const stored = localStorage.getItem(`novelist_ai_preference_${mockPreference.userId}_${mockPreference.userId}`);
       expect(stored).not.toBeNull();
 
       const parsed = JSON.parse(stored as string);
@@ -161,7 +162,8 @@ describe('AI Preferences Database Service', () => {
     it('should save provider capability to localStorage', async () => {
       await saveProviderCapability(mockCapability);
 
-      const stored = localStorage.getItem('novelist_ai_preferences_capabilities');
+      // Storage adapter uses key format: novelist_{namespace}_{key}
+      const stored = localStorage.getItem('novelist_ai_capabilities');
       expect(stored).not.toBeNull();
 
       const parsed = JSON.parse(stored as string);
@@ -241,7 +243,8 @@ describe('AI Preferences Database Service', () => {
     it('should log usage analytic to localStorage', async () => {
       await logUsageAnalytic(mockAnalytic);
 
-      const stored = localStorage.getItem('novelist_ai_preferences_analytics');
+      // Storage adapter uses key format: novelist_{namespace}_{key}
+      const stored = localStorage.getItem('novelist_ai_analytics');
       expect(stored).not.toBeNull();
 
       const parsed = JSON.parse(stored as string);
@@ -323,7 +326,8 @@ describe('AI Preferences Database Service', () => {
     it('should save provider health to localStorage', async () => {
       await updateProviderHealth(mockHealth);
 
-      const stored = localStorage.getItem('novelist_ai_preferences_health');
+      // Storage adapter uses key format: novelist_{namespace}_{key}
+      const stored = localStorage.getItem('novelist_ai_health');
       expect(stored).not.toBeNull();
 
       const parsed = JSON.parse(stored as string);

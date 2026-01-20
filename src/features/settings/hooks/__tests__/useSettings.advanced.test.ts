@@ -215,7 +215,7 @@ describe('useSettings - Advanced Features', () => {
   });
 
   // Persistence Tests
-  it('persists settings across hook remounts', () => {
+  it('persists settings across hook remounts', async () => {
     const customSettings: Settings = {
       ...DEFAULT_SETTINGS,
       theme: 'dark',
@@ -230,6 +230,9 @@ describe('useSettings - Advanced Features', () => {
       result1.current.init();
     });
 
+    // Wait for async init to complete
+    await new Promise(resolve => setTimeout(resolve, 10));
+
     expect(result1.current.settings.theme).toBe('dark');
 
     // Remount
@@ -238,6 +241,9 @@ describe('useSettings - Advanced Features', () => {
     act(() => {
       result2.current.init();
     });
+
+    // Wait for async init to complete
+    await new Promise(resolve => setTimeout(resolve, 10));
 
     expect(result2.current.settings.theme).toBe('dark');
   });

@@ -2,8 +2,13 @@ import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { useSettings } from '@/features/settings/hooks/useSettings';
+import { settingsService } from '@/features/settings/services/settingsService';
 import { type Settings } from '@/types';
 import { DEFAULT_SETTINGS } from '@/types';
+
+// Mock settings service
+vi.mock('../../services/settingsService');
+const mockSettingsService = vi.mocked(settingsService);
 
 // Mock DOM methods
 const mockClassListToggle = vi.fn();
@@ -174,17 +179,9 @@ describe('useSettings - Basic Operations', () => {
   it('handles update errors', () => {
     const { result } = renderHook(() => useSettings());
 
-    // Mock localStorage to throw on save
-    Object.defineProperty(window, 'localStorage', {
-      value: {
-        getItem: vi.fn().mockReturnValue(null),
-        setItem: () => {
-          throw new Error('Save failed');
-        },
-        removeItem: vi.fn(),
-        clear: vi.fn(),
-      },
-      writable: true,
+    // Mock settingsService.save to throw synchronously
+    mockSettingsService.save.mockImplementation(() => {
+      throw new Error('Save failed');
     });
 
     // Suppress console.error for this test since it's expected
@@ -235,17 +232,9 @@ describe('useSettings - Basic Operations', () => {
   it('handles reset errors', () => {
     const { result } = renderHook(() => useSettings());
 
-    // Mock localStorage to throw on setItem (which save() uses)
-    Object.defineProperty(window, 'localStorage', {
-      value: {
-        getItem: vi.fn().mockReturnValue(null),
-        setItem: () => {
-          throw new Error('Reset failed');
-        },
-        removeItem: vi.fn(),
-        clear: vi.fn(),
-      },
-      writable: true,
+    // Mock settingsService.save to throw synchronously
+    mockSettingsService.save.mockImplementation(() => {
+      throw new Error('Reset failed');
     });
 
     // Suppress console.error for this test since it's expected
@@ -305,35 +294,20 @@ describe('useSettings - Basic Operations', () => {
     // Suppress console.error for this test since it's expected
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Force an error
-    Object.defineProperty(window, 'localStorage', {
-      value: {
-        getItem: vi.fn().mockReturnValue(null),
-        setItem: () => {
-          throw new Error('Save error');
-        },
-        removeItem: vi.fn(),
-        clear: vi.fn(),
-      },
-      writable: true,
-    });
+    // Mock settingsService.save to throw synchronously first time
+    mockSettingsService.save
+      .mockImplementationOnce(() => {
+        throw new Error('Save error');
+      })
+      .mockImplementationOnce(() => {
+        return Promise.resolve(undefined);
+      });
 
     act(() => {
       result.current.update({ theme: 'dark' });
     });
 
     expect(result.current.error).toBe('Save error');
-
-    // Fix localStorage and try again
-    Object.defineProperty(window, 'localStorage', {
-      value: {
-        getItem: vi.fn().mockReturnValue(null),
-        setItem: vi.fn(),
-        removeItem: vi.fn(),
-        clear: vi.fn(),
-      },
-      writable: true,
-    });
 
     act(() => {
       result.current.update({ theme: 'light' });
