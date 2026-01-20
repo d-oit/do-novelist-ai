@@ -4,8 +4,8 @@
  * Automatically uses Turso when available, falls back to localStorage for compatibility
  */
 import { getDrizzleClient } from './database/drizzle';
-import { kvService, KV_NAMESPACES } from './database/services/key-value-service';
 import type { KVNamespace } from './database/schemas/key-value-store';
+import { kvService, KV_NAMESPACES } from './database/services/key-value-service';
 import { logger } from './logging/logger';
 
 /**
@@ -31,7 +31,9 @@ export class StorageAdapter {
     if (typeof window === 'undefined') return null;
 
     try {
-      const storageKey = userId ? `novelist_${namespace}_${key}_${userId}` : `novelist_${namespace}_${key}`;
+      const storageKey = userId
+        ? `novelist_${namespace}_${key}_${userId}`
+        : `novelist_${namespace}_${key}`;
       const value = localStorage.getItem(storageKey);
       if (value === null) return null;
 
@@ -68,7 +70,9 @@ export class StorageAdapter {
     if (typeof window === 'undefined') return;
 
     try {
-      const storageKey = userId ? `novelist_${namespace}_${key}_${userId}` : `novelist_${namespace}_${key}`;
+      const storageKey = userId
+        ? `novelist_${namespace}_${key}_${userId}`
+        : `novelist_${namespace}_${key}`;
       localStorage.setItem(storageKey, JSON.stringify(value));
     } catch (error) {
       logger.error(
@@ -91,7 +95,9 @@ export class StorageAdapter {
     if (typeof window === 'undefined') return;
 
     try {
-      const storageKey = userId ? `novelist_${namespace}_${key}_${userId}` : `novelist_${namespace}_${key}`;
+      const storageKey = userId
+        ? `novelist_${namespace}_${key}_${userId}`
+        : `novelist_${namespace}_${key}`;
       localStorage.removeItem(storageKey);
     } catch (error) {
       logger.error(
