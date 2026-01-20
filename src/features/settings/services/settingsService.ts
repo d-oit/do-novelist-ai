@@ -5,24 +5,21 @@
  */
 
 import { logger } from '@/lib/logging/logger';
+import { storageAdapter, KV_NAMESPACES } from '@/lib/storage-adapter';
 import { DEFAULT_SETTINGS, validateSettings } from '@/types';
 import { type Settings } from '@/types';
 
-const STORAGE_KEY = 'novelist-settings';
-
 class SettingsService {
   /**
-   * Load settings from localStorage
+   * Load settings from storage
    */
-  public load(): Settings {
+  public async load(): Promise<Settings> {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const parsed = await storageAdapter.get<Settings>(KV_NAMESPACES.SETTINGS, 'general');
 
-      if (stored === null || stored.length === 0) {
+      if (!parsed) {
         return DEFAULT_SETTINGS;
       }
-
-      const parsed: unknown = JSON.parse(stored);
       const validation = validateSettings(parsed);
 
       if (!validation.isValid || !validation.data) {
@@ -47,9 +44,9 @@ class SettingsService {
   }
 
   /**
-   * Save settings to localStorage
+   * Save settings to storage
    */
-  public save(settings: Settings): void {
+  public async save(settings: Settings): Promise<void> {
     try {
       const validation = validateSettings(settings);
 
@@ -57,7 +54,7 @@ class SettingsService {
         throw new Error('Invalid settings data');
       }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      await storageAdapter.set(KV_NAMESPACES.SETTINGS, 'general', settings);
     } catch (error) {
       logger.error('Failed to save settings', {
         component: 'SettingsService',
@@ -70,9 +67,9 @@ class SettingsService {
   /**
    * Reset settings to defaults
    */
-  public reset(): Settings {
+  public async reset(): Promise<Settings> {
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      await storageAdapter.delete(KV_NAMESPACES.SETTINGS, 'general');
       return DEFAULT_SETTINGS;
     } catch (error) {
       logger.error('Failed to reset settings', {
@@ -86,15 +83,15 @@ class SettingsService {
   /**
    * Export settings as JSON
    */
-  public export(): string {
-    const settings = this.load();
+  public async export(): Promise<string> {
+    const settings = await this.load();
     return JSON.stringify(settings, null, 2);
   }
 
   /**
    * Import settings from JSON
    */
-  public import(json: string): Settings {
+  public async import(json: string): Promise<Settings> {
     try {
       const parsed: unknown = JSON.parse(json);
       const validation = validateSettings(parsed);
@@ -103,7 +100,7 @@ class SettingsService {
         throw new Error('Invalid settings JSON');
       }
 
-      this.save(validation.data);
+      await this.save(validation.data);
       return validation.data;
     } catch (error) {
       logger.error('Failed to import settings', {
@@ -117,18 +114,18 @@ class SettingsService {
   /**
    * Get a specific setting value
    */
-  public get<K extends keyof Settings>(key: K): Settings[K] {
-    const settings = this.load();
+  public async get<K extends keyof Settings>(key: K): Promise<Settings[K]> {
+    const settings = await this.load();
     return settings[key];
   }
 
   /**
    * Update a specific setting value
    */
-  public set<K extends keyof Settings>(key: K, value: Settings[K]): void {
-    const settings = this.load();
+  public async set<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {
+    const settings = await this.load();
     const updated = { ...settings, [key]: value };
-    this.save(updated);
+    await this.save(updated);
   }
 }
 

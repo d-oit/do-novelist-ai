@@ -9,3 +9,5 @@ export * from './world-building-service';
 export * from './versioning-service';
 export * from './publishing-service';
 export * from './writing-assistant-service';
+export * from './key-value-service';
+export * from './localStorage-migration';

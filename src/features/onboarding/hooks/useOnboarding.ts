@@ -3,9 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { getUserSettings, updateUserSettings } from '@/lib/database/services/user-settings-service';
 import { logger } from '@/lib/logging/logger';
-
-const ONBOARDING_STORAGE_KEY = 'novelist-onboarding-completed';
-const ONBOARDING_STEP_KEY = 'novelist-onboarding-step';
+import { storageAdapter, KV_NAMESPACES } from '@/lib/storage-adapter';
 
 export type OnboardingStep =
   | 'welcome'
@@ -84,14 +82,14 @@ export function useOnboarding(): UseOnboardingReturn {
         });
         // Fallback to localStorage if Turso fails
         try {
-          const completed = localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true';
-          const saved = localStorage.getItem(ONBOARDING_STEP_KEY);
+          const completed = await storageAdapter.get<boolean>(KV_NAMESPACES.ONBOARDING, 'complete');
+          const saved = await storageAdapter.get<string>(KV_NAMESPACES.ONBOARDING, 'step');
           if (saved && STEPS.includes(saved as OnboardingStep)) {
             setCurrentStep(saved as OnboardingStep);
           } else {
             setCurrentStep('welcome');
           }
-          setIsCompleted(completed);
+          setIsCompleted(completed ?? false);
           setIsOpen(!completed);
         } catch (localError) {
           logger.error('Failed to load onboarding state from localStorage', { error: localError });
@@ -120,7 +118,7 @@ export function useOnboarding(): UseOnboardingReturn {
         });
         // Fallback to localStorage if Turso fails
         try {
-          localStorage.setItem(ONBOARDING_STEP_KEY, currentStep);
+          await storageAdapter.set(KV_NAMESPACES.ONBOARDING, 'step', currentStep);
         } catch (localError) {
           logger.error('Failed to save onboarding step to localStorage', { error: localError });
         }
@@ -139,11 +137,11 @@ export function useOnboarding(): UseOnboardingReturn {
     setIsOpen(true);
     setIsCompleted(false);
 
-    // Clear localStorage as backup
+    // Clear storage as backup
     try {
-      localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+      void storageAdapter.delete(KV_NAMESPACES.ONBOARDING, 'complete');
     } catch {
-      // Ignore localStorage errors
+      // Ignore storage errors
     }
   }, []);
 
@@ -174,8 +172,8 @@ export function useOnboarding(): UseOnboardingReturn {
       });
       // Fallback to localStorage if Turso fails
       try {
-        localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
-        localStorage.setItem(ONBOARDING_STEP_KEY, 'complete');
+        await storageAdapter.set(KV_NAMESPACES.ONBOARDING, 'complete', true);
+        await storageAdapter.set(KV_NAMESPACES.ONBOARDING, 'step', 'complete');
       } catch (localError) {
         logger.error('Failed to save onboarding complete to localStorage', { error: localError });
       }

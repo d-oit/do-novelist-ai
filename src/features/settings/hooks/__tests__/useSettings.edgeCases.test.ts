@@ -63,8 +63,8 @@ describe('useSettings - Edge Cases', () => {
       })),
     });
 
-    mockSettingsService.load.mockReturnValue(DEFAULT_SETTINGS);
-    mockSettingsService.save.mockReturnValue();
+    mockSettingsService.load.mockResolvedValue(DEFAULT_SETTINGS);
+    mockSettingsService.save.mockResolvedValue();
   });
 
   afterEach(() => {

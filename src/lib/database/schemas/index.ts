@@ -14,3 +14,4 @@ export * from './plots';
 export * from './user-settings';
 export * from './agent-coordination';
 export * from './plot-engine-feedback';
+export * from './key-value-store';

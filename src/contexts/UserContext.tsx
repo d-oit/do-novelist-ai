@@ -6,6 +6,7 @@ import {
   getOrCreateUserSettings,
 } from '@/lib/database/services/user-settings-service';
 import { logger } from '@/lib/logging/logger';
+import { storageAdapter, KV_NAMESPACES } from '@/lib/storage-adapter';
 
 interface UserContextType {
   userId: string;
@@ -20,8 +21,6 @@ interface UserProviderProps {
   children: ReactNode;
 }
 
-const STORAGE_KEY = 'novelist_user_id';
-
 function generateUserId(): string {
   // Use crypto.getRandomValues for cryptographically secure random values
   const randomBytes = new Uint8Array(8);
@@ -35,19 +34,40 @@ function generateUserId(): string {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [userId, setUserId] = useState<string>((): string => {
-    // Initialize with existing userId or generate new one
-    const storedUserId = localStorage.getItem(STORAGE_KEY);
-    if (storedUserId !== null && storedUserId !== '') {
-      return storedUserId;
-    }
-    return generateUserId();
-  });
+  const [userId, setUserId] = useState<string>(generateUserId());
+  const [isUserIdLoaded, setIsUserIdLoaded] = useState(false);
 
-  // Store userId to localStorage when it changes
+  // Load userId from storage on mount
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, userId);
-  }, [userId]);
+    const loadUserId = async (): Promise<void> => {
+      try {
+        const storedUserId = await storageAdapter.get<string>(KV_NAMESPACES.USER, 'userId');
+        if (storedUserId) {
+          setUserId(storedUserId);
+        } else {
+          // Save the generated userId
+          await storageAdapter.set(KV_NAMESPACES.USER, 'userId', userId);
+        }
+      } catch (error) {
+        logger.error('Failed to load userId from storage', {
+          component: 'UserContext',
+          error,
+        });
+      } finally {
+        setIsUserIdLoaded(true);
+      }
+    };
+
+    void loadUserId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Store userId to storage when it changes
+  useEffect(() => {
+    if (isUserIdLoaded) {
+      void storageAdapter.set(KV_NAMESPACES.USER, 'userId', userId);
+    }
+  }, [userId, isUserIdLoaded]);
 
   // eslint-disable-next-line react/hook-use-state
   const [theme, setThemeState] = useState('light' as 'light' | 'dark' | 'system');
@@ -63,17 +83,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // Initialize user settings in Turso if they don't exist
         await getOrCreateUserSettings(userId);
       } catch (error) {
-        logger.error('Failed to load theme from database, using localStorage fallback', {
+        logger.error('Failed to load theme from database', {
           component: 'UserContext',
           error,
         });
-        // Fallback to localStorage if Turso fails
-        const storedTheme = localStorage.getItem('novelist-theme') as
-          | 'light'
-          | 'dark'
-          | 'system'
-          | null;
-        setThemeState(storedTheme ?? 'light');
+        // Use default theme
+        setThemeState('light');
       } finally {
         setIsInitialized(true);
       }
@@ -86,15 +101,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setThemeState(newTheme);
 
     try {
-      // Try to save to Turso
+      // Save to Turso
       await setTheme(userId, newTheme);
     } catch (error) {
-      logger.error('Failed to save theme to database, using localStorage fallback', {
+      logger.error('Failed to save theme to database', {
         component: 'UserContext',
         error,
       });
-      // Fallback to localStorage if Turso fails
-      localStorage.setItem('novelist-theme', newTheme);
     }
   };
 

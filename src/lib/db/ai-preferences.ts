@@ -5,8 +5,9 @@
 
 import { type AIProvider } from '@/lib/ai-config';
 import { logger } from '@/lib/logging/logger';
+import { storageAdapter, KV_NAMESPACES } from '@/lib/storage-adapter';
 
-import { getClient, getStorageKey } from './ai-preferences-helpers';
+import { getClient } from './ai-preferences-helpers';
 import {
   type UserAIPreference,
   type AIProviderCapability,
@@ -81,12 +82,11 @@ export async function getUserAIPreference(userId: string): Promise<UserAIPrefere
       return null;
     }
   } else {
-    // Fallback to localStorage
+    // Fallback to storage adapter
     try {
-      const stored = localStorage.getItem(getStorageKey(userId));
-      return stored != null ? (JSON.parse(stored) as UserAIPreference) : null;
+      return await storageAdapter.get<UserAIPreference>(KV_NAMESPACES.AI, `preference_${userId}`, userId);
     } catch {
-      logger.warn('Failed to parse user AI preference from localStorage', {
+      logger.warn('Failed to get user AI preference from storage', {
         component: 'ai-preferences',
         userId,
       });
@@ -148,8 +148,8 @@ export async function saveUserAIPreference(preference: UserAIPreference): Promis
       throw e;
     }
   } else {
-    // Fallback to localStorage
-    localStorage.setItem(getStorageKey(preference.userId), JSON.stringify(preference));
+    // Fallback to storage adapter
+    await storageAdapter.set(KV_NAMESPACES.AI, `preference_${preference.userId}`, preference, preference.userId);
   }
 }
 
@@ -198,8 +198,7 @@ export async function getProviderCapabilities(
       return [];
     }
   } else {
-    const stored = localStorage.getItem(`${getStorageKey('capabilities')}`);
-    const all = stored != null ? (JSON.parse(stored) as AIProviderCapability[]) : [];
+    const all = await storageAdapter.get<AIProviderCapability[]>(KV_NAMESPACES.AI, 'capabilities') || [];
     return provider ? all.filter((c: AIProviderCapability) => c.provider === provider) : all;
   }
 }
@@ -256,8 +255,7 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
       throw e;
     }
   } else {
-    const stored = localStorage.getItem(`${getStorageKey('capabilities')}`);
-    const all = stored != null ? (JSON.parse(stored) as AIProviderCapability[]) : [];
+    const all = await storageAdapter.get<AIProviderCapability[]>(KV_NAMESPACES.AI, 'capabilities') || [];
     const index = all.findIndex(
       (c: AIProviderCapability) =>
         c.provider === capability.provider && c.modelName === capability.modelName,
@@ -269,7 +267,7 @@ export async function saveProviderCapability(capability: AIProviderCapability): 
       all.push(capability);
     }
 
-    localStorage.setItem(`${getStorageKey('capabilities')}`, JSON.stringify(all));
+    await storageAdapter.set(KV_NAMESPACES.AI, 'capabilities', all);
   }
 }
 
@@ -314,10 +312,9 @@ export async function logUsageAnalytic(analytic: AIUsageAnalytic): Promise<void>
       }
     }
   } else {
-    const stored = localStorage.getItem(`${getStorageKey('analytics')}`);
-    const all = stored != null ? (JSON.parse(stored) as AIUsageAnalytic[]) : [];
+    const all = await storageAdapter.get<AIUsageAnalytic[]>(KV_NAMESPACES.AI, 'analytics') || [];
     all.push(analytic);
-    localStorage.setItem(`${getStorageKey('analytics')}`, JSON.stringify(all));
+    await storageAdapter.set(KV_NAMESPACES.AI, 'analytics', all);
   }
 }
 
@@ -396,8 +393,7 @@ export async function getUserUsageStats(
       };
     }
   } else {
-    const stored = localStorage.getItem(`${getStorageKey('analytics')}`);
-    const all: AIUsageAnalytic[] = stored != null ? (JSON.parse(stored) as AIUsageAnalytic[]) : [];
+    const all = await storageAdapter.get<AIUsageAnalytic[]>(KV_NAMESPACES.AI, 'analytics') || [];
     const filtered = all.filter(a => {
       if (a.userId !== userId) return false;
       if (startDate != null && a.createdAt < startDate) return false;
@@ -462,8 +458,7 @@ export async function getProviderHealth(provider?: AIProvider): Promise<AIProvid
       return [];
     }
   } else {
-    const stored = localStorage.getItem(`${getStorageKey('health')}`);
-    const all = stored != null ? (JSON.parse(stored) as AIProviderHealth[]) : [];
+    const all = await storageAdapter.get<AIProviderHealth[]>(KV_NAMESPACES.AI, 'health') || [];
     return provider ? all.filter((h: AIProviderHealth) => h.provider === provider) : all;
   }
 }
@@ -513,8 +508,7 @@ export async function updateProviderHealth(health: AIProviderHealth): Promise<vo
       throw e;
     }
   } else {
-    const stored = localStorage.getItem(`${getStorageKey('health')}`);
-    const all = stored != null ? (JSON.parse(stored) as AIProviderHealth[]) : [];
+    const all = await storageAdapter.get<AIProviderHealth[]>(KV_NAMESPACES.AI, 'health') || [];
     const index = all.findIndex((h: AIProviderHealth) => h.provider === health.provider);
 
     if (index >= 0) {
@@ -523,6 +517,6 @@ export async function updateProviderHealth(health: AIProviderHealth): Promise<vo
       all.push(health);
     }
 
-    localStorage.setItem(`${getStorageKey('health')}`, JSON.stringify(all));
+    await storageAdapter.set(KV_NAMESPACES.AI, 'health', all);
   }
 }

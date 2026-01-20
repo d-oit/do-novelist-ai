@@ -48,18 +48,20 @@ export const useSettings = create<SettingsState>()(
         // Initialize
         init: (): void => {
           set({ isLoading: true, error: null });
-          try {
-            const settings = settingsService.load();
-            set({ settings, isLoading: false });
+          void (async (): Promise<void> => {
+            try {
+              const settings = await settingsService.load();
+              set({ settings, isLoading: false });
 
-            // Apply theme immediately
-            applyTheme(settings.theme);
-          } catch (error) {
-            set({
-              error: error instanceof Error ? error.message : 'Failed to load settings',
-              isLoading: false,
-            });
-          }
+              // Apply theme immediately
+              applyTheme(settings.theme);
+            } catch (error) {
+              set({
+                error: error instanceof Error ? error.message : 'Failed to load settings',
+                isLoading: false,
+              });
+            }
+          })();
         },
 
         // Update settings
@@ -75,7 +77,7 @@ export const useSettings = create<SettingsState>()(
               throw new Error('Invalid settings data');
             }
 
-            settingsService.save(newSettings);
+            void settingsService.save(newSettings);
             set({ settings: newSettings, isSaving: false });
 
             // Apply theme if changed
@@ -99,7 +101,7 @@ export const useSettings = create<SettingsState>()(
         reset: (): void => {
           set({ isSaving: true, error: null });
           try {
-            settingsService.save(DEFAULT_SETTINGS);
+            void settingsService.save(DEFAULT_SETTINGS);
             set({ settings: DEFAULT_SETTINGS, isSaving: false });
 
             // Reapply defaults

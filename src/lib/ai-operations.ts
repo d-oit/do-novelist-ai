@@ -43,7 +43,7 @@ const _generateOutline = async (
   try {
     let enhancedPrompt;
 
-    const settings = settingsService.load();
+    const settings = await settingsService.load();
 
     if (project && settings.enableContextInjection) {
       const contextPrompts = new ContextAwarePrompts(project);
@@ -125,7 +125,7 @@ The story continues with detailed narrative, character development, and plot pro
 
   try {
     let enhancedPrompt;
-    const settings = settingsService.load();
+    const settings = await settingsService.load();
 
     if (project && settings.enableContextInjection) {
       const contextPrompts = new ContextAwarePrompts(project);
@@ -303,7 +303,7 @@ Overall: The story shows good consistency with minor suggestions for improvement
 
   try {
     let enhancedPrompt;
-    const settings = settingsService.load();
+    const settings = await settingsService.load();
 
     if (project && settings.enableContextInjection) {
       const contextPrompts = new ContextAwarePrompts(project);
@@ -538,7 +538,7 @@ export const developCharacters = async (
 
   try {
     let enhancedPrompt;
-    const settings = settingsService.load();
+    const settings = await settingsService.load();
 
     if (project && settings.enableContextInjection) {
       const contextPrompts = new ContextAwarePrompts(project);

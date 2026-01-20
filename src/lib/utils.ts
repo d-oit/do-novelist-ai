@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 import { logger } from '@/lib/logging/logger';
+import { storageAdapter, KV_NAMESPACES } from '@/lib/storage-adapter';
 
 /**
  * Utility function to merge Tailwind CSS classes with proper conflict resolution
@@ -12,12 +13,12 @@ export function cn(...inputs: ClassValue[]): string {
 }
 
 /**
- * Get or create anonymous user ID from localStorage
+ * Get or create anonymous user ID from storage
  * Used for AI settings and other user-specific features
  */
-export function getUserId(): string {
+export async function getUserId(): Promise<string> {
   try {
-    const userId = localStorage.getItem('novelist_user_id');
+    const userId = await storageAdapter.get<string>(KV_NAMESPACES.USER, 'userId');
     if (userId == null || userId === '') {
       // Use crypto.getRandomValues for cryptographically secure random values
       const randomBytes = new Uint8Array(8);
@@ -28,12 +29,12 @@ export function getUserId(): string {
         .slice(0, 10);
 
       const newUserId = `user_${Date.now()}_${randomString}`;
-      localStorage.setItem('novelist_user_id', newUserId);
+      await storageAdapter.set(KV_NAMESPACES.USER, 'userId', newUserId);
       return newUserId;
     }
     return userId;
   } catch {
-    // Fallback for when localStorage is not available (e.g. server-side or restricted)
+    // Fallback for when storage is not available (e.g. server-side or restricted)
     return `user_temp_${Date.now()}`;
   }
 }
@@ -74,25 +75,26 @@ export function truncateText(text: string, maxLength: number): string {
 export const isClient = typeof window !== 'undefined';
 
 /**
- * Safe localStorage access with fallbacks
+ * Safe storage access with fallbacks
+ * @deprecated Use storageAdapter directly instead
  */
 export const storage = {
-  get: (key: string, defaultValue?: unknown): unknown => {
+  get: async (key: string, defaultValue?: unknown): Promise<unknown> => {
     if (!isClient) return defaultValue;
     try {
-      const item = localStorage.getItem(key);
-      return item !== null && item.length > 0 ? JSON.parse(item) : defaultValue;
+      const item = await storageAdapter.get<unknown>(KV_NAMESPACES.SETTINGS, key);
+      return item !== null && item !== undefined ? item : defaultValue;
     } catch {
       return defaultValue;
     }
   },
 
-  set: (key: string, value: unknown): void => {
+  set: async (key: string, value: unknown): Promise<void> => {
     if (!isClient) return;
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      await storageAdapter.set(KV_NAMESPACES.SETTINGS, key, value);
     } catch (error) {
-      logger.warn('Failed to save to localStorage', {
+      logger.warn('Failed to save to storage', {
         component: 'storage',
         error,
         key,
@@ -100,12 +102,12 @@ export const storage = {
     }
   },
 
-  remove: (key: string): void => {
+  remove: async (key: string): Promise<void> => {
     if (!isClient) return;
     try {
-      localStorage.removeItem(key);
+      await storageAdapter.delete(KV_NAMESPACES.SETTINGS, key);
     } catch (error) {
-      logger.warn('Failed to remove from localStorage', {
+      logger.warn('Failed to remove from storage', {
         component: 'storage',
         error,
         key,

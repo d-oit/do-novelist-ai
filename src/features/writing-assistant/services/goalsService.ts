@@ -13,10 +13,9 @@ import type {
   GoalWithStatus,
 } from '@/features/writing-assistant/types';
 import { logger } from '@/lib/logging/logger';
+import { storageAdapter, KV_NAMESPACES } from '@/lib/storage-adapter';
 
 import { styleAnalysisService } from './styleAnalysisService';
-
-const STORAGE_KEY = 'novelist-writing-goals';
 
 // ============================================================================
 // Private Implementation
@@ -37,7 +36,7 @@ class GoalsService {
       autoAnalyze: true,
       analysisDelay: 1500,
     };
-    this.loadGoals();
+    void this.loadGoals();
   }
 
   public static getInstance(): GoalsService {
@@ -62,7 +61,7 @@ class GoalsService {
     };
 
     this.goals.push(newGoal);
-    this.saveGoals();
+    void this.saveGoals();
 
     logger.info('Goal created', {
       component: 'GoalsService',
@@ -91,7 +90,7 @@ class GoalsService {
     };
     this.goals[index] = updatedGoal;
 
-    this.saveGoals();
+    void this.saveGoals();
 
     logger.info('Goal updated', {
       component: 'GoalsService',
@@ -113,7 +112,7 @@ class GoalsService {
     }
 
     this.goals.splice(index, 1);
-    this.saveGoals();
+    void this.saveGoals();
 
     logger.info('Goal deleted', { component: 'GoalsService', goalId });
 
@@ -150,7 +149,7 @@ class GoalsService {
 
     goal.isActive = !goal.isActive;
     goal.updatedAt = new Date();
-    this.saveGoals();
+    void this.saveGoals();
 
     return goal;
   }
@@ -569,7 +568,7 @@ class GoalsService {
         }
       }
 
-      this.saveGoals();
+      void this.saveGoals();
 
       logger.info('Goals imported', {
         component: 'GoalsService',
@@ -590,13 +589,15 @@ class GoalsService {
   // Persistence
   // ============================================================================
 
-  private loadGoals(): void {
+  private async loadGoals(): Promise<void> {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = await storageAdapter.get<WritingGoal[]>(
+        KV_NAMESPACES.WRITING_ASSISTANT,
+        'goals',
+      );
       if (stored) {
-        const parsed = JSON.parse(stored);
-        this.goals = Array.isArray(parsed)
-          ? parsed.map((g: WritingGoal) => ({
+        this.goals = Array.isArray(stored)
+          ? stored.map((g: WritingGoal) => ({
               ...g,
               createdAt: new Date(g.createdAt),
               updatedAt: new Date(g.updatedAt),
@@ -612,9 +613,9 @@ class GoalsService {
     }
   }
 
-  private saveGoals(): void {
+  private async saveGoals(): Promise<void> {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.goals));
+      await storageAdapter.set(KV_NAMESPACES.WRITING_ASSISTANT, 'goals', this.goals);
     } catch (error) {
       logger.error('Failed to save goals to storage', {
         component: 'GoalsService',
@@ -628,7 +629,7 @@ class GoalsService {
    */
   public clearAllGoals(): void {
     this.goals = [];
-    this.saveGoals();
+    void this.saveGoals();
   }
 }
 

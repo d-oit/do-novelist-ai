@@ -63,8 +63,8 @@ describe('useSettings - Advanced Features', () => {
       })),
     });
 
-    mockSettingsService.load.mockReturnValue(DEFAULT_SETTINGS);
-    mockSettingsService.save.mockReturnValue();
+    mockSettingsService.load.mockResolvedValue(DEFAULT_SETTINGS);
+    mockSettingsService.save.mockResolvedValue();
   });
 
   afterEach(() => {
@@ -222,7 +222,7 @@ describe('useSettings - Advanced Features', () => {
       fontSize: 18,
     };
 
-    mockSettingsService.load.mockReturnValue(customSettings);
+    mockSettingsService.load.mockResolvedValue(customSettings);
 
     const { result: result1 } = renderHook(() => useSettings());
 

@@ -8,6 +8,7 @@ import { OnboardingModal, useOnboarding } from '@/features/onboarding';
 import { ProjectStats, ProjectWizard } from '@/features/projects/components';
 import { db } from '@/features/projects/services';
 import { SearchModal } from '@/features/semantic-search';
+import { initDatabaseAndMigrate } from '@/lib/database/init-migration';
 import { logger } from '@/lib/logging/logger';
 import { offlineManager } from '@/lib/pwa';
 import { queryClient, QueryClientProvider } from '@/lib/react-query';
@@ -143,6 +144,11 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewMode>('projects');
   const [isLoading, setIsLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Initialize database and migrate from localStorage on mount
+  useEffect(() => {
+    void initDatabaseAndMigrate();
+  }, []);
 
   // Onboarding for new users
   const onboarding = useOnboarding();
