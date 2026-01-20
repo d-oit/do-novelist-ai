@@ -29,16 +29,16 @@ test.describe('Mock Infrastructure Validation', () => {
     await page.waitForLoadState('networkidle');
 
     // Verify navigation is available using top navigation (not bottom nav)
-    await expect(page.getByRole('navigation').getByTestId('nav-settings')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('nav-settings')).toBeVisible({ timeout: 10000 });
 
-    // Verify the unified mock manager has initialized by checking console
+    // Verify unified mock manager has initialized by checking console
     const consoleLogs: string[] = [];
     page.on('console', msg => {
       consoleLogs.push(msg.text());
     });
 
     // Navigate to a view that would use AI mocks
-    await page.getByRole('navigation').getByTestId('nav-dashboard').click({ timeout: 15000 });
+    await page.getByTestId('nav-dashboard').click({ timeout: 15000 });
     await expect(page.getByTestId('project-dashboard')).toBeVisible({ timeout: 10000 });
 
     // Verify mock manager was initialized by checking console logs
