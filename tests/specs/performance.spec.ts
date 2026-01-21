@@ -57,8 +57,13 @@ test.describe('Application Performance', () => {
       scrollHeight: document.documentElement.scrollHeight,
     }));
 
-    // Wait a bit more
-    await page.waitForTimeout(1000);
+    // Wait for layout to stabilize using smart wait instead of fixed timeout
+    await page.evaluate(
+      () =>
+        new Promise<void>(resolve => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
 
     // Check metrics again
     const metricsAfter = await page.evaluate(() => ({

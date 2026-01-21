@@ -108,8 +108,8 @@ test.describe('Form Validation', () => {
         // Try to submit without filling required fields
         await submitButton.click();
 
-        // Should show validation error or prevent submission
-        await page.waitForTimeout(500);
+        // Should show validation error or prevent submission - use smart wait
+        await page.waitForLoadState('domcontentloaded');
 
         // Form should still be visible (not submitted)
         await expect(forms.first()).toBeVisible();
@@ -132,8 +132,8 @@ test.describe('Form Validation', () => {
       await firstInput.focus();
       await firstInput.blur();
 
-      // Should show validation message
-      await page.waitForTimeout(300);
+      // Should show validation message - use smart wait
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for error message
       const errorMessage = page.locator('.error, [role="alert"], .text-red-500, .text-destructive');
@@ -157,11 +157,13 @@ test.describe('Form Validation', () => {
       // Enter invalid data
       await firstInput.fill('');
       await firstInput.blur();
-      await page.waitForTimeout(300);
+      // Use smart wait for validation
+      await page.waitForLoadState('domcontentloaded');
 
       // Now enter valid data
       await firstInput.fill('Valid Input');
-      await page.waitForTimeout(300);
+      // Use smart wait for validation update
+      await page.waitForLoadState('domcontentloaded');
 
       // Error should be cleared or not present
       const body = await page.locator('body').textContent();

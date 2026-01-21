@@ -57,7 +57,13 @@ test.describe('AI Generation and GOAP Workflow E2E Tests', () => {
 
     // Wait for app shell to be ready even if initialization spinner shows briefly
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(100);
+    // Use smart wait instead of fixed timeout
+    await page.evaluate(
+      () =>
+        new Promise<void>(resolve => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
     try {
       await page.getByRole('navigation').waitFor({ state: 'visible', timeout: 15000 });
     } catch {

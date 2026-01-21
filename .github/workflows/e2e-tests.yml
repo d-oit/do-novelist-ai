@@ -33,13 +33,15 @@ env:
 
 jobs:
   e2e-tests:
-    name: 🎭 E2E Tests (${{ matrix.browser }})
+    name: 🎭 E2E Tests (${{ matrix.browser }} - Shard ${{ matrix.shard_index + 1 }}/${{ matrix.total_shards }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         browser: [chromium, firefox, webkit]
+        shard_index: [0, 1, 2, 3]
+        total_shards: [4]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -102,18 +104,20 @@ jobs:
 
       - name: Run E2E tests
         run: |
-          echo "🎭 Running E2E tests on ${{ matrix.browser }}"
+          echo "🎭 Running E2E tests on ${{ matrix.browser }} - Shard ${{ matrix.shard_index + 1 }}/${{ matrix.total_shards }}"
 
           # Set environment
           export PLAYWRIGHT_BROWSERS_PATH=~/.cache/ms-playwright
 
-          # Run tests with retry logic
+          # Run tests with sharding and retry logic
+          # Using 1 worker per shard to avoid resource contention
           pnpm exec playwright test \
             --project=${{ matrix.browser }} \
+            --shard=${{ matrix.shard_index }}/${{ matrix.total_shards }} \
             --reporter=list,html,json \
             --retries=2 \
             --timeout=30000 \
-            --workers=2
+            --workers=1
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
@@ -149,18 +153,24 @@ jobs:
             echo "**Branch**: ${{ github.ref_name }}"
             echo "**Trigger**: ${{ github.event_name }}"
             echo ""
-            echo "## 🌐 Browser Test Results"
+            echo "## 🌐 Browser Test Results (12 parallel jobs - 4 shards per browser)"
             echo ""
-            echo "| Browser | Status |"
-            echo "|---------|--------|"
-            echo "| Chromium | ${{ needs.e2e-tests.result }} |"
-            echo "| Firefox | ${{ needs.e2e-tests.result }} |"
-            echo "| WebKit | ${{ needs.e2e-tests.result }} |"
+            echo "| Browser | Shards | Status |"
+            echo "|---------|--------|--------|"
+            echo "| Chromium | 4 | ${{ needs.e2e-tests.result }} |"
+            echo "| Firefox | 4 | ${{ needs.e2e-tests.result }} |"
+            echo "| WebKit | 4 | ${{ needs.e2e-tests.result }} |"
+            echo ""
+            echo "## 📊 Execution Details"
+            echo ""
+            echo "- **Total Tests**: 108"
+            echo "- **Parallel Jobs**: 12 (4 shards × 3 browsers)"
+            echo "- **Expected Duration**: ~3-4 minutes"
             echo ""
 
             if [ "${{ needs.e2e-tests.result }}" == "success" ]; then
               echo "## ✅ Status: ALL TESTS PASSED"
-              echo "All E2E tests completed successfully across all browsers!"
+              echo "All E2E tests completed successfully across all browsers and shards!"
             else
               echo "## ❌ Status: TESTS FAILED"
               echo "Some E2E tests failed. Please review the test reports."

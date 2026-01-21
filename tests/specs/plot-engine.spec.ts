@@ -18,9 +18,9 @@ test.describe('Plot Engine Dashboard', () => {
     // Dismiss onboarding modal if present
     await dismissOnboardingModal(page);
 
-    // Wait for Framer Motion animations to complete
-    // Header navigation animates in with 400ms delay + 500ms duration = ~900ms total
-    await page.waitForTimeout(1000);
+    // Wait for navigation to be interactive (smart wait instead of fixed timeout)
+    // Header navigation animates in with 400ms delay + 500ms duration
+    await expect(page.getByRole('navigation')).toBeVisible({ timeout: 3000 });
 
     // Wait for ALL navigation elements to be visible (fixes animation timing issues)
     const navSelectors = [
@@ -116,16 +116,17 @@ test.describe('Plot Engine Dashboard', () => {
 
       // Click on different tabs and verify they become visible
       await page.getByTestId('tab-structure').click();
-      await page.waitForTimeout(1000); // Wait for tab content to render (increased from 500ms)
+      // Wait for tab content to render using smart wait
+      await expect(page.locator('[data-testid*="tab-content"]')).toBeVisible({ timeout: 3000 });
 
       await page.getByTestId('tab-characters').click();
-      await page.waitForTimeout(1000);
+      await expect(page.locator('[data-testid*="tab-content"]')).toBeVisible({ timeout: 3000 });
 
       await page.getByTestId('tab-plot-holes').click();
-      await page.waitForTimeout(1000);
+      await expect(page.locator('[data-testid*="tab-content"]')).toBeVisible({ timeout: 3000 });
 
       await page.getByTestId('tab-generator').click();
-      await page.waitForTimeout(1000);
+      await expect(page.locator('[data-testid*="tab-content"]')).toBeVisible({ timeout: 3000 });
 
       // Verify we're on generator tab by checking if the tab button has active state
       await expect(page.getByTestId('tab-generator')).toBeVisible();
@@ -219,7 +220,7 @@ test.describe('Plot Engine Dashboard', () => {
       await page.keyboard.press('Enter');
 
       // Verify tab changed or action occurred
-      await page.waitForTimeout(1000);
+      await page.waitForLoadState('domcontentloaded');
     } else {
       test.skip();
     }
@@ -274,7 +275,8 @@ test.describe('Plot Engine Dashboard', () => {
 
       // Navigate to generator tab
       await page.getByTestId('tab-generator').click();
-      await page.waitForTimeout(1000);
+      // Wait for tab content to render
+      await expect(page.locator('[data-testid*="tab-content"]')).toBeVisible({ timeout: 3000 });
 
       // Check for generator tab is visible
       await expect(page.getByTestId('tab-generator')).toBeVisible();
@@ -389,8 +391,8 @@ test.describe('Plot Engine Accessibility', () => {
     // Dismiss onboarding modal
     await dismissOnboardingModal(page);
 
-    // Wait for animations to complete
-    await page.waitForTimeout(1000);
+    // Wait for navigation to be interactive instead of fixed timeout
+    await expect(page.getByRole('navigation')).toBeVisible({ timeout: 3000 });
 
     // Explicitly wait for navigation element
     await page
@@ -426,8 +428,8 @@ test.describe('Plot Engine Accessibility', () => {
     // Dismiss onboarding modal
     await dismissOnboardingModal(page);
 
-    // Wait for animations to complete
-    await page.waitForTimeout(1000);
+    // Wait for navigation to be interactive instead of fixed timeout
+    await expect(page.getByRole('navigation')).toBeVisible({ timeout: 3000 });
 
     // Explicitly wait for navigation element
     await page

@@ -63,7 +63,7 @@ export class ReactTestHelpers {
 
     // Short mutation-idle window + double RAF to settle layout for a11y scanners
     await page.evaluate(
-      (t: number) =>
+      () =>
         new Promise<void>(resolve => {
           let timer: number | undefined;
           const settle = () => {
@@ -72,7 +72,7 @@ export class ReactTestHelpers {
 
           const observer = new MutationObserver(() => {
             if (timer) clearTimeout(timer);
-            timer = window.setTimeout(settle, 200);
+            timer = window.setTimeout(settle, 100); // Reduced from 200ms
           });
           observer.observe(document, {
             subtree: true,
@@ -82,18 +82,17 @@ export class ReactTestHelpers {
           });
 
           // Initial idle settle
-          timer = window.setTimeout(settle, 200);
+          timer = window.setTimeout(settle, 100); // Reduced from 200ms
 
-          // Safety valve
+          // Safety valve - reduced min time
           window.setTimeout(
             () => {
               observer.disconnect();
               resolve();
             },
-            Math.min(Math.max(t, 500), 5000),
+            Math.min(timeout, 3000), // Reduced max time
           );
         }),
-      timeout,
     );
   }
 
@@ -262,7 +261,8 @@ export class NavigationHelpers {
       try {
         const element = strategy();
         await element.click({ timeout: 3000 });
-        await page.waitForTimeout(1000);
+        // Wait for navigation to complete using smart wait
+        await page.waitForLoadState('domcontentloaded', { timeout: 5000 });
 
         // Verify navigation was successful
         const url = page.url();
@@ -286,7 +286,13 @@ export class NavigationHelpers {
   static async waitForNavigation(page: Page): Promise<void> {
     // Use specific element wait instead of networkidle for better performance
     await expect(page.getByRole('main')).toBeVisible({ timeout: 5000 });
-    await page.waitForTimeout(200); // Reduced delay for state updates
+    // Wait for animations using double RAF instead of fixed timeout
+    await page.evaluate(
+      () =>
+        new Promise<void>(resolve => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
   }
 }
 

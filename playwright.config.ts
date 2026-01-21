@@ -17,8 +17,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: process.env.CI ? true : false,
   retries: process.env.CI ? 2 : 1,
-  workers: process.env.CI ? 2 : 2,
-  // Note: Sharding is handled dynamically by CI via --shard flag
+  workers: process.env.CI ? 1 : 2,
+  // Sharding is enabled via --shard flag in CI for parallel execution
+  // Local: 2 workers for faster development feedback
+  // CI: 1 worker per shard to avoid resource contention
 
   // Reporting is slimmed down in CI to reduce I/O overhead
   reporter: process.env.CI

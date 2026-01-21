@@ -27,7 +27,12 @@ export async function dismissOnboardingModal(page: Page): Promise<void> {
     const skipButton = page.getByText(/skip onboarding|skip/i).first();
     if (await skipButton.isVisible({ timeout: 2000 }).catch(() => false)) {
       await skipButton.click();
-      await page.waitForTimeout(300);
+      // Wait for modal to close using smart wait
+      await page
+        .waitForSelector('[role="dialog"]', { state: 'hidden', timeout: 2000 })
+        .catch(() => {
+          // Modal might have been removed differently
+        });
     }
   } catch {
     // Button might not be visible or already dismissed
@@ -100,8 +105,13 @@ export async function waitForElementStability(
 ): Promise<boolean> {
   try {
     await page.waitForSelector(selector, { state: 'visible', timeout });
-    // Additional wait for animations to complete
-    await page.waitForTimeout(200);
+    // Wait for animations to complete using double RAF instead of fixed timeout
+    await page.evaluate(
+      () =>
+        new Promise<void>(resolve => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
     return true;
   } catch {
     return false;
@@ -129,8 +139,13 @@ export async function clickWithStability(
   // Wait for element to be visible
   await page.waitForSelector(dataTestIdSelector, { state: 'visible', timeout });
 
-  // Small delay for animations
-  await page.waitForTimeout(100);
+  // Small wait for animations using double RAF instead of fixed timeout
+  await page.evaluate(
+    () =>
+      new Promise<void>(resolve => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      }),
+  );
 
   // Click with stability check
   await page.locator(dataTestIdSelector).click({ timeout, force });
