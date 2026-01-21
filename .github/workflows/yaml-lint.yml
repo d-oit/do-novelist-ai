@@ -40,7 +40,7 @@ jobs:
 
       - name: Run yamllint
         run: |
-          yamllint -d '{"extends": default, "rules": {"line-length": "disable", "indentation": {"spaces": 2}, "truthy": "disable"}}' .github/ || (echo "❌ YAML lint failed" && exit 1)
+          yamllint -d '{"extends": "default", "rules": {"line-length": "disable", "indentation": {"spaces": 2}, "truthy": "disable"}}' .github/ || (echo "❌ YAML lint failed" && exit 1)
 
   actionlint:
     name: GitHub Actions Workflow Validation
