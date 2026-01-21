@@ -102,7 +102,8 @@ jobs:
 
       - name: Run E2E tests
         run: |
-          SHARD_NUM=$(( matrix.shard_index + 1 ))
+          SHARD_NUM=${{ matrix.shard_index }}
+          SHARD_NUM=$((SHARD_NUM + 1))
           echo "🎭 Running E2E tests on ${{ matrix.browser }} - Shard ${SHARD_NUM}/${{ matrix.total_shards }}"
 
           # Set environment
@@ -145,34 +146,36 @@ jobs:
     steps:
       - name: Generate E2E summary
         run: |
-          echo "# 🎭 E2E Test Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Commit**: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Branch**: ${{ github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Trigger**: ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "## 🌐 Browser Test Results (12 parallel jobs - 4 shards per browser)" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Browser | Shards | Status |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|---------|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Chromium | 4 | ${{ needs.e2e-tests.result }} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Firefox | 4 | ${{ needs.e2e-tests.result }} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| WebKit | 4 | ${{ needs.e2e-tests.result }} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "## 📊 Execution Details" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Total Tests**: 108" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Parallel Jobs**: 12 (4 shards × 3 browsers)" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Expected Duration**: ~3-4 minutes" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "# 🎭 E2E Test Summary"
+            echo ""
+            echo "**Commit**: ${{ github.sha }}"
+            echo "**Branch**: ${{ github.ref_name }}"
+            echo "**Trigger**: ${{ github.event_name }}"
+            echo ""
+            echo "## 🌐 Browser Test Results (12 parallel jobs - 4 shards per browser)"
+            echo ""
+            echo "| Browser | Shards | Status |"
+            echo "|---------|--------|--------|"
+            echo "| Chromium | 4 | ${{ needs.e2e-tests.result }} |"
+            echo "| Firefox | 4 | ${{ needs.e2e-tests.result }} |"
+            echo "| WebKit | 4 | ${{ needs.e2e-tests.result }} |"
+            echo ""
+            echo "## 📊 Execution Details"
+            echo ""
+            echo "- **Total Tests**: 108"
+            echo "- **Parallel Jobs**: 12 (4 shards × 3 browsers)"
+            echo "- **Expected Duration**: ~3-4 minutes"
+            echo ""
 
-          if [ "${{ needs.e2e-tests.result }}" == "success" ]; then
-            echo "## ✅ Status: ALL TESTS PASSED" >> "$GITHUB_STEP_SUMMARY"
-            echo "All E2E tests completed successfully across all browsers and shards!" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "## ❌ Status: TESTS FAILED" >> "$GITHUB_STEP_SUMMARY"
-            echo "Some E2E tests failed. Please review the test reports." >> "$GITHUB_STEP_SUMMARY"
-          fi
+            if [ "${{ needs.e2e-tests.result }}" == "success" ]; then
+              echo "## ✅ Status: ALL TESTS PASSED"
+              echo "All E2E tests completed successfully across all browsers and shards!"
+            else
+              echo "## ❌ Status: TESTS FAILED"
+              echo "Some E2E tests failed. Please review the test reports."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment on PR
         if: github.event_name == 'pull_request'
