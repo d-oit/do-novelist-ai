@@ -1,7 +1,7 @@
 /**
  * Settings Service
  *
- * Handles localStorage persistence for application settings
+ * Handles Turso storage for application settings via storageAdapter
  */
 
 import { logger } from '@/lib/logging/logger';

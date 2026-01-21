@@ -1,11 +1,11 @@
 /**
  * Settings Management Hook
  *
- * Manages application settings with Zustand and localStorage persistence
+ * Manages application settings with Zustand and Turso storage via settingsService
  */
 
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
 
 import { settingsService } from '@/features/settings/services/settingsService';
 import {
@@ -36,109 +36,101 @@ interface SettingsState {
 
 export const useSettings = create<SettingsState>()(
   devtools(
-    persist(
-      (set, get) => ({
-        // Initial state
-        settings: DEFAULT_SETTINGS,
-        isLoading: false,
-        isSaving: false,
-        error: null,
-        activeCategory: 'appearance',
+    (set, get) => ({
+      // Initial state
+      settings: DEFAULT_SETTINGS,
+      isLoading: false,
+      isSaving: false,
+      error: null,
+      activeCategory: 'appearance',
 
-        // Initialize
-        init: (): void => {
-          set({ isLoading: true, error: null });
-          void (async (): Promise<void> => {
-            try {
-              const settings = await settingsService.load();
-              set({ settings, isLoading: false });
-
-              // Apply theme immediately
-              applyTheme(settings.theme);
-            } catch (error) {
-              set({
-                error: error instanceof Error ? error.message : 'Failed to load settings',
-                isLoading: false,
-              });
-            }
-          })();
-        },
-
-        // Update settings
-        update: (updates: Partial<Settings>): void => {
-          set({ isSaving: true, error: null });
+      // Initialize
+      init: (): void => {
+        set({ isLoading: true, error: null });
+        void (async (): Promise<void> => {
           try {
-            const current = get().settings;
-            const newSettings = { ...current, ...updates };
+            const settings = await settingsService.load();
+            set({ settings, isLoading: false });
 
-            // Validate before saving
-            const validation = validateSettings(newSettings);
-            if (!validation.isValid) {
-              throw new Error('Invalid settings data');
-            }
-
-            void settingsService.save(newSettings);
-            set({ settings: newSettings, isSaving: false });
-
-            // Apply theme if changed
-            if (updates.theme) {
-              applyTheme(updates.theme);
-            }
-
-            // Apply font size if changed
-            if (updates.fontSize != null && !isNaN(updates.fontSize) && updates.fontSize > 0) {
-              applyFontSize(updates.fontSize);
-            }
+            // Apply theme immediately
+            applyTheme(settings.theme);
           } catch (error) {
             set({
-              error: error instanceof Error ? error.message : 'Failed to save settings',
-              isSaving: false,
+              error: error instanceof Error ? error.message : 'Failed to load settings',
+              isLoading: false,
             });
           }
-        },
-
-        // Reset all settings to defaults
-        reset: (): void => {
-          set({ isSaving: true, error: null });
-          try {
-            void settingsService.save(DEFAULT_SETTINGS);
-            set({ settings: DEFAULT_SETTINGS, isSaving: false });
-
-            // Reapply defaults
-            applyTheme(DEFAULT_SETTINGS.theme);
-            applyFontSize(DEFAULT_SETTINGS.fontSize);
-          } catch (error) {
-            set({
-              error: error instanceof Error ? error.message : 'Failed to reset settings',
-              isSaving: false,
-            });
-            throw error;
-          }
-        },
-
-        // Reset specific category
-        resetCategory: (category: SettingsCategory): void => {
-          const categoryDefaults = getCategoryDefaults(category);
-          get().update(categoryDefaults);
-        },
-
-        // Set active category for UI
-        setActiveCategory: (category: SettingsCategory): void => {
-          set({ activeCategory: category });
-        },
-
-        // Clear error
-        clearError: (): void => {
-          set({ error: null });
-        },
-      }),
-      {
-        name: 'settings-storage',
-        partialize: state => ({
-          settings: state.settings,
-        }),
+        })();
       },
-    ),
+
+      // Update settings
+      update: (updates: Partial<Settings>): void => {
+        set({ isSaving: true, error: null });
+        try {
+          const current = get().settings;
+          const newSettings = { ...current, ...updates };
+
+          // Validate before saving
+          const validation = validateSettings(newSettings);
+          if (!validation.isValid) {
+            throw new Error('Invalid settings data');
+          }
+
+          void settingsService.save(newSettings);
+          set({ settings: newSettings, isSaving: false });
+
+          // Apply theme if changed
+          if (updates.theme) {
+            applyTheme(updates.theme);
+          }
+
+          // Apply font size if changed
+          if (updates.fontSize != null && !isNaN(updates.fontSize) && updates.fontSize > 0) {
+            applyFontSize(updates.fontSize);
+          }
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to save settings',
+            isSaving: false,
+          });
+        }
+      },
+
+      // Reset all settings to defaults
+      reset: (): void => {
+        set({ isSaving: true, error: null });
+        try {
+          void settingsService.save(DEFAULT_SETTINGS);
+          set({ settings: DEFAULT_SETTINGS, isSaving: false });
+
+          // Reapply defaults
+          applyTheme(DEFAULT_SETTINGS.theme);
+          applyFontSize(DEFAULT_SETTINGS.fontSize);
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Failed to reset settings',
+            isSaving: false,
+          });
+          throw error;
+        }
+      },
+
+      // Reset specific category
+      resetCategory: (category: SettingsCategory): void => {
+        const categoryDefaults = getCategoryDefaults(category);
+        get().update(categoryDefaults);
+      },
+
+      // Set active category for UI
+      setActiveCategory: (category: SettingsCategory): void => {
+        set({ activeCategory: category });
+      },
+
+      // Clear error
+      clearError: (): void => {
+        set({ error: null });
+      },
+    }),
     { name: 'SettingsStore' },
   ),
 );

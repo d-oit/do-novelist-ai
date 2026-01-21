@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import { getDrizzleClient } from '@/lib/database/drizzle';
 import { userSettings } from '@/lib/database/schemas';
 import { logger } from '@/lib/logging/logger';
+import { storageAdapter, KV_NAMESPACES } from '@/lib/storage-adapter';
 
 /**
  * User settings interface
@@ -18,22 +19,20 @@ export interface UserSettings {
   onboardingStep: string;
 }
 
-const LOCAL_SETTINGS_KEY = 'novelist_user_settings';
-
 /**
  * Get or create user settings for a user
  */
 export const getUserSettings = async (userId: string): Promise<UserSettings | null> => {
   const db = getDrizzleClient();
   if (!db) {
-    // Fallback to LocalStorage
+    // Fallback to storageAdapter (Turso with localStorage fallback)
     try {
-      const stored = localStorage.getItem(LOCAL_SETTINGS_KEY);
-      if (stored) {
-        const settings = JSON.parse(stored) as UserSettings;
-        return settings;
-      }
-      return null;
+      const settings = await storageAdapter.get<UserSettings>(
+        KV_NAMESPACES.USER,
+        'settings',
+        userId,
+      );
+      return settings;
     } catch {
       return null;
     }
@@ -73,7 +72,7 @@ export const getUserSettings = async (userId: string): Promise<UserSettings | nu
 export const createUserSettings = async (userId: string): Promise<UserSettings | null> => {
   const db = getDrizzleClient();
   const now = new Date();
-  
+
   const defaultSettings: UserSettings = {
     theme: 'light',
     language: 'en',
@@ -82,9 +81,9 @@ export const createUserSettings = async (userId: string): Promise<UserSettings |
   };
 
   if (!db) {
-    // Fallback to LocalStorage
+    // Fallback to storageAdapter
     try {
-      localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(defaultSettings));
+      await storageAdapter.set(KV_NAMESPACES.USER, 'settings', defaultSettings, userId);
       return defaultSettings;
     } catch (e) {
       logger.error('Failed to create local user settings', { error: e });
@@ -122,18 +121,23 @@ export const updateUserSettings = async (
   updates: Partial<UserSettings>,
 ): Promise<boolean> => {
   const db = getDrizzleClient();
-  
+
   if (!db) {
-    // Fallback to LocalStorage
+    // Fallback to storageAdapter
     try {
-      const stored = localStorage.getItem(LOCAL_SETTINGS_KEY);
-      const current = stored ? (JSON.parse(stored) as UserSettings) : {};
+      const stored = await storageAdapter.get<UserSettings>(KV_NAMESPACES.USER, 'settings', userId);
+      const current = stored ?? {
+        theme: 'light',
+        language: 'en',
+        onboardingComplete: false,
+        onboardingStep: 'welcome',
+      };
       const updated = { ...current, ...updates };
-      localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(updated));
+      await storageAdapter.set(KV_NAMESPACES.USER, 'settings', updated, userId);
       return true;
     } catch (e) {
-       logger.error('Failed to update local user settings', { error: e });
-       return false;
+      logger.error('Failed to update local user settings', { error: e });
+      return false;
     }
   }
 
