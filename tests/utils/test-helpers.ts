@@ -60,40 +60,6 @@ export class ReactTestHelpers {
       { requireMain: options?.requireMain ?? false },
       { timeout },
     );
-
-    // Short mutation-idle window + double RAF to settle layout for a11y scanners
-    await page.evaluate(
-      () =>
-        new Promise<void>(resolve => {
-          let timer: number | undefined;
-          const settle = () => {
-            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-          };
-
-          const observer = new MutationObserver(() => {
-            if (timer) clearTimeout(timer);
-            timer = window.setTimeout(settle, 100); // Reduced from 200ms
-          });
-          observer.observe(document, {
-            subtree: true,
-            childList: true,
-            attributes: true,
-            characterData: true,
-          });
-
-          // Initial idle settle
-          timer = window.setTimeout(settle, 100); // Reduced from 200ms
-
-          // Safety valve - reduced min time
-          window.setTimeout(
-            () => {
-              observer.disconnect();
-              resolve();
-            },
-            Math.min(timeout, 3000), // Reduced max time
-          );
-        }),
-    );
   }
 
   /**
