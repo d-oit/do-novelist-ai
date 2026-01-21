@@ -41,7 +41,7 @@ jobs:
       matrix:
         browser: [chromium, firefox, webkit]
         shard_index: [0, 1, 2, 3]
-        total_shards: [4]
+        total_shards: 4
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -62,7 +62,9 @@ jobs:
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-store-
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-
 
       - name: Install system dependencies
         run: |
