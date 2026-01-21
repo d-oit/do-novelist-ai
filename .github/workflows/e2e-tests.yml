@@ -92,7 +92,7 @@ jobs:
         with:
           path: test-results/, playwright-report/
           key: ${{ runner.os }}-playwright-results-${{ matrix.browser }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-playwright-results-${{ matrix.browser }}-
+          restore-keys: ${{ runner.os }}-playwright-results-${{ matrix.browser }}
 
       - name: Run E2E tests
         run: |
