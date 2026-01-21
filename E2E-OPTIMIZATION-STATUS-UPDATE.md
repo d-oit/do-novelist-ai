@@ -90,3 +90,5 @@ test-helpers.ts)
 ---
 
 **Last Updated**: January 21, 2026 - 10:30 AM
+
+# Monitoring E2E workflow status
