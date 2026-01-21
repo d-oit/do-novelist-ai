@@ -56,6 +56,14 @@ const isTestEnvironment = (): boolean => {
       env?.CI === 'true'
     );
   }
+  if (typeof process !== 'undefined' && process.env) {
+    return (
+      process.env.PLAYWRIGHT_TEST === 'true' ||
+      process.env.PLAYWRIGHT === 'true' ||
+      process.env.NODE_ENV === 'test' ||
+      process.env.CI === 'true'
+    );
+  }
   return false;
 };
 
@@ -64,20 +72,23 @@ const isTestEnvironment = (): boolean => {
  * Returns null if Turso cloud config is not set (falls back to local file database)
  */
 export const getDrizzleConfig = (): DrizzleConfig | null => {
-  // In test environment, skip cloud
+  // In test environment, use memory database
   if (isTestEnvironment()) {
-    return null;
+    return {
+      url: ':memory:',
+      authToken: '',
+    };
   }
 
   // Only check environment variables for Turso cloud config
-  const envUrl = (import.meta.env.VITE_TURSO_DATABASE_URL as string | undefined) ?? '';
-  const envToken = (import.meta.env.VITE_TURSO_AUTH_TOKEN as string | undefined) ?? '';
+  const envUrl = (import.meta.env?.VITE_TURSO_DATABASE_URL as string | undefined) ?? '';
+  const envToken = (import.meta.env?.VITE_TURSO_AUTH_TOKEN as string | undefined) ?? '';
 
   if (isValidTursoUrl(envUrl) && envToken.length > 0) {
     return { url: envUrl, authToken: envToken };
   }
 
-  // Return null - will use local file database as default
+  // Default: Return null - will use local file database/local storage as fallback
   return null;
 };
 

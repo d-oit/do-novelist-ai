@@ -28,8 +28,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const SettingsView: React.FC = () => {
-  const { userId } = useUser();
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { userId, theme, setTheme: setUserTheme } = useUser();
   const [dbConfig, setDbConfig] = useState<DbConfig>({ url: '', authToken: '', useCloud: false });
   const [isSaved, setIsSaved] = useState(false);
   const [testStatus, setTestStatus] = useState<'none' | 'success' | 'error'>('none');
@@ -37,29 +36,10 @@ const SettingsView: React.FC = () => {
   useEffect(() => {
     const config = getStoredConfig();
     setDbConfig(config);
-
-    // Check localstorage first, then DOM class
-    const storedTheme = localStorage.getItem('novelist_theme');
-    if (storedTheme === 'light' || storedTheme === 'dark') {
-      setTheme(storedTheme);
-      const root = window.document.documentElement;
-      if (storedTheme === 'dark') root.classList.add('dark');
-      else root.classList.remove('dark');
-    } else {
-      const root = window.document.documentElement;
-      setTheme(root.classList.contains('dark') ? 'dark' : 'light');
-    }
   }, []);
 
   const handleThemeChange = (newTheme: 'dark' | 'light'): void => {
-    setTheme(newTheme);
-    localStorage.setItem('novelist_theme', newTheme);
-    const root = window.document.documentElement;
-    if (newTheme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    void setUserTheme(newTheme);
   };
 
   const handleSaveDbConfig = async (): Promise<void> => {

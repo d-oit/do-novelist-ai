@@ -18,14 +18,25 @@ export interface UserSettings {
   onboardingStep: string;
 }
 
+const LOCAL_SETTINGS_KEY = 'novelist_user_settings';
+
 /**
  * Get or create user settings for a user
  */
 export const getUserSettings = async (userId: string): Promise<UserSettings | null> => {
   const db = getDrizzleClient();
   if (!db) {
-    logger.error('Database client not available for getUserSettings');
-    return null;
+    // Fallback to LocalStorage
+    try {
+      const stored = localStorage.getItem(LOCAL_SETTINGS_KEY);
+      if (stored) {
+        const settings = JSON.parse(stored) as UserSettings;
+        return settings;
+      }
+      return null;
+    } catch {
+      return null;
+    }
   }
 
   try {
@@ -61,13 +72,27 @@ export const getUserSettings = async (userId: string): Promise<UserSettings | nu
  */
 export const createUserSettings = async (userId: string): Promise<UserSettings | null> => {
   const db = getDrizzleClient();
+  const now = new Date();
+  
+  const defaultSettings: UserSettings = {
+    theme: 'light',
+    language: 'en',
+    onboardingComplete: false,
+    onboardingStep: 'welcome',
+  };
+
   if (!db) {
-    logger.error('Database client not available for createUserSettings');
-    return null;
+    // Fallback to LocalStorage
+    try {
+      localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(defaultSettings));
+      return defaultSettings;
+    } catch (e) {
+      logger.error('Failed to create local user settings', { error: e });
+      return null;
+    }
   }
 
   try {
-    const now = new Date();
     await db.insert(userSettings).values({
       id: crypto.randomUUID(),
       userId,
@@ -79,12 +104,7 @@ export const createUserSettings = async (userId: string): Promise<UserSettings |
       updatedAt: now,
     });
 
-    return {
-      theme: 'light',
-      language: 'en',
-      onboardingComplete: false,
-      onboardingStep: 'welcome',
-    };
+    return defaultSettings;
   } catch (e) {
     logger.error('Failed to create user settings', {
       component: 'UserSettingsService',
@@ -102,9 +122,19 @@ export const updateUserSettings = async (
   updates: Partial<UserSettings>,
 ): Promise<boolean> => {
   const db = getDrizzleClient();
+  
   if (!db) {
-    logger.error('Database client not available for updateUserSettings');
-    return false;
+    // Fallback to LocalStorage
+    try {
+      const stored = localStorage.getItem(LOCAL_SETTINGS_KEY);
+      const current = stored ? (JSON.parse(stored) as UserSettings) : {};
+      const updated = { ...current, ...updates };
+      localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(updated));
+      return true;
+    } catch (e) {
+       logger.error('Failed to update local user settings', { error: e });
+       return false;
+    }
   }
 
   try {

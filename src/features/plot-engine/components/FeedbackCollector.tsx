@@ -7,6 +7,7 @@
 import { MessageSquare, Send, X } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { feedbackService } from '@/lib/analytics/feedback';
 import { logger } from '@/lib/logging/logger';
 import { cn } from '@/lib/utils';
 import { Button } from '@/shared/components/ui/Button';
@@ -64,17 +65,37 @@ export const FeedbackCollector: React.FC<FeedbackCollectorProps> = React.memo(
         if (onSubmit) {
           await onSubmit(feedback);
         } else {
-          // Default: Log feedback locally
+          // Default: Log feedback to analytics service
           logger.info('User feedback collected', {
             component: 'FeedbackCollector',
             feedback,
           });
 
-          // Store in localStorage for later retrieval
-          const existingFeedback = localStorage.getItem('plot-engine-feedback');
-          const feedbackList = existingFeedback ? JSON.parse(existingFeedback) : [];
-          feedbackList.push(feedback);
-          localStorage.setItem('plot-engine-feedback', JSON.stringify(feedbackList));
+          // Submit to analytics service
+          if (feedback.type === 'bug') {
+            feedbackService.trackBugReport(
+              feedback.message,
+              feedback.context?.component ?? 'unknown',
+              {
+                rating: feedback.rating,
+                userAgent: feedback.userAgent,
+              },
+            );
+          } else if (feedback.type === 'feature') {
+            feedbackService.trackFeatureRequest(
+              feedback.context?.component ?? 'general',
+              feedback.message,
+              feedback.rating,
+            );
+          } else {
+            feedbackService.submitFeedback({
+              surveyId: `feedback-${feedback.context?.component ?? 'general'}`,
+              response: `${feedback.type}:${feedback.rating ?? 'N/A'}`,
+              comment: feedback.message,
+              timestamp: feedback.timestamp.toISOString(),
+              context: feedback.context,
+            });
+          }
         }
 
         setSubmitted(true);
