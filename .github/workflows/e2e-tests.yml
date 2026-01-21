@@ -186,7 +186,7 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `## ${emoji} E2E Test Results\n\n${message}\n\n**Commit**: ${context.sha}`
+                body: `${emoji} E2E Test Results\n\n${message}\n\nCommit: ${context.sha}`
               });
             } catch (error) {
               console.log('Could not comment on PR (permissions issue):', error.message);
