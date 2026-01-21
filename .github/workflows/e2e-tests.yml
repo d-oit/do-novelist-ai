@@ -92,9 +92,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: test-results/, playwright-report/
-          key: ${{ runner.os }}-playwright-results-${{ matrix.browser }}-${{ github.sha }}
+          key: ${{ runner.os }}-playwright-results-${{ matrix.browser }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-playwright-results-${{ matrix.browser }}-
-            ${{ runner.os }}-playwright-results-
 
       - name: Run E2E tests
         run: |
