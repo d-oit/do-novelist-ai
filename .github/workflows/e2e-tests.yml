@@ -33,7 +33,7 @@ env:
 
 jobs:
   e2e-tests:
-    name: E2E Tests (${{ matrix.browser }} Shard ${{ matrix.shard_index + 1 }}/${{ matrix.total_shards }})
+    name: E2E Tests (${{ matrix.browser }} Shard ${{ matrix.shard_index }}/${{ matrix.total_shards }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -41,7 +41,7 @@ jobs:
       matrix:
         browser: [chromium, firefox, webkit]
         shard_index: [0, 1, 2, 3]
-        total_shards: 4
+        total_shards: [4]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
