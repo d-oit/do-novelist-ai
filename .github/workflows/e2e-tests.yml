@@ -79,7 +79,7 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-playwright-${{ matrix.browser }}-
+          restore-keys: ${{ runner.os }}-playwright-${{ matrix.browser }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
