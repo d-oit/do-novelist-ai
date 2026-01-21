@@ -109,6 +109,14 @@ const testConfig: WritingAssistantConfig = {
 };
 
 describe('WritingAssistantService', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.clearAllMocks();
+  });
   describe('getInstance', () => {
     it('should return to singleton instance', () => {
       const instance1 = writingAssistantService;
