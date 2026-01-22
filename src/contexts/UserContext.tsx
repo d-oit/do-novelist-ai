@@ -97,6 +97,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     void loadTheme();
   }, [userId]);
 
+  // Apply theme to DOM whenever it changes
+  useEffect(() => {
+    if (isInitialized) {
+      if (theme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', prefersDark);
+      } else {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+      }
+    }
+  }, [theme, isInitialized]);
+
   const handleSetTheme = async (newTheme: 'light' | 'dark' | 'system'): Promise<void> => {
     setThemeState(newTheme);
 
