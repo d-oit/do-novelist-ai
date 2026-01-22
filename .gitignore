@@ -51,6 +51,9 @@ test_*.txt
 coverage/
 
 .eslintcache
+
+# TypeScript build cache
+.tsbuildinfo
 .factory/config.json
 playwright-results.json
 .performance-metrics/
