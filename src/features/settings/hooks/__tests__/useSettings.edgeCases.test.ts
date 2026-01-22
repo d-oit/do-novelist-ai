@@ -223,7 +223,7 @@ describe('useSettings - Edge Cases', () => {
     expect(result.current.error).toBe('Save failed');
   });
 
-  it('handles DOM manipulation failures', () => {
+  it('handles DOM manipulation failures', async () => {
     // Mock DOM methods to throw errors
     mockClassListToggle.mockImplementation(() => {
       throw new Error('DOM manipulation failed');
@@ -231,15 +231,17 @@ describe('useSettings - Edge Cases', () => {
 
     const { result } = renderHook(() => useSettings());
 
-    act(() => {
+    await act(async () => {
       result.current.init();
+      // Wait for any pending promises
+      await Promise.resolve();
     });
 
     // Should handle gracefully without crashing
     expect(result.current.settings).toBeDefined();
   });
 
-  it('handles media query listener failures', () => {
+  it('handles media query listener failures', async () => {
     const mockMatchMedia = vi.fn().mockImplementation(query => ({
       matches: false,
       media: query,
@@ -257,8 +259,10 @@ describe('useSettings - Edge Cases', () => {
 
     const { result } = renderHook(() => useSettings());
 
-    act(() => {
+    await act(async () => {
       result.current.init();
+      // Wait for any pending promises
+      await Promise.resolve();
     });
 
     // Should handle gracefully without crashing

@@ -113,7 +113,7 @@ jobs:
           # Using 1 worker per shard to avoid resource contention
           pnpm exec playwright test \
             --project=${{ matrix.browser }} \
-            --shard=${{ matrix.shard_index }}/${{ matrix.total_shards }} \
+            --shard=${SHARD_NUM}/${{ matrix.total_shards }} \
             --reporter=list,html,json \
             --retries=2 \
             --timeout=30000 \
