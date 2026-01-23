@@ -5,11 +5,17 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { cleanupTestEnvironment } from '../utils/test-cleanup';
 
 test.describe('Error Handling', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('[data-testid="app-ready"]', { timeout: 10000 });
+  });
+
+  test.afterEach(async ({ page }) => {
+    // Clean up overlays and modals between tests
+    await cleanupTestEnvironment(page);
   });
 
   test('should handle JavaScript errors gracefully', async ({ page }) => {

@@ -2,6 +2,7 @@ import { AlertCircle, Book, FileText, Loader2, Sparkles, Upload, X } from 'lucid
 import React from 'react';
 
 import { cn } from '@/lib/utils';
+import { FormField } from '@/shared/components/forms/FormField';
 
 interface IdeaInputSectionProps {
   idea: string;
@@ -94,19 +95,32 @@ export const IdeaInputSection: React.FC<IdeaInputSectionProps> = ({
 
         <div className='min-h-[200px] flex-1 bg-card p-4'>
           {activeTab === 'write' ? (
-            <textarea
-              ref={ideaTextareaRef}
-              className='h-full min-h-[180px] w-full resize-y bg-transparent font-mono text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none'
+            <FormField
+              id='wizard-idea-input'
+              label='Core Idea'
+              type='textarea'
+              value={idea}
+              onChange={onIdeaChange}
+              onKeyDown={
+                onKeyDown as (
+                  e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+                ) => void
+              }
+              textareaRef={ideaTextareaRef}
               placeholder='Describe your plot, characters, and themes here...
 
 Examples:
 • A story about a detective who can see ghosts...
 • In a world where dreams are currency...
 • Two rival chefs fall in love during a cooking competition...'
-              value={idea}
-              onChange={e => onIdeaChange(e.target.value)}
-              onKeyDown={onKeyDown}
-              data-testid='wizard-idea-input'
+              validationRules={[
+                { type: 'required', message: 'Core idea is required' },
+                { type: 'minLength', value: 10, message: 'Idea must be at least 10 characters' },
+              ]}
+              required
+              validateOnBlur={true}
+              textareaRows={8}
+              className='h-full'
             />
           ) : (
             <div className='space-y-3'>

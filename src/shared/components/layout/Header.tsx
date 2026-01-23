@@ -11,16 +11,19 @@ import {
   Map,
   BarChart3,
   ChartColumn,
+  HelpCircle,
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 import { useScrollLock } from '@/lib/hooks/useScrollLock';
 import { cn } from '@/lib/utils';
 import { zIndex } from '@/lib/z-index.config';
+import { Button } from '@/shared/components/ui/Button';
 
 export interface HeaderProps {
   projectTitle: string;
   onNewProject: () => void;
+  onOpenHelp?: () => void;
   currentView:
     | 'dashboard'
     | 'projects'
@@ -41,13 +44,26 @@ export interface HeaderProps {
   ) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView, onNavigate }) => {
+const Header: React.FC<HeaderProps> = ({
+  projectTitle,
+  onNewProject,
+  onOpenHelp,
+  currentView,
+  onNavigate,
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
+      // Close mobile menu on escape
       if (event.key === 'Escape' && isMenuOpen) {
         setIsMenuOpen(false);
+      }
+
+      // Help keyboard shortcut: Ctrl+/ or Cmd+/
+      if ((event.ctrlKey || event.metaKey) && event.key === '/') {
+        event.preventDefault();
+        onOpenHelp?.();
       }
     };
 
@@ -64,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('resize', handleResize);
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, onOpenHelp]);
 
   // Lock body scroll when mobile menu is open
   useScrollLock(isMenuOpen);
@@ -193,6 +209,19 @@ const Header: React.FC<HeaderProps> = ({ projectTitle, onNewProject, currentView
               </span>
               <span className='max-w-[150px] truncate text-xs font-medium'>{projectTitle}</span>
             </div>
+
+            {/* Help Button */}
+            <Button
+              size='icon'
+              variant='outline'
+              onClick={onOpenHelp}
+              className='h-9 w-9'
+              title='Help Center (Ctrl+/)'
+              data-testid='help-button'
+              aria-label='Open help center'
+            >
+              <HelpCircle className='h-4 w-4' />
+            </Button>
 
             <button
               onClick={onNewProject}

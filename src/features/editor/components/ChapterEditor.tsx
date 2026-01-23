@@ -13,10 +13,13 @@ import {
   Brain,
   PanelRightOpen,
   PanelRightClose,
+  Undo2,
+  Redo2,
 } from 'lucide-react';
 import type { FC } from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
+import { useUndoRedo } from '@/features/editor/hooks/useUndoRedo';
 import { WritingAssistantPanel } from '@/features/writing-assistant/components/WritingAssistantPanel';
 import { useAnalytics, useFeatureAction } from '@/lib/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
@@ -49,6 +52,7 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
   }>({});
   const [showWritingAssistant, setShowWritingAssistant] = useState(false);
 
+  // Use undo/redo hook for content editing
   useAnalytics({ feature: 'editor', trackTimeInFeature: true });
   const { trackAction } = useFeatureAction('editor');
 
@@ -59,6 +63,10 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
       ? project.chapters.find(c => c.id === selectedChapterId)
       : undefined;
 
+  // Initialize undo/redo hook for content editing
+  const initialContent = selectedChapter?.content ?? '';
+  const undoRedo = useUndoRedo(initialContent, { maxHistory: 50 });
+
   useEffect(() => {
     if (editingField && textareaRef.current) {
       textareaRef.current.focus();
@@ -68,24 +76,57 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
     }
   }, [editingField]);
 
+  // Reset undo/redo state when chapter changes
+  useEffect(() => {
+    undoRedo.reset();
+  }, [selectedChapterId, undoRedo]);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      // Only handle keyboard shortcuts when not in edit mode and Ctrl/Cmd key is pressed
+      if (!isEditing && (e.ctrlKey || e.metaKey)) {
+        if (e.key === 'z' && !e.shiftKey) {
+          e.preventDefault();
+          undoRedo.undo();
+        } else if ((e.key === 'y' || (e.key === 'z' && e.shiftKey)) && undoRedo.canRedo) {
+          e.preventDefault();
+          undoRedo.redo();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isEditing, undoRedo]);
+
   const handleStartEdit = (field: 'title' | 'summary' | 'content', currentValue: string): void => {
     setEditingField(field);
     setIsEditing(true);
-    setTempValues({ [field]: currentValue });
+
+    // Initialize temp values
+    if (field === 'content') {
+      // Reset undo/redo when starting content edit
+      undoRedo.reset();
+    } else {
+      setTempValues({ [field]: currentValue });
+    }
     trackAction('start_edit', { field });
   };
 
-  const handleSaveEdit = (): void => {
-    if (selectedChapter && editingField && tempValues[editingField] !== undefined) {
+  const handleSaveEdit = useCallback((): void => {
+    if (selectedChapter && editingField) {
       const updates: Partial<Chapter> = {
-        [editingField]: tempValues[editingField],
         updatedAt: new Date(),
       };
 
-      // If content is being updated, recalculate word count
+      // For content, use undo/redo state. For title/summary, use tempValues.
       if (editingField === 'content') {
-        updates.wordCount = tempValues.content?.split(/\s+/).length ?? 0;
-        updates.characterCount = tempValues.content?.length ?? 0;
+        updates.content = undoRedo.state;
+        updates.wordCount = undoRedo.state.split(/\s+/).length;
+        updates.characterCount = undoRedo.state.length;
+      } else {
+        updates[editingField] = tempValues[editingField];
       }
 
       onUpdateChapter(selectedChapter.id, updates);
@@ -95,13 +136,20 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
     setIsEditing(false);
     setEditingField(null);
     setTempValues({});
-  };
+  }, [selectedChapter, editingField, undoRedo, tempValues, onUpdateChapter, trackAction]);
 
-  const handleCancelEdit = (): void => {
+  const handleCancelEdit = useCallback((): void => {
     setIsEditing(false);
     setEditingField(null);
     trackAction('cancel_edit', { field: editingField });
     setTempValues({});
+    if (editingField === 'content') {
+      undoRedo.reset();
+    }
+  }, [editingField, trackAction, undoRedo]);
+
+  const handleContentChange = (newContent: string): void => {
+    undoRedo.set(newContent);
   };
 
   const handleRefine = (): void => {
@@ -189,7 +237,7 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
               </div>
             ) : (
               <div
-                onClick={() => handleStartEdit('title', selectedChapter.title)}
+                onClick={() => handleStartEdit('title', selectedChapter.title ?? '')}
                 className='group w-full cursor-pointer rounded-lg border border-border/50 bg-card/50 px-3 py-2 transition-colors hover:border-border hover:bg-card'
               >
                 <div className='flex items-center justify-between'>
@@ -272,6 +320,24 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
             <RefreshCw className='h-3 w-3' />
             Rewrite
           </Button>
+          <Button
+            size='sm'
+            variant='outline'
+            onClick={() => undoRedo.undo()}
+            disabled={!undoRedo.canUndo || isEditing}
+            title='Undo (Ctrl+Z / Cmd+Z)'
+          >
+            <Undo2 className='h-3 w-3' />
+          </Button>
+          <Button
+            size='sm'
+            variant='outline'
+            onClick={() => undoRedo.redo()}
+            disabled={!undoRedo.canRedo || isEditing}
+            title='Redo (Ctrl+Y / Cmd+Y)'
+          >
+            <Redo2 className='h-3 w-3' />
+          </Button>
         </div>
 
         {/* Content Editor */}
@@ -281,8 +347,8 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
             <div className='space-y-2'>
               <textarea
                 ref={textareaRef}
-                value={tempValues.content ?? ''}
-                onChange={e => setTempValues({ ...tempValues, content: e.target.value })}
+                value={undoRedo.state}
+                onChange={e => handleContentChange(e.target.value)}
                 className='min-h-[300px] w-full resize-none rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm focus:border-transparent focus:ring-2 focus:ring-primary'
                 placeholder='Start writing your chapter content...'
               />
@@ -295,14 +361,19 @@ const ChapterEditor: FC<ChapterEditorProps> = ({
                   Cancel
                 </Button>
               </div>
-              <div className='text-xs text-muted-foreground'>
-                Words: {tempValues.content?.split(/\s+/).length ?? 0} | Characters:{' '}
-                {tempValues.content?.length ?? 0}
+              <div className='flex items-center justify-between text-xs text-muted-foreground'>
+                <span>
+                  Words: {undoRedo.state.split(/\s+/).length} | Characters: {undoRedo.state.length}
+                </span>
+                <span>
+                  History: {undoRedo.canUndo ? 'Undo available' : 'No undo'} |{' '}
+                  {undoRedo.canRedo ? 'Redo available' : 'No redo'}
+                </span>
               </div>
             </div>
           ) : (
             <div
-              onClick={() => handleStartEdit('content', selectedChapter.content)}
+              onClick={() => handleStartEdit('content', selectedChapter.content ?? '')}
               className='group min-h-[300px] w-full cursor-pointer rounded-lg border border-border/50 bg-card/50 px-3 py-2 transition-colors hover:border-border hover:bg-card'
             >
               <div className='mb-2 flex items-start justify-between'>

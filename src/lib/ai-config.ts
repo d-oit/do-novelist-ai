@@ -49,8 +49,45 @@ export interface AIServiceConfig {
 
 /**
  * Get AI service configuration from environment variables
- * Uses validated environment variables for type safety
- * Note: API keys are now handled server-side for security
+ *
+ * Retrieves the complete AI service configuration including all provider settings,
+ * model configurations, and feature flags. The configuration is validated
+ * using environment variables to ensure type safety and prevent runtime errors.
+ *
+ * Important notes:
+ * - API keys are handled server-side for security reasons
+ * - All providers are enabled by default when API keys are available server-side
+ * - Model variants (:free, :thinking, etc.) can be enabled via configuration
+ *
+ * @returns {AIServiceConfig} Complete AI service configuration object containing:
+ *   - defaultProvider: The primary AI provider to use
+ *   - enableFallback: Whether to automatically fallback to alternative providers
+ *   - defaultModel: Standard model for general tasks
+ *   - thinkingModel: Advanced model for complex reasoning
+ *   - enableAutoRouting: Whether to use OpenRouter's auto-routing
+ *   - enableModelVariants: Whether to use model variant syntax
+ *   - providers: Object containing all 15 AI provider configurations
+ * @throws {Error} When environment validation fails or required variables are missing
+ * @example
+ * ```typescript
+ * import { getAIConfig } from '@/lib/ai-config';
+ *
+ * try {
+ *   const config = getAIConfig();
+ *   console.log(`Default provider: ${config.defaultProvider}`);
+ *   console.log(`Default model: ${config.defaultModel}`);
+ *
+ *   // Get model for specific task
+ *   const model = getModelForTask(
+ *     config.defaultProvider,
+ *     'standard',
+ *     config
+ *   );
+ *   console.log(`Model for standard task: ${model}`);
+ * } catch (error) {
+ *   console.error('Failed to get AI config:', error);
+ * }
+ * ```
  */
 export function getAIConfig(): AIServiceConfig {
   // Get validated environment variables (throws error if invalid)
@@ -238,6 +275,37 @@ export function getAIConfig(): AIServiceConfig {
 
 /**
  * Get enabled providers in priority order
+ *
+ * Returns an array of enabled AI providers sorted by priority. The default
+ * provider is always first in the array, followed by other enabled providers
+ * in a predetermined order (mistral, openai, anthropic, google, etc.).
+ *
+ * This ordering ensures that providers with higher reliability and better
+ * performance are tried first when fallback is enabled.
+ *
+ * @param {AIServiceConfig} config - The AI service configuration object
+ * @returns {AIProvider[]} Array of enabled provider names in priority order:
+ *   - First element is the default provider (always)
+ *   - Subsequent elements are other enabled providers in fixed priority order
+ * @throws {Error} Never throws, returns empty array if no providers are enabled
+ * @example
+ * ```typescript
+ * import { getAIConfig, getEnabledProviders } from '@/lib/ai-config';
+ *
+ * const config = getAIConfig();
+ * const providers = getEnabledProviders(config);
+ *
+ * console.log('Available providers:');
+ * providers.forEach((provider, index) => {
+ *   console.log(`${index + 1}. ${provider}`);
+ * });
+ *
+ * // Use first available provider
+ * if (providers.length > 0) {
+ *   const primaryProvider = providers[0];
+ *   console.log(`Using: ${primaryProvider}`);
+ * }
+ * ```
  */
 export function getEnabledProviders(config: AIServiceConfig): AIProvider[] {
   const providers: AIProvider[] = [];
@@ -277,6 +345,39 @@ export function getEnabledProviders(config: AIServiceConfig): AIProvider[] {
 
 /**
  * Get model name for a specific task complexity
+ *
+ * Retrieves the appropriate model name from the provider configuration
+ * based on the task complexity level. This allows the application to
+ * automatically select the optimal model for different types of tasks.
+ *
+ * Complexity levels:
+ * - 'fast': Lightweight models for simple, quick tasks (e.g., basic queries)
+ * - 'standard': Balanced models for most everyday tasks
+ * - 'advanced': Premium models for complex reasoning, analysis, or generation
+ *
+ * @param {AIProvider} provider - The AI provider identifier (e.g., 'openai', 'anthropic')
+ * @param {'fast' | 'standard' | 'advanced'} complexity - The task complexity level
+ * @param {AIServiceConfig} config - The AI service configuration object
+ * @returns {string} The model identifier for the specified provider and complexity level
+ * @throws {Error} When provider is not found in configuration or model is not available
+ * @example
+ * ```typescript
+ * import { getAIConfig, getModelForTask } from '@/lib/ai-config';
+ *
+ * const config = getAIConfig();
+ *
+ * // Get fast model for simple query
+ * const fastModel = getModelForTask('openai', 'fast', config);
+ * console.log(`Fast model: ${fastModel}`); // Output: "gpt-4o-mini"
+ *
+ * // Get standard model for typical task
+ * const standardModel = getModelForTask('anthropic', 'standard', config);
+ * console.log(`Standard model: ${standardModel}`); // Output: "claude-3-5-sonnet-20241022"
+ *
+ * // Get advanced model for complex reasoning
+ * const advancedModel = getModelForTask('google', 'advanced', config);
+ * console.log(`Advanced model: ${advancedModel}`); // Output: "gemini-exp-1206"
+ * ```
  */
 export function getModelForTask(
   provider: AIProvider,

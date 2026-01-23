@@ -26,6 +26,7 @@ import {
   type DbConfig,
 } from '@/lib/database';
 import { cn } from '@/lib/utils';
+import { FormField } from '@/shared/components/forms/FormField';
 
 const SettingsView: React.FC = () => {
   const { userId, theme, setTheme: setUserTheme } = useUser();
@@ -110,38 +111,38 @@ const SettingsView: React.FC = () => {
 
           {dbConfig.useCloud && (
             <div className='animate-in fade-in slide-in-from-top-2 space-y-4 rounded-md border border-border bg-secondary/10 p-4'>
-              <div className='space-y-1.5'>
-                <label
-                  htmlFor='db-url-input'
-                  className='text-xs font-bold uppercase text-muted-foreground'
-                >
-                  Database URL (libsql://)
-                </label>
-                <input
-                  id='db-url-input'
-                  type='text'
-                  value={dbConfig.url}
-                  onChange={e => setDbConfig(p => ({ ...p, url: e.target.value }))}
-                  placeholder='libsql://your-db.turso.io'
-                  className='w-full rounded border border-input bg-background px-3 py-2 font-mono text-sm text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
-                />
-              </div>
-              <div className='space-y-1.5'>
-                <label
-                  htmlFor='auth-token-input'
-                  className='text-xs font-bold uppercase text-muted-foreground'
-                >
-                  Auth Token
-                </label>
-                <input
-                  id='auth-token-input'
-                  type='password'
-                  value={dbConfig.authToken}
-                  onChange={e => setDbConfig(p => ({ ...p, authToken: e.target.value }))}
-                  placeholder='ey...'
-                  className='w-full rounded border border-input bg-background px-3 py-2 font-mono text-sm text-foreground focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
-                />
-              </div>
+              <FormField
+                id='db-url-input'
+                label='Database URL (libsql://)'
+                type='url'
+                value={dbConfig.url}
+                onChange={value => setDbConfig(p => ({ ...p, url: value }))}
+                placeholder='libsql://your-db.turso.io'
+                validationRules={[
+                  {
+                    type: 'pattern',
+                    value: /^libsql:\/\//i,
+                    message: 'URL must start with libsql://',
+                  },
+                ]}
+                validateOnBlur={true}
+                helperText='Enter your Turso database URL'
+              />
+              <FormField
+                id='auth-token-input'
+                label='Auth Token'
+                type='password'
+                value={dbConfig.authToken}
+                onChange={value => setDbConfig(p => ({ ...p, authToken: value }))}
+                placeholder='ey...'
+                validationRules={[
+                  { type: 'required', message: 'Auth token is required' },
+                  { type: 'minLength', value: 10, message: 'Token must be at least 10 characters' },
+                ]}
+                required
+                validateOnBlur={true}
+                helperText='Enter your Turso authentication token'
+              />
 
               {testStatus === 'success' && (
                 <div className='flex items-center gap-2 text-xs font-medium text-green-500'>

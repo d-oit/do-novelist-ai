@@ -5,7 +5,7 @@
  * to prevent overlay blocking and test interference
  */
 
-import type { Page } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
 
 /**
  * Dismiss the onboarding modal if present
@@ -149,4 +149,72 @@ export async function clickWithStability(
 
   // Click with stability check
   await page.locator(dataTestIdSelector).click({ timeout, force });
+}
+
+/**
+ * Track mock routes for smart cleanup
+ * Only clears routes that were actually used during a test
+ */
+export const mockRouteTracker = {
+  usedRoutes: new Set<string>(),
+  registeredRoutes: new Map<string, Route>(),
+
+  recordUsage(routePattern: string): void {
+    this.usedRoutes.add(routePattern);
+  },
+
+  clearUsage(): void {
+    this.usedRoutes.clear();
+  },
+
+  getUsedRoutes(): string[] {
+    return Array.from(this.usedRoutes);
+  },
+};
+
+/**
+ * Smart mock cleanup - only clears routes that were changed
+ * This preserves common mocks between tests
+ */
+export async function cleanupTestMocks(page: Page): Promise<void> {
+  try {
+    const usedRoutes = mockRouteTracker.getUsedRoutes();
+
+    // Only unroute patterns that were actually used
+    for (const pattern of usedRoutes) {
+      try {
+        await page.unroute(pattern);
+      } catch {
+        // Route might have already been cleared
+      }
+    }
+
+    // Clear usage tracking for next test
+    mockRouteTracker.clearUsage();
+
+    console.log(`[MockCleanup] Cleared ${usedRoutes.length} mock routes`);
+  } catch (error) {
+    console.error('[MockCleanup] Failed to clean up mocks:', error);
+  }
+}
+
+/**
+ * Reset page context for mock isolation
+ * Creates a clean state between tests without full page reload
+ */
+export async function resetPageContext(page: Page): Promise<void> {
+  // Clear all event listeners on the page
+  await page.evaluate(() => {
+    // Remove any temporary test attributes
+    document.querySelectorAll('[data-test-temp]').forEach(el => {
+      el.removeAttribute('data-test-temp');
+    });
+  });
+
+  // Clear any active timeouts/intervals
+  await page.evaluate(() => {
+    // Clear any test-specific timers
+    (window as any).__testTimers?.forEach((timer: number) => clearTimeout(timer));
+    (window as any).__testTimers = [];
+  });
 }

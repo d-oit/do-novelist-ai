@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { setupGeminiMock } from '../utils/mock-openrouter';
+import { cleanupTestEnvironment, dismissOnboardingModal } from '../utils/test-cleanup';
 
 test.describe('Semantic Search E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -14,6 +15,14 @@ test.describe('Semantic Search E2E Tests', () => {
     } catch {
       await page.getByTestId('nav-dashboard').waitFor({ state: 'visible', timeout: 15000 });
     }
+
+    // Dismiss onboarding modal if present
+    await dismissOnboardingModal(page);
+  });
+
+  test.afterEach(async ({ page }) => {
+    // Clean up overlays and modals between tests
+    await cleanupTestEnvironment(page);
   });
 
   test('should open search modal with Cmd+K keyboard shortcut', async ({ page }) => {

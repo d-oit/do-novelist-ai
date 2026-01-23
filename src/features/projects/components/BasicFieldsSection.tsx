@@ -1,6 +1,8 @@
 import { ChevronDown, Loader2, Sparkles, Wand2 } from 'lucide-react';
 import React from 'react';
 
+import { FormField } from '@/shared/components/forms/FormField';
+
 import { GENRES } from './project-wizard-constants';
 
 interface BasicFieldsSectionProps {
@@ -42,12 +44,20 @@ export const BasicFieldsSection: React.FC<BasicFieldsSectionProps> = ({
             Generate Title
           </button>
         </label>
-        <input
-          className='w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary'
-          placeholder='e.g. The Last Kingdom'
+        <FormField
+          id='wizard-title-input'
+          label='Book Title'
+          type='text'
           value={title}
-          onChange={e => onTitleChange(e.target.value)}
-          data-testid='wizard-title-input'
+          onChange={onTitleChange}
+          placeholder='e.g. The Last Kingdom'
+          validationRules={[
+            { type: 'required', message: 'Book title is required' },
+            { type: 'minLength', value: 2, message: 'Title must be at least 2 characters' },
+            { type: 'maxLength', value: 100, message: 'Title must be less than 100 characters' },
+          ]}
+          required
+          validateOnBlur={true}
         />
       </div>
 
@@ -70,20 +80,29 @@ export const BasicFieldsSection: React.FC<BasicFieldsSectionProps> = ({
           </button>
         </label>
         <div className='flex gap-2'>
-          <input
-            className='flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary'
-            placeholder='e.g. Dark Fantasy with Mystery elements'
+          <FormField
+            id='wizard-style-input'
+            label='Genre / Writing Style'
+            type='text'
             value={style}
-            onChange={e => onStyleChange(e.target.value)}
-            data-testid='wizard-style-input'
+            onChange={onStyleChange}
+            placeholder='e.g. Dark Fantasy with Mystery elements'
+            validationRules={[
+              { type: 'required', message: 'Genre is required' },
+              { type: 'minLength', value: 2, message: 'Genre must be at least 2 characters' },
+            ]}
+            required
+            validateOnBlur={true}
+            className='flex-1'
           />
-          <div className='relative shrink-0'>
+          <div className='relative shrink-0 self-start pt-6'>
             <select
               className='h-full w-28 cursor-pointer appearance-none rounded-md border border-border bg-secondary px-3 py-2 pr-8 text-sm outline-none hover:bg-secondary/80 focus:border-primary'
               onChange={e => {
                 if (e.target.value) onStyleChange(e.target.value);
                 e.target.value = '';
               }}
+              aria-label='Select genre'
             >
               <option value=''>Genres</option>
               {GENRES.map(genre => (

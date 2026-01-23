@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { ProjectsErrorBoundary } from '@/components/error-boundary';
 import { ActionCard, BookViewer, PlannerControl } from '@/features/generation/components';
 import { useGoapEngine } from '@/features/generation/hooks';
+import { HelpCenter } from '@/features/help/components/HelpCenter';
 import { OnboardingModal, useOnboarding } from '@/features/onboarding';
 import { ProjectStats, ProjectWizard } from '@/features/projects/components';
 import { db } from '@/features/projects/services';
@@ -144,6 +145,7 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewMode>('projects');
   const [isLoading, setIsLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   // Initialize database and migrate from localStorage on mount
   useEffect(() => {
@@ -391,9 +393,12 @@ const App: React.FC = () => {
       <Navbar
         projectTitle={project?.title ?? 'No Project'}
         onNewProject={() => setShowWizard(true)}
+        onOpenHelp={() => setIsHelpOpen(true)}
         currentView={currentView}
         onNavigate={setCurrentView}
       />
+
+      <HelpCenter isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
 
       <main
         id='main-content'
