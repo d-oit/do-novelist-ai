@@ -13,6 +13,7 @@ overrides:
   postcss: ^8.5.6
   url-parse: ^1.5.10
   diff: ^8.0.3
+  lodash: ">=4.17.23"
 
 importers:
   .:
@@ -384,10 +385,10 @@ packages:
     peerDependencies:
       "@babel/core": ^7.0.0
 
-  "@babel/helper-define-polyfill-provider@0.6.5":
+  "@babel/helper-define-polyfill-provider@0.6.6":
     resolution:
       {
-        integrity: sha512-uJnGFcPsWQK8fvjgGP5LZUZZsYGIoPeRjSF5PGwrelYgq7Q15/Ft9NGFp1zglwgIv//W0uG4BevRuSJRyylZPg==,
+        integrity: sha512-mOAsxeeKkUKayvZR3HeTYD/fICpCPLJrU5ZjelT/PA6WHtNDBOE436YiaEUvHN454bRM3CebhDsIpieCc4texA==,
       }
     peerDependencies:
       "@babel/core": ^7.4.0 || ^8.0.0-0 <8.0.0
@@ -3356,10 +3357,10 @@ packages:
         integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==,
       }
 
-  babel-plugin-polyfill-corejs2@0.4.14:
+  babel-plugin-polyfill-corejs2@0.4.15:
     resolution:
       {
-        integrity: sha512-Co2Y9wX854ts6U8gAAPXfn0GmAyctHuK8n0Yhfjd6t30g7yvKjspvvOo9yG+z52PZRgFErt7Ka2pYnXCjLKEpg==,
+        integrity: sha512-hR3GwrRwHUfYwGfrisXPIDP3JcYfBrW7wKE7+Au6wDYl7fm/ka1NEII6kORzxNU556JjfidZeBsO10kYvtV1aw==,
       }
     peerDependencies:
       "@babel/core": ^7.4.0 || ^8.0.0-0 <8.0.0
@@ -3372,10 +3373,10 @@ packages:
     peerDependencies:
       "@babel/core": ^7.4.0 || ^8.0.0-0 <8.0.0
 
-  babel-plugin-polyfill-regenerator@0.6.5:
+  babel-plugin-polyfill-regenerator@0.6.6:
     resolution:
       {
-        integrity: sha512-ISqQ2frbiNU9vIJkzg7dlPpznPZ4jOiUQ1uSmB0fEHeowtN3COYRsXr/xexn64NpU13P06jc/L5TgiJXOgrbEg==,
+        integrity: sha512-hYm+XLYRMvupxiQzrvXUj7YyvFFVfv5gI0R71AJzudg1g2AI2vyCPPIFEBjk162/wFzti3inBHo7isWFuEVS/A==,
       }
     peerDependencies:
       "@babel/core": ^7.4.0 || ^8.0.0-0 <8.0.0
@@ -3685,10 +3686,10 @@ packages:
       }
     engines: { node: ">=18" }
 
-  core-js-compat@3.47.0:
+  core-js-compat@3.48.0:
     resolution:
       {
-        integrity: sha512-IGfuznZ/n7Kp9+nypamBhvwdwLsW6KC8IOaURw2doAK5e98AG3acVLdh0woOnEqCfUtS+Vu882JE4k/DAm3ItQ==,
+        integrity: sha512-OM4cAF3D6VtH/WkLtWvyNC56EZVXsZdU3iqaMG2B4WvYrlqU831pc4UtG5yp0sE9z8Y02wVN7PjW5Zf9Gt0f1Q==,
       }
 
   core-js@3.47.0:
@@ -5780,10 +5781,10 @@ packages:
         integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==,
       }
 
-  lodash@4.17.21:
+  lodash@4.17.23:
     resolution:
       {
-        integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==,
+        integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==,
       }
 
   log-update@6.1.0:
@@ -8425,7 +8426,7 @@ snapshots:
       regexpu-core: 6.4.0
       semver: 6.3.1
 
-  "@babel/helper-define-polyfill-provider@0.6.5(@babel/core@7.28.5)":
+  "@babel/helper-define-polyfill-provider@0.6.6(@babel/core@7.28.5)":
     dependencies:
       "@babel/core": 7.28.5
       "@babel/helper-compilation-targets": 7.28.6
@@ -9003,10 +9004,10 @@ snapshots:
       "@babel/plugin-transform-unicode-regex": 7.27.1(@babel/core@7.28.5)
       "@babel/plugin-transform-unicode-sets-regex": 7.28.6(@babel/core@7.28.5)
       "@babel/preset-modules": 0.1.6-no-external-plugins(@babel/core@7.28.5)
-      babel-plugin-polyfill-corejs2: 0.4.14(@babel/core@7.28.5)
+      babel-plugin-polyfill-corejs2: 0.4.15(@babel/core@7.28.5)
       babel-plugin-polyfill-corejs3: 0.13.0(@babel/core@7.28.5)
-      babel-plugin-polyfill-regenerator: 0.6.5(@babel/core@7.28.5)
-      core-js-compat: 3.47.0
+      babel-plugin-polyfill-regenerator: 0.6.6(@babel/core@7.28.5)
+      core-js-compat: 3.48.0
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
@@ -10348,11 +10349,11 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  babel-plugin-polyfill-corejs2@0.4.14(@babel/core@7.28.5):
+  babel-plugin-polyfill-corejs2@0.4.15(@babel/core@7.28.5):
     dependencies:
       "@babel/compat-data": 7.28.6
       "@babel/core": 7.28.5
-      "@babel/helper-define-polyfill-provider": 0.6.5(@babel/core@7.28.5)
+      "@babel/helper-define-polyfill-provider": 0.6.6(@babel/core@7.28.5)
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
@@ -10360,15 +10361,15 @@ snapshots:
   babel-plugin-polyfill-corejs3@0.13.0(@babel/core@7.28.5):
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-define-polyfill-provider": 0.6.5(@babel/core@7.28.5)
-      core-js-compat: 3.47.0
+      "@babel/helper-define-polyfill-provider": 0.6.6(@babel/core@7.28.5)
+      core-js-compat: 3.48.0
     transitivePeerDependencies:
       - supports-color
 
-  babel-plugin-polyfill-regenerator@0.6.5(@babel/core@7.28.5):
+  babel-plugin-polyfill-regenerator@0.6.6(@babel/core@7.28.5):
     dependencies:
       "@babel/core": 7.28.5
-      "@babel/helper-define-polyfill-provider": 0.6.5(@babel/core@7.28.5)
+      "@babel/helper-define-polyfill-provider": 0.6.6(@babel/core@7.28.5)
     transitivePeerDependencies:
       - supports-color
 
@@ -10520,7 +10521,7 @@ snapshots:
 
   cookie@1.1.1: {}
 
-  core-js-compat@3.47.0:
+  core-js-compat@3.48.0:
     dependencies:
       browserslist: 4.28.1
 
@@ -11847,7 +11848,7 @@ snapshots:
 
   lodash.sortby@4.7.0: {}
 
-  lodash@4.17.21: {}
+  lodash@4.17.23: {}
 
   log-update@6.1.0:
     dependencies:
@@ -13136,7 +13137,7 @@ snapshots:
     dependencies:
       axios: 1.13.2
       joi: 18.0.2
-      lodash: 4.17.21
+      lodash: 4.17.23
       minimist: 1.2.8
       rxjs: 7.8.2
     transitivePeerDependencies:
@@ -13251,7 +13252,7 @@ snapshots:
       fast-json-stable-stringify: 2.1.0
       fs-extra: 9.1.0
       glob: 11.1.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       pretty-bytes: 5.6.0
       rollup: 2.79.2
       source-map: 0.8.0-beta.0
