@@ -5,11 +5,11 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { openRouterModelsService } from '../openrouter-models-service';
-import { OpenRouterAdvancedService } from '../openrouter-advanced-service';
+import { OpenRouterAdvancedService } from '@/services/openrouter-advanced-service';
+import { openRouterModelsService } from '@/services/openrouter-models-service';
 
 // Mock dependencies
-vi.mock('../openrouter-models-service', () => ({
+vi.mock('@/services/openrouter-models-service', () => ({
   openRouterModelsService: {
     getModel: vi.fn(),
     getAvailableModels: vi.fn(),
@@ -49,25 +49,25 @@ describe('OpenRouterAdvancedService', () => {
   describe('Model Variants', () => {
     it('should apply model variant to model ID', () => {
       const result = service.applyModelVariant('openai/gpt-4', ':free');
-      
+
       expect(result).toBe('openai/gpt-4:free');
     });
 
     it('should replace existing variant', () => {
       const result = service.applyModelVariant('openai/gpt-4:extended', ':free');
-      
+
       expect(result).toBe('openai/gpt-4:free');
     });
 
     it('should return original model ID for empty variant', () => {
       const result = service.applyModelVariant('openai/gpt-4', '');
-      
+
       expect(result).toBe('openai/gpt-4');
     });
 
     it('should get variant information', () => {
       const info = service.getModelVariantInfo(':free');
-      
+
       expect(info).toBeDefined();
       expect(info.name).toBe('Free Tier');
       expect(info.costImpact).toBe('free');
@@ -79,7 +79,7 @@ describe('OpenRouterAdvancedService', () => {
       vi.mocked(openRouterModelsService.getModel).mockResolvedValue(mockModel as never);
 
       const variants = await service.getAvailableVariantsForModel('openai/gpt-4');
-      
+
       expect(variants).toBeDefined();
       expect(variants).toContain('');
       expect(variants).toContain(':free');
@@ -90,7 +90,7 @@ describe('OpenRouterAdvancedService', () => {
       vi.mocked(openRouterModelsService.getModel).mockResolvedValue(null);
 
       const variants = await service.getAvailableVariantsForModel('unknown/model');
-      
+
       expect(variants).toEqual(['']);
     });
 
@@ -98,7 +98,7 @@ describe('OpenRouterAdvancedService', () => {
       vi.mocked(openRouterModelsService.getModel).mockResolvedValue(mockModel as never);
 
       const isAvailable = await service.isVariantAvailable('openai/gpt-4', ':free');
-      
+
       expect(isAvailable).toBe(true);
     });
   });
@@ -110,7 +110,7 @@ describe('OpenRouterAdvancedService', () => {
       const result = await service.selectBestModel({
         taskType: 'chat',
       });
-      
+
       expect(result).toBeDefined();
       expect(result.recommendedModel).toBe('openai/gpt-4');
       expect(result.confidence).toBeGreaterThan(0);
@@ -126,7 +126,7 @@ describe('OpenRouterAdvancedService', () => {
         taskType: 'chat',
         requirements: { maxCost: 1.0 },
       });
-      
+
       expect(result.recommendedModel).toBe('cheap/model');
     });
 
@@ -138,16 +138,14 @@ describe('OpenRouterAdvancedService', () => {
         taskType: 'analysis',
         requirements: { minContext: 100000 },
       });
-      
+
       expect(result.recommendedModel).toBe('long/model');
     });
 
     it('should throw error when no suitable models found', async () => {
       vi.mocked(openRouterModelsService.getAvailableModels).mockResolvedValue([]);
 
-      await expect(
-        service.selectBestModel({ taskType: 'chat' })
-      ).rejects.toThrow('No suitable models found');
+      await expect(service.selectBestModel({ taskType: 'chat' })).rejects.toThrow('No suitable models found');
     });
   });
 
@@ -159,7 +157,7 @@ describe('OpenRouterAdvancedService', () => {
         taskType: 'coding',
         requirements: { maxCost: 50, minContext: 8000 },
       });
-      
+
       expect(result.metadata.selectionCriteria).toContain('Task type: coding');
       expect(result.metadata.selectionCriteria).toContain('Max cost: $50');
       expect(result.metadata.selectionCriteria).toContain('Min context: 8000 tokens');
@@ -167,15 +165,11 @@ describe('OpenRouterAdvancedService', () => {
     });
 
     it('should include alternative models', async () => {
-      const models = [
-        mockModel,
-        { ...mockModel, id: 'anthropic/claude-3' },
-        { ...mockModel, id: 'google/gemini-pro' },
-      ];
+      const models = [mockModel, { ...mockModel, id: 'anthropic/claude-3' }, { ...mockModel, id: 'google/gemini-pro' }];
       vi.mocked(openRouterModelsService.getAvailableModels).mockResolvedValue(models as never);
 
       const result = await service.selectBestModel({ taskType: 'chat' });
-      
+
       expect(result.alternatives).toHaveLength(2);
       expect(result.alternatives[0]).toHaveProperty('model');
       expect(result.alternatives[0]).toHaveProperty('score');

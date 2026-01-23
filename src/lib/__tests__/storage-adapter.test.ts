@@ -7,8 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getDrizzleClient } from '@/lib/database/drizzle';
 import { kvService, KV_NAMESPACES } from '@/lib/database/services/key-value-service';
-
-import { StorageAdapter } from '../storage-adapter';
+import { StorageAdapter } from '@/lib/storage-adapter';
 
 // Mock dependencies
 vi.mock('@/lib/database/drizzle');
@@ -125,13 +124,7 @@ describe('StorageAdapter', () => {
       const testValue = { test: 'value' };
       await adapter.set(KV_NAMESPACES.SETTINGS, 'testKey', testValue, 'user123');
 
-      expect(kvService.set).toHaveBeenCalledWith(
-        KV_NAMESPACES.SETTINGS,
-        'testKey',
-        testValue,
-        'user123',
-        undefined,
-      );
+      expect(kvService.set).toHaveBeenCalledWith(KV_NAMESPACES.SETTINGS, 'testKey', testValue, 'user123', undefined);
       expect(localStorage.setItem).not.toHaveBeenCalled();
     });
 
@@ -141,10 +134,7 @@ describe('StorageAdapter', () => {
       const testValue = { test: 'value' };
       await adapter.set(KV_NAMESPACES.SETTINGS, 'testKey', testValue);
 
-      expect(localStorage.setItem).toHaveBeenCalledWith(
-        'novelist_settings_testKey',
-        JSON.stringify(testValue),
-      );
+      expect(localStorage.setItem).toHaveBeenCalledWith('novelist_settings_testKey', JSON.stringify(testValue));
       expect(mockLocalStorage['novelist_settings_testKey']).toBe(JSON.stringify(testValue));
     });
 
@@ -154,10 +144,7 @@ describe('StorageAdapter', () => {
       const testValue = { test: 'value' };
       await adapter.set(KV_NAMESPACES.SETTINGS, 'testKey', testValue, 'user123');
 
-      expect(localStorage.setItem).toHaveBeenCalledWith(
-        'novelist_settings_testKey_user123',
-        JSON.stringify(testValue),
-      );
+      expect(localStorage.setItem).toHaveBeenCalledWith('novelist_settings_testKey_user123', JSON.stringify(testValue));
     });
 
     it('should do nothing in SSR environment', async () => {
