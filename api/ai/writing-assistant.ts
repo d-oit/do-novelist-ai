@@ -5,6 +5,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+import { apiLogger } from './_logger';
 import { rateLimitMiddleware } from './_middleware';
 import {
   getOpenRouterClient,
@@ -160,7 +162,11 @@ function parseAISuggestions(aiResponse: string, config: Record<string, unknown>)
         category: s.category ?? 'readability',
       }));
   } catch (error) {
-    console.error('[Writing Assistant] Failed to parse AI suggestions:', error);
+    apiLogger.error(
+      'Failed to parse AI suggestions',
+      { context: 'writing-assistant' },
+      error as Error,
+    );
     return extractSuggestionsFromText(aiResponse);
   }
 }

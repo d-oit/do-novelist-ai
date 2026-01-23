@@ -124,6 +124,7 @@ export function estimateCost(model: string, usage: UsageMetrics): number {
  * Handle API errors and send appropriate response
  */
 export function handleAPIError(error: unknown, res: VercelResponse): void {
+  // Note: Using console.error is intentional for serverless error visibility
   console.error('[API Error]', error);
 
   if (error instanceof APIError) {
@@ -205,7 +206,7 @@ class CostTracker {
       timestamp: Date.now(),
     };
 
-    // Log to console for debugging
+    // Log to console for debugging in serverless environment
     console.log('[COST]', JSON.stringify(fullEntry));
 
     // Send to analytics service if PostHog is available

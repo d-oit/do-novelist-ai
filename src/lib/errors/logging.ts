@@ -65,6 +65,7 @@ export class ConsoleLogService implements LogService {
     if (!this.shouldLog(entry.level)) return;
 
     const formatted = this.formatEntry(entry);
+    // Console usage is intentional in logging infrastructure
     switch (entry.level) {
       case 'debug':
         console.debug(formatted);

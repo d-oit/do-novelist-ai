@@ -6,6 +6,8 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+import { apiLogger } from './_logger';
+
 export const config = { runtime: 'edge' };
 
 interface BrainstormRequest {
@@ -135,32 +137,13 @@ function trackCost(
   };
 }
 
+// Use centralized API logger (see _logger.ts)
 function log(
   level: 'info' | 'warn' | 'error' | 'debug',
   message: string,
   data?: Record<string, unknown>,
 ): void {
-  const logEntry = {
-    timestamp: new Date().toISOString(),
-    level,
-    message,
-    ...data,
-  };
-
-  switch (level) {
-    case 'debug':
-      console.debug(JSON.stringify(logEntry));
-      break;
-    case 'info':
-      console.info(JSON.stringify(logEntry));
-      break;
-    case 'warn':
-      console.warn(JSON.stringify(logEntry));
-      break;
-    case 'error':
-      console.error(JSON.stringify(logEntry));
-      break;
-  }
+  apiLogger.log(level, message, data);
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {

@@ -6,6 +6,8 @@
  * automatically use the in-memory store, which works fine for most use cases.
  */
 
+import { apiLogger } from './_logger';
+
 /**
  * Rate limit entry for token bucket
  */
@@ -53,7 +55,7 @@ class InMemoryRateLimitStore implements RateLimitStore {
       }
     }
 
-    console.log(`[Rate Limit] Cleaned up old entries. Current size: ${this.store.size}`);
+    apiLogger.info('Cleaned up old rate limit entries', { storeSize: this.store.size });
   }
 }
 
@@ -81,7 +83,7 @@ class VercelKVRateLimitStore implements RateLimitStore {
       const data = await this.kv.get<RateLimitEntry>(key);
       return data;
     } catch (error) {
-      console.error('[Rate Limit] KV get error:', error);
+      apiLogger.error('KV get error', { context: 'rate-limit' }, error as Error);
       return null;
     }
   }
@@ -91,7 +93,7 @@ class VercelKVRateLimitStore implements RateLimitStore {
       // Set with 24h expiration
       await this.kv.set(key, entry, { ex: 24 * 60 * 60 });
     } catch (error) {
-      console.error('[Rate Limit] KV set error:', error);
+      apiLogger.error('KV set error', { context: 'rate-limit' }, error as Error);
     }
   }
 
@@ -99,13 +101,13 @@ class VercelKVRateLimitStore implements RateLimitStore {
     try {
       await this.kv.del(key);
     } catch (error) {
-      console.error('[Rate Limit] KV delete error:', error);
+      apiLogger.error('KV delete error', { context: 'rate-limit' }, error as Error);
     }
   }
 
   async cleanup(): Promise<void> {
     // Vercel KV handles expiration automatically, no cleanup needed
-    console.log('[Rate Limit] KV cleanup skipped (automatic expiration)');
+    apiLogger.info('KV cleanup skipped (automatic expiration)', { context: 'rate-limit' });
   }
 }
 
@@ -129,16 +131,17 @@ export function createRateLimitStore(): RateLimitStore {
         url: process.env.KV_REST_API_URL,
         token: process.env.KV_REST_API_TOKEN,
       });
-      console.log('[Rate Limit] Using Vercel KV store');
+      apiLogger.info('Using Vercel KV store', { context: 'rate-limit' });
       return new VercelKVRateLimitStore(kv);
     } catch (error) {
-      console.warn(
-        '[Rate Limit] Failed to initialize Vercel KV, falling back to in-memory:',
-        error,
+      apiLogger.warn(
+        'Failed to initialize Vercel KV, falling back to in-memory',
+        { context: 'rate-limit' },
+        error as Error,
       );
     }
   }
 
-  console.log('[Rate Limit] Using in-memory store');
+  apiLogger.info('Using in-memory store', { context: 'rate-limit' });
   return new InMemoryRateLimitStore();
 }
