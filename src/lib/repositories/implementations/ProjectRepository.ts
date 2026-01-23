@@ -3,6 +3,9 @@
  *
  * Implements IProjectRepository interface using Drizzle ORM
  * Provides CRUD operations, queries, and aggregations for projects
+ *
+ * @fileoverview LOC Budget: Keep under 600 lines (Current: 567 LOC - warning zone)
+ * If approaching limit, extract analytics methods to ProjectRepository.analytics.ts
  */
 
 import { eq, and, desc, sql } from 'drizzle-orm';

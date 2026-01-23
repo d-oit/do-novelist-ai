@@ -3,6 +3,9 @@
  *
  * Implements basic CRUD operations for characters using Drizzle ORM
  * This file contains the core repository interface and data manipulation methods
+ *
+ * @fileoverview LOC Budget: Keep under 600 lines (Current: 561 LOC - warning zone)
+ * If approaching limit, extract batch operations to CharacterRepository.batch.ts
  */
 
 import { eq, sql } from 'drizzle-orm';

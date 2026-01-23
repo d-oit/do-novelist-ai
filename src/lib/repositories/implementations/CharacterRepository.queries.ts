@@ -3,6 +3,9 @@
  *
  * Contains complex query methods, relationship management, and count operations
  * These functions are used by CharacterRepository.core.ts
+ *
+ * @fileoverview LOC Budget: Keep under 600 lines (Current: 706 LOC - tracked exception)
+ * This file contains only query builders - consider further splitting if it grows significantly
  */
 
 import { eq, and, or, sql, gte, lte } from 'drizzle-orm';
