@@ -218,7 +218,7 @@ export async function browserSpecificClick(
  */
 export async function dismissModalCompat(
   page: Page,
-  compatibility: BrowserCompatibility,
+  _compatibility: BrowserCompatibility,
   modalSelector: string = '[role="dialog"]',
 ): Promise<void> {
   try {

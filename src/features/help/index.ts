@@ -13,5 +13,5 @@ export {
   getArticleById,
   searchArticles,
   getRelatedArticles,
-} from './data/helpContent';
-export type { HelpArticle as HelpArticleType } from './data/helpContent';
+} from './helpContent';
+export type { HelpArticle as HelpArticleType } from './helpContent';
