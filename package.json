@@ -57,7 +57,7 @@
     "framer-motion": "^12.26.2",
     "jszip": "^3.10.1",
     "lucide-react": "^0.562.0",
-    "posthog-js": "^1.310.1",
+    "posthog-js": "^1.335.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "recharts": "^3.4.1",
