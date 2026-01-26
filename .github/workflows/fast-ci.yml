@@ -47,7 +47,7 @@ jobs:
           cache: "pnpm"
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -80,7 +80,7 @@ jobs:
           cache: "pnpm"
 
       - name: Restore pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -92,7 +92,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Cache ESLint
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .eslintcache
           key: ${{ runner.os }}-eslint-${{ hashFiles('eslint.config.js', '.eslintrc') }}
@@ -124,7 +124,7 @@ jobs:
           cache: "pnpm"
 
       - name: Restore pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -136,7 +136,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Cache TypeScript build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: "**/*.tsbuildinfo"
           key: ${{ runner.os }}-typescript-${{ hashFiles('tsconfig.json') }}
@@ -172,7 +172,7 @@ jobs:
           cache: "pnpm"
 
       - name: Restore pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -184,7 +184,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Cache Vitest test results
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules/.vite
@@ -233,7 +233,7 @@ jobs:
           cache: "pnpm"
 
       - name: Restore pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -251,7 +251,7 @@ jobs:
         run: pnpm run check:file-size
 
       - name: Cache Vite build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules/.vite
@@ -318,7 +318,7 @@ jobs:
             ca-certificates fonts-liberation wget
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('**/pnpm-lock.yaml') }}
